@@ -71,7 +71,7 @@ export default function Voting() {
           >
             <LogOut className="w-5 h-5" />
           </Button>
-          <span className="text-[12px] text-white/80 font-pixel-text tracking-tight animate-pulse">BY MOHAMED SEYAM</span>
+          <span className="text-[12px] text-[#2C0834] font-pixel-text tracking-tight animate-pulse font-bold">BY MOHAMED SEYAM</span>
         </div>
 
         <motion.div
@@ -88,7 +88,7 @@ export default function Voting() {
             <span className="font-bold text-white font-pixel-text">التحكيم</span>
           </motion.div>
           <h1 className="text-2xl font-pixel-title mb-2 text-white">صوّت على الإجابات</h1>
-          <p className="text-white/80">هل الإجابات صحيحة؟</p>
+          <p className="text-[#FFFDD1] font-bold">هل الإجابات صحيحة؟</p>
         </motion.div>
 
         <motion.div
@@ -140,7 +140,7 @@ export default function Voting() {
                   </div>
                   <div>
                     <span className="text-xl font-pixel-title">{currentCategory}</span>
-                    <p className="text-[10px] text-white/70 font-pixel-text">
+                    <p className="text-[10px] text-[#FFFDD1] font-pixel-text font-bold">
                       {currentCategoryIndex + 1} / {categories.length}
                     </p>
                   </div>

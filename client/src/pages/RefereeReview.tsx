@@ -69,7 +69,7 @@ export default function RefereeReview() {
           >
             <LogOut className="w-5 h-5" />
           </Button>
-          <span className="text-[12px] text-white/80 font-pixel-text tracking-tight animate-pulse">BY MOHAMED SEYAM</span>
+          <span className="text-[12px] text-[#2C0834] font-pixel-text tracking-tight animate-pulse font-bold">BY MOHAMED SEYAM</span>
         </div>
 
         <motion.div
@@ -86,9 +86,9 @@ export default function RefereeReview() {
           </motion.div>
           <h1 className="text-2xl font-pixel-title mb-2 text-white">مراجعة الحكم</h1>
           {isReferee ? (
-            <p className="text-white/80 font-pixel-text">أنت الحكم! راجع الإجابات واخصم اللي مش صح</p>
+            <p className="text-[#FFFDD1] font-bold font-pixel-text">أنت الحكم! راجع الإجابات واخصم اللي مش صح</p>
           ) : (
-            <p className="text-white/60 font-pixel-text">
+            <p className="text-[#FFFDD1] font-pixel-text">
               الحكم <span className="font-bold text-[#FFFDD1]">{referee?.name}</span> بيراجع الإجابات...
             </p>
           )}
@@ -210,7 +210,7 @@ export default function RefereeReview() {
 
         {!isReferee && (
           <motion.div
-            className="text-center p-4 font-pixel-text text-white/60 animate-pulse"
+            className="text-center p-4 font-pixel-text text-[#FFFDD1] animate-pulse"
           >
             <p>في انتظار اعتماد الحكم...</p>
           </motion.div>

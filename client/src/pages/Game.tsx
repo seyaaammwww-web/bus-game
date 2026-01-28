@@ -162,7 +162,7 @@ export default function Game() {
               >
                 <span className="text-6xl font-pixel-title text-white">{letter}</span>
               </motion.div>
-              <motion.p className="text-xl text-white/80 mb-4 font-pixel-text">
+              <motion.p className="text-xl text-[#FFFDD1] mb-4 font-pixel-text">
                 الجولة {room.currentRound + 1}
               </motion.p>
               <motion.div
@@ -301,10 +301,10 @@ export default function Game() {
                     transition={{ duration: 4, repeat: Infinity, times: [0, 0.2, 1] }}
                     className="flex flex-col gap-2 font-pixel-text"
                   >
-                    <span className="text-white/60 text-sm">نتأكد من الإجابات... 🧐</span>
-                    <span className="text-white/60 text-sm">نحسب النقاط... 🔢</span>
-                    <span className="text-white/60 text-sm">نبحث عن الهبد... 🤔</span>
-                    <span className="text-white/60 text-sm">نجهز النتائج... 🏆</span>
+                    <span className="text-[#FFFDD1] text-sm">نتأكد من الإجابات... 🧐</span>
+                    <span className="text-[#FFFDD1] text-sm">نحسب النقاط... 🔢</span>
+                    <span className="text-[#FFFDD1] text-sm">نبحث عن الهبد... 🤔</span>
+                    <span className="text-[#FFFDD1] text-sm">نجهز النتائج... 🏆</span>
                   </motion.div>
                 </div>
               </div>

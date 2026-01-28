@@ -140,7 +140,7 @@ export default function Results() {
           >
             <LogOut className="w-5 h-5" />
           </Button>
-          <span className="text-[12px] text-white/80 font-pixel-text tracking-tight animate-pulse">BY MOHAMED SEYAM</span>
+          <span className="text-[12px] text-[#2C0834] font-pixel-text tracking-tight animate-pulse font-bold">BY MOHAMED SEYAM</span>
         </div>
 
         <motion.div

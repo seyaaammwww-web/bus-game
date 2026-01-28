@@ -48,7 +48,7 @@ export default function Lobby() {
           >
             <LogOut className="w-5 h-5" />
           </Button>
-          <span className="text-[12px] text-white/80 font-pixel-text tracking-tight animate-pulse">BY MOHAMED SEYAM</span>
+          <span className="text-[12px] text-[#2C0834] font-pixel-text tracking-tight animate-pulse font-bold">BY MOHAMED SEYAM</span>
         </div>
 
         <motion.div
@@ -65,7 +65,7 @@ export default function Lobby() {
             <span className="font-bold text-[#31093A] font-pixel-text">غرفة الانتظار</span>
           </motion.div>
           <h1 className="text-2xl font-pixel-title mb-2 text-white">في انتظار اللاعبين...</h1>
-          <p className="text-white/80 font-pixel-text">ادعي أصحابك وعيلتك!</p>
+          <p className="text-[#FFFDD1] font-bold font-pixel-text">ادعي أصحابك وعيلتك!</p>
         </motion.div>
 
         <motion.div

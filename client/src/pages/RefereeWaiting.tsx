@@ -32,7 +32,7 @@ export default function RefereeWaiting() {
                     >
                         <LogOut className="w-5 h-5" />
                     </Button>
-                    <span className="text-[12px] text-white/80 font-pixel-text tracking-tight animate-pulse">BY MOHAMED SEYAM</span>
+                    <span className="text-[12px] text-[#2C0834] font-pixel-text tracking-tight animate-pulse font-bold">BY MOHAMED SEYAM</span>
                 </div>
 
                 <motion.div
@@ -54,7 +54,7 @@ export default function RefereeWaiting() {
                     <h1 className="text-3xl font-pixel-title mb-2 text-white">
                         أنت الحكم! 👨‍⚖️
                     </h1>
-                    <p className="text-white/80 font-pixel-text">
+                    <p className="text-[#FFFDD1] font-bold font-pixel-text">
                         استنى اللاعبين يخلصوا الجولة وبعدين هتراجع إجاباتهم
                     </p>
                 </motion.div>
@@ -129,7 +129,7 @@ export default function RefereeWaiting() {
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.2 }}
                 >
-                    <div className="flex items-center justify-center gap-2 text-white/80 font-pixel-text">
+                    <div className="flex items-center justify-center gap-2 text-[#FFFDD1] font-bold font-pixel-text">
                         <Timer className="w-4 h-4" />
                         <span className="text-sm">الوقت المتبقي: </span>
                         <motion.span
@@ -148,7 +148,7 @@ export default function RefereeWaiting() {
                     animate={{ opacity: [0.5, 1, 0.5] }}
                     transition={{ repeat: Infinity, duration: 2 }}
                 >
-                    <p className="text-white/40 text-[10px] font-pixel-text">
+                    <p className="text-[#FFFDD1] text-[10px] font-pixel-text">
                         ⏳ بانتظار انتهاء الجولة...
                     </p>
                 </motion.div>
