@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Crown, Check, Clock, Shield, Zap, Trophy } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { cn } from '@/lib/utils';
 import type { Player } from '@shared/schema';
 
 interface PlayerCardProps {
