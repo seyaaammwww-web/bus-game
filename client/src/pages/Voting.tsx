@@ -60,7 +60,7 @@ export default function Voting() {
   return (
     <div className="min-h-screen p-4 overflow-hidden relative text-white font-pixel-text">
       <ArcadeBackground />
-      <div className="max-w-md mx-auto relative z-10">
+      <div className="max-w-2xl mx-auto relative z-10">
         <div className="flex justify-between items-center mb-4">
           <Button
             variant="ghost"
@@ -80,15 +80,15 @@ export default function Voting() {
           animate={{ y: 0, opacity: 1 }}
         >
           <motion.div
-            className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full mb-4"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 rounded-full mb-4"
             animate={{ scale: [1, 1.05, 1] }}
             transition={{ repeat: Infinity, duration: 2 }}
           >
             <Sparkles className="w-5 h-5 text-white" />
-            <span className="font-bold text-white font-pixel-text">التحكيم</span>
+            <span className="font-bold text-xl text-white font-pixel-text">التحكيم</span>
           </motion.div>
-          <h1 className="text-2xl font-pixel-title mb-2 text-white">صوّت على الإجابات</h1>
-          <p className="text-[#FFFDD1] font-bold">هل الإجابات صحيحة؟</p>
+          <h1 className="text-4xl font-pixel-title mb-3 text-white">صوّت على الإجابات</h1>
+          <p className="text-2xl text-[#FFFDD1] font-bold font-pixel-text">هل الإجابات صحيحة؟</p>
         </motion.div>
 
         <motion.div
@@ -139,17 +139,17 @@ export default function Voting() {
                     <Icon className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <span className="text-xl font-pixel-title">{currentCategory}</span>
-                    <p className="text-[10px] text-[#FFFDD1] font-pixel-text font-bold">
+                    <span className="text-2xl font-pixel-title font-bold">{currentCategory}</span>
+                    <p className="text-sm text-[#FFFDD1] font-pixel-text font-bold">
                       {currentCategoryIndex + 1} / {categories.length}
                     </p>
                   </div>
                 </div>
               </div>
-              <div className="p-4 space-y-4 font-pixel-text">
+              <div className="p-6 space-y-5 font-pixel-text">
                 {otherSubmissions.length === 0 ? (
                   <motion.p
-                    className="text-center text-[#31093A]/50 py-8"
+                    className="text-center text-[#31093A]/50 py-12 text-xl font-bold"
                     animate={{ opacity: [0.5, 1, 0.5] }}
                     transition={{ repeat: Infinity, duration: 2 }}
                   >
@@ -167,7 +167,7 @@ export default function Voting() {
                     return (
                       <motion.div
                         key={submission.playerId}
-                        className={`p-4 border-[3px] transition-all bg-white relative ${voted
+                        className={`p-5 border-[3px] transition-all bg-white relative ${voted
                           ? isAccepted
                             ? 'border-green-600 bg-green-50'
                             : 'border-red-600 bg-red-50'
@@ -179,13 +179,13 @@ export default function Voting() {
                       >
                         <div className="flex items-center justify-between mb-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-[#31093A] text-white flex items-center justify-center font-bold text-xs border-2 border-[#2C0834]">
+                            <div className="w-10 h-10 bg-[#31093A] text-white flex items-center justify-center font-bold text-sm border-2 border-[#2C0834]">
                               {submission.playerName.charAt(0)}
                             </div>
-                            <span className="text-xs font-bold text-[#31093A]">{submission.playerName}</span>
+                            <span className="text-sm font-bold text-[#31093A] font-pixel-text">{submission.playerName}</span>
                           </div>
                           <motion.span
-                            className="font-bold text-xl text-[#31093A] font-pixel-title"
+                            className="font-bold text-3xl text-[#31093A] font-pixel-title"
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             transition={{ type: 'spring', delay: 0.2 }}
@@ -195,35 +195,35 @@ export default function Voting() {
                         </div>
 
                         {!voted ? (
-                          <div className="flex gap-2">
+                          <div className="flex gap-3">
                             <Button
                               variant="outline"
-                              className="flex-1 h-12 border-[3px] border-green-600 text-green-700 hover:bg-green-600 hover:text-white text-sm font-bold rounded-none shadow-[2px_2px_0_0_#166534] active:translate-y-[2px] active:shadow-none transition-all"
+                              className="flex-1 h-14 border-[3px] border-green-600 text-green-700 hover:bg-green-600 hover:text-white text-lg font-bold rounded-none shadow-[2px_2px_0_0_#166534] active:translate-y-[2px] active:shadow-none transition-all font-pixel-text"
                               onClick={() => handleVote(submission.playerId, true)}
                             >
-                              <ThumbsUp className="w-4 h-4 ml-2" />
+                              <ThumbsUp className="w-5 h-5 ml-2" />
                               صح
                             </Button>
                             <Button
                               variant="outline"
-                              className="flex-1 h-12 border-[3px] border-red-600 text-red-700 hover:bg-red-600 hover:text-white text-sm font-bold rounded-none shadow-[2px_2px_0_0_#991b1b] active:translate-y-[2px] active:shadow-none transition-all"
+                              className="flex-1 h-14 border-[3px] border-red-600 text-red-700 hover:bg-red-600 hover:text-white text-lg font-bold rounded-none shadow-[2px_2px_0_0_#991b1b] active:translate-y-[2px] active:shadow-none transition-all font-pixel-text"
                               onClick={() => handleVote(submission.playerId, false)}
                             >
-                              <ThumbsDown className="w-4 h-4 ml-2" />
+                              <ThumbsDown className="w-5 h-5 ml-2" />
                               غلط
                             </Button>
                           </div>
                         ) : (
                           <motion.div
-                            className={`text-center py-2 font-bold flex items-center justify-center gap-2 text-sm border-2 ${isAccepted ? 'bg-green-100 text-green-700 border-green-600' : 'bg-red-100 text-red-700 border-red-600'
+                            className={`text-center py-3 font-bold flex items-center justify-center gap-2 text-lg border-2 font-pixel-text ${isAccepted ? 'bg-green-100 text-green-700 border-green-600' : 'bg-red-100 text-red-700 border-red-600'
                               }`}
                             initial={{ scale: 0.8 }}
                             animate={{ scale: 1 }}
                           >
                             {isAccepted ? (
-                              <><CheckCircle className="w-4 h-4" /> مقبولة</>
+                              <><CheckCircle className="w-5 h-5" /> مقبولة</>
                             ) : (
-                              <><XCircle className="w-4 h-4" /> مرفوضة</>
+                              <><XCircle className="w-5 h-5" /> مرفوضة</>
                             )}
                           </motion.div>
                         )}
@@ -242,7 +242,7 @@ export default function Voting() {
             animate={{ y: 0, opacity: 1 }}
           >
             <Button
-              className={`w-full h-14 text-lg font-bold bg-[#2C0834] text-white shadow-xl hover:bg-[#31093A] font-pixel-title`}
+              className={`w-full h-16 text-xl font-bold bg-[#2C0834] text-white shadow-xl hover:bg-[#31093A] font-pixel-title`}
               onClick={handleNextCategory}
             >
               التالي: {categories[currentCategoryIndex + 1]}
@@ -254,18 +254,18 @@ export default function Voting() {
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="text-center p-6 bg-[#FFFDD1] rounded-2xl border-[3px] border-[#2C0834]"
+            className="text-center p-8 bg-[#FFFDD1] rounded-2xl border-[3px] border-[#2C0834]"
           >
             <motion.div
-              className="w-14 h-14 bg-[#2C0834] rounded-full flex items-center justify-center mx-auto mb-4"
+              className="w-16 h-16 bg-[#2C0834] rounded-full flex items-center justify-center mx-auto mb-4"
               animate={{ rotate: [0, 360] }}
               transition={{ repeat: Infinity, duration: 3, ease: 'linear' }}
             >
-              <Sparkles className="w-7 h-7 text-white" />
+              <Sparkles className="w-8 h-8 text-white" />
             </motion.div>
-            <p className="font-pixel-title text-xl text-[#31093A] mb-2">تم التصويت!</p>
+            <p className="font-pixel-title text-2xl text-[#31093A] mb-2 font-bold">تم التصويت!</p>
             <motion.p
-              className="text-xs text-[#31093A]/50 font-pixel-text"
+              className="text-lg text-[#31093A]/50 font-pixel-text font-bold"
               animate={{ opacity: [0.5, 1, 0.5] }}
               transition={{ repeat: Infinity, duration: 2 }}
             >

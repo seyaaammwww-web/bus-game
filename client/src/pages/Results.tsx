@@ -129,7 +129,7 @@ export default function Results() {
       <FloatingShapes />
       <Confetti active={isFinal} />
 
-      <div className="max-w-md mx-auto relative z-10">
+      <div className="max-w-3xl mx-auto relative z-10">
         <div className="flex justify-between items-center mb-4">
           <Button
             variant="ghost"
@@ -156,21 +156,21 @@ export default function Results() {
                 transition={{ type: 'spring', stiffness: 150, damping: 15 }}
                 className="relative inline-block mb-6"
               >
-                <div className="w-28 h-28 bg-[#2C0834] rounded-3xl flex items-center justify-center shadow-2xl border-4 border-[#FFFDD1]">
-                  <Trophy className="w-14 h-14 text-[#FFFDD1]" />
+                <div className="w-32 h-32 bg-[#2C0834] rounded-3xl flex items-center justify-center shadow-2xl border-4 border-[#FFFDD1]">
+                  <Trophy className="w-16 h-16 text-[#FFFDD1]" />
                 </div>
                 <motion.div
-                  className="absolute -top-3 -right-3 w-10 h-10 bg-[#FFFDD1] rounded-full flex items-center justify-center shadow-lg border-2 border-[#2C0834]"
+                  className="absolute -top-4 -right-4 w-12 h-12 bg-[#FFFDD1] rounded-full flex items-center justify-center shadow-lg border-2 border-[#2C0834]"
                   animate={{ scale: [1, 1.2, 1], rotate: [0, 10, -10, 0] }}
                   transition={{ repeat: Infinity, duration: 1 }}
                 >
-                  <Crown className="w-5 h-5 text-[#2C0834]" />
+                  <Crown className="w-6 h-6 text-[#2C0834]" />
                 </motion.div>
               </motion.div>
 
               <RetroQuote variant="yellow" className="mb-4">
                 <motion.h1
-                  className="text-4xl font-pixel-title mb-3 text-[#31093A]"
+                  className="text-5xl font-pixel-title mb-4 text-[#31093A] font-bold"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.3, type: 'spring' }}
@@ -181,7 +181,7 @@ export default function Results() {
                   <PixelAvatar src={winner.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${winner.id}`} size="lg" />
                 </div>
                 <motion.p
-                  className="text-3xl font-pixel-text font-bold text-[#31093A]"
+                  className="text-4xl font-pixel-text font-bold text-[#31093A]"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5 }}
@@ -189,7 +189,7 @@ export default function Results() {
                   {winner.name}
                 </motion.p>
                 <motion.p
-                  className="text-xl text-[#31093A]/80 mt-2 font-pixel-text"
+                  className="text-2xl text-[#31093A]/80 mt-3 font-pixel-text font-bold"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.7 }}
@@ -201,14 +201,14 @@ export default function Results() {
           ) : (
             <>
               <motion.div
-                className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full mb-4"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 rounded-full mb-4"
                 animate={{ scale: [1, 1.05, 1] }}
                 transition={{ repeat: Infinity, duration: 2 }}
               >
                 <Sparkles className="w-5 h-5 text-white" />
-                <span className="font-bold text-white font-pixel-text">نتائج الجولة {room.currentRound + 1}</span>
+                <span className="font-bold text-lg text-white font-pixel-text">نتائج الجولة {room.currentRound + 1}</span>
               </motion.div>
-              <h1 className="text-2xl font-pixel-title mb-2 text-white">حرف: {currentRound?.letter}</h1>
+              <h1 className="text-4xl font-pixel-title mb-3 text-white font-bold">حرف: {currentRound?.letter}</h1>
             </>
           )}
         </motion.div>
@@ -219,11 +219,11 @@ export default function Results() {
           transition={{ delay: 0.2 }}
         >
           <RetroCard className="mb-6">
-            <div className="flex items-center gap-2 mb-4 font-pixel-title text-[#31093A]">
-              <Trophy className="w-5 h-4 text-orange-500" />
+            <div className="flex items-center gap-2 mb-5 font-pixel-title text-[#31093A] text-lg">
+              <Trophy className="w-6 h-6 text-orange-500" />
               الترتيب
             </div>
-            <div className="space-y-3">
+            <div className="space-y-4">
               <AnimatePresence>
                 {sortedPlayers.map((player, index) => {
                   const RankIcon = rankIcons[index] || Star;
@@ -231,38 +231,38 @@ export default function Results() {
                   return (
                     <motion.div
                       key={player.id}
-                      className={`flex items-center gap-4 p-3 rounded-xl border-2 transition-all ${player.id === state.playerId
+                      className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all ${player.id === state.playerId
                         ? 'bg-[#31093A]/10 border-[#31093A]/30'
                         : 'bg-white/50 border-transparent'
-                        } font-pixel-text`}
+                        } font-pixel-text text-lg`}
                       initial={{ x: -20, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
                       transition={{ delay: 0.1 * index }}
                     >
                       {index < 3 ? (
-                        <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${rankColors[index]} flex items-center justify-center text-white shadow-md`}>
-                          <RankIcon className="w-5 h-5" />
+                        <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${rankColors[index]} flex items-center justify-center text-white shadow-md`}>
+                          <RankIcon className="w-6 h-6" />
                         </div>
                       ) : (
-                        <div className="w-10 h-10 rounded-lg bg-[#31093A]/10 flex items-center justify-center text-[#31093A] font-bold text-lg">
+                        <div className="w-12 h-12 rounded-lg bg-[#31093A]/10 flex items-center justify-center text-[#31093A] font-bold text-xl">
                           {index + 1}
                         </div>
                       )}
 
                       <PixelAvatar
                         src={player.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${player.id}`}
-                        className="w-10 h-10 border-2"
+                        className="w-12 h-12 border-2"
                         size="sm"
                       />
 
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <p className="font-bold text-base text-[#31093A]">{player.name}</p>
-                          {player.isHost && <Crown className="w-3 h-3 text-orange-500" />}
-                          {isReferee && <Shield className="w-3 h-3 text-accent" />}
+                          <p className="font-bold text-lg text-[#31093A] font-pixel-text">{player.name}</p>
+                          {player.isHost && <Crown className="w-4 h-4 text-orange-500" />}
+                          {isReferee && <Shield className="w-4 h-4 text-accent" />}
                         </div>
                       </div>
-                      <span className="text-xl font-bold text-[#31093A]">{player.score}</span>
+                      <span className="text-2xl font-bold text-[#31093A] font-pixel-text">{player.score}</span>
                     </motion.div>
                   );
                 })}
@@ -278,41 +278,41 @@ export default function Results() {
             transition={{ delay: 0.3 }}
           >
             <RetroCard className="mb-6">
-              <div className="flex items-center gap-2 mb-4 font-pixel-title text-[#31093A]">
-                <Award className="w-5 h-4 text-accent" />
+              <div className="flex items-center gap-2 mb-5 font-pixel-title text-[#31093A] text-lg">
+                <Award className="w-6 h-6 text-accent" />
                 إحصائيات المباراة
               </div>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {gameStats.fastestPlayer && (
-                  <div className="flex items-center gap-3 p-2 rounded-lg bg-[#31093A]/5">
-                    <Zap className="w-4 h-4 text-orange-500" />
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-[#31093A]/5">
+                    <Zap className="w-5 h-5 text-orange-500" />
                     <div className="flex-1">
-                      <p className="text-[10px] text-[#31093A]/80 font-bold">الأسرع</p>
-                      <p className="font-bold text-sm text-[#31093A]">{gameStats.fastestPlayer.name}</p>
+                      <p className="text-sm text-[#31093A]/80 font-bold font-pixel-text">الأسرع</p>
+                      <p className="font-bold text-lg text-[#31093A] font-pixel-text">{gameStats.fastestPlayer.name}</p>
                     </div>
-                    <span className="text-[10px] bg-[#31093A]/10 px-2 py-1 rounded-full text-[#31093A]">{gameStats.fastestPlayer.fastSubmissions} مرة</span>
+                    <span className="text-sm bg-[#31093A]/10 px-3 py-1 rounded-full text-[#31093A] font-pixel-text font-bold">{gameStats.fastestPlayer.fastSubmissions} مرة</span>
                   </div>
                 )}
                 {gameStats.mostUnique && (
-                  <div className="flex items-center gap-3 p-2 rounded-lg bg-[#31093A]/5">
-                    <Star className="w-4 h-4 text-purple-500" />
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-[#31093A]/5">
+                    <Star className="w-5 h-5 text-purple-500" />
                     <div className="flex-1">
-                      <p className="text-[10px] text-[#31093A]/80 font-bold">الأكثر إبداعاً</p>
-                      <p className="font-bold text-sm text-[#31093A]">{gameStats.mostUnique.name}</p>
+                      <p className="text-sm text-[#31093A]/80 font-bold font-pixel-text">الأكثر إبداعاً</p>
+                      <p className="font-bold text-lg text-[#31093A] font-pixel-text">{gameStats.mostUnique.name}</p>
                     </div>
-                    <span className="text-[10px] bg-[#31093A]/10 px-2 py-1 rounded-full text-[#31093A]">{gameStats.mostUnique.uniqueAnswers} فريدة</span>
+                    <span className="text-sm bg-[#31093A]/10 px-3 py-1 rounded-full text-[#31093A] font-pixel-text font-bold">{gameStats.mostUnique.uniqueAnswers} فريدة</span>
                   </div>
                 )}
                 {gameStats.busChampion && (
-                  <div className="flex items-center gap-3 p-2 rounded-lg bg-orange-500/10 border border-orange-500/20">
-                    <span className="text-lg">🚌</span>
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-orange-500/10 border border-orange-500/20">
+                    <span className="text-2xl">🚌</span>
                     <div className="flex-1">
-                      <p className="text-[10px] text-orange-600">بطل الباص!</p>
-                      <p className="font-bold text-sm text-[#31093A]">{gameStats.busChampion.name}</p>
+                      <p className="text-sm text-orange-600 font-pixel-text font-bold">بطل الباص!</p>
+                      <p className="font-bold text-lg text-[#31093A] font-pixel-text">{gameStats.busChampion.name}</p>
                     </div>
                     <div className="text-left">
-                      <p className="text-[10px] font-bold text-orange-600">+10 بونص!</p>
-                      <p className="text-[8px] text-[#31093A]/50">{gameStats.busChampion.busStreak} متتالية</p>
+                      <p className="text-sm font-bold text-orange-600 font-pixel-text">+10 بونص!</p>
+                      <p className="text-xs text-[#31093A]/50 font-pixel-text">{gameStats.busChampion.busStreak} متتالية</p>
                     </div>
                   </div>
                 )}
@@ -328,8 +328,8 @@ export default function Results() {
             transition={{ delay: 0.3 }}
           >
             <RetroCard className="mb-6">
-              <div className="font-pixel-title text-[#31093A] mb-4">الإجابات</div>
-              <div className="space-y-4">
+              <div className="font-pixel-title text-[#31093A] mb-5 text-lg font-bold">الإجابات</div>
+              <div className="space-y-5">
                 {categories.map((category, catIndex) => {
                   const Icon = categoryIcons[category];
                   const categorySubmissions = currentRound.submissions.map(s => ({
@@ -339,17 +339,17 @@ export default function Results() {
                   })).filter(a => a.answer && a.answer.trim());
                   return (
                     <div key={category} className="border rounded-xl bg-white/50 overflow-hidden border-[#31093A]/10 font-pixel-text">
-                      <div className={`flex items-center gap-2 p-3 ${categoryColors[category]} bg-opacity-20`}>
-                        <Icon className="w-4 h-4 text-[#31093A]" />
-                        <span className="font-bold text-sm text-[#31093A]">{category}</span>
+                      <div className={`flex items-center gap-2 p-4 ${categoryColors[category]} bg-opacity-20`}>
+                        <Icon className="w-5 h-5 text-[#31093A]" />
+                        <span className="font-bold text-lg text-[#31093A] font-pixel-text">{category}</span>
                       </div>
                       <div className="p-0 overflow-x-auto">
-                        <table className="w-full text-[10px]">
+                        <table className="w-full text-sm">
                           <thead>
                             <tr className="border-b bg-[#31093A]/5">
-                              <th className="p-2 text-right text-[#31093A]/80 font-bold">اللاعب</th>
-                              <th className="p-2 text-right text-[#31093A]/80 font-bold">الكلمة</th>
-                              <th className="p-2 text-right text-[#31093A]/80 font-bold">النتيجة</th>
+                              <th className="p-3 text-right text-[#31093A]/80 font-bold font-pixel-text">اللاعب</th>
+                              <th className="p-3 text-right text-[#31093A]/80 font-bold font-pixel-text">الكلمة</th>
+                              <th className="p-3 text-right text-[#31093A]/80 font-bold font-pixel-text">النتيجة</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -360,13 +360,13 @@ export default function Results() {
                               const isMe = s.playerId === state.playerId;
                               return (
                                 <tr key={idx} className={`border-b border-[#31093A]/5 last:border-0 ${isValid ? 'bg-green-500/5' : 'bg-red-500/5'}`}>
-                                  <td className="p-2 text-[#31093A]">{s.playerName} {isMe && "(أنت)"}</td>
-                                  <td className="p-2 font-bold text-[#31093A]">{s.answer}</td>
-                                  <td className="p-2">
-                                    <div className="flex items-center gap-1">
-                                      <span className={`font-bold ${isValid ? 'text-green-600' : 'text-red-500'}`}>{isValid ? `+${score}` : '❌'}</span>
+                                  <td className="p-3 text-[#31093A] font-pixel-text">{s.playerName} {isMe && "(أنت)"}</td>
+                                  <td className="p-3 font-bold text-[#31093A] font-pixel-text">{s.answer}</td>
+                                  <td className="p-3">
+                                    <div className="flex items-center gap-2">
+                                      <span className={`font-bold text-lg ${isValid ? 'text-green-600' : 'text-red-500'} font-pixel-text`}>{isValid ? `+${score}` : '❌'}</span>
                                       {isReferee && (
-                                        <button onClick={() => refereeToggleUnique(s.playerId, category)} className="p-1"><Star className={`w-3 h-3 ${validation?.isUnique ? 'fill-orange-400 text-orange-400' : ''}`} /></button>
+                                        <button onClick={() => refereeToggleUnique(s.playerId, category)} className="p-1"><Star className={`w-4 h-4 ${validation?.isUnique ? 'fill-orange-400 text-orange-400' : ''}`} /></button>
                                       )}
                                     </div>
                                   </td>
@@ -391,13 +391,13 @@ export default function Results() {
           transition={{ delay: 0.4 }}
         >
           {!isFinal && (
-            <div className="w-full h-14 bg-white/10 rounded-xl flex items-center justify-center gap-3 border-2 border-white/20 font-pixel-text">
-              <span className="text-sm">الجولة التالية في</span>
+            <div className="w-full h-16 bg-white/10 rounded-xl flex items-center justify-center gap-4 border-2 border-white/20 font-pixel-text text-lg font-bold">
+              <span className="text-lg">الجولة التالية في</span>
               <motion.span
                 key={countdown}
                 initial={{ scale: 1.5, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="w-8 h-8 bg-white text-[#2C0834] rounded-full flex items-center justify-center font-bold shadow-md"
+                className="w-10 h-10 bg-white text-[#2C0834] rounded-full flex items-center justify-center font-bold shadow-md font-pixel-title text-xl"
               >
                 {countdown}
               </motion.span>
@@ -407,7 +407,7 @@ export default function Results() {
           <Button
             size="lg"
             variant="default"
-            className="w-full h-16 text-xl font-bold font-pixel-title"
+            className="w-full h-16 text-2xl font-bold font-pixel-title"
             onClick={playAgain}
             data-testid="button-play-again"
           >

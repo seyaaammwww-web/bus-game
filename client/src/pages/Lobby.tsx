@@ -37,7 +37,7 @@ export default function Lobby() {
     <div className="min-h-screen p-4 overflow-hidden relative text-white font-pixel-text">
       <ArcadeBackground />
       <FloatingShapes />
-      <div className="max-w-md mx-auto relative z-10">
+      <div className="max-w-2xl mx-auto relative z-10">
         <div className="flex justify-between items-center mb-4">
           <Button
             variant="ghost"
@@ -57,15 +57,15 @@ export default function Lobby() {
           animate={{ y: 0, opacity: 1 }}
         >
           <motion.div
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#FFFDD1] border-[3px] border-[#2C0834] rounded-full mb-4 shadow-[4px_4px_0_0_#2C0834]"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-[#FFFDD1] border-[3px] border-[#2C0834] rounded-full mb-4 shadow-[4px_4px_0_0_#2C0834]"
             animate={{ scale: [1, 1.05, 1] }}
             transition={{ repeat: Infinity, duration: 2 }}
           >
-            <Sparkles className="w-5 h-5 text-[#2C0834]" />
-            <span className="font-bold text-[#31093A] font-pixel-text">غرفة الانتظار</span>
+            <Sparkles className="w-6 h-6 text-[#2C0834]" />
+            <span className="font-bold text-lg text-[#31093A] font-pixel-text">غرفة الانتظار</span>
           </motion.div>
-          <h1 className="text-2xl font-pixel-title mb-2 text-white">في انتظار اللاعبين...</h1>
-          <p className="text-[#FFFDD1] font-bold font-pixel-text">ادعي أصحابك وعيلتك!</p>
+          <h1 className="text-4xl font-pixel-title mb-3 text-white font-bold">في انتظار اللاعبين...</h1>
+          <p className="text-2xl text-[#FFFDD1] font-bold font-pixel-text">ادعي أصحابك وعيلتك!</p>
         </motion.div>
 
         <motion.div
@@ -75,10 +75,10 @@ export default function Lobby() {
         >
           <RetroCard className="mb-6">
             <div className="text-center">
-              <p className="text-sm text-[#31093A] font-bold mb-2 font-pixel-text">كود الغرفة</p>
-              <div className="flex items-center justify-center gap-3">
+              <p className="text-lg text-[#31093A] font-bold mb-3 font-pixel-text">كود الغرفة</p>
+              <div className="flex items-center justify-center gap-4">
                 <motion.div
-                  className="flex gap-1"
+                  className="flex gap-2"
                   dir="ltr"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
@@ -87,7 +87,7 @@ export default function Lobby() {
                   {room.code.split('').map((char, i) => (
                     <motion.span
                       key={i}
-                      className="w-12 h-14 flex items-center justify-center text-2xl font-bold bg-[#31093A] text-[#F9D794] rounded-lg shadow-[4px_4px_0_0_#2C0834] border-2 border-[#2C0834] font-pixel-title"
+                      className="w-14 h-16 flex items-center justify-center text-3xl font-bold bg-[#31093A] text-[#F9D794] rounded-lg shadow-[4px_4px_0_0_#2C0834] border-2 border-[#2C0834] font-pixel-title"
                       initial={{ rotateY: 90 }}
                       animate={{ rotateY: 0 }}
                       transition={{ delay: 0.3 + i * 0.1 }}
@@ -100,18 +100,18 @@ export default function Lobby() {
                   variant="outline"
                   size="icon"
                   onClick={copyCode}
-                  className="h-14 w-14 border-[3px] border-[#2C0834] text-[#2C0834] hover:bg-[#2C0834] hover:text-[#FFFDD1] bg-[#FFFDD1] shadow-[4px_4px_0_0_#2C0834] active:translate-y-[2px] active:shadow-[2px_2px_0_0_#2C0834] rounded-none transition-all"
+                  className="h-16 w-16 border-[3px] border-[#2C0834] text-[#2C0834] hover:bg-[#2C0834] hover:text-[#FFFDD1] bg-[#FFFDD1] shadow-[4px_4px_0_0_#2C0834] active:translate-y-[2px] active:shadow-[2px_2px_0_0_#2C0834] rounded-none transition-all"
                   data-testid="button-copy-code"
                 >
                   {copied ? (
-                    <Check className="w-6 h-6" />
+                    <Check className="w-7 h-7" />
                   ) : (
-                    <Copy className="w-6 h-6" />
+                    <Copy className="w-7 h-7" />
                   )}
                 </Button>
               </div>
               <motion.p
-                className="text-xs text-[#31093A] mt-3 font-pixel-text font-bold"
+                className="text-sm text-[#31093A] mt-4 font-pixel-text font-bold"
                 animate={{ opacity: [0.5, 1, 0.5] }}
                 transition={{ repeat: Infinity, duration: 2 }}
               >
@@ -127,20 +127,20 @@ export default function Lobby() {
           transition={{ delay: 0.2 }}
         >
           <RetroCard className="mb-6">
-            <div className="flex flex-row items-center justify-between gap-2 pb-3 border-b-2 border-[#2C0834]/10 mb-2">
-              <h2 className="text-lg flex items-center gap-2 font-pixel-title text-[#31093A]">
-                <Users className="w-5 h-5 text-primary" />
+            <div className="flex flex-row items-center justify-between gap-2 pb-4 border-b-2 border-[#2C0834]/10 mb-3">
+              <h2 className="text-xl flex items-center gap-2 font-pixel-title text-[#31093A] font-bold">
+                <Users className="w-6 h-6 text-primary" />
                 اللاعبين
               </h2>
               <motion.span
-                className="text-sm px-3 py-1 bg-[#31093A] text-[#F9D794] rounded-full font-bold border-2 border-[#2C0834]"
+                className="text-sm px-4 py-2 bg-[#31093A] text-[#F9D794] rounded-full font-bold border-2 border-[#2C0834] font-pixel-text text-lg"
                 animate={{ scale: room.players.length >= 1 ? [1, 1.1, 1] : 1 }}
                 transition={{ repeat: room.players.length >= 1 ? Infinity : 0, duration: 1.5 }}
               >
                 {room.players.length} / 8
               </motion.span>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               <AnimatePresence>
                 {room.players.map((player, index) => (
                   <motion.div

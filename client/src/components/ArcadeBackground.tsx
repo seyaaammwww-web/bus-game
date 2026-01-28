@@ -30,6 +30,9 @@ export default function ArcadeBackground() {
                 <div style={{ height: 112, backgroundColor: 'var(--hero-piece-13)' }} />
                 <div style={{ height: '100%', backgroundColor: 'var(--hero-piece-13)' }} />
             </div>
+
+            {/* Dark Overlay for Contrast */}
+            <div className="absolute inset-0 bg-black/40 z-[-5]" />
         </div>
     );
 }

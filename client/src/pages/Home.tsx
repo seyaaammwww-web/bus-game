@@ -63,7 +63,7 @@ export default function Home() {
 
       {/* Large Floating Help Button */}
       <motion.button
-        className="fixed bottom-8 left-1/2 -translate-x-1/2 sm:left-auto sm:right-8 sm:translate-x-0 z-50 flex items-center gap-3 bg-[#FFFDD1] px-6 py-4 rounded-none shadow-[6px_6px_0px_0px_#2C0834] border-[3px] border-[#2C0834] hover:bg-[#FFFEF0] hover:translate-y-[-2px] hover:shadow-[8px_8px_0px_0px_#2C0834] active:translate-y-[2px] active:shadow-[2px_2px_0px_0px_#2C0834] transition-all group overflow-hidden font-pixel-text"
+        className="fixed bottom-8 left-1/2 -translate-x-1/2 sm:left-auto sm:right-8 sm:translate-x-0 z-50 flex items-center gap-3 bg-[#FFFDD1] px-8 py-5 rounded-none shadow-[6px_6px_0px_0px_#2C0834] border-[3px] border-[#2C0834] hover:bg-[#FFFEF0] hover:translate-y-[-2px] hover:shadow-[8px_8px_0px_0px_#2C0834] active:translate-y-[2px] active:shadow-[2px_2px_0px_0px_#2C0834] transition-all group overflow-hidden"
         whileHover={{ scale: 1.05, y: -5 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setShowHelp(true)}
@@ -72,8 +72,8 @@ export default function Home() {
           <HelpCircle className="w-6 h-6 text-primary" />
         </div>
         <div className="flex flex-col items-start leading-tight relative z-10">
-          <span className="text-xs text-muted-foreground font-medium">إزاي تلعب؟</span>
-          <span className="text-base font-bold text-[#31093A]">شرح اللعبة 🎮</span>
+          <span className="text-sm text-muted-foreground font-bold font-pixel-text">إزاي تلعب؟</span>
+          <span className="text-lg font-bold text-[#31093A] font-pixel-text">شرح اللعبة 🎮</span>
         </div>
         <motion.span
           className="absolute top-2 right-2 w-3 h-3 bg-red-500 rounded-full border-2 border-[#2C0834]"
@@ -132,7 +132,7 @@ export default function Home() {
               <Button
                 size="lg"
                 variant="default"
-                className="w-full h-16 text-xl tracking-wider"
+                className="w-full h-16 text-xl tracking-wider font-pixel-text"
                 onClick={() => setMode('public')}
                 data-testid="button-public-room"
               >
@@ -155,7 +155,7 @@ export default function Home() {
               <Button
                 size="lg"
                 variant="secondary"
-                className="w-full h-16 text-lg"
+                className="w-full h-16 text-xl font-pixel-text"
                 onClick={() => setMode('create')}
                 data-testid="button-create-room"
               >
@@ -171,7 +171,7 @@ export default function Home() {
               <Button
                 size="lg"
                 variant="retro"
-                className="w-full h-16 text-lg"
+                className="w-full h-16 text-xl font-pixel-text"
                 onClick={() => setMode('join')}
                 data-testid="button-join-room"
               >
@@ -207,12 +207,12 @@ export default function Home() {
                   animate={{ scale: 1 }}
                   transition={{ type: 'spring', delay: 0.1 }}
                 >
-                  <CardTitle className="flex items-center gap-2 font-pixel-title">
+                  <CardTitle className="flex items-center gap-2 font-pixel-title text-3xl">
                     <Plus className="w-5 h-5 text-primary" />
                     غرفة جديدة
                   </CardTitle>
                 </motion.div>
-                <CardDescription className="font-pixel-text">أنشئ غرفة وادعي أصحابك</CardDescription>
+                <CardDescription className="font-pixel-text text-lg">أنشئ غرفة وادعي أصحابك</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <motion.div
@@ -220,14 +220,14 @@ export default function Home() {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <label className="text-sm font-medium mb-2 block">اسمك</label>
+                  <label className="text-lg font-bold mb-2 block font-pixel-text">اسمك</label>
                   <Input
                     type="text"
                     placeholder="اكتب اسمك هنا"
                     value={playerName}
                     onChange={(e) => setPlayerName(e.target.value)}
                     maxLength={20}
-                    className="h-12 text-lg"
+                    className="h-14 text-lg font-pixel-text"
                     data-testid="input-player-name"
                   />
                 </motion.div>
@@ -239,7 +239,7 @@ export default function Home() {
                   whileTap={{ scale: 0.98 }}
                 >
                   <Button
-                    className="w-full h-14 text-lg font-bold bg-gradient-to-r from-primary to-secondary"
+                    className="w-full h-14 text-xl font-bold bg-gradient-to-r from-primary to-secondary font-pixel-text"
                     onClick={handleCreate}
                     disabled={playerName.trim().length < 2 || isLoading}
                     data-testid="button-create-confirm"

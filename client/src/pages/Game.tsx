@@ -162,7 +162,7 @@ export default function Game() {
               >
                 <span className="text-6xl font-pixel-title text-white">{letter}</span>
               </motion.div>
-              <motion.p className="text-xl text-[#FFFDD1] mb-4 font-pixel-text">
+              <motion.p className="text-3xl text-[#FFFDD1] mb-4 font-pixel-text">
                 الجولة {room.currentRound + 1}
               </motion.p>
               <motion.div
@@ -229,8 +229,8 @@ export default function Game() {
                 {activePowerUpNotification.type === 'wildcard' && <Sparkles className="w-6 h-6 animate-spin" />}
               </div>
               <div className="flex flex-col">
-                <span className="font-bold text-lg font-pixel-text">{activePowerUpNotification.playerName}</span>
-                <span className="text-sm opacity-90 font-pixel-text">
+                <span className="font-bold text-xl font-pixel-text">{activePowerUpNotification.playerName}</span>
+                <span className="text-lg opacity-90 font-pixel-text">
                   {activePowerUpNotification.type === 'wildcard' ? 'استخدم الجوكر! 🃏' : 'استخدم مساعدة!'}
                 </span>
               </div>
@@ -288,7 +288,7 @@ export default function Game() {
                 </motion.div>
 
                 <motion.h2
-                  className="text-3xl font-pixel-title text-white mb-2"
+                  className="text-4xl font-pixel-title text-white mb-2"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
@@ -299,12 +299,12 @@ export default function Game() {
                   <motion.div
                     animate={{ y: [-24, 0, -24] }}
                     transition={{ duration: 4, repeat: Infinity, times: [0, 0.2, 1] }}
-                    className="flex flex-col gap-2 font-pixel-text"
+                    className="flex flex-col gap-2 font-pixel-text text-lg"
                   >
-                    <span className="text-[#FFFDD1] text-sm">نتأكد من الإجابات... 🧐</span>
-                    <span className="text-[#FFFDD1] text-sm">نحسب النقاط... 🔢</span>
-                    <span className="text-[#FFFDD1] text-sm">نبحث عن الهبد... 🤔</span>
-                    <span className="text-[#FFFDD1] text-sm">نجهز النتائج... 🏆</span>
+                    <span className="text-[#FFFDD1] font-bold">نتأكد من الإجابات... 🧐</span>
+                    <span className="text-[#FFFDD1] font-bold">نحسب النقاط... 🔢</span>
+                    <span className="text-[#FFFDD1] font-bold">نبحث عن الهبد... 🤔</span>
+                    <span className="text-[#FFFDD1] font-bold">نجهز النتائج... 🏆</span>
                   </motion.div>
                 </div>
               </div>
@@ -327,7 +327,7 @@ export default function Game() {
                   <div className="bg-[#FFFDD1] border-[3px] border-[#2C0834] shadow-[4px_4px_0px_0px_#2C0834] rounded-none overflow-hidden">
                     <div className={`${categoryColors[category]} p-2 border-b-[3px] border-[#2C0834] flex items-center justify-center gap-2`}>
                       <Icon className="w-4 h-4 text-white" />
-                      <span className="font-bold text-white font-pixel-text text-sm">{category}</span>
+                      <span className="font-bold text-white font-pixel-text text-lg">{category}</span>
                     </div>
                     <div className="p-2 bg-[#FFFDD1]">
                       <Input
@@ -338,7 +338,7 @@ export default function Game() {
                         onKeyDown={(e) => handleKeyDown(category, e)}
                         disabled={hasSubmitted}
                         placeholder={category}
-                        className={`text-center text-lg h-12 border-[2px] border-[#2C0834]/20 focus:border-[#2C0834] focus:ring-0 focus:shadow-[2px_2px_0px_0px_#2C0834] transition-all font-pixel-text bg-white text-[#2C0834] placeholder:text-[#2C0834]/50 rounded-none ${hasSubmitted ? 'opacity-60 grayscale' : ''}`}
+                        className={`text-center text-xl h-14 border-[2px] border-[#2C0834]/20 focus:border-[#2C0834] focus:ring-0 focus:shadow-[2px_2px_0px_0px_#2C0834] transition-all font-pixel-text font-bold bg-white text-[#2C0834] placeholder:text-[#2C0834]/50 rounded-none ${hasSubmitted ? 'opacity-60 grayscale' : ''}`}
                         data-testid={`input-${category}`}
                       />
                     </div>
@@ -350,13 +350,13 @@ export default function Game() {
         </div>
 
         <div className="flex justify-center mt-6 mb-2">
-          <RetroCard className="py-2 px-6 w-auto inline-flex items-center gap-4 bg-[#2C0834] border-[#FFFDD1] text-white">
-            <span className="text-sm text-[#FFFDD1] font-bold font-pixel-text">التقدم</span>
-            <div className="flex gap-1">
+          <RetroCard className="py-3 px-6 w-auto inline-flex items-center gap-6 bg-[#2C0834] border-[#FFFDD1] text-white">
+            <span className="text-lg text-[#FFFDD1] font-bold font-pixel-text">التقدم</span>
+            <div className="flex gap-2">
               {categories.map((cat, i) => (
                 <motion.div
                   key={cat}
-                  className={`w-3 h-3 rounded-sm border border-[#FFFDD1]/20 ${answers[cat].trim() ? 'bg-[#ffc800] border-[#ffc800]' : 'bg-transparent'
+                  className={`w-4 h-4 rounded-sm border border-[#FFFDD1]/20 ${answers[cat].trim() ? 'bg-[#ffc800] border-[#ffc800]' : 'bg-transparent'
                     }`}
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
@@ -364,7 +364,7 @@ export default function Game() {
                 />
               ))}
             </div>
-            <span className="text-sm font-bold text-[#FFFDD1] font-pixel-title">{filledCount} / 5</span>
+            <span className="text-lg font-bold text-[#FFFDD1] font-pixel-title">{filledCount} / 5</span>
           </RetroCard>
         </div>
 
@@ -383,17 +383,17 @@ export default function Game() {
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="text-center p-6 bg-[#FFFDD1] rounded-2xl border-[3px] border-[#2C0834] shadow-lg"
+            className="text-center p-8 bg-[#FFFDD1] rounded-2xl border-[3px] border-[#2C0834] shadow-lg"
           >
             <motion.div
-              className="w-14 h-14 bg-[#2C0834] rounded-full flex items-center justify-center mx-auto mb-3"
+              className="w-16 h-16 bg-[#2C0834] rounded-full flex items-center justify-center mx-auto mb-4"
               animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
               transition={{ repeat: Infinity, duration: 1.5 }}
             >
-              <Send className="w-7 h-7 text-white" />
+              <Send className="w-8 h-8 text-white" />
             </motion.div>
-            <p className="font-pixel-title text-lg text-[#31093A] mb-1">تم الإرسال!</p>
-            <motion.p className="text-sm text-[#31093A] font-bold font-pixel-text"
+            <p className="font-pixel-title text-2xl text-[#31093A] mb-2">تم الإرسال!</p>
+            <motion.p className="text-lg text-[#31093A] font-bold font-pixel-text"
               animate={{ opacity: [0.8, 1, 0.8] }}
               transition={{ repeat: Infinity, duration: 2 }}
             >
