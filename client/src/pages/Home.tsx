@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bus, Users, Plus, ArrowLeft, Globe, Sparkles, Zap, Star, Heart } from 'lucide-react';
+import { Users, Plus, ArrowLeft, Globe, Sparkles, Star, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -116,31 +116,13 @@ export default function Home() {
         transition={{ type: 'spring', stiffness: 200 }}
         className="text-center mb-8 relative z-10"
       >
-        <motion.div
-          className="w-28 h-28 bg-gradient-to-br from-primary via-secondary to-accent rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl relative"
-          animate={{
-            y: [0, -15, 0],
-            rotateZ: [0, 2, -2, 0],
-          }}
-          transition={{
-            y: { repeat: Infinity, duration: 2.5, ease: 'easeInOut' },
-            rotateZ: { repeat: Infinity, duration: 3, ease: 'easeInOut' },
-          }}
-        >
-          <Bus className="w-16 h-16 text-white" />
-          <motion.div
-            className="absolute -top-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg"
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ repeat: Infinity, duration: 1 }}
-          >
-            <Zap className="w-4 h-4 text-yellow-900" />
-          </motion.div>
-        </motion.div>
-        <motion.h1
-          className="text-3xl sm:text-4xl font-bold text-primary mb-2"
-        >
-          أوتوبيس كومبليت
-        </motion.h1>
+        <div className="logo-container animate-slow-float logo-shine">
+          <img
+            src="/assets/logo.png"
+            alt="أوتوبيس كومبليت"
+            className="w-full max-w-[500px] object-contain pixelated drop-shadow-2xl"
+          />
+        </div>
       </motion.div>
 
       <AnimatePresence mode="wait">
