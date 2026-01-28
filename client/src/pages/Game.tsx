@@ -351,7 +351,7 @@ export default function Game() {
 
         <div className="flex justify-center mt-6 mb-2">
           <RetroCard className="py-2 px-6 w-auto inline-flex items-center gap-4 bg-[#2C0834] border-[#FFFDD1] text-white">
-            <span className="text-sm text-[#FFFDD1]/70 font-pixel-text">التقدم</span>
+            <span className="text-sm text-[#FFFDD1] font-bold font-pixel-text">التقدم</span>
             <div className="flex gap-1">
               {categories.map((cat, i) => (
                 <motion.div
@@ -393,12 +393,12 @@ export default function Game() {
               <Send className="w-7 h-7 text-white" />
             </motion.div>
             <p className="font-pixel-title text-lg text-[#31093A] mb-1">تم الإرسال!</p>
-            <p className="text-sm text-[#31093A] font-bold font-pixel-text"
+            <motion.p className="text-sm text-[#31093A] font-bold font-pixel-text"
               animate={{ opacity: [0.8, 1, 0.8] }}
               transition={{ repeat: Infinity, duration: 2 }}
             >
               في انتظار باقي اللاعبين...
-            </p>
+            </motion.p>
           </motion.div>
         )}
 
