@@ -8,6 +8,9 @@ import { categories, type Category } from '@shared/schema';
 import { playSuccessSound, playCountdownSound, playBonusSound } from '@/lib/sounds';
 import ArcadeBackground from '@/components/ArcadeBackground';
 import { RetroCard } from '@/components/ui/RetroCard';
+import { PixelAvatar } from '@/components/ui/PixelAvatar';
+import { RetroQuote } from '@/components/ui/RetroQuote';
+import { FloatingShapes } from '@/components/ui/FloatingShapes';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -123,6 +126,7 @@ export default function Results() {
   return (
     <div className="min-h-screen p-4 overflow-hidden relative text-white font-pixel-text">
       <ArcadeBackground />
+      <FloatingShapes />
       <Confetti active={isFinal} />
 
       <div className="max-w-md mx-auto relative z-10">
@@ -163,30 +167,36 @@ export default function Results() {
                   <Crown className="w-5 h-5 text-[#2C0834]" />
                 </motion.div>
               </motion.div>
-              <motion.h1
-                className="text-4xl font-pixel-title mb-3 text-white"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.3, type: 'spring' }}
-              >
-                الفائز!
-              </motion.h1>
-              <motion.p
-                className="text-3xl font-pixel-text font-bold text-[#FFFDD1]"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-              >
-                {winner.name}
-              </motion.p>
-              <motion.p
-                className="text-xl text-white/80 mt-2 font-pixel-text"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.7 }}
-              >
-                {winner.score} نقطة
-              </motion.p>
+
+              <RetroQuote variant="yellow" className="mb-4">
+                <motion.h1
+                  className="text-4xl font-pixel-title mb-3 text-[#31093A]"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.3, type: 'spring' }}
+                >
+                  الفائز! 👑
+                </motion.h1>
+                <div className="flex justify-center mb-4">
+                  <PixelAvatar src={winner.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${winner.id}`} size="lg" />
+                </div>
+                <motion.p
+                  className="text-3xl font-pixel-text font-bold text-[#31093A]"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  {winner.name}
+                </motion.p>
+                <motion.p
+                  className="text-xl text-[#31093A]/80 mt-2 font-pixel-text"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.7 }}
+                >
+                  {winner.score} نقطة
+                </motion.p>
+              </RetroQuote>
             </>
           ) : (
             <>
@@ -238,6 +248,13 @@ export default function Results() {
                           {index + 1}
                         </div>
                       )}
+
+                      <PixelAvatar
+                        src={player.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${player.id}`}
+                        className="w-10 h-10 border-2"
+                        size="sm"
+                      />
+
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <p className="font-bold text-base text-[#31093A]">{player.name}</p>
@@ -410,6 +427,6 @@ export default function Results() {
           </Button>
         )}
       </div>
-    </div>
+    </div >
   );
 }

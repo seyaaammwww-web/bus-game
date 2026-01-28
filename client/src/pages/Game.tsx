@@ -18,7 +18,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { playCountdownSound, playCountdownFinalSound, playRoundStart, playBusSound, playFreezeSound, playWildcardSound, playBanishSound, playSubmitSound, playClickSound, playRushActivateSound, playBonusSound } from '@/lib/sounds';
 import ArcadeBackground from '@/components/ArcadeBackground';
+
 import { RetroCard } from '@/components/ui/RetroCard';
+import { FloatingShapes } from '@/components/ui/FloatingShapes';
 
 const categoryIcons: Record<Category, any> = {
   'ولد': User,
@@ -138,6 +140,7 @@ export default function Game() {
       className={`min-h-screen p-3 overflow-hidden relative text-white font-pixel-text ${shake ? 'animate-shake' : ''}`}
     >
       <ArcadeBackground />
+      <FloatingShapes />
       <AnimatePresence>
         {showCountdown && (
           <motion.div
