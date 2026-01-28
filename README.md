@@ -2,7 +2,7 @@
 title: Egyptian Bus Game
 emoji: 🚌
 colorFrom: yellow
-colorTo: orange
+colorTo: red
 sdk: docker
 pinned: false
 ---
