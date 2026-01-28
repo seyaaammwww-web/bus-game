@@ -320,432 +320,433 @@
 
   /* Force high z-index for custom cursor to appear over overlays */
   /* This is now handled by the general rule above */
+}
 
-  /* Advanced Retro Text Shadow */
-  .text-original {
-    --sn: 2px;
-    --s: 4px;
-    --sd: 6px;
-    --color: #2C0834;
-    text-shadow:
-      var(--sn) var(--sn) 0 var(--color),
-      0 var(--sn) 0 var(--color),
-      var(--s) var(--sn) 0 var(--color),
-      var(--s) 0 0 var(--color),
-      var(--s) var(--s) 0 var(--color),
-      0 var(--s) 0 var(--color),
-      var(--sn) var(--s) 0 var(--color),
-      var(--sn) var(--sd) 0 var(--color),
-      var(--s) var(--sd) 0 var(--color),
-      0px var(--sd) 0 var(--color),
-      var(--sn) 0 0 var(--color);
+/* Advanced Retro Text Shadow */
+.text-original {
+  --sn: 2px;
+  --s: 4px;
+  --sd: 6px;
+  --color: #2C0834;
+  text-shadow:
+    var(--sn) var(--sn) 0 var(--color),
+    0 var(--sn) 0 var(--color),
+    var(--s) var(--sn) 0 var(--color),
+    var(--s) 0 0 var(--color),
+    var(--s) var(--s) 0 var(--color),
+    0 var(--s) 0 var(--color),
+    var(--sn) var(--s) 0 var(--color),
+    var(--sn) var(--sd) 0 var(--color),
+    var(--s) var(--sd) 0 var(--color),
+    0px var(--sd) 0 var(--color),
+    var(--sn) 0 0 var(--color);
+}
+
+/* Lazy Background Image Helper */
+.lazy-background-image {
+  transition: opacity 0.5s ease-in-out;
+}
+
+/* Custom Animations */
+@keyframes pulse-warning {
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
   }
 
-  /* Lazy Background Image Helper */
-  .lazy-background-image {
-    transition: opacity 0.5s ease-in-out;
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
   }
 
-  /* Custom Animations */
-  @keyframes pulse-warning {
-
-    0%,
-    100% {
-      transform: scale(1);
-      opacity: 1;
-    }
-
-    50% {
-      transform: scale(1.05);
-      opacity: 0.9;
-    }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-4px);
   }
 
-  @keyframes shake {
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(4px);
+  }
+}
 
-    0%,
-    100% {
-      transform: translateX(0);
-    }
-
-    10%,
-    30%,
-    50%,
-    70%,
-    90% {
-      transform: translateX(-4px);
-    }
-
-    20%,
-    40%,
-    60%,
-    80% {
-      transform: translateX(4px);
-    }
+@keyframes bounce-in {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
   }
 
-  @keyframes bounce-in {
-    0% {
-      transform: scale(0.3);
-      opacity: 0;
-    }
-
-    50% {
-      transform: scale(1.05);
-    }
-
-    70% {
-      transform: scale(0.9);
-    }
-
-    100% {
-      transform: scale(1);
-      opacity: 1;
-    }
+  50% {
+    transform: scale(1.05);
   }
 
-  @keyframes slide-up {
-    0% {
-      transform: translateY(20px);
-      opacity: 0;
-    }
-
-    100% {
-      transform: translateY(0);
-      opacity: 1;
-    }
+  70% {
+    transform: scale(0.9);
   }
 
-  @keyframes confetti-fall {
-    0% {
-      transform: translateY(-100vh) rotate(0deg);
-      opacity: 1;
-    }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
 
-    100% {
-      transform: translateY(100vh) rotate(720deg);
-      opacity: 0;
-    }
+@keyframes slide-up {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
   }
 
-  @keyframes glow {
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
 
-    0%,
-    100% {
-      box-shadow: 0 0 5px hsl(var(--primary)), 0 0 10px hsl(var(--primary)), 0 0 15px hsl(var(--primary));
-    }
-
-    50% {
-      box-shadow: 0 0 20px hsl(var(--primary)), 0 0 30px hsl(var(--primary)), 0 0 40px hsl(var(--primary));
-    }
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 1;
   }
 
-  @keyframes float {
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
 
-    0%,
-    100% {
-      transform: translateY(0px);
-    }
+@keyframes glow {
 
-    50% {
-      transform: translateY(-10px);
-    }
+  0%,
+  100% {
+    box-shadow: 0 0 5px hsl(var(--primary)), 0 0 10px hsl(var(--primary)), 0 0 15px hsl(var(--primary));
   }
 
-  @keyframes tick {
+  50% {
+    box-shadow: 0 0 20px hsl(var(--primary)), 0 0 30px hsl(var(--primary)), 0 0 40px hsl(var(--primary));
+  }
+}
 
-    0%,
-    100% {
-      transform: scale(1);
-    }
+@keyframes float {
 
-    50% {
-      transform: scale(1.1);
-    }
+  0%,
+  100% {
+    transform: translateY(0px);
   }
 
-  .animate-pulse-warning {
-    animation: pulse-warning 0.5s ease-in-out infinite;
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes tick {
+
+  0%,
+  100% {
+    transform: scale(1);
   }
 
-  .animate-shake {
-    animation: shake 0.5s ease-in-out;
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.animate-pulse-warning {
+  animation: pulse-warning 0.5s ease-in-out infinite;
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.5s ease-out;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.4s ease-out;
+}
+
+.animate-glow {
+  animation: glow 1.5s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-tick {
+  animation: tick 1s ease-in-out infinite;
+}
+
+@keyframes slow-float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
   }
 
-  .animate-bounce-in {
-    animation: bounce-in 0.5s ease-out;
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes shine-move {
+  0% {
+    left: -100%;
+    opacity: 0;
   }
 
-  .animate-slide-up {
-    animation: slide-up 0.4s ease-out;
+  50% {
+    opacity: 0.5;
   }
 
-  .animate-glow {
-    animation: glow 1.5s ease-in-out infinite;
+  100% {
+    left: 200%;
+    opacity: 0;
+  }
+}
+
+.animate-slow-float {
+  animation: slow-float 6s ease-in-out infinite;
+}
+
+.pixelated {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+.logo-container {
+  position: relative;
+  display: inline-block;
+}
+
+.perspective-grid {
+  transform: perspective(500px) rotateX(20deg);
+  transform-origin: top;
+  animation: grid-scroll 20s linear infinite;
+}
+
+@keyframes grid-scroll {
+  0% {
+    transform: perspective(500px) rotateX(20deg) translateY(0);
   }
 
-  .animate-float {
-    animation: float 3s ease-in-out infinite;
+  100% {
+    transform: perspective(500px) rotateX(20deg) translateY(40px);
+  }
+}
+
+/* Confetti particle */
+.confetti {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  animation: confetti-fall 3s linear forwards;
+}
+
+/* Timer colors */
+.timer-normal {
+  @apply text-accent;
+}
+
+.timer-warning {
+  @apply text-secondary;
+}
+
+.timer-danger {
+  @apply text-destructive animate-pulse-warning;
+}
+
+/* WorkOS Retro Card Styles */
+.retro-card {
+  background: #FFFDD1;
+  border: 3px solid #2C0834;
+  box-shadow: 4px 4px 0px 0px #2C0834;
+  border-radius: 0;
+}
+
+.retro-card-dark {
+  background: #2C0834;
+  border: 3px solid #FFFDD1;
+  box-shadow: 4px 4px 0px 0px #FFFDD1;
+  border-radius: 0;
+}
+
+/* Category Colors - WorkOS Theme */
+.category-boy {
+  background: linear-gradient(135deg, #6714A8, #871BB7);
+}
+
+.category-girl {
+  background: linear-gradient(135deg, #F640A8, #FF6957);
+}
+
+.category-country {
+  background: linear-gradient(135deg, #4E0994, #6714A8);
+}
+
+.category-animal {
+  background: linear-gradient(135deg, #FF8A50, #FFA168);
+}
+
+.category-thing {
+  background: linear-gradient(135deg, #871BB7, #A333D5);
+}
+
+/* Text Utilities */
+.text-on-light {
+  color: #2C0834;
+}
+
+.text-on-dark {
+  color: #FFFDD1;
+}
+
+/* Legacy category icons for backwards compatibility */
+.category-ولد {
+  background: linear-gradient(135deg, #6714A8, #871BB7);
+}
+
+.category-بنت {
+  background: linear-gradient(135deg, #F640A8, #FF6957);
+}
+
+.category-بلد {
+  background: linear-gradient(135deg, #4E0994, #6714A8);
+}
+
+.category-حيوان {
+  background: linear-gradient(135deg, #FF8A50, #FFA168);
+}
+
+.category-جماد {
+  background: linear-gradient(135deg, #871BB7, #A333D5);
+}
+
+@layer utilities {
+  input[type="search"]::-webkit-search-cancel-button {
+    @apply hidden;
   }
 
-  .animate-tick {
-    animation: tick 1s ease-in-out infinite;
+  [contenteditable][data-placeholder]:empty::before {
+    content: attr(data-placeholder);
+    color: hsl(var(--muted-foreground));
+    pointer-events: none;
   }
 
-  @keyframes slow-float {
-
-    0%,
-    100% {
-      transform: translateY(0px);
-    }
-
-    50% {
-      transform: translateY(-20px);
-    }
+  .toggle-elevate::before,
+  .toggle-elevate-2::before {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 0px;
+    border-radius: inherit;
+    z-index: -1;
   }
 
-  @keyframes shine-move {
-    0% {
-      left: -100%;
-      opacity: 0;
-    }
-
-    50% {
-      opacity: 0.5;
-    }
-
-    100% {
-      left: 200%;
-      opacity: 0;
-    }
+  .toggle-elevate.toggle-elevated::before {
+    background-color: var(--elevate-2);
   }
 
-  .animate-slow-float {
-    animation: slow-float 6s ease-in-out infinite;
+  .border.toggle-elevate::before {
+    inset: -1px;
   }
 
-  .pixelated {
-    image-rendering: pixelated;
-    image-rendering: -moz-crisp-edges;
-    image-rendering: crisp-edges;
-  }
-
-  .logo-container {
+  .hover-elevate:not(.no-default-hover-elevate),
+  .active-elevate:not(.no-default-active-elevate),
+  .hover-elevate-2:not(.no-default-hover-elevate),
+  .active-elevate-2:not(.no-default-active-elevate) {
     position: relative;
-    display: inline-block;
+    z-index: 0;
   }
 
-  .perspective-grid {
-    transform: perspective(500px) rotateX(20deg);
-    transform-origin: top;
-    animation: grid-scroll 20s linear infinite;
+  .hover-elevate:not(.no-default-hover-elevate)::after,
+  .active-elevate:not(.no-default-active-elevate)::after,
+  .hover-elevate-2:not(.no-default-hover-elevate)::after,
+  .active-elevate-2:not(.no-default-active-elevate)::after {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 0px;
+    border-radius: inherit;
+    z-index: 999;
   }
 
-  @keyframes grid-scroll {
-    0% {
-      transform: perspective(500px) rotateX(20deg) translateY(0);
-    }
-
-    100% {
-      transform: perspective(500px) rotateX(20deg) translateY(40px);
-    }
+  .hover-elevate:hover:not(.no-default-hover-elevate)::after,
+  .active-elevate:active:not(.no-default-active-elevate)::after {
+    background-color: var(--elevate-1);
   }
 
-  /* Confetti particle */
-  .confetti {
-    position: fixed;
-    width: 10px;
-    height: 10px;
-    animation: confetti-fall 3s linear forwards;
+  .hover-elevate-2:hover:not(.no-default-hover-elevate)::after,
+  .active-elevate-2:active:not(.no-default-active-elevate)::after {
+    background-color: var(--elevate-2);
   }
 
-  /* Timer colors */
-  .timer-normal {
-    @apply text-accent;
+  .border.hover-elevate:not(.no-hover-interaction-elevate)::after,
+  .border.active-elevate:not(.no-active-interaction-elevate)::after,
+  .border.hover-elevate-2:not(.no-hover-interaction-elevate)::after,
+  .border.active-elevate-2:not(.no-active-interaction-elevate)::after,
+  .border.hover-elevate:not(.no-hover-interaction-elevate)::after {
+    inset: -1px;
+  }
+}
+
+/* Retro Card Animations */
+.focus-arrows svg {
+  animation: giveaway-notice-arrow-animation 1s ease-in-out infinite;
+}
+
+@keyframes giveaway-notice-arrow-animation {
+
+  0%,
+  48% {
+    transform: translateY(0);
   }
 
-  .timer-warning {
-    @apply text-secondary;
+  50%,
+  98% {
+    transform: translate(3px, 0);
   }
 
-  .timer-danger {
-    @apply text-destructive animate-pulse-warning;
+  to {
+    transform: translateY(0);
+  }
+}
+
+.focus-arrows>div:nth-child(2) svg {
+  animation-name: giveaway-notice-arrow-animation-reverse;
+  transform: rotate(180deg);
+}
+
+@keyframes giveaway-notice-arrow-animation-reverse {
+
+  0%,
+  48% {
+    transform: rotate(180deg) translateY(0);
   }
 
-  /* WorkOS Retro Card Styles */
-  .retro-card {
-    background: #FFFDD1;
-    border: 3px solid #2C0834;
-    box-shadow: 4px 4px 0px 0px #2C0834;
-    border-radius: 0;
+  50%,
+  98% {
+    transform: translate(-3px, 0) rotate(180deg);
   }
 
-  .retro-card-dark {
-    background: #2C0834;
-    border: 3px solid #FFFDD1;
-    box-shadow: 4px 4px 0px 0px #FFFDD1;
-    border-radius: 0;
+  to {
+    transform: translateY(0) rotate(180deg);
   }
-
-  /* Category Colors - WorkOS Theme */
-  .category-boy {
-    background: linear-gradient(135deg, #6714A8, #871BB7);
-  }
-
-  .category-girl {
-    background: linear-gradient(135deg, #F640A8, #FF6957);
-  }
-
-  .category-country {
-    background: linear-gradient(135deg, #4E0994, #6714A8);
-  }
-
-  .category-animal {
-    background: linear-gradient(135deg, #FF8A50, #FFA168);
-  }
-
-  .category-thing {
-    background: linear-gradient(135deg, #871BB7, #A333D5);
-  }
-
-  /* Text Utilities */
-  .text-on-light {
-    color: #2C0834;
-  }
-
-  .text-on-dark {
-    color: #FFFDD1;
-  }
-
-  /* Legacy category icons for backwards compatibility */
-  .category-ولد {
-    background: linear-gradient(135deg, #6714A8, #871BB7);
-  }
-
-  .category-بنت {
-    background: linear-gradient(135deg, #F640A8, #FF6957);
-  }
-
-  .category-بلد {
-    background: linear-gradient(135deg, #4E0994, #6714A8);
-  }
-
-  .category-حيوان {
-    background: linear-gradient(135deg, #FF8A50, #FFA168);
-  }
-
-  .category-جماد {
-    background: linear-gradient(135deg, #871BB7, #A333D5);
-  }
-
-  @layer utilities {
-    input[type="search"]::-webkit-search-cancel-button {
-      @apply hidden;
-    }
-
-    [contenteditable][data-placeholder]:empty::before {
-      content: attr(data-placeholder);
-      color: hsl(var(--muted-foreground));
-      pointer-events: none;
-    }
-
-    .toggle-elevate::before,
-    .toggle-elevate-2::before {
-      content: "";
-      pointer-events: none;
-      position: absolute;
-      inset: 0px;
-      border-radius: inherit;
-      z-index: -1;
-    }
-
-    .toggle-elevate.toggle-elevated::before {
-      background-color: var(--elevate-2);
-    }
-
-    .border.toggle-elevate::before {
-      inset: -1px;
-    }
-
-    .hover-elevate:not(.no-default-hover-elevate),
-    .active-elevate:not(.no-default-active-elevate),
-    .hover-elevate-2:not(.no-default-hover-elevate),
-    .active-elevate-2:not(.no-default-active-elevate) {
-      position: relative;
-      z-index: 0;
-    }
-
-    .hover-elevate:not(.no-default-hover-elevate)::after,
-    .active-elevate:not(.no-default-active-elevate)::after,
-    .hover-elevate-2:not(.no-default-hover-elevate)::after,
-    .active-elevate-2:not(.no-default-active-elevate)::after {
-      content: "";
-      pointer-events: none;
-      position: absolute;
-      inset: 0px;
-      border-radius: inherit;
-      z-index: 999;
-    }
-
-    .hover-elevate:hover:not(.no-default-hover-elevate)::after,
-    .active-elevate:active:not(.no-default-active-elevate)::after {
-      background-color: var(--elevate-1);
-    }
-
-    .hover-elevate-2:hover:not(.no-default-hover-elevate)::after,
-    .active-elevate-2:active:not(.no-default-active-elevate)::after {
-      background-color: var(--elevate-2);
-    }
-
-    .border.hover-elevate:not(.no-hover-interaction-elevate)::after,
-    .border.active-elevate:not(.no-active-interaction-elevate)::after,
-    .border.hover-elevate-2:not(.no-hover-interaction-elevate)::after,
-    .border.active-elevate-2:not(.no-active-interaction-elevate)::after,
-    .border.hover-elevate:not(.no-hover-interaction-elevate)::after {
-      inset: -1px;
-    }
-  }
-
-  /* Retro Card Animations */
-  .focus-arrows svg {
-    animation: giveaway-notice-arrow-animation 1s ease-in-out infinite;
-  }
-
-  @keyframes giveaway-notice-arrow-animation {
-
-    0%,
-    48% {
-      transform: translateY(0);
-    }
-
-    50%,
-    98% {
-      transform: translate(3px, 0);
-    }
-
-    to {
-      transform: translateY(0);
-    }
-  }
-
-  .focus-arrows>div:nth-child(2) svg {
-    animation-name: giveaway-notice-arrow-animation-reverse;
-    transform: rotate(180deg);
-  }
-
-  @keyframes giveaway-notice-arrow-animation-reverse {
-
-    0%,
-    48% {
-      transform: rotate(180deg) translateY(0);
-    }
-
-    50%,
-    98% {
-      transform: translate(-3px, 0) rotate(180deg);
-    }
-
-    to {
-      transform: translateY(0) rotate(180deg);
-    }
-  }
+}
