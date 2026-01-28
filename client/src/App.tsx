@@ -11,6 +11,7 @@ import Voting from "@/pages/Voting";
 import RefereeReview from "@/pages/RefereeReview";
 import RefereeWaiting from "@/pages/RefereeWaiting";
 import Results from "@/pages/Results";
+import RetroLayout from "@/components/RetroLayout";
 
 function GameRouter() {
   const { state, isReferee } = useGame();
@@ -45,9 +46,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <GameProvider>
+        {/* <GameProvider>
           <GameRouter />
-        </GameProvider>
+        </GameProvider> */}
+        <RetroLayout />
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>
