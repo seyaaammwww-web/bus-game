@@ -39,9 +39,8 @@ export function Timer({ timeLeft, isRush }: TimerProps) {
 
   return (
     <motion.div
-      className={`flex items-center justify-center gap-4 p-6 rounded-2xl bg-gradient-to-br ${getTimerBg()} border-2 ${
-        isDanger ? 'border-red-400' : isWarning ? 'border-amber-400' : 'border-blue-400'
-      } shadow-lg relative overflow-hidden`}
+      className={`flex items-center justify-center gap-4 p-4 rounded-xl bg-[#FFFDD1] border-[3px] ${isDanger ? 'border-red-500' : isWarning ? 'border-orange-500' : 'border-[#2C0834]'
+        } shadow-lg relative overflow-hidden font-pixel-text`}
       initial={{ scale: 0.8, opacity: 0, rotate: -10 }}
       animate={{ scale: 1, opacity: 1, rotate: 0 }}
       transition={{ type: 'spring', stiffness: 300 }}
@@ -61,8 +60,8 @@ export function Timer({ timeLeft, isRush }: TimerProps) {
           isDanger
             ? { scale: [1, 1.2, 1], rotate: [0, -10, 10, -10, 0] }
             : isWarning
-            ? { scale: [1, 1.1, 1] }
-            : {}
+              ? { scale: [1, 1.1, 1] }
+              : {}
         }
         transition={{
           duration: isDanger ? 0.5 : 1,
@@ -84,7 +83,7 @@ export function Timer({ timeLeft, isRush }: TimerProps) {
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.5, opacity: 0 }}
       >
-        <span className={`text-6xl font-black tabular-nums ${getTimerClass()} relative z-10`}>
+        <span className={`text-4xl font-pixel-title tabular-nums ${isDanger ? 'text-red-600' : isWarning ? 'text-orange-600' : 'text-[#31093A]'} relative z-10`}>
           {String(timeLeft).padStart(2, '0')}
         </span>
         {isDanger && (
@@ -109,9 +108,9 @@ export function Timer({ timeLeft, isRush }: TimerProps) {
             animate={{ rotate: 360 }}
             transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
           >
-            <Zap className="w-5 h-5" />
+            <Zap className="w-4 h-4" />
           </motion.div>
-          راش!
+          RAAAASH!
         </motion.div>
       )}
     </motion.div>

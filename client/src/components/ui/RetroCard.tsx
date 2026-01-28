@@ -156,7 +156,7 @@ export function RetroCard({ children, className, ...props }: React.HTMLAttribute
             <BottomLeftCorner />
             <BottomRightCorner />
 
-            <div className="relative z-10 text-[#31093A]">
+            <div className="relative z-10 text-[#31093A] font-pixel-text">
                 {children}
             </div>
         </div>

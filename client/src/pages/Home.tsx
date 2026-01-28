@@ -60,25 +60,20 @@ export default function Home() {
 
       {/* Large Floating Help Button */}
       <motion.button
-        className="fixed bottom-8 left-1/2 -translate-x-1/2 sm:left-auto sm:right-8 sm:translate-x-0 z-50 flex items-center gap-3 bg-white px-6 py-4 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border-2 border-primary/20 hover:border-primary/50 transition-all group overflow-hidden"
+        className="fixed bottom-8 left-1/2 -translate-x-1/2 sm:left-auto sm:right-8 sm:translate-x-0 z-50 flex items-center gap-3 bg-[#FFFDD1] px-6 py-4 rounded-xl shadow-xl border-[3px] border-[#2C0834] hover:bg-[#FFFEF0] transition-all group overflow-hidden font-pixel-text"
         whileHover={{ scale: 1.05, y: -5 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setShowHelp(true)}
       >
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity"
-          animate={{ x: ['-100%', '100%'] }}
-          transition={{ repeat: Infinity, duration: 2, ease: 'linear' }}
-        />
-        <div className="relative z-10 w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+        <div className="relative z-10 w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
           <HelpCircle className="w-6 h-6 text-primary" />
         </div>
         <div className="flex flex-col items-start leading-tight relative z-10">
           <span className="text-xs text-muted-foreground font-medium">إزاي تلعب؟</span>
-          <span className="text-base font-bold text-primary">شرح اللعبة 🎮</span>
+          <span className="text-base font-bold text-[#31093A]">شرح اللعبة 🎮</span>
         </div>
         <motion.span
-          className="absolute top-2 right-2 w-3 h-3 bg-red-500 rounded-full border-2 border-white"
+          className="absolute top-2 right-2 w-3 h-3 bg-red-500 rounded-full border-2 border-[#2C0834]"
           animate={{ scale: [1, 1.3, 1] }}
           transition={{ repeat: Infinity, duration: 1.5 }}
         />
@@ -207,12 +202,12 @@ export default function Home() {
                   animate={{ scale: 1 }}
                   transition={{ type: 'spring', delay: 0.1 }}
                 >
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 font-pixel-title">
                     <Plus className="w-5 h-5 text-primary" />
                     غرفة جديدة
                   </CardTitle>
                 </motion.div>
-                <CardDescription>أنشئ غرفة وادعي أصحابك</CardDescription>
+                <CardDescription className="font-pixel-text">أنشئ غرفة وادعي أصحابك</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <motion.div
@@ -286,12 +281,12 @@ export default function Home() {
                   animate={{ scale: 1 }}
                   transition={{ type: 'spring', delay: 0.1 }}
                 >
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 font-pixel-title">
                     <Users className="w-5 h-5 text-secondary" />
                     انضم لغرفة
                   </CardTitle>
                 </motion.div>
-                <CardDescription>اكتب كود الغرفة من صاحبك</CardDescription>
+                <CardDescription className="font-pixel-text">اكتب كود الغرفة من صاحبك</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <motion.div
@@ -381,12 +376,12 @@ export default function Home() {
                   animate={{ scale: 1 }}
                   transition={{ type: 'spring', delay: 0.1 }}
                 >
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 font-pixel-title">
                     <Globe className="w-5 h-5 text-accent" />
                     الغرفة العامة
                   </CardTitle>
                 </motion.div>
-                <CardDescription>العب مع عائلتك وأصحابك في غرفة مشتركة</CardDescription>
+                <CardDescription className="font-pixel-text">العب مع عائلتك وأصحابك في غرفة مشتركة</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <motion.div
@@ -395,7 +390,7 @@ export default function Home() {
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <p className="text-sm text-muted-foreground mb-2">كود الغرفة العامة</p>
+                  <p className="text-sm text-muted-foreground mb-2 font-pixel-text">كود الغرفة العامة</p>
                   <motion.div
                     className="flex justify-center gap-2"
                     dir="ltr"
@@ -469,20 +464,20 @@ export default function Home() {
         transition={{ delay: 0.6 }}
       >
         <motion.div
-          className="flex items-center justify-center gap-4 text-muted-foreground"
+          className="flex items-center justify-center gap-4 text-white font-pixel-text"
           animate={{ y: [0, -3, 0] }}
           transition={{ repeat: Infinity, duration: 2 }}
         >
           <span className="flex items-center gap-1">
-            <span className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold">10</span>
+            <span className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-bold">10</span>
             جولات
           </span>
-          <span className="w-1 h-1 rounded-full bg-muted-foreground" />
+          <span className="w-1 h-1 rounded-full bg-white" />
           <span className="flex items-center gap-1">
-            <span className="w-6 h-6 rounded-full bg-secondary/20 flex items-center justify-center text-xs font-bold">45</span>
+            <span className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-bold">45</span>
             ثانية
           </span>
-          <span className="w-1 h-1 rounded-full bg-muted-foreground" />
+          <span className="w-1 h-1 rounded-full bg-white" />
           <span className="flex items-center gap-1">
             <Sparkles className="w-4 h-4" />
             تحدي!
@@ -491,7 +486,7 @@ export default function Home() {
       </motion.div>
 
       <div className="fixed bottom-6 left-0 right-0 text-center">
-        <p className="text-[11px] text-muted-foreground/60 animate-pulse">
+        <p className="text-[12px] text-white/80 font-pixel-text tracking-tight animate-pulse">
           BY MOHAMED SEYAM
         </p>
       </div>

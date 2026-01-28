@@ -86,6 +86,8 @@ export default {
         sans: ["var(--font-sans)"],
         serif: ["var(--font-serif)"],
         mono: ["var(--font-mono)"],
+        "pixel-title": ["'04b03'", "sans-serif"],
+        "pixel-text": ["'DogicaPixel'", "sans-serif"],
       },
       keyframes: {
         "accordion-down": {

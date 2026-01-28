@@ -1,21 +1,22 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
+import ArcadeBackground from "@/components/ArcadeBackground";
+import { RetroCard } from "@/components/ui/RetroCard";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gray-50">
-      <Card className="w-full max-w-md mx-4">
-        <CardContent className="pt-6">
-          <div className="flex mb-4 gap-2">
-            <AlertCircle className="h-8 w-8 text-red-500" />
-            <h1 className="text-2xl font-bold text-gray-900">404 Page Not Found</h1>
-          </div>
-
-          <p className="mt-4 text-sm text-gray-600">
-            Did you forget to add the page to the router?
-          </p>
-        </CardContent>
-      </Card>
+    <div className="min-h-screen p-4 flex items-center justify-center font-pixel-text">
+      <ArcadeBackground />
+      <RetroCard className="w-full max-w-md relative z-10 text-center">
+        <div className="flex mb-4 gap-2 justify-center">
+          <AlertCircle className="h-8 w-8 text-red-500" />
+        </div>
+        <h1 className="text-2xl font-pixel-title text-[#31093A] mb-2">404 Page Not Found</h1>
+        <p className="text-[#31093A]/60">الصفحة دي غير موجودة في الأتوبيس بتاعنا.</p>
+        <div className="mt-6">
+          <a href="/" className="text-primary hover:underline font-bold">ارجع للرئيسية</a>
+        </div>
+      </RetroCard>
     </div>
   );
 }

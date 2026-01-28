@@ -1,11 +1,12 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Check, X, User, Users, Globe, PawPrint, Box, AlertTriangle, Gavel, LogOut } from 'lucide-react';
+import { Shield, Check, X, User, Users, Globe, PawPrint, Box, AlertTriangle, Gavel, LogOut, Crown } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useGame } from '@/lib/gameContext';
 import { categories, type Category } from '@shared/schema';
+import ArcadeBackground from '@/components/ArcadeBackground';
+import { RetroCard } from '@/components/ui/RetroCard';
 
 const categoryIcons: Record<Category, any> = {
   'ولد': User,
@@ -32,8 +33,6 @@ export default function RefereeReview() {
   const submissions = round?.submissions || [];
   const refereeDeductions = room.refereeDeductions || [];
 
-
-
   const getAnswerScore = (playerId: string, category: Category) => {
     const answer = validatedAnswers.find(
       a => a.playerId === playerId && a.category === category
@@ -49,26 +48,28 @@ export default function RefereeReview() {
 
   if (!round) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">جاري التحميل...</p>
+      <div className="min-h-screen flex items-center justify-center font-pixel-text text-white">
+        <ArcadeBackground />
+        <p className="relative z-10 text-white animate-pulse">جاري التحميل...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-accent/5 to-muted/30 p-4">
-      <div className="max-w-lg mx-auto">
+    <div className="min-h-screen p-4 overflow-hidden relative text-white font-pixel-text">
+      <ArcadeBackground />
+      <div className="max-w-lg mx-auto relative z-10">
         <div className="flex justify-between items-center mb-4">
           <Button
             variant="ghost"
             size="icon"
             onClick={disconnect}
-            className="text-destructive hover:bg-destructive/10"
+            className="text-white hover:bg-white/10"
             data-testid="button-exit-referee"
           >
             <LogOut className="w-5 h-5" />
           </Button>
-          <span className="text-xs text-muted-foreground/60">BY MOHAMED SEYAM</span>
+          <span className="text-[12px] text-white/80 font-pixel-text tracking-tight animate-pulse">BY MOHAMED SEYAM</span>
         </div>
 
         <motion.div
@@ -77,18 +78,18 @@ export default function RefereeReview() {
           animate={{ y: 0, opacity: 1 }}
         >
           <motion.div
-            className="w-20 h-20 bg-gradient-to-br from-accent to-accent/80 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl"
+            className="w-20 h-20 bg-[#2C0834] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl border-4 border-[#FFFDD1]"
             animate={{ scale: [1, 1.05, 1] }}
             transition={{ repeat: Infinity, duration: 2 }}
           >
             <Gavel className="w-10 h-10 text-white" />
           </motion.div>
-          <h1 className="text-2xl font-bold mb-2">مراجعة الحكم</h1>
+          <h1 className="text-2xl font-pixel-title mb-2 text-white">مراجعة الحكم</h1>
           {isReferee ? (
-            <p className="text-accent font-medium">أنت الحكم! راجع الإجابات واخصم اللي مش صح</p>
+            <p className="text-white/80 font-pixel-text">أنت الحكم! راجع الإجابات واخصم اللي مش صح</p>
           ) : (
-            <p className="text-muted-foreground">
-              الحكم <span className="font-bold text-accent">{referee?.name}</span> بيراجع الإجابات...
+            <p className="text-white/60 font-pixel-text">
+              الحكم <span className="font-bold text-[#FFFDD1]">{referee?.name}</span> بيراجع الإجابات...
             </p>
           )}
         </motion.div>
@@ -99,25 +100,23 @@ export default function RefereeReview() {
           transition={{ delay: 0.1 }}
           className="mb-4"
         >
-          <Card className="border-2 border-primary/20">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center justify-between">
-                <span className="flex items-center gap-2">
-                  <Shield className="w-5 h-5 text-accent" />
-                  الجولة {room.currentRound + 1} - حرف {round.letter}
-                </span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          <RetroCard className="mb-4">
+            <div className="flex items-center justify-between font-pixel-title text-[#31093A] mb-4">
+              <span className="flex items-center gap-2">
+                <Shield className="w-5 h-5 text-accent" />
+                الجولة {room.currentRound + 1} - حرف {round.letter}
+              </span>
+            </div>
+            <div className="space-y-6">
               {categories.map((category) => {
                 const Icon = categoryIcons[category];
                 return (
-                  <div key={category} className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-8 h-8 ${categoryColors[category]} rounded-lg flex items-center justify-center`}>
+                  <div key={category} className="space-y-3">
+                    <div className="flex items-center gap-2 font-pixel-text">
+                      <div className={`w-8 h-8 ${categoryColors[category]} rounded-lg flex items-center justify-center shadow-md`}>
                         <Icon className="w-4 h-4 text-white" />
                       </div>
-                      <span className="font-bold">{category}</span>
+                      <span className="font-bold text-[#31093A]">{category}</span>
                     </div>
 
                     <div className="grid gap-2">
@@ -131,19 +130,19 @@ export default function RefereeReview() {
                         return (
                           <motion.div
                             key={submission.playerId}
-                            className={`flex items-center justify-between p-3 rounded-xl border-2 transition-all ${deducted
-                              ? 'bg-destructive/10 border-destructive/30 opacity-60'
-                              : 'bg-card border-card-border hover:border-primary/30'
+                            className={`flex items-center justify-between p-3 rounded-xl border-[3px] transition-all font-pixel-text ${deducted
+                              ? 'bg-red-500/10 border-red-500/30 opacity-60'
+                              : 'bg-white border-[#31093A]/10 hover:border-[#31093A]/30'
                               }`}
                             layout
                           >
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold">
+                              <div className="w-8 h-8 rounded-full bg-[#31093A]/10 flex items-center justify-center text-sm font-bold text-[#31093A]">
                                 {submission.playerName.charAt(0)}
                               </div>
                               <div>
-                                <p className="font-medium text-sm">{submission.playerName}</p>
-                                <p className={`text-lg ${deducted ? 'line-through text-muted-foreground' : ''}`}>
+                                <p className="font-medium text-xs text-[#31093A]/70">{submission.playerName}</p>
+                                <p className={`text-base font-bold text-[#31093A] ${deducted ? 'line-through opacity-50' : ''}`}>
                                   {answer}
                                 </p>
                               </div>
@@ -151,55 +150,36 @@ export default function RefereeReview() {
 
                             <div className="flex items-center gap-2">
                               {deducted ? (
-                                <div className="flex items-center gap-2">
-                                  <span className="text-destructive text-sm font-bold flex items-center gap-1">
-                                    <X className="w-4 h-4" />
-                                    مرفوض
-                                  </span>
-                                  {isReferee && (
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="w-8 h-8 text-muted-foreground"
-                                      onClick={() => {
-                                        // TODO: Add ability to UNDO deduction if needed, for now we just show it's rejected
-                                      }}
-                                    >
-                                      <span className="text-xs">تراجع</span>
-                                    </Button>
-                                  )}
-                                </div>
+                                <span className="text-red-500 text-xs font-bold flex items-center gap-1">
+                                  <X className="w-3 h-3" />
+                                  مرفوض
+                                </span>
                               ) : (
                                 <>
-                                  <span className={`px-3 py-1 rounded-full text-sm font-bold ${score === 20 ? 'bg-green-500/20 text-green-600' :
+                                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${score === 20 ? 'bg-green-500/20 text-green-600' :
                                     score === 10 ? 'bg-yellow-500/20 text-yellow-600' :
-                                      'bg-muted text-muted-foreground'
+                                      'bg-gray-100 text-[#31093A]/40'
                                     }`}>
                                     {score} نقطة
                                   </span>
 
                                   {isReferee && score > 0 && (
                                     <div className="flex gap-1">
-                                      {/* Toggle Unique/Duplicate Button */}
                                       <Button
                                         variant="ghost"
                                         size="icon"
-                                        className={`h-8 w-8 rounded-full ${score === 10 ? 'text-amber-500 bg-amber-500/10' : 'text-blue-500 bg-blue-500/10'}`}
+                                        className="h-7 w-7 rounded-lg text-[#31093A]/40 hover:bg-[#31093A]/10"
                                         onClick={() => refereeToggleUnique(submission.playerId, category)}
-                                        title={score === 10 ? "اجعلها فريدة (20 نقطة)" : "اجعلها مكررة (10 نقاط)"}
                                       >
-                                        <Users className="w-4 h-4" />
+                                        <Users className="w-3 h-3" />
                                       </Button>
-
-                                      {/* Quick Reject Button */}
                                       <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="h-8 w-8 text-destructive hover:bg-destructive/20 rounded-full"
+                                        className="h-7 w-7 text-red-500 hover:bg-red-500/10 rounded-lg"
                                         onClick={() => refereeDeduct(submission.playerId, category, "رفض الحكم")}
-                                        title="رفض سريع"
                                       >
-                                        <X className="w-5 h-5" />
+                                        <X className="w-4 h-4" />
                                       </Button>
                                     </div>
                                   )}
@@ -213,63 +193,26 @@ export default function RefereeReview() {
                   </div>
                 );
               })}
-            </CardContent>
-          </Card>
+            </div>
+          </RetroCard>
         </motion.div>
 
-        {refereeDeductions.length > 0 && (
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="mb-4"
-          >
-            <Card className="border-destructive/30">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-destructive flex items-center gap-2">
-                  <X className="w-4 h-4" />
-                  الخصومات
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {refereeDeductions.map((d, i) => (
-                  <div key={i} className="flex items-center justify-between p-2 bg-destructive/10 rounded-lg text-sm">
-                    <span>
-                      <span className="font-bold">{d.playerName}</span>
-                      <span className="text-muted-foreground mx-1">-</span>
-                      <span>{d.answer}</span>
-                    </span>
-                    <span className="text-destructive font-bold">-{d.pointsDeducted}</span>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-
         {isReferee && (
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.3 }}
+          <Button
+            className="w-full h-14 text-lg font-bold bg-[#2C0834] text-white shadow-xl font-pixel-title hover:bg-[#31093A]"
+            onClick={refereeApprove}
+            data-testid="button-referee-approve"
           >
-            <Button
-              className="w-full h-14 text-lg font-bold bg-gradient-to-r from-accent to-accent/80"
-              onClick={refereeApprove}
-              data-testid="button-referee-approve"
-            >
-              <Check className="w-6 h-6 ml-2" />
-              اعتماد النتائج
-            </Button>
-          </motion.div>
+            <Check className="w-6 h-6 ml-2" />
+            اعتماد النتائج
+          </Button>
         )}
 
         {!isReferee && (
           <motion.div
-            className="text-center p-4"
-            animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ repeat: Infinity, duration: 2 }}
+            className="text-center p-4 font-pixel-text text-white/60 animate-pulse"
           >
-            <p className="text-muted-foreground">في انتظار اعتماد الحكم...</p>
+            <p>في انتظار اعتماد الحكم...</p>
           </motion.div>
         )}
       </div>

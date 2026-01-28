@@ -87,7 +87,7 @@ export default function InstructionSlides({ isOpen, onClose }: InstructionSlides
                 initial={{ scale: 0.9, opacity: 0, y: 20 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                className="bg-background w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl relative z-10 border border-border"
+                className="bg-[#FFFDD1] w-full max-w-lg rounded-xl overflow-hidden shadow-2xl relative z-10 border-[3px] border-[#2C0834] font-pixel-text"
             >
                 <button
                     onClick={onClose}
@@ -121,10 +121,10 @@ export default function InstructionSlides({ isOpen, onClose }: InstructionSlides
                             exit={{ x: -20, opacity: 0 }}
                             transition={{ duration: 0.2 }}
                         >
-                            <h2 className="text-2xl font-bold mb-4 text-primary">
+                            <h2 className="text-2xl font-pixel-title mb-4 text-[#31093A]">
                                 {slides[currentSlide].title}
                             </h2>
-                            <p className="text-lg text-muted-foreground leading-relaxed">
+                            <p className="text-base text-[#31093A]/80 leading-relaxed font-pixel-text">
                                 {slides[currentSlide].description}
                             </p>
                         </motion.div>

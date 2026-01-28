@@ -1,6 +1,28 @@
-@tailwind base;
-@tailwind components;
 @tailwind utilities;
+
+@font-face {
+  font-family: 'DogicaPixel';
+  src: url('/assets/fonts/DogicaPixel/400.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'DogicaPixel';
+  src: url('/assets/fonts/DogicaPixel/700.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: '04b03';
+  src: url('/assets/fonts/04b03/400.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 
 /* LIGHT MODE - Egyptian Fun Theme */
 :root {
@@ -155,6 +177,15 @@
     direction: rtl;
     background-color: var(--hero-piece-15);
     cursor: url(/assets/workos/cursor-normal.png) 28 26, auto;
+    font-family: 'DogicaPixel', 'Cairo', sans-serif;
+  }
+
+  .font-pixel-title {
+    font-family: '04b03', sans-serif;
+  }
+
+  .font-pixel-text {
+    font-family: 'DogicaPixel', sans-serif;
   }
 
   a:hover,
