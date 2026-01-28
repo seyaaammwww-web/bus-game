@@ -476,24 +476,24 @@ export default function Home() {
           <span className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-bold">45</span>
           ثانية
         </span>
-
-
-        <motion.div
-          className="mt-8 relative z-10 w-full max-w-sm"
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8 }}
-        >
-          <RetroQuote title="نصيحة اليوم">
-            أسرع واحد بيكتب هو اللي بيكسب! 🚀
-          </RetroQuote>
-        </motion.div>
-
-        <div className="fixed bottom-6 left-0 right-0 text-center">
-          <p className="text-[12px] text-white/80 font-pixel-text tracking-tight animate-pulse">
-            BY MOHAMED SEYAM
-          </p>
-        </div>
       </motion.div>
-      );
+
+      <motion.div
+        className="mt-8 relative z-10 w-full max-w-sm"
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.8 }}
+      >
+        <RetroQuote title="نصيحة اليوم">
+          أسرع واحد بيكتب هو اللي بيكسب! 🚀
+        </RetroQuote>
+      </motion.div>
+
+      <div className="fixed bottom-6 left-0 right-0 text-center">
+        <p className="text-[12px] text-white/80 font-pixel-text tracking-tight animate-pulse">
+          BY MOHAMED SEYAM
+        </p>
+      </div>
+    </div>
+  );
 }
