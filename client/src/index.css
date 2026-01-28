@@ -4,11 +4,11 @@
 
 /* LIGHT MODE - Egyptian Fun Theme */
 :root {
-  --button-outline: rgba(0,0,0, .10);
-  --badge-outline: rgba(0,0,0, .05);
+  --button-outline: rgba(0, 0, 0, .10);
+  --badge-outline: rgba(0, 0, 0, .05);
   --opaque-button-border-intensity: -8;
-  --elevate-1: rgba(0,0,0, .03);
-  --elevate-2: rgba(0,0,0, .08);
+  --elevate-1: rgba(0, 0, 0, .03);
+  --elevate-2: rgba(0, 0, 0, .08);
 
   --background: 45 100% 96%;
   --foreground: 20 14% 15%;
@@ -49,14 +49,14 @@
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
   --radius: .625rem;
-  --shadow-2xs: 0px 2px 4px 0px rgba(0,0,0, 0.03);
-  --shadow-xs: 0px 2px 6px 0px rgba(0,0,0, 0.05);
-  --shadow-sm: 0px 2px 8px 0px rgba(0,0,0, 0.08);
-  --shadow: 0px 4px 12px 0px rgba(0,0,0, 0.1);
-  --shadow-md: 0px 6px 16px 0px rgba(0,0,0, 0.12);
-  --shadow-lg: 0px 8px 24px 0px rgba(0,0,0, 0.15);
-  --shadow-xl: 0px 12px 32px 0px rgba(0,0,0, 0.18);
-  --shadow-2xl: 0px 16px 48px 0px rgba(0,0,0, 0.22);
+  --shadow-2xs: 0px 2px 4px 0px rgba(0, 0, 0, 0.03);
+  --shadow-xs: 0px 2px 6px 0px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0px 2px 8px 0px rgba(0, 0, 0, 0.08);
+  --shadow: 0px 4px 12px 0px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0px 6px 16px 0px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0px 8px 24px 0px rgba(0, 0, 0, 0.15);
+  --shadow-xl: 0px 12px 32px 0px rgba(0, 0, 0, 0.18);
+  --shadow-2xl: 0px 16px 48px 0px rgba(0, 0, 0, 0.22);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 
@@ -77,11 +77,11 @@
 }
 
 .dark {
-  --button-outline: rgba(255,255,255, .10);
-  --badge-outline: rgba(255,255,255, .05);
+  --button-outline: rgba(255, 255, 255, .10);
+  --badge-outline: rgba(255, 255, 255, .05);
   --opaque-button-border-intensity: 9;
-  --elevate-1: rgba(255,255,255, .04);
-  --elevate-2: rgba(255,255,255, .09);
+  --elevate-1: rgba(255, 255, 255, .04);
+  --elevate-2: rgba(255, 255, 255, .09);
 
   --background: 20 15% 10%;
   --foreground: 45 20% 95%;
@@ -118,14 +118,14 @@
   --chart-4: 200 80% 55%;
   --chart-5: 280 70% 55%;
 
-  --shadow-2xs: 0px 2px 4px 0px rgba(0,0,0, 0.2);
-  --shadow-xs: 0px 2px 6px 0px rgba(0,0,0, 0.25);
-  --shadow-sm: 0px 2px 8px 0px rgba(0,0,0, 0.3);
-  --shadow: 0px 4px 12px 0px rgba(0,0,0, 0.35);
-  --shadow-md: 0px 6px 16px 0px rgba(0,0,0, 0.4);
-  --shadow-lg: 0px 8px 24px 0px rgba(0,0,0, 0.45);
-  --shadow-xl: 0px 12px 32px 0px rgba(0,0,0, 0.5);
-  --shadow-2xl: 0px 16px 48px 0px rgba(0,0,0, 0.55);
+  --shadow-2xs: 0px 2px 4px 0px rgba(0, 0, 0, 0.2);
+  --shadow-xs: 0px 2px 6px 0px rgba(0, 0, 0, 0.25);
+  --shadow-sm: 0px 2px 8px 0px rgba(0, 0, 0, 0.3);
+  --shadow: 0px 4px 12px 0px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0px 6px 16px 0px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0px 8px 24px 0px rgba(0, 0, 0, 0.45);
+  --shadow-xl: 0px 12px 32px 0px rgba(0, 0, 0, 0.5);
+  --shadow-2xl: 0px 16px 48px 0px rgba(0, 0, 0, 0.55);
 }
 
 @layer base {
@@ -141,46 +141,120 @@
 
 /* Custom Animations */
 @keyframes pulse-warning {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.05); opacity: 0.9; }
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
-  20%, 40%, 60%, 80% { transform: translateX(4px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-4px);
+  }
+
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(4px);
+  }
 }
 
 @keyframes bounce-in {
-  0% { transform: scale(0.3); opacity: 0; }
-  50% { transform: scale(1.05); }
-  70% { transform: scale(0.9); }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+
+  70% {
+    transform: scale(0.9);
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 @keyframes slide-up {
-  0% { transform: translateY(20px); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 @keyframes confetti-fall {
-  0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
-  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
 }
 
 @keyframes glow {
-  0%, 100% { box-shadow: 0 0 5px hsl(var(--primary)), 0 0 10px hsl(var(--primary)), 0 0 15px hsl(var(--primary)); }
-  50% { box-shadow: 0 0 20px hsl(var(--primary)), 0 0 30px hsl(var(--primary)), 0 0 40px hsl(var(--primary)); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 5px hsl(var(--primary)), 0 0 10px hsl(var(--primary)), 0 0 15px hsl(var(--primary));
+  }
+
+  50% {
+    box-shadow: 0 0 20px hsl(var(--primary)), 0 0 30px hsl(var(--primary)), 0 0 40px hsl(var(--primary));
+  }
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 @keyframes tick {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
 }
 
 .animate-pulse-warning {
@@ -212,14 +286,31 @@
 }
 
 @keyframes slow-float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-20px);
+  }
 }
 
 @keyframes shine-move {
-  0% { left: -100%; opacity: 0; }
-  50% { opacity: 0.5; }
-  100% { left: 200%; opacity: 0; }
+  0% {
+    left: -100%;
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+
+  100% {
+    left: 200%;
+    opacity: 0;
+  }
 }
 
 .animate-slow-float {
@@ -237,18 +328,20 @@
   display: inline-block;
 }
 
-.logo-shine::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 50%;
-  height: 100%;
-  background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0) 100%);
-  transform: skewX(-25deg);
-  animation: shine-move 3s infinite linear; /* Fast loop 3s */
-  pointer-events: none;
-  mix-blend-mode: overlay;
+.perspective-grid {
+  transform: perspective(500px) rotateX(20deg);
+  transform-origin: top;
+  animation: grid-scroll 20s linear infinite;
+}
+
+@keyframes grid-scroll {
+  0% {
+    transform: perspective(500px) rotateX(20deg) translateY(0);
+  }
+
+  100% {
+    transform: perspective(500px) rotateX(20deg) translateY(40px);
+  }
 }
 
 /* Confetti particle */
@@ -273,11 +366,25 @@
 }
 
 /* Category icons */
-.category-ولد { @apply bg-blue-500; }
-.category-بنت { @apply bg-pink-500; }
-.category-بلد { @apply bg-green-500; }
-.category-حيوان { @apply bg-amber-500; }
-.category-جماد { @apply bg-purple-500; }
+.category-ولد {
+  @apply bg-blue-500;
+}
+
+.category-بنت {
+  @apply bg-pink-500;
+}
+
+.category-بلد {
+  @apply bg-green-500;
+}
+
+.category-حيوان {
+  @apply bg-amber-500;
+}
+
+.category-جماد {
+  @apply bg-purple-500;
+}
 
 @layer utilities {
   input[type="search"]::-webkit-search-cancel-button {
@@ -291,6 +398,7 @@
   }
 
   .no-default-hover-elevate {}
+
   .no-default-active-elevate {}
 
   .toggle-elevate::before,

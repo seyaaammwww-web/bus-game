@@ -1,3 +1,4 @@
+// ... imports
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Plus, ArrowLeft, Globe, Sparkles, Star, Heart } from 'lucide-react';
@@ -8,16 +9,9 @@ import { useGame } from '@/lib/gameContext';
 import { resumeAudioContext } from '@/lib/sounds';
 import InstructionSlides from '@/components/InstructionSlides';
 import { HelpCircle } from 'lucide-react';
+import ArcadeBackground from '@/components/ArcadeBackground';
 
 const PUBLIC_ROOM_CODE = 'PLAY';
-
-const floatingParticles = Array.from({ length: 12 }, (_, i) => ({
-  id: i,
-  delay: Math.random() * 2,
-  duration: 3 + Math.random() * 2,
-  x: Math.random() * 100,
-  size: 8 + Math.random() * 12,
-}));
 
 export default function Home() {
   const { createRoom, joinRoom, joinPublicRoom, state } = useGame();
@@ -57,8 +51,10 @@ export default function Home() {
     }
   };
 
+  // ... inside component
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary/10 via-background to-secondary/10 flex flex-col items-center justify-center p-4 overflow-hidden relative">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden relative text-white">
+      <ArcadeBackground />
       <InstructionSlides isOpen={showHelp} onClose={() => setShowHelp(false)} />
 
       {/* Large Floating Help Button */}
@@ -86,29 +82,6 @@ export default function Home() {
           transition={{ repeat: Infinity, duration: 1.5 }}
         />
       </motion.button>
-      {floatingParticles.map((particle) => (
-        <motion.div
-          key={particle.id}
-          className="absolute pointer-events-none opacity-20"
-          style={{ left: `${particle.x}%` }}
-          initial={{ y: '100vh', rotate: 0 }}
-          animate={{ y: '-100px', rotate: 360 }}
-          transition={{
-            duration: particle.duration,
-            delay: particle.delay,
-            repeat: Infinity,
-            ease: 'linear',
-          }}
-        >
-          {particle.id % 3 === 0 ? (
-            <Star className="text-primary" style={{ width: particle.size, height: particle.size }} />
-          ) : particle.id % 3 === 1 ? (
-            <Sparkles className="text-secondary" style={{ width: particle.size, height: particle.size }} />
-          ) : (
-            <Heart className="text-accent" style={{ width: particle.size, height: particle.size }} />
-          )}
-        </motion.div>
-      ))}
 
       <motion.div
         initial={{ y: -50, opacity: 0 }}
