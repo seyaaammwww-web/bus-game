@@ -388,7 +388,9 @@ export default function Results() {
           )}
 
           <Button
-            className="w-full h-16 text-xl font-bold bg-[#2C0834] text-white shadow-xl font-pixel-title hover:bg-[#31093A]"
+            size="lg"
+            variant="default"
+            className="w-full h-16 text-xl font-bold font-pixel-title"
             onClick={playAgain}
             data-testid="button-play-again"
           >
@@ -401,7 +403,8 @@ export default function Results() {
         {!isFinal && room.refereeId === state.playerId && (
           <Button
             onClick={() => refereeApprove()}
-            className="w-full h-14 mt-4 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-xl border-4 border-green-400 animate-pulse font-pixel-title"
+            size="lg"
+            className="w-full h-16 mt-4 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#2C0834] border-[3px] border-[#2C0834] animate-pulse font-pixel-title"
           >
             اعتماد النتيجة ✅
           </Button>

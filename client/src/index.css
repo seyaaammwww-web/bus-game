@@ -188,6 +188,18 @@
     font-family: 'DogicaPixel', sans-serif;
   }
 
+  .font-pixel-button {
+    font-family: '04b03', sans-serif;
+    letter-spacing: -0.5px;
+  }
+
+  /* Make text on background clearer */
+  .text-on-bg {
+    text-shadow: 2px 2px 0px #2C0834;
+    font-weight: 700;
+    color: white;
+  }
+
   a:hover,
   button:hover,
   input:hover,
@@ -460,10 +472,6 @@
     color: hsl(var(--muted-foreground));
     pointer-events: none;
   }
-
-  .no-default-hover-elevate {}
-
-  .no-default-active-elevate {}
 
   .toggle-elevate::before,
   .toggle-elevate-2::before {

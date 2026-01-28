@@ -123,19 +123,20 @@ export default function Home() {
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
           >
             <motion.div
-              whileHover={{ scale: 1.03, y: -2 }}
+              whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
             >
               <Button
                 size="lg"
-                className="h-18 text-xl font-bold bg-gradient-to-r from-accent via-accent to-accent/90 shadow-xl hover:shadow-2xl transition-shadow w-full py-5"
+                variant="default"
+                className="w-full h-16 text-xl tracking-wider"
                 onClick={() => setMode('public')}
                 data-testid="button-public-room"
               >
                 <Globe className="w-7 h-7 ml-3" />
                 الغرفة العامة
                 <motion.span
-                  className="mr-2 bg-white/20 px-2 py-0.5 rounded-full text-sm"
+                  className="mr-2 bg-[#31093A]/20 px-2 py-0.5 rounded text-sm font-pixel-text"
                   animate={{ scale: [1, 1.1, 1] }}
                   transition={{ repeat: Infinity, duration: 1.5 }}
                 >
@@ -145,12 +146,13 @@ export default function Home() {
             </motion.div>
 
             <motion.div
-              whileHover={{ scale: 1.03, y: -2 }}
+              whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
             >
               <Button
                 size="lg"
-                className="h-16 text-lg font-bold bg-gradient-to-r from-primary to-primary/90 shadow-lg w-full"
+                variant="secondary"
+                className="w-full h-16 text-lg"
                 onClick={() => setMode('create')}
                 data-testid="button-create-room"
               >
@@ -160,13 +162,13 @@ export default function Home() {
             </motion.div>
 
             <motion.div
-              whileHover={{ scale: 1.03, y: -2 }}
+              whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
             >
               <Button
                 size="lg"
-                variant="secondary"
-                className="h-16 text-lg font-bold shadow-lg w-full"
+                variant="retro"
+                className="w-full h-16 text-lg"
                 onClick={() => setMode('join')}
                 data-testid="button-join-room"
               >

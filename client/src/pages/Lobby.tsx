@@ -55,15 +55,15 @@ export default function Lobby() {
           animate={{ y: 0, opacity: 1 }}
         >
           <motion.div
-            className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full mb-4"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#FFFDD1] border-[3px] border-[#2C0834] rounded-full mb-4 shadow-[4px_4px_0_0_#2C0834]"
             animate={{ scale: [1, 1.05, 1] }}
             transition={{ repeat: Infinity, duration: 2 }}
           >
-            <Sparkles className="w-5 h-5 text-white" />
-            <span className="font-bold text-white">غرفة الانتظار</span>
+            <Sparkles className="w-5 h-5 text-[#2C0834]" />
+            <span className="font-bold text-[#31093A] font-pixel-text">غرفة الانتظار</span>
           </motion.div>
           <h1 className="text-2xl font-pixel-title mb-2 text-white">في انتظار اللاعبين...</h1>
-          <p className="text-white/80">ادعي أصحابك وعيلتك!</p>
+          <p className="text-white/80 font-pixel-text">ادعي أصحابك وعيلتك!</p>
         </motion.div>
 
         <motion.div
@@ -85,7 +85,7 @@ export default function Lobby() {
                   {room.code.split('').map((char, i) => (
                     <motion.span
                       key={i}
-                      className="w-12 h-14 flex items-center justify-center text-2xl font-bold bg-[#31093A] text-white rounded-lg shadow-lg"
+                      className="w-12 h-14 flex items-center justify-center text-2xl font-bold bg-[#31093A] text-[#F9D794] rounded-lg shadow-[4px_4px_0_0_#2C0834] border-2 border-[#2C0834] font-pixel-title"
                       initial={{ rotateY: 90 }}
                       animate={{ rotateY: 0 }}
                       transition={{ delay: 0.3 + i * 0.1 }}
@@ -98,18 +98,18 @@ export default function Lobby() {
                   variant="outline"
                   size="icon"
                   onClick={copyCode}
-                  className="border-[#2C0834] text-[#2C0834] hover:bg-[#2C0834]/10"
+                  className="h-14 w-14 border-[3px] border-[#2C0834] text-[#2C0834] hover:bg-[#2C0834]/10 bg-[#FFFDD1] shadow-[4px_4px_0_0_#2C0834] active:shadow-none"
                   data-testid="button-copy-code"
                 >
                   {copied ? (
-                    <Check className="w-4 h-4" />
+                    <Check className="w-6 h-6" />
                   ) : (
-                    <Copy className="w-4 h-4" />
+                    <Copy className="w-6 h-6" />
                   )}
                 </Button>
               </div>
               <motion.p
-                className="text-xs text-[#31093A]/50 mt-3"
+                className="text-xs text-[#31093A]/50 mt-3 font-pixel-text"
                 animate={{ opacity: [0.5, 1, 0.5] }}
                 transition={{ repeat: Infinity, duration: 2 }}
               >
@@ -125,13 +125,13 @@ export default function Lobby() {
           transition={{ delay: 0.2 }}
         >
           <RetroCard className="mb-6">
-            <div className="flex flex-row items-center justify-between gap-2 pb-3">
+            <div className="flex flex-row items-center justify-between gap-2 pb-3 border-b-2 border-[#2C0834]/10 mb-2">
               <h2 className="text-lg flex items-center gap-2 font-pixel-title text-[#31093A]">
                 <Users className="w-5 h-5 text-primary" />
                 اللاعبين
               </h2>
               <motion.span
-                className="text-sm px-3 py-1 bg-[#31093A]/10 rounded-full font-bold text-[#31093A]"
+                className="text-sm px-3 py-1 bg-[#31093A] text-[#F9D794] rounded-full font-bold border-2 border-[#2C0834]"
                 animate={{ scale: room.players.length >= 1 ? [1, 1.1, 1] : 1 }}
                 transition={{ repeat: room.players.length >= 1 ? Infinity : 0, duration: 1.5 }}
               >
@@ -168,11 +168,11 @@ export default function Lobby() {
             transition={{ delay: 0.25 }}
             className="mb-4"
           >
-            <RetroCard className="border-2 border-dashed !bg-accent/5">
+            <RetroCard className="border-[3px] border-dashed !bg-[#FFFDD1]/80">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
-                    <Shield className="w-5 h-5 text-accent" />
+                  <div className="w-10 h-10 rounded-full bg-[#31093A]/10 flex items-center justify-center border-2 border-[#31093A]">
+                    <Shield className="w-5 h-5 text-[#31093A]" />
                   </div>
                   <div>
                     <p className="font-bold text-sm text-[#31093A]">الحكم (اختياري)</p>
@@ -186,7 +186,7 @@ export default function Lobby() {
                     variant="ghost"
                     size="icon"
                     onClick={() => removeReferee()}
-                    className="text-[#31093A]"
+                    className="text-[#31093A] hover:bg-red-100 hover:text-red-900"
                     data-testid="button-remove-referee"
                   >
                     <X className="w-4 h-4" />
@@ -196,7 +196,7 @@ export default function Lobby() {
                     variant="outline"
                     size="sm"
                     onClick={() => setShowRefereeSelect(true)}
-                    className="border-[#2C0834] text-[#2C0834]"
+                    className="h-8 border-2"
                     data-testid="button-choose-referee"
                   >
                     اختر حكم
@@ -210,7 +210,7 @@ export default function Lobby() {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    className="mt-4 pt-4 border-t border-[#31093A]/10 overflow-hidden"
+                    className="mt-4 pt-4 border-t-2 border-[#31093A]/10 overflow-hidden"
                   >
                     <p className="text-sm text-[#31093A]/70 mb-3 font-pixel-text">اختر واحد من اللاعبين:</p>
                     <div className="grid grid-cols-2 gap-2">
@@ -218,11 +218,11 @@ export default function Lobby() {
                         <Button
                           key={player.id}
                           variant="outline"
-                          className="justify-start gap-2 border-[#2C0834] text-[#2C0834]"
+                          className="justify-start gap-2 h-10 border-2"
                           onClick={() => handleSetReferee(player.id)}
                           data-testid={`button-select-referee-${player.id}`}
                         >
-                          {player.isHost && <Crown className="w-3 h-3 text-yellow-500" />}
+                          {player.isHost && <Crown className="w-3 h-3 text-orange-500" />}
                           <span className="truncate">{player.name}</span>
                         </Button>
                       ))}
@@ -230,7 +230,7 @@ export default function Lobby() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="w-full mt-2 text-[#31093A]"
+                      className="w-full mt-2 text-[#31093A] hover:bg-[#31093A]/10"
                       onClick={() => setShowRefereeSelect(false)}
                     >
                       إلغاء
@@ -254,7 +254,9 @@ export default function Lobby() {
               whileTap={{ scale: 0.98 }}
             >
               <Button
-                className="w-full h-14 text-lg font-bold bg-[#2C0834] text-white hover:bg-[#31093A] font-pixel-title"
+                variant="retro"
+                size="lg"
+                className="w-full h-16 text-lg font-pixel-title bg-[#2C0834] text-[#F9D794] hover:bg-[#1C0524] border-[#F9D794]"
                 onClick={setReady}
                 data-testid="button-ready"
               >
@@ -266,7 +268,7 @@ export default function Lobby() {
 
           {currentPlayer?.isReady && !isHost && (
             <motion.div
-              className="text-center p-4 bg-white/10 rounded-xl border-2 border-white/20"
+              className="text-center p-4 bg-[#FFFDD1] rounded-xl border-[3px] border-[#2C0834] shadow-[4px_4px_0_0_#2C0834]"
               animate={{ scale: [1, 1.02, 1] }}
               transition={{ repeat: Infinity, duration: 2 }}
             >
@@ -274,10 +276,10 @@ export default function Lobby() {
                 animate={{ rotate: [0, 10, -10, 0] }}
                 transition={{ repeat: Infinity, duration: 1 }}
               >
-                <Check className="w-8 h-8 text-white mx-auto mb-2" />
+                <Check className="w-8 h-8 text-[#2C0834] mx-auto mb-2" />
               </motion.div>
-              <p className="font-medium text-white">أنت جاهز!</p>
-              <p className="text-sm text-white/60">في انتظار باقي اللاعبين...</p>
+              <p className="font-bold text-[#31093A] font-pixel-text">أنت جاهز!</p>
+              <p className="text-sm text-[#31093A]/60 font-pixel-text">في انتظار باقي اللاعبين...</p>
             </motion.div>
           )}
 
@@ -287,7 +289,9 @@ export default function Lobby() {
               whileTap={{ scale: canStart ? 0.98 : 1 }}
             >
               <Button
-                className="w-full h-14 text-lg font-bold bg-accent text-white shadow-lg font-pixel-title disabled:opacity-50"
+                size="lg"
+                variant={canStart ? "secondary" : "default"}
+                className={`w-full h-16 text-lg font-pixel-title ${!canStart ? 'opacity-50 cursor-not-allowed bg-gray-400 border-gray-600' : ''}`}
                 onClick={startGame}
                 disabled={!canStart}
                 data-testid="button-start-game"
