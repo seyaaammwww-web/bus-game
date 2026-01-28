@@ -230,18 +230,18 @@
   }
 
   .font-pixel-title {
-    font-family: 'Handjet', 'AraPix', 'Cairo', sans-serif;
+    font-family: 'AraPix', 'Handjet', 'Cairo', sans-serif;
     font-weight: 800;
-    font-size: 2.5rem;
+    font-size: 3.5rem;
     letter-spacing: 0px;
     line-height: 1.2;
   }
 
   .font-pixel-text {
-    font-family: 'Handjet', 'AraPix', 'Cairo', sans-serif;
+    font-family: 'AraPix', 'Handjet', 'Cairo', sans-serif;
     font-weight: 700;
-    font-size: 1.75rem;
-    line-height: 1.8;
+    font-size: 2.25rem;
+    line-height: 1.6;
     letter-spacing: 0px;
   }
 
