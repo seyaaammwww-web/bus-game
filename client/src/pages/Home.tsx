@@ -462,35 +462,10 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      <motion.div
-        className="flex items-center justify-center gap-4 text-white font-pixel-text text-xl"
-        animate={{ y: [0, -3, 0] }}
-        transition={{ repeat: Infinity, duration: 2 }}
-      >
-        <span className="flex items-center gap-1">
-          <span className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-bold">10</span>
-          جولات
-        </span>
-        <span className="w-1 h-1 rounded-full bg-white" />
-        <span className="flex items-center gap-1">
-          <span className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-bold">45</span>
-          ثانية
-        </span>
-      </motion.div>
 
-      <motion.div
-        className="mt-8 relative z-10 w-full max-w-sm"
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8 }}
-      >
-        <RetroQuote title="نصيحة اليوم">
-          أسرع واحد بيكتب هو اللي بيكسب! 🚀
-        </RetroQuote>
-      </motion.div>
 
       <div className="fixed bottom-6 left-0 right-0 text-center">
-        <p className="text-[12px] text-white/80 font-pixel-text tracking-tight animate-pulse">
+        <p className="text-[12px] text-black font-pixel-text tracking-tight animate-pulse font-bold">
           BY MOHAMED SEYAM
         </p>
       </div>

@@ -113,10 +113,10 @@ export default function RefereeReview() {
                 return (
                   <div key={category} className="space-y-3">
                     <div className="flex items-center gap-2 font-pixel-text">
-                      <div className={`w-8 h-8 ${categoryColors[category]} rounded-lg flex items-center justify-center shadow-md`}>
+                      <div className={`w-8 h-8 ${categoryColors[category]} flex items-center justify-center border-2 border-[#2C0834] shadow-[2px_2px_0_0_#2C0834]`}>
                         <Icon className="w-4 h-4 text-white" />
                       </div>
-                      <span className="font-bold text-[#31093A]">{category}</span>
+                      <span className="font-bold text-[#31093A] text-lg">{category}</span>
                     </div>
 
                     <div className="grid gap-2">
@@ -130,14 +130,14 @@ export default function RefereeReview() {
                         return (
                           <motion.div
                             key={submission.playerId}
-                            className={`flex items-center justify-between p-3 rounded-xl border-[3px] transition-all font-pixel-text ${deducted
-                              ? 'bg-red-500/10 border-red-500/30 opacity-60'
-                              : 'bg-white border-[#31093A]/10 hover:border-[#31093A]/30'
+                            className={`flex items-center justify-between p-3 border-[3px] transition-all font-pixel-text ${deducted
+                              ? 'bg-red-500/10 border-red-500/50 opacity-60'
+                              : 'bg-white border-[#31093A] hover:shadow-[2px_2px_0_0_#2C0834]'
                               }`}
                             layout
                           >
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-[#31093A]/10 flex items-center justify-center text-sm font-bold text-[#31093A]">
+                              <div className="w-8 h-8 bg-[#31093A] text-white flex items-center justify-center text-sm font-bold border-2 border-[#2C0834]">
                                 {submission.playerName.charAt(0)}
                               </div>
                               <div>
@@ -168,7 +168,7 @@ export default function RefereeReview() {
                                       <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="h-7 w-7 rounded-lg text-[#31093A]/40 hover:bg-[#31093A]/10"
+                                        className="h-7 w-7 rounded-none border-2 border-[#31093A]/20 hover:bg-[#31093A] hover:text-white"
                                         onClick={() => refereeToggleUnique(submission.playerId, category)}
                                       >
                                         <Users className="w-3 h-3" />
@@ -176,7 +176,7 @@ export default function RefereeReview() {
                                       <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="h-7 w-7 text-red-500 hover:bg-red-500/10 rounded-lg"
+                                        className="h-7 w-7 text-red-500 border-2 border-red-500/20 hover:bg-red-500 hover:text-white rounded-none"
                                         onClick={() => refereeDeduct(submission.playerId, category, "رفض الحكم")}
                                       >
                                         <X className="w-4 h-4" />

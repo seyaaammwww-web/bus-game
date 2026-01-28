@@ -312,91 +312,61 @@ export default function Game() {
           )}
         </AnimatePresence>
 
-        <RetroCard className="p-0 border-[3px] overflow-hidden mb-4">
-          <div className="overflow-x-auto">
-            <table className="w-full" dir="rtl">
-              <thead>
-                <tr>
-                  <th className="p-2 text-center text-[10px] text-[#31093A]/60 bg-[#31093A]/5 border-b border-[#31093A]/10 w-12 font-pixel-text">
-                    الحرف
-                  </th>
-                  {currentCategories.map((category, i) => {
-                    const Icon = categoryIcons[category as Category] || Box;
-                    return (
-                      <th key={category} className="p-0 border-b border-[#31093A]/10">
-                        <motion.div
-                          className={`bg-gradient-to-b ${categoryColors[category]} p-2 flex flex-col items-center justify-center gap-1`}
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: i * 0.05 }}
-                        >
-                          <Icon className="w-4 h-4 text-white" />
-                          <span className="text-[10px] font-bold text-white font-pixel-text">{category}</span>
-                        </motion.div>
-                      </th>
-                    );
-                  })}
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="bg-[#31093A]/5">
-                  <td className="p-2 text-center">
-                    <motion.div
-                      className="w-10 h-10 bg-[#31093A] rounded-xl flex items-center justify-center mx-auto shadow-lg"
-                      animate={{ scale: [1, 1.05, 1] }}
-                      transition={{ repeat: Infinity, duration: 2 }}
-                    >
-                      <span className="font-pixel-title text-lg text-white">{letter}</span>
-                    </motion.div>
-                  </td>
-                  {categories.map((category, i) => (
-                    <td key={category} className="p-1">
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 + i * 0.05 }}
-                      >
-                        <Input
-                          ref={(el) => { inputRefs.current[category] = el; }}
-                          type="text"
-                          value={answers[category]}
-                          onChange={(e) => updateAnswer(category, e.target.value)}
-                          onKeyDown={(e) => handleKeyDown(category, e)}
-                          disabled={hasSubmitted}
-                          placeholder={category}
-                          className={`text-center text-sm h-10 border-2 transition-all font-pixel-text ${answers[category].trim()
-                            ? 'border-[#2C0834] bg-white'
-                            : 'border-[#31093A]/10 bg-white/50'
-                            } ${hasSubmitted ? 'opacity-60' : ''}`}
-                          data-testid={`input-${category}`}
-                        />
-                      </motion.div>
-                    </td>
-                  ))}
-                </tr>
-              </tbody>
-            </table>
+        <div className="w-full relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            {currentCategories.map((category, i) => {
+              const Icon = categoryIcons[category as Category] || Box;
+              return (
+                <motion.div
+                  key={category}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  className="relative"
+                >
+                  <div className="bg-[#FFFDD1] border-[3px] border-[#2C0834] shadow-[4px_4px_0px_0px_#2C0834] rounded-none overflow-hidden">
+                    <div className={`${categoryColors[category]} p-2 border-b-[3px] border-[#2C0834] flex items-center justify-center gap-2`}>
+                      <Icon className="w-4 h-4 text-white" />
+                      <span className="font-bold text-white font-pixel-text text-sm">{category}</span>
+                    </div>
+                    <div className="p-2 bg-[#FFFDD1]">
+                      <Input
+                        ref={(el) => { inputRefs.current[category] = el; }}
+                        type="text"
+                        value={answers[category]}
+                        onChange={(e) => updateAnswer(category, e.target.value)}
+                        onKeyDown={(e) => handleKeyDown(category, e)}
+                        disabled={hasSubmitted}
+                        placeholder={category}
+                        className={`text-center text-lg h-12 border-[2px] border-[#2C0834]/20 focus:border-[#2C0834] focus:ring-0 focus:shadow-[2px_2px_0px_0px_#2C0834] transition-all font-pixel-text bg-white text-[#2C0834] placeholder:text-[#2C0834]/30 rounded-none ${hasSubmitted ? 'opacity-60 grayscale' : ''}`}
+                        data-testid={`input-${category}`}
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
+        </div>
 
-          <div className="p-3 bg-[#31093A]/5 border-t border-[#31093A]/10 font-pixel-text">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-[#31093A]/60">التقدم</span>
-              <span className="text-sm font-bold text-[#31093A]">{filledCount} / 5</span>
-            </div>
-            <div className="flex gap-1 mt-2">
+        <div className="flex justify-center mt-6 mb-2">
+          <RetroCard className="py-2 px-6 w-auto inline-flex items-center gap-4 bg-[#2C0834] border-[#FFFDD1] text-white">
+            <span className="text-sm text-[#FFFDD1]/70 font-pixel-text">التقدم</span>
+            <div className="flex gap-1">
               {categories.map((cat, i) => (
                 <motion.div
                   key={cat}
-                  className={`flex-1 h-2 rounded-full ${answers[cat].trim() ? 'bg-[#31093A]' : 'bg-[#31093A]/10'
+                  className={`w-3 h-3 rounded-sm border border-[#FFFDD1]/20 ${answers[cat].trim() ? 'bg-[#ffc800] border-[#ffc800]' : 'bg-transparent'
                     }`}
-                  initial={{ scaleX: 0 }}
-                  animate={{ scaleX: 1 }}
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
                   transition={{ delay: i * 0.05 }}
                 />
               ))}
             </div>
-          </div>
-        </RetroCard>
+            <span className="text-sm font-bold text-[#FFFDD1] font-pixel-title">{filledCount} / 5</span>
+          </RetroCard>
+        </div>
 
         {!hasSubmitted ? (
           <motion.div

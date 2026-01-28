@@ -13,6 +13,14 @@
 }
 
 @font-face {
+  font-family: 'AraPix';
+  src: url('/assets/fonts/AraPix/arapix.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
   font-family: 'DogicaPixel';
   src: url('/assets/fonts/DogicaPixel/700.woff2') format('woff2');
   font-weight: 700;
@@ -185,17 +193,19 @@
   }
 
   .font-pixel-title {
-    font-family: 'Handjet', '04b03', sans-serif;
+    font-family: 'Handjet', 'AraPix', 'Cairo', sans-serif;
     font-weight: 800;
   }
 
   .font-pixel-text {
-    font-family: 'Handjet', 'DogicaPixel', sans-serif;
-    font-weight: 600;
+    font-family: 'AraPix', 'Handjet', 'Cairo', sans-serif;
+    font-weight: 400;
+    font-size: 1.1rem;
+    line-height: 1.6;
   }
 
   .font-pixel-button {
-    font-family: 'Handjet', '04b03', sans-serif;
+    font-family: 'Handjet', 'AraPix', 'Cairo', sans-serif;
     letter-spacing: 0px;
     font-weight: 700;
   }

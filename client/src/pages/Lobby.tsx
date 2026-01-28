@@ -100,7 +100,7 @@ export default function Lobby() {
                   variant="outline"
                   size="icon"
                   onClick={copyCode}
-                  className="h-14 w-14 border-[3px] border-[#2C0834] text-[#2C0834] hover:bg-[#2C0834]/10 bg-[#FFFDD1] shadow-[4px_4px_0_0_#2C0834] active:shadow-none"
+                  className="h-14 w-14 border-[3px] border-[#2C0834] text-[#2C0834] hover:bg-[#2C0834] hover:text-[#FFFDD1] bg-[#FFFDD1] shadow-[4px_4px_0_0_#2C0834] active:translate-y-[2px] active:shadow-[2px_2px_0_0_#2C0834] rounded-none transition-all"
                   data-testid="button-copy-code"
                 >
                   {copied ? (
@@ -111,7 +111,7 @@ export default function Lobby() {
                 </Button>
               </div>
               <motion.p
-                className="text-xs text-[#31093A]/50 mt-3 font-pixel-text"
+                className="text-xs text-[#31093A] mt-3 font-pixel-text font-bold"
                 animate={{ opacity: [0.5, 1, 0.5] }}
                 transition={{ repeat: Infinity, duration: 2 }}
               >
@@ -311,25 +311,25 @@ export default function Lobby() {
             قواعد اللعبة
           </h3>
           <ul className="text-sm text-[#31093A]/80 space-y-2 font-pixel-text">
-            <li className="flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-[#31093A]/10 flex items-center justify-center text-[10px] font-bold">10</span>
-              جولات، كل جولة بحرف مختلف
+            <li className="flex items-center gap-3 p-2 bg-[#31093A]/5 border border-[#31093A]/10">
+              <span className="w-8 h-8 bg-[#31093A] text-[#F9D794] flex items-center justify-center text-sm font-bold border-2 border-[#2C0834] shadow-[2px_2px_0_0_#2C0834]">10</span>
+              <span className="font-bold">جولات مختلفة</span>
             </li>
-            <li className="flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-[#31093A]/10 flex items-center justify-center text-[10px] font-bold">45</span>
-              ثانية لكل جولة
+            <li className="flex items-center gap-3 p-2 bg-[#31093A]/5 border border-[#31093A]/10">
+              <span className="w-8 h-8 bg-[#31093A] text-[#F9D794] flex items-center justify-center text-sm font-bold border-2 border-[#2C0834] shadow-[2px_2px_0_0_#2C0834]">45</span>
+              <span className="font-bold">ثانية لكل جولة</span>
             </li>
-            <li className="flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-[#31093A]/10 flex items-center justify-center text-xs">🚌</span>
-              اضغط "أوتوبيس كومبليت" لو خلصت بدري
+            <li className="flex items-center gap-3 p-2 bg-[#31093A]/5 border border-[#31093A]/10">
+              <span className="w-8 h-8 bg-white border-2 border-[#2C0834] flex items-center justify-center text-sm shadow-[2px_2px_0_0_#2C0834]">🚌</span>
+              <span className="font-bold">اضغط "أوتوبيس كومبليت" لو خلصت!</span>
             </li>
-            <li className="flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-green-500/10 flex items-center justify-center text-[10px] font-bold text-green-600">20</span>
-              نقطة للإجابة الفريدة
+            <li className="flex items-center gap-3 p-2 bg-[#31093A]/5 border border-[#31093A]/10">
+              <span className="w-8 h-8 bg-green-500 text-white border-2 border-[#2C0834] flex items-center justify-center text-xs font-bold shadow-[2px_2px_0_0_#2C0834]">20</span>
+              <span className="font-bold text-green-700">نقطة للإجابة المميزة</span>
             </li>
-            <li className="flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-yellow-500/10 flex items-center justify-center text-[10px] font-bold text-yellow-600">10</span>
-              نقاط للإجابة المتكررة
+            <li className="flex items-center gap-3 p-2 bg-[#31093A]/5 border border-[#31093A]/10">
+              <span className="w-8 h-8 bg-yellow-400 text-[#2C0834] border-2 border-[#2C0834] flex items-center justify-center text-xs font-bold shadow-[2px_2px_0_0_#2C0834]">10</span>
+              <span className="font-bold text-yellow-700">نقاط للإجابة المكررة</span>
             </li>
           </ul>
         </RetroCard>

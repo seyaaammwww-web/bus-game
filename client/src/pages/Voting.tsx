@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ThumbsUp, ThumbsDown, User, Users, Globe, PawPrint, Box, CheckCircle, XCircle, Sparkles, LogOut } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, User, Users, Globe, PawPrint, Box, CheckCircle, XCircle, Sparkles, LogOut, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ReactionButtons, ReactionDisplay } from '@/components/Reactions';
 import { useGame } from '@/lib/gameContext';
@@ -92,7 +92,7 @@ export default function Voting() {
         </motion.div>
 
         <motion.div
-          className="flex items-center justify-center gap-3 mb-6 p-3 bg-white/10 rounded-2xl border-2 border-white/20"
+          className="flex items-center justify-center gap-2 mb-6 p-4 bg-[#FFFDD1] border-[3px] border-[#2C0834] shadow-[4px_4px_0_0_#2C0834]"
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
         >
@@ -104,19 +104,19 @@ export default function Voting() {
             return (
               <motion.div
                 key={cat}
-                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-lg ${isActive
-                  ? `bg-white scale-110`
+                className={`w-10 h-10 flex items-center justify-center transition-all border-2 border-[#2C0834] ${isActive
+                  ? `bg-[#31093A] text-white scale-110 shadow-[2px_2px_0_0_#F9D794]`
                   : isDone
-                    ? 'bg-[#31093A]/30'
-                    : 'bg-[#31093A]/10'
+                    ? 'bg-green-500 text-white'
+                    : 'bg-white text-[#31093A]/40'
                   }`}
                 animate={isActive ? { y: [0, -3, 0] } : {}}
                 transition={{ repeat: Infinity, duration: 1 }}
               >
                 {isDone ? (
-                  <CheckCircle className="w-5 h-5 text-green-500" />
+                  <Check className="w-5 h-5" />
                 ) : (
-                  <CatIcon className={`w-5 h-5 ${isActive ? 'text-[#31093A]' : 'text-white/40'}`} />
+                  <CatIcon className="w-5 h-5" />
                 )}
               </motion.div>
             );
@@ -167,11 +167,11 @@ export default function Voting() {
                     return (
                       <motion.div
                         key={submission.playerId}
-                        className={`rounded-xl p-4 border-2 transition-all ${voted
+                        className={`p-4 border-[3px] transition-all bg-white relative ${voted
                           ? isAccepted
-                            ? 'bg-green-500/10 border-green-500/30'
-                            : 'bg-red-500/10 border-red-500/30'
-                          : 'bg-[#31093A]/5 border-[#31093A]/5 hover:border-[#31093A]/10'
+                            ? 'border-green-600 bg-green-50'
+                            : 'border-red-600 bg-red-50'
+                          : 'border-[#31093A] shadow-[4px_4px_0_0_#31093A]'
                           }`}
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
@@ -179,13 +179,13 @@ export default function Voting() {
                       >
                         <div className="flex items-center justify-between mb-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-[#31093A]/10 flex items-center justify-center font-bold text-[#31093A] text-xs">
+                            <div className="w-8 h-8 bg-[#31093A] text-white flex items-center justify-center font-bold text-xs border-2 border-[#2C0834]">
                               {submission.playerName.charAt(0)}
                             </div>
-                            <span className="text-[10px] text-[#31093A]/50">{submission.playerName}</span>
+                            <span className="text-xs font-bold text-[#31093A]">{submission.playerName}</span>
                           </div>
                           <motion.span
-                            className="font-bold text-xl text-[#31093A]"
+                            className="font-bold text-xl text-[#31093A] font-pixel-title"
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             transition={{ type: 'spring', delay: 0.2 }}
@@ -198,7 +198,7 @@ export default function Voting() {
                           <div className="flex gap-2">
                             <Button
                               variant="outline"
-                              className="flex-1 h-12 border-2 border-green-500 text-green-600 hover:bg-green-500 hover:text-white text-sm font-bold"
+                              className="flex-1 h-12 border-[3px] border-green-600 text-green-700 hover:bg-green-600 hover:text-white text-sm font-bold rounded-none shadow-[2px_2px_0_0_#166534] active:translate-y-[2px] active:shadow-none transition-all"
                               onClick={() => handleVote(submission.playerId, true)}
                             >
                               <ThumbsUp className="w-4 h-4 ml-2" />
@@ -206,7 +206,7 @@ export default function Voting() {
                             </Button>
                             <Button
                               variant="outline"
-                              className="flex-1 h-12 border-2 border-red-500 text-red-600 hover:bg-red-500 hover:text-white text-sm font-bold"
+                              className="flex-1 h-12 border-[3px] border-red-600 text-red-700 hover:bg-red-600 hover:text-white text-sm font-bold rounded-none shadow-[2px_2px_0_0_#991b1b] active:translate-y-[2px] active:shadow-none transition-all"
                               onClick={() => handleVote(submission.playerId, false)}
                             >
                               <ThumbsDown className="w-4 h-4 ml-2" />
@@ -215,15 +215,15 @@ export default function Voting() {
                           </div>
                         ) : (
                           <motion.div
-                            className={`text-center py-2 rounded-lg font-bold flex items-center justify-center gap-2 text-xs ${isAccepted ? 'bg-green-500/20 text-green-600' : 'bg-red-500/20 text-red-600'
+                            className={`text-center py-2 font-bold flex items-center justify-center gap-2 text-sm border-2 ${isAccepted ? 'bg-green-100 text-green-700 border-green-600' : 'bg-red-100 text-red-700 border-red-600'
                               }`}
                             initial={{ scale: 0.8 }}
                             animate={{ scale: 1 }}
                           >
                             {isAccepted ? (
-                              <><CheckCircle className="w-4 h-4" /> صوّت بالقبول</>
+                              <><CheckCircle className="w-4 h-4" /> مقبولة</>
                             ) : (
-                              <><XCircle className="w-4 h-4" /> صوّت بالرفض</>
+                              <><XCircle className="w-4 h-4" /> مرفوضة</>
                             )}
                           </motion.div>
                         )}
