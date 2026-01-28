@@ -494,6 +494,6 @@ export default function Home() {
             BY MOHAMED SEYAM
           </p>
         </div>
-    </div >
-  );
+      </motion.div>
+      );
 }
