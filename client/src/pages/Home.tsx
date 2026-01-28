@@ -207,12 +207,12 @@ export default function Home() {
                   animate={{ scale: 1 }}
                   transition={{ type: 'spring', delay: 0.1 }}
                 >
-                  <CardTitle className="flex items-center gap-2 font-pixel-title text-3xl">
-                    <Plus className="w-5 h-5 text-primary" />
+                  <CardTitle className="flex items-center gap-2 font-pixel-title text-4xl">
+                    <Plus className="w-7 h-7 text-primary" />
                     غرفة جديدة
                   </CardTitle>
                 </motion.div>
-                <CardDescription className="font-pixel-text text-lg">أنشئ غرفة وادعي أصحابك</CardDescription>
+                <CardDescription className="font-pixel-text text-xl mt-2">أنشئ غرفة وادعي أصحابك</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <motion.div
@@ -220,14 +220,14 @@ export default function Home() {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <label className="text-lg font-bold mb-2 block font-pixel-text">اسمك</label>
+                  <label className="text-2xl font-bold mb-3 block font-pixel-text">اسمك</label>
                   <Input
                     type="text"
                     placeholder="اكتب اسمك هنا"
                     value={playerName}
                     onChange={(e) => setPlayerName(e.target.value)}
                     maxLength={20}
-                    className="h-14 text-lg font-pixel-text"
+                    className="h-16 text-xl font-pixel-text font-bold"
                     data-testid="input-player-name"
                   />
                 </motion.div>
@@ -286,12 +286,12 @@ export default function Home() {
                   animate={{ scale: 1 }}
                   transition={{ type: 'spring', delay: 0.1 }}
                 >
-                  <CardTitle className="flex items-center gap-2 font-pixel-title">
-                    <Users className="w-5 h-5 text-secondary" />
+                  <CardTitle className="flex items-center gap-2 font-pixel-title text-4xl">
+                    <Users className="w-7 h-7 text-secondary" />
                     انضم لغرفة
                   </CardTitle>
                 </motion.div>
-                <CardDescription className="font-pixel-text">اكتب كود الغرفة من صاحبك</CardDescription>
+                <CardDescription className="font-pixel-text text-xl mt-2">اكتب كود الغرفة من صاحبك</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <motion.div
@@ -299,14 +299,14 @@ export default function Home() {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <label className="text-sm font-medium mb-2 block">اسمك</label>
+                  <label className="text-2xl font-bold mb-3 block font-pixel-text">اسمك</label>
                   <Input
                     type="text"
                     placeholder="اكتب اسمك هنا"
                     value={playerName}
                     onChange={(e) => setPlayerName(e.target.value)}
                     maxLength={20}
-                    className="h-12 text-lg"
+                    className="h-16 text-xl font-pixel-text font-bold"
                     data-testid="input-player-name-join"
                   />
                 </motion.div>
@@ -315,14 +315,14 @@ export default function Home() {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.3 }}
                 >
-                  <label className="text-sm font-medium mb-2 block">كود الغرفة</label>
+                  <label className="text-2xl font-bold mb-3 block font-pixel-text">كود الغرفة</label>
                   <Input
                     type="text"
                     placeholder="XXXX"
                     value={roomCode}
                     onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
                     maxLength={4}
-                    className="text-center text-3xl tracking-widest font-bold h-16"
+                    className="text-center text-4xl tracking-widest font-bold h-16 font-pixel-text"
                     data-testid="input-room-code"
                   />
                 </motion.div>
@@ -334,7 +334,7 @@ export default function Home() {
                   whileTap={{ scale: 0.98 }}
                 >
                   <Button
-                    className="w-full h-14 text-lg font-bold bg-gradient-to-r from-secondary to-primary"
+                    className="w-full h-14 text-xl font-bold bg-gradient-to-r from-secondary to-primary font-pixel-text"
                     onClick={handleJoin}
                     disabled={playerName.trim().length < 2 || roomCode.length !== 4 || isLoading}
                     data-testid="button-join-confirm"
@@ -381,12 +381,12 @@ export default function Home() {
                   animate={{ scale: 1 }}
                   transition={{ type: 'spring', delay: 0.1 }}
                 >
-                  <CardTitle className="flex items-center gap-2 font-pixel-title">
-                    <Globe className="w-5 h-5 text-accent" />
+                  <CardTitle className="flex items-center gap-2 font-pixel-title text-4xl">
+                    <Globe className="w-7 h-7 text-accent" />
                     الغرفة العامة
                   </CardTitle>
                 </motion.div>
-                <CardDescription className="font-pixel-text">العب مع عائلتك وأصحابك في غرفة مشتركة</CardDescription>
+                <CardDescription className="font-pixel-text text-xl mt-2">العب مع عائلتك وأصحابك في غرفة مشتركة</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <motion.div
@@ -395,7 +395,7 @@ export default function Home() {
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <p className="text-sm text-muted-foreground mb-2 font-pixel-text">كود الغرفة العامة</p>
+                  <p className="text-xl text-muted-foreground mb-4 font-pixel-text font-bold">كود الغرفة العامة</p>
                   <motion.div
                     className="flex justify-center gap-2"
                     dir="ltr"
@@ -405,7 +405,7 @@ export default function Home() {
                     {PUBLIC_ROOM_CODE.split('').map((char, i) => (
                       <motion.span
                         key={i}
-                        className="w-12 h-14 bg-accent text-white flex items-center justify-center text-2xl font-bold rounded-lg shadow-lg"
+                        className="w-14 h-16 bg-accent text-white flex items-center justify-center text-3xl font-bold rounded-lg shadow-lg font-pixel-text"
                         initial={{ rotateY: 90, opacity: 0 }}
                         animate={{ rotateY: 0, opacity: 1 }}
                         transition={{ delay: 0.3 + i * 0.1 }}
@@ -420,14 +420,14 @@ export default function Home() {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.4 }}
                 >
-                  <label className="text-sm font-medium mb-2 block">اسمك</label>
+                  <label className="text-2xl font-bold mb-3 block font-pixel-text">اسمك</label>
                   <Input
                     type="text"
                     placeholder="اكتب اسمك هنا"
                     value={playerName}
                     onChange={(e) => setPlayerName(e.target.value)}
                     maxLength={20}
-                    className="h-12 text-lg"
+                    className="h-16 text-xl font-pixel-text font-bold"
                     data-testid="input-player-name-public"
                   />
                 </motion.div>
@@ -439,7 +439,7 @@ export default function Home() {
                   whileTap={{ scale: 0.98 }}
                 >
                   <Button
-                    className="w-full h-14 text-lg font-bold bg-gradient-to-r from-accent to-accent/80 shadow-lg"
+                    className="w-full h-14 text-xl font-bold bg-gradient-to-r from-accent to-accent/80 shadow-lg font-pixel-text"
                     onClick={handleJoinPublic}
                     disabled={playerName.trim().length < 2 || isLoading}
                     data-testid="button-join-public"
