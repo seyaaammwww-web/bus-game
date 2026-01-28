@@ -5,7 +5,7 @@ dotenv.config();
 
 const config = {
     apiKey: process.env.GEMINI_API_KEY || process.env.GEMINIAPIKEY,
-    modelName: process.env.GEMINI_MODEL_NAME || process.env.GEMINIMODEL || 'gemini-1.5-flash',
+    modelName: process.env.GEMINI_MODEL_NAME || process.env.GEMINIMODEL || 'gemini-3-flash-preview',
 };
 
 interface CacheEntry {
