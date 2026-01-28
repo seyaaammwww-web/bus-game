@@ -127,6 +127,27 @@
   --hero-piece-15: #FFFEE5;
 }
 
+/* P3 Color Space Support for Better Color Accuracy on Modern Displays */
+@supports (color: color(display-p3 1 1 1)) {
+  :root {
+    --hero-piece-1: color(display-p3 0.1889 0.0624 0.4576);
+    --hero-piece-2: color(display-p3 0.2802 0.062 0.558);
+    --hero-piece-3: color(display-p3 0.37 0.1073 0.6327);
+    --hero-piece-4: color(display-p3 0.4853 0.1469 0.6927);
+    --hero-piece-5: color(display-p3 0.5891 0.232 0.808);
+    --hero-piece-6: color(display-p3 0.888 0.312 0.648);
+    --hero-piece-7: color(display-p3 0.9569 0.4505 0.3725);
+    --hero-piece-8: color(display-p3 0.9765 0.5686 0.3647);
+    --hero-piece-9: color(display-p3 0.9843 0.651 0.451);
+    --hero-piece-10: color(display-p3 0.9922 0.7804 0.5765);
+    --hero-piece-11: color(display-p3 1 0.9095 0.6766);
+    --hero-piece-12: color(display-p3 1 0.9567 0.74);
+    --hero-piece-13: color(display-p3 1 0.9961 0.898);
+    --hero-piece-14: color(display-p3 1 0.9922 0.8196);
+    --hero-piece-15: color(display-p3 1 0.9961 0.898);
+  }
+}
+
 .dark {
   --button-outline: rgba(255, 255, 255, .10);
   --badge-outline: rgba(255, 255, 255, .05);
@@ -185,16 +206,26 @@
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply font-sans antialiased text-foreground;
     direction: rtl;
-    background-color: #2C0834;
+    background-color: hsl(var(--hero-piece-15));
     cursor: url(/assets/workos/cursor-normal.png) 28 26, auto;
     font-family: 'AraPix', 'Handjet', 'DogicaPixel', 'Cairo', sans-serif;
     letter-spacing: 1px;
   }
 
   /* Arabic Text Styling */
-  p, span, div, h1, h2, h3, h4, h5, h6, label, button {
+  p,
+  span,
+  div,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  label,
+  button {
     font-family: 'AraPix', 'Handjet', 'Cairo', sans-serif;
   }
 
@@ -488,25 +519,70 @@
   @apply text-destructive animate-pulse-warning;
 }
 
-/* Category icons */
+/* WorkOS Retro Card Styles */
+.retro-card {
+  background: #FFFDD1;
+  border: 3px solid #2C0834;
+  box-shadow: 4px 4px 0px 0px #2C0834;
+  border-radius: 0;
+}
+
+.retro-card-dark {
+  background: #2C0834;
+  border: 3px solid #FFFDD1;
+  box-shadow: 4px 4px 0px 0px #FFFDD1;
+  border-radius: 0;
+}
+
+/* Category Colors - WorkOS Theme */
+.category-boy {
+  background: linear-gradient(135deg, #6714A8, #871BB7);
+}
+
+.category-girl {
+  background: linear-gradient(135deg, #F640A8, #FF6957);
+}
+
+.category-country {
+  background: linear-gradient(135deg, #4E0994, #6714A8);
+}
+
+.category-animal {
+  background: linear-gradient(135deg, #FF8A50, #FFA168);
+}
+
+.category-thing {
+  background: linear-gradient(135deg, #871BB7, #A333D5);
+}
+
+/* Text Utilities */
+.text-on-light {
+  color: #2C0834;
+}
+
+.text-on-dark {
+  color: #FFFDD1;
+}
+
+/* Legacy category icons for backwards compatibility */
 .category-ولد {
-  @apply bg-blue-500;
+  background: linear-gradient(135deg, #6714A8, #871BB7);
 }
 
 .category-بنت {
-  @apply bg-pink-500;
+  background: linear-gradient(135deg, #F640A8, #FF6957);
 }
 
 .category-بلد {
-  @apply bg-green-500;
+  background: linear-gradient(135deg, #4E0994, #6714A8);
 }
 
 .category-حيوان {
-  @apply bg-amber-500;
+  background: linear-gradient(135deg, #FF8A50, #FFA168);
 }
 
 .category-جماد {
-  @apply bg-purple-500;
+  background: linear-gradient(135deg, #871BB7, #A333D5);
 }
 
 @layer utilities {

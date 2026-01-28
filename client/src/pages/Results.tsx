@@ -31,14 +31,14 @@ const categoryIcons: Record<Category, any> = {
 };
 
 const categoryColors: Record<Category, string> = {
-  'ولد': 'bg-blue-500',
-  'بنت': 'bg-pink-500',
-  'بلد': 'bg-green-500',
-  'حيوان': 'bg-amber-500',
-  'جماد': 'bg-purple-500',
+  'ولد': 'category-boy',
+  'بنت': 'category-girl',
+  'بلد': 'category-country',
+  'حيوان': 'category-animal',
+  'جماد': 'category-thing',
 };
 
-const rankColors = ['from-yellow-400 to-yellow-600', 'from-gray-300 to-gray-500', 'from-amber-500 to-amber-700'];
+const rankColors = ['bg-gradient-to-br from-[#FFE7A4] to-[#FFC48B]', 'bg-gradient-to-br from-[#E0DCF2] to-[#C0C0C0]', 'bg-gradient-to-br from-[#FF8A50] to-[#FFA168]'];
 const rankIcons = [Crown, Medal, Star];
 
 export default function Results() {

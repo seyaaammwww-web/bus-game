@@ -18,11 +18,11 @@ const categoryIcons: Record<Category, any> = {
 };
 
 const categoryColors: Record<Category, string> = {
-  'ولد': 'from-blue-500 to-blue-600',
-  'بنت': 'from-pink-500 to-pink-600',
-  'بلد': 'from-green-500 to-green-600',
-  'حيوان': 'from-amber-500 to-amber-600',
-  'جماد': 'from-purple-500 to-purple-600',
+  'ولد': 'category-boy',
+  'بنت': 'category-girl',
+  'بلد': 'category-country',
+  'حيوان': 'category-animal',
+  'جماد': 'category-thing',
 };
 
 export default function Voting() {
