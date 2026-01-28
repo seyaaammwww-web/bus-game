@@ -5,6 +5,7 @@ import { Users, Plus, ArrowLeft, Globe, Sparkles, Star, Heart } from 'lucide-rea
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { RetroCard } from '@/components/ui/RetroCard';
 import { useGame } from '@/lib/gameContext';
 import { resumeAudioContext } from '@/lib/sounds';
 import InstructionSlides from '@/components/InstructionSlides';
@@ -190,7 +191,7 @@ export default function Home() {
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
             className="w-full max-w-sm relative z-10"
           >
-            <Card className="border-2 shadow-xl">
+            <RetroCard className="shadow-xl">
               <CardHeader>
                 <Button
                   variant="ghost"
@@ -256,7 +257,7 @@ export default function Home() {
                   </Button>
                 </motion.div>
               </CardContent>
-            </Card>
+            </RetroCard>
           </motion.div>
         )}
 
@@ -269,7 +270,7 @@ export default function Home() {
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
             className="w-full max-w-sm relative z-10"
           >
-            <Card className="border-2 shadow-xl">
+            <RetroCard className="shadow-xl">
               <CardHeader>
                 <Button
                   variant="ghost"
@@ -351,7 +352,7 @@ export default function Home() {
                   </Button>
                 </motion.div>
               </CardContent>
-            </Card>
+            </RetroCard>
           </motion.div>
         )}
 
@@ -364,7 +365,7 @@ export default function Home() {
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
             className="w-full max-w-sm relative z-10"
           >
-            <Card className="border-2 border-accent/30 shadow-xl">
+            <RetroCard className="shadow-xl">
               <CardHeader>
                 <Button
                   variant="ghost"
@@ -456,7 +457,7 @@ export default function Home() {
                   </Button>
                 </motion.div>
               </CardContent>
-            </Card>
+            </RetroCard>
           </motion.div>
         )}
       </AnimatePresence>

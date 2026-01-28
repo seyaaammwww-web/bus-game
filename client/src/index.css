@@ -74,6 +74,23 @@
   --accent-border: hsl(from hsl(var(--accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
   --destructive-border: hsl(var(--destructive));
   --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+
+  /* WorkOS Hero Colors */
+  --hero-piece-1: #350D7A;
+  --hero-piece-2: #4E0994;
+  --hero-piece-3: #6714A8;
+  --hero-piece-4: #871BB7;
+  --hero-piece-5: #A333D5;
+  --hero-piece-6: #F640A8;
+  --hero-piece-7: #FF6957;
+  --hero-piece-8: #FF8A50;
+  --hero-piece-9: #FFA168;
+  --hero-piece-10: #FFC48B;
+  --hero-piece-11: #FFE7A4;
+  --hero-piece-12: #FFF3B6;
+  --hero-piece-13: #FFFEE2;
+  --hero-piece-14: #FFFDCC;
+  --hero-piece-15: #FFFEE5;
 }
 
 .dark {
@@ -136,6 +153,22 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
     direction: rtl;
+    background-color: var(--hero-piece-15);
+    cursor: url(/assets/workos/cursor-normal.png) 28 26, auto;
+  }
+
+  a:hover,
+  button:hover,
+  input:hover,
+  .clickable:hover {
+    cursor: url(/assets/workos/cursor-hover.png) 28 26, auto;
+  }
+
+  a:active,
+  button:active,
+  input:active,
+  .clickable:active {
+    cursor: url(/assets/workos/cursor-click.png) 28 26, auto;
   }
 }
 
@@ -455,5 +488,49 @@
   .border.active-elevate-2:not(.no-active-interaction-elevate)::after,
   .border.hover-elevate:not(.no-hover-interaction-elevate)::after {
     inset: -1px;
+  }
+}
+
+/* Retro Card Animations */
+.focus-arrows svg {
+  animation: giveaway-notice-arrow-animation 1s ease-in-out infinite;
+}
+
+@keyframes giveaway-notice-arrow-animation {
+
+  0%,
+  48% {
+    transform: translateY(0);
+  }
+
+  50%,
+  98% {
+    transform: translate(3px, 0);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+.focus-arrows>div:nth-child(2) svg {
+  animation-name: giveaway-notice-arrow-animation-reverse;
+  transform: rotate(180deg);
+}
+
+@keyframes giveaway-notice-arrow-animation-reverse {
+
+  0%,
+  48% {
+    transform: rotate(180deg) translateY(0);
+  }
+
+  50%,
+  98% {
+    transform: translate(-3px, 0) rotate(180deg);
+  }
+
+  to {
+    transform: translateY(0) rotate(180deg);
   }
 }
