@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Handjet:wght@100..900&display=swap');
 
 @font-face {
   font-family: 'DogicaPixel';
@@ -69,10 +67,10 @@
   --chart-4: 200 80% 55%;
   --chart-5: 280 70% 55%;
 
-  --font-sans: 'Cairo', 'IBM Plex Sans', sans-serif;
+  --font-sans: 'Handjet', 'Cairo', 'IBM Plex Sans', sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
-  --radius: .625rem;
+  --radius: 0;
   --shadow-2xs: 0px 2px 4px 0px rgba(0, 0, 0, 0.03);
   --shadow-xs: 0px 2px 6px 0px rgba(0, 0, 0, 0.05);
   --shadow-sm: 0px 2px 8px 0px rgba(0, 0, 0, 0.08);
@@ -179,20 +177,23 @@
     direction: rtl;
     background-color: var(--hero-piece-15);
     cursor: url(/assets/workos/cursor-normal.png) 28 26, auto;
-    font-family: 'DogicaPixel', 'Cairo', sans-serif;
+    font-family: 'Handjet', 'DogicaPixel', 'Cairo', sans-serif;
   }
 
   .font-pixel-title {
-    font-family: '04b03', sans-serif;
+    font-family: 'Handjet', '04b03', sans-serif;
+    font-weight: 800;
   }
 
   .font-pixel-text {
-    font-family: 'DogicaPixel', sans-serif;
+    font-family: 'Handjet', 'DogicaPixel', sans-serif;
+    font-weight: 600;
   }
 
   .font-pixel-button {
-    font-family: '04b03', sans-serif;
-    letter-spacing: -0.5px;
+    font-family: 'Handjet', '04b03', sans-serif;
+    letter-spacing: 0px;
+    font-weight: 700;
   }
 
   /* Make text on background clearer */
@@ -202,18 +203,12 @@
     color: white;
   }
 
-  a:hover,
-  button:hover,
-  input:hover,
-  .clickable:hover {
-    cursor: url(/assets/workos/cursor-hover.png) 28 26, auto;
-  }
-
-  a:active,
-  button:active,
-  input:active,
-  .clickable:active {
-    cursor: url(/assets/workos/cursor-click.png) 28 26, auto;
+  /* Force high z-index for custom cursor to appear over overlays */
+  a,
+  button,
+  input,
+  .clickable {
+    cursor: url(/assets/workos/cursor-hover.png) 28 26, auto !important;
   }
 }
 

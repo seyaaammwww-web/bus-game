@@ -138,7 +138,7 @@ export function RetroCard({ children, className, ...props }: React.HTMLAttribute
     return (
         <div
             className={cn(
-                "relative bg-[#FFFDD1] border-[3px] border-[#2C0834] p-8",
+                "relative bg-[#FFFDD1] border-[3px] border-[#2C0834] p-8 shadow-2xl backdrop-blur-sm",
                 className
             )}
             {...props}

@@ -30,17 +30,6 @@ export default function ArcadeBackground() {
                 <div style={{ height: 112, backgroundColor: 'var(--hero-piece-13)' }} />
                 <div style={{ height: '100%', backgroundColor: 'var(--hero-piece-13)' }} />
             </div>
-
-            {/* Floating elements from original ArcadeBackground preserved but simplified/adjusted slightly for new theme? 
-               User said: "Copy background... without ruining current progress"
-               The current progress had "Parallax Pixels". The new design is static colored bars + dots.
-               Maybe I should keep the pixels but make them subtle? 
-               The user said "copy from this code... animation in the background".
-               The new code has "grid-scroll" and some other animations but the bars are static.
-               The user might want the FEEL of the new code.
-               I will stick to the NEW design's background (bars + dots) as requested.
-               I will remove the old gradient and grid to match the "WorkOS" look precisely.
-           */}
         </div>
     );
 }

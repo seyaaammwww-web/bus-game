@@ -60,7 +60,7 @@ export default function Home() {
 
       {/* Large Floating Help Button */}
       <motion.button
-        className="fixed bottom-8 left-1/2 -translate-x-1/2 sm:left-auto sm:right-8 sm:translate-x-0 z-50 flex items-center gap-3 bg-[#FFFDD1] px-6 py-4 rounded-xl shadow-xl border-[3px] border-[#2C0834] hover:bg-[#FFFEF0] transition-all group overflow-hidden font-pixel-text"
+        className="fixed bottom-8 left-1/2 -translate-x-1/2 sm:left-auto sm:right-8 sm:translate-x-0 z-50 flex items-center gap-3 bg-[#FFFDD1] px-6 py-4 rounded-none shadow-[6px_6px_0px_0px_#2C0834] border-[3px] border-[#2C0834] hover:bg-[#FFFEF0] hover:translate-y-[-2px] hover:shadow-[8px_8px_0px_0px_#2C0834] active:translate-y-[2px] active:shadow-[2px_2px_0px_0px_#2C0834] transition-all group overflow-hidden font-pixel-text"
         whileHover={{ scale: 1.05, y: -5 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setShowHelp(true)}
@@ -466,7 +466,7 @@ export default function Home() {
         transition={{ delay: 0.6 }}
       >
         <motion.div
-          className="flex items-center justify-center gap-4 text-white font-pixel-text"
+          className="flex items-center justify-center gap-4 text-white font-pixel-text text-xl"
           animate={{ y: [0, -3, 0] }}
           transition={{ repeat: Infinity, duration: 2 }}
         >
