@@ -8,7 +8,7 @@ interface LetterDisplayProps {
 
 export function LetterDisplay({ letter, round, totalRounds }: LetterDisplayProps) {
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="flex flex-col items-center relative mb-4">
       <motion.div
         className="w-24 h-24 bg-[#FFFDD1] rounded-xl flex items-center justify-center shadow-xl border-[3px] border-[#2C0834]"
         initial={{ scale: 0, rotate: -180 }}
@@ -26,15 +26,12 @@ export function LetterDisplay({ letter, round, totalRounds }: LetterDisplayProps
       </motion.div>
 
       <motion.div
-        className="flex items-center gap-2 font-pixel-text"
+        className="absolute -bottom-3 bg-[#FFFDD1] text-[#31093A] px-3 py-1 rounded-none border-2 border-[#2C0834] font-bold text-xs shadow-[2px_2px_0_0_#2C0834] font-pixel-text whitespace-nowrap"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.4 }}
       >
-        <span className="text-white/80 text-xs">الجولة</span>
-        <span className="bg-[#FFFDD1] text-[#31093A] px-2 py-1 rounded-lg border-2 border-[#2C0834] font-bold text-xs">
-          {round} / {totalRounds}
-        </span>
+        جولة {round} / {totalRounds}
       </motion.div>
     </div>
   );

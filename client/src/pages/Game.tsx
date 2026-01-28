@@ -190,7 +190,7 @@ export default function Game() {
           >
             <LogOut className="w-5 h-5" />
           </Button>
-          <span className="text-[12px] text-white/80 font-pixel-text tracking-tight animate-pulse">BY MOHAMED SEYAM</span>
+
         </div>
 
         <motion.div
@@ -338,7 +338,7 @@ export default function Game() {
                         onKeyDown={(e) => handleKeyDown(category, e)}
                         disabled={hasSubmitted}
                         placeholder={category}
-                        className={`text-center text-lg h-12 border-[2px] border-[#2C0834]/20 focus:border-[#2C0834] focus:ring-0 focus:shadow-[2px_2px_0px_0px_#2C0834] transition-all font-pixel-text bg-white text-[#2C0834] placeholder:text-[#2C0834]/30 rounded-none ${hasSubmitted ? 'opacity-60 grayscale' : ''}`}
+                        className={`text-center text-lg h-12 border-[2px] border-[#2C0834]/20 focus:border-[#2C0834] focus:ring-0 focus:shadow-[2px_2px_0px_0px_#2C0834] transition-all font-pixel-text bg-white text-[#2C0834] placeholder:text-[#2C0834]/50 rounded-none ${hasSubmitted ? 'opacity-60 grayscale' : ''}`}
                         data-testid={`input-${category}`}
                       />
                     </div>
@@ -393,13 +393,12 @@ export default function Game() {
               <Send className="w-7 h-7 text-white" />
             </motion.div>
             <p className="font-pixel-title text-lg text-[#31093A] mb-1">تم الإرسال!</p>
-            <motion.p
-              className="text-xs text-[#31093A]/60 font-pixel-text"
-              animate={{ opacity: [0.5, 1, 0.5] }}
+            <p className="text-sm text-[#31093A] font-bold font-pixel-text"
+              animate={{ opacity: [0.8, 1, 0.8] }}
               transition={{ repeat: Infinity, duration: 2 }}
             >
               في انتظار باقي اللاعبين...
-            </motion.p>
+            </p>
           </motion.div>
         )}
 
@@ -410,6 +409,12 @@ export default function Game() {
 
       <ReactionDisplay />
       <Confetti active={room.phase === 'results' || room.phase === 'final'} />
+
+      <div className="fixed bottom-2 left-0 right-0 text-center z-0 pointer-events-none">
+        <p className="text-[10px] text-black/40 font-pixel-text font-bold">
+          BY MOHAMED SEYAM
+        </p>
+      </div>
     </motion.div>
   );
 }

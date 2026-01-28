@@ -75,7 +75,7 @@ export default function Lobby() {
         >
           <RetroCard className="mb-6">
             <div className="text-center">
-              <p className="text-sm text-[#31093A]/70 mb-2 font-pixel-text">كود الغرفة</p>
+              <p className="text-sm text-[#31093A] font-bold mb-2 font-pixel-text">كود الغرفة</p>
               <div className="flex items-center justify-center gap-3">
                 <motion.div
                   className="flex gap-1"
@@ -178,7 +178,7 @@ export default function Lobby() {
                   </div>
                   <div>
                     <p className="font-bold text-sm text-[#31093A]">الحكم (اختياري)</p>
-                    <p className="text-xs text-[#31093A]/70">
+                    <p className="text-xs text-[#31093A] font-medium">
                       {referee ? referee.name : 'اختر حكم للمباراة'}
                     </p>
                   </div>
@@ -281,7 +281,7 @@ export default function Lobby() {
                 <Check className="w-8 h-8 text-[#2C0834] mx-auto mb-2" />
               </motion.div>
               <p className="font-bold text-[#31093A] font-pixel-text">أنت جاهز!</p>
-              <p className="text-sm text-[#31093A]/60 font-pixel-text">في انتظار باقي اللاعبين...</p>
+              <p className="text-sm text-[#31093A] font-bold font-pixel-text">في انتظار باقي اللاعبين...</p>
             </motion.div>
           )}
 
@@ -310,7 +310,7 @@ export default function Lobby() {
             <Sparkles className="w-4 h-4 text-primary" />
             قواعد اللعبة
           </h3>
-          <ul className="text-sm text-[#31093A]/80 space-y-2 font-pixel-text">
+          <ul className="text-sm text-[#31093A] font-medium space-y-2 font-pixel-text">
             <li className="flex items-center gap-3 p-2 bg-[#31093A]/5 border border-[#31093A]/10">
               <span className="w-8 h-8 bg-[#31093A] text-[#F9D794] flex items-center justify-center text-sm font-bold border-2 border-[#2C0834] shadow-[2px_2px_0_0_#2C0834]">10</span>
               <span className="font-bold">جولات مختلفة</span>

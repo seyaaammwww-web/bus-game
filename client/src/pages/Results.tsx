@@ -244,7 +244,7 @@ export default function Results() {
                           <RankIcon className="w-5 h-5" />
                         </div>
                       ) : (
-                        <div className="w-10 h-10 rounded-lg bg-[#31093A]/10 flex items-center justify-center text-[#31093A]/50 font-bold text-lg">
+                        <div className="w-10 h-10 rounded-lg bg-[#31093A]/10 flex items-center justify-center text-[#31093A] font-bold text-lg">
                           {index + 1}
                         </div>
                       )}
@@ -287,7 +287,7 @@ export default function Results() {
                   <div className="flex items-center gap-3 p-2 rounded-lg bg-[#31093A]/5">
                     <Zap className="w-4 h-4 text-orange-500" />
                     <div className="flex-1">
-                      <p className="text-[10px] text-[#31093A]/60">الأسرع</p>
+                      <p className="text-[10px] text-[#31093A]/80 font-bold">الأسرع</p>
                       <p className="font-bold text-sm text-[#31093A]">{gameStats.fastestPlayer.name}</p>
                     </div>
                     <span className="text-[10px] bg-[#31093A]/10 px-2 py-1 rounded-full text-[#31093A]">{gameStats.fastestPlayer.fastSubmissions} مرة</span>
@@ -297,7 +297,7 @@ export default function Results() {
                   <div className="flex items-center gap-3 p-2 rounded-lg bg-[#31093A]/5">
                     <Star className="w-4 h-4 text-purple-500" />
                     <div className="flex-1">
-                      <p className="text-[10px] text-[#31093A]/60">الأكثر إبداعاً</p>
+                      <p className="text-[10px] text-[#31093A]/80 font-bold">الأكثر إبداعاً</p>
                       <p className="font-bold text-sm text-[#31093A]">{gameStats.mostUnique.name}</p>
                     </div>
                     <span className="text-[10px] bg-[#31093A]/10 px-2 py-1 rounded-full text-[#31093A]">{gameStats.mostUnique.uniqueAnswers} فريدة</span>
@@ -347,9 +347,9 @@ export default function Results() {
                         <table className="w-full text-[10px]">
                           <thead>
                             <tr className="border-b bg-[#31093A]/5">
-                              <th className="p-2 text-right text-[#31093A]/50">اللاعب</th>
-                              <th className="p-2 text-right text-[#31093A]/50">الكلمة</th>
-                              <th className="p-2 text-right text-[#31093A]/50">النتيجة</th>
+                              <th className="p-2 text-right text-[#31093A]/80 font-bold">اللاعب</th>
+                              <th className="p-2 text-right text-[#31093A]/80 font-bold">الكلمة</th>
+                              <th className="p-2 text-right text-[#31093A]/80 font-bold">النتيجة</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -397,7 +397,7 @@ export default function Results() {
                 key={countdown}
                 initial={{ scale: 1.5, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="w-8 h-8 bg-white text-[#2C0834] rounded-full flex items-center justify-center font-bold"
+                className="w-8 h-8 bg-white text-[#2C0834] rounded-full flex items-center justify-center font-bold shadow-md"
               >
                 {countdown}
               </motion.span>
