@@ -42,7 +42,7 @@ export class HybridValidator {
 
   private constructor() {
     const apiKey = process.env.GEMINI_API_KEY || process.env.GEMINIAPIKEY;
-    const modelName = process.env.GEMINI_MODEL_NAME || process.env.GEMINIMODEL || 'gemini-3-flash-preview';
+    const modelName = process.env.GEMINI_MODEL_NAME || process.env.GEMINIMODEL || 'gemini-1.5-flash';
 
     console.log(`[HybridValidator] API Key: ${apiKey ? 'Provided' : 'Missing'}`);
     console.log(`[HybridValidator] Model: ${modelName}`);
