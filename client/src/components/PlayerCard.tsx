@@ -98,11 +98,18 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
       {!showScore && (
         player.isReady ? (
           <motion.div
-            className="w-8 h-8 bg-accent rounded-full flex items-center justify-center"
-            animate={{ scale: [1, 1.1, 1] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+            className={cn(
+              "bg-[#FFFDD1] border-[3px] border-[#2C0834] p-4 flex items-center gap-4 relative transition-all duration-300",
+              "shadow-[4px_4px_0_0_#2C0834]",
+              "hover:shadow-[6px_6px_0_0_#2C0834] hover:translate-x-[-2px] hover:translate-y-[-2px]",
+              "before:absolute before:inset-[4px] before:border-[2px] before:border-[#2C0834]/10 before:pointer-events-none",
+              isCurrentPlayer && "bg-[#FFFEF0] border-[3px] shadow-[6px_6px_0_0_#2C0834] scale-105 z-10",
+              "overflow-hidden"
+            )}
           >
-            <Check className="w-5 h-5 text-accent-foreground" />
+            <div className="relative z-10 flex items-center gap-4 w-full">
+              <Check className="w-5 h-5 text-accent-foreground" />
+            </div>
           </motion.div>
         ) : (
           <motion.div

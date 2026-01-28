@@ -22,15 +22,18 @@ export default function ArcadeBackground() {
                 <div style={{ height: '200vh', backgroundColor: 'var(--hero-piece-15)' }} />
             </div>
 
-            {/* Dots Pattern Overlay */}
+            {/* Dots Pattern Overlay - Animated */}
             <div
-                className="absolute inset-0 z-10 bg-repeat-x opacity-30"
+                className="absolute inset-0 z-10 opacity-20 pointer-events-none"
                 style={{
-                    backgroundImage: 'url(/assets/workos/dots.png)',
-                    backgroundSize: '16px 1156px',
+                    backgroundImage: 'radial-gradient(#2C0834 2px, transparent 2px)',
+                    backgroundSize: '32px 32px',
                     imageRendering: 'pixelated',
                 }}
             />
+
+            {/* Scanline Effect - Optional for extra retro feel */}
+            <div className="absolute inset-0 z-10 pointer-events-none opacity-5 bg-[linear-gradient(transparent_50%,rgba(0,0,0,1)_50%)] bg-[length:100%_4px]" />
 
             {/* Subtle Dark Overlay for Better Text Contrast */}
             <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/10 z-20" />

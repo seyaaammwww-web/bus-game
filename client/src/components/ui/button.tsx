@@ -6,22 +6,22 @@ import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[4px] text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 transition-all font-pixel-button" +
-  " hover:translate-y-[-2px] active:translate-y-[0px]",
+  " hover:translate-y-[-2px] active:translate-y-[0px] active:scale-[0.98]",
   {
     variants: {
       variant: {
         default:
-          "bg-primary text-[#31093A] border-[3px] border-[#2C0834] shadow-[0_4px_0_0_#2C0834] active:shadow-none font-bold uppercase",
+          "bg-primary text-[#31093A] border-[3px] border-[#2C0834] shadow-[4px_4px_0_0_#2C0834] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] font-bold uppercase",
         destructive:
-          "bg-destructive text-[#FDF0C9] border-[3px] border-[#2C0834] shadow-[0_4px_0_0_#2C0834] active:shadow-none font-bold",
+          "bg-destructive text-[#FDF0C9] border-[3px] border-[#2C0834] shadow-[4px_4px_0_0_#2C0834] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] font-bold",
         outline:
-          "border-[3px] border-[#2C0834] bg-transparent text-[#2C0834] hover:bg-[#2C0834]/5 shadow-[0_4px_0_0_#2C0834] active:shadow-none font-bold",
+          "border-[3px] border-[#2C0834] bg-[#FFFDD1] text-[#2C0834] hover:bg-[#FFFEF0] shadow-[4px_4px_0_0_#2C0834] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] font-bold",
         secondary:
-          "bg-secondary text-[#31093A] border-[3px] border-[#2C0834] shadow-[0_4px_0_0_#2C0834] active:shadow-none font-bold",
+          "bg-secondary text-[#31093A] border-[3px] border-[#2C0834] shadow-[4px_4px_0_0_#2C0834] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] font-bold",
         ghost:
-          "hover:bg-[#2C0834]/5 text-[#31093A]",
+          "hover:bg-[#2C0834]/5 text-[#31093A] hover:border-[3px] hover:border-transparent",
         link: "text-[#31093A] underline-offset-4 hover:underline",
-        retro: "bg-[#FFFDD1] text-[#31093A] border-[3px] border-[#2C0834] shadow-[0_4px_0_0_#2C0834] active:shadow-none font-bold hover:bg-[#FFFEF0]",
+        retro: "bg-[#FFFDD1] text-[#31093A] border-[3px] border-[#2C0834] shadow-[4px_4px_0_0_#2C0834] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] font-bold hover:bg-[#FFFEF0]",
       },
       size: {
         default: "h-11 px-6 py-2",
