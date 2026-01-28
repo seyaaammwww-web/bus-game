@@ -11,6 +11,7 @@ import { RetroCard } from '@/components/ui/RetroCard';
 import { PixelAvatar } from '@/components/ui/PixelAvatar';
 import { RetroQuote } from '@/components/ui/RetroQuote';
 import { FloatingShapes } from '@/components/ui/FloatingShapes';
+import { LetterDisplay } from '@/components/LetterDisplay';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -200,15 +201,13 @@ export default function Results() {
             </>
           ) : (
             <>
-              <motion.div
-                className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 rounded-full mb-4"
-                animate={{ scale: [1, 1.05, 1] }}
-                transition={{ repeat: Infinity, duration: 2 }}
-              >
-                <Sparkles className="w-5 h-5 text-white" />
-                <span className="font-bold text-lg text-white font-pixel-text">نتائج الجولة {room.currentRound + 1}</span>
-              </motion.div>
-              <h1 className="text-4xl font-pixel-title mb-3 text-white font-bold">حرف: {currentRound?.letter}</h1>
+              <div className="flex justify-center mb-6">
+                <LetterDisplay
+                  letter={currentRound?.letter || '?'}
+                  round={room.currentRound + 1}
+                  totalRounds={room.totalRounds}
+                />
+              </div>
             </>
           )}
         </motion.div>

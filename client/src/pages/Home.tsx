@@ -63,23 +63,12 @@ export default function Home() {
 
       {/* Large Floating Help Button */}
       <motion.button
-        className="fixed bottom-8 left-1/2 -translate-x-1/2 sm:left-auto sm:right-8 sm:translate-x-0 z-50 flex items-center gap-3 bg-[#FFFDD1] px-8 py-5 rounded-none shadow-[6px_6px_0px_0px_#2C0834] border-[3px] border-[#2C0834] hover:bg-[#FFFEF0] hover:translate-y-[-2px] hover:shadow-[8px_8px_0px_0px_#2C0834] active:translate-y-[2px] active:shadow-[2px_2px_0px_0px_#2C0834] transition-all group overflow-hidden"
-        whileHover={{ scale: 1.05, y: -5 }}
-        whileTap={{ scale: 0.95 }}
+        className="fixed bottom-4 right-4 z-50 w-12 h-12 bg-[#FFFDD1] rounded-full flex items-center justify-center shadow-[4px_4px_0px_0px_#2C0834] border-[3px] border-[#2C0834] hover:bg-[#FFFEF0] hover:scale-110 active:scale-95 transition-all"
         onClick={() => setShowHelp(true)}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
       >
-        <div className="relative z-10 w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-          <HelpCircle className="w-6 h-6 text-primary" />
-        </div>
-        <div className="flex flex-col items-start leading-tight relative z-10">
-          <span className="text-sm text-muted-foreground font-bold font-pixel-text">إزاي تلعب؟</span>
-          <span className="text-lg font-bold text-[#31093A] font-pixel-text">شرح اللعبة 🎮</span>
-        </div>
-        <motion.span
-          className="absolute top-2 right-2 w-3 h-3 bg-red-500 rounded-full border-2 border-[#2C0834]"
-          animate={{ scale: [1, 1.3, 1] }}
-          transition={{ repeat: Infinity, duration: 1.5 }}
-        />
+        <span className="text-2xl font-bold text-[#2C0834] font-pixel-title">؟</span>
       </motion.button>
 
       <motion.div
@@ -132,11 +121,11 @@ export default function Home() {
               <Button
                 size="lg"
                 variant="default"
-                className="w-full h-16 text-xl tracking-wider font-pixel-text"
+                className="w-full h-20 text-3xl tracking-wider font-pixel-title"
                 onClick={() => setMode('public')}
                 data-testid="button-public-room"
               >
-                <Globe className="w-7 h-7 ml-3" />
+                <Globe className="w-8 h-8 ml-3" />
                 الغرفة العامة
                 <motion.span
                   className="mr-2 bg-[#31093A]/20 px-2 py-0.5 rounded text-sm font-pixel-text"
@@ -155,11 +144,11 @@ export default function Home() {
               <Button
                 size="lg"
                 variant="secondary"
-                className="w-full h-16 text-xl font-pixel-text"
+                className="w-full h-20 text-3xl font-pixel-title"
                 onClick={() => setMode('create')}
                 data-testid="button-create-room"
               >
-                <Plus className="w-6 h-6 ml-2" />
+                <Plus className="w-8 h-8 ml-2" />
                 غرفة جديدة
               </Button>
             </motion.div>
@@ -171,11 +160,11 @@ export default function Home() {
               <Button
                 size="lg"
                 variant="retro"
-                className="w-full h-16 text-xl font-pixel-text"
+                className="w-full h-20 text-3xl font-pixel-title"
                 onClick={() => setMode('join')}
                 data-testid="button-join-room"
               >
-                <Users className="w-6 h-6 ml-2" />
+                <Users className="w-8 h-8 ml-2" />
                 انضم لغرفة
               </Button>
             </motion.div>
@@ -220,14 +209,14 @@ export default function Home() {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <label className="text-2xl font-bold mb-3 block font-pixel-text">اسمك</label>
+                  <label className="text-3xl font-bold mb-3 block font-pixel-title">اسمك</label>
                   <Input
                     type="text"
                     placeholder="اكتب اسمك هنا"
                     value={playerName}
                     onChange={(e) => setPlayerName(e.target.value)}
                     maxLength={20}
-                    className="h-16 text-xl font-pixel-text font-bold"
+                    className="h-20 text-2xl font-pixel-text font-bold"
                     data-testid="input-player-name"
                   />
                 </motion.div>
@@ -239,7 +228,7 @@ export default function Home() {
                   whileTap={{ scale: 0.98 }}
                 >
                   <Button
-                    className="w-full h-14 text-xl font-bold bg-gradient-to-r from-primary to-secondary font-pixel-text"
+                    className="w-full h-20 text-3xl font-bold bg-gradient-to-r from-primary to-secondary font-pixel-title"
                     onClick={handleCreate}
                     disabled={playerName.trim().length < 2 || isLoading}
                     data-testid="button-create-confirm"
@@ -299,14 +288,14 @@ export default function Home() {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <label className="text-2xl font-bold mb-3 block font-pixel-text">اسمك</label>
+                  <label className="text-3xl font-bold mb-3 block font-pixel-title">اسمك</label>
                   <Input
                     type="text"
                     placeholder="اكتب اسمك هنا"
                     value={playerName}
                     onChange={(e) => setPlayerName(e.target.value)}
                     maxLength={20}
-                    className="h-16 text-xl font-pixel-text font-bold"
+                    className="h-20 text-2xl font-pixel-text font-bold"
                     data-testid="input-player-name-join"
                   />
                 </motion.div>
@@ -315,14 +304,14 @@ export default function Home() {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.3 }}
                 >
-                  <label className="text-2xl font-bold mb-3 block font-pixel-text">كود الغرفة</label>
+                  <label className="text-3xl font-bold mb-3 block font-pixel-title">كود الغرفة</label>
                   <Input
                     type="text"
                     placeholder="XXXX"
                     value={roomCode}
                     onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
                     maxLength={4}
-                    className="text-center text-4xl tracking-widest font-bold h-16 font-pixel-text"
+                    className="text-center text-5xl tracking-widest font-bold h-20 font-pixel-title"
                     data-testid="input-room-code"
                   />
                 </motion.div>

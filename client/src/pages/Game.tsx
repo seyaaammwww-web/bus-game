@@ -349,24 +349,7 @@ export default function Game() {
           </div>
         </div>
 
-        <div className="flex justify-center mt-6 mb-2">
-          <RetroCard className="py-3 px-6 w-auto inline-flex items-center gap-6 bg-[#2C0834] border-[#FFFDD1] text-white">
-            <span className="text-lg text-[#FFFDD1] font-bold font-pixel-text">التقدم</span>
-            <div className="flex gap-2">
-              {categories.map((cat, i) => (
-                <motion.div
-                  key={cat}
-                  className={`w-4 h-4 rounded-sm border border-[#FFFDD1]/20 ${answers[cat].trim() ? 'bg-[#ffc800] border-[#ffc800]' : 'bg-transparent'
-                    }`}
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: i * 0.05 }}
-                />
-              ))}
-            </div>
-            <span className="text-lg font-bold text-[#FFFDD1] font-pixel-title">{filledCount} / 5</span>
-          </RetroCard>
-        </div>
+
 
         {!hasSubmitted ? (
           <motion.div

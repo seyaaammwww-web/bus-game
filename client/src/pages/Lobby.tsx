@@ -64,8 +64,8 @@ export default function Lobby() {
             <Sparkles className="w-6 h-6 text-[#2C0834]" />
             <span className="font-bold text-lg text-[#31093A] font-pixel-text">غرفة الانتظار</span>
           </motion.div>
-          <h1 className="text-4xl font-pixel-title mb-3 text-white font-bold">في انتظار اللاعبين...</h1>
-          <p className="text-2xl text-[#FFFDD1] font-bold font-pixel-text">ادعي أصحابك وعيلتك!</p>
+          <h1 className="text-5xl font-pixel-title mb-3 text-white font-bold">في انتظار اللاعبين...</h1>
+          <p className="text-3xl text-[#FFFDD1] font-bold font-pixel-text">ادعي أصحابك وعيلتك!</p>
         </motion.div>
 
         <motion.div
