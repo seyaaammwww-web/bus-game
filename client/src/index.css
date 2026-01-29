@@ -183,10 +183,16 @@
     @apply font-sans antialiased text-foreground;
     direction: rtl;
     background-color: hsl(var(--hero-piece-15));
-    cursor: url(/assets/workos/cursor-normal.png) 28 26, auto;
     font-family: 'Pixelify Sans', sans-serif !important;
     font-weight: 700 !important;
     letter-spacing: 1px;
+  }
+
+  /* UNIVERSAL CURSOR - applies to ALL elements */
+  *,
+  *::before,
+  *::after {
+    cursor: url(/assets/workos/cursor-normal.png) 28 26, auto !important;
   }
 
   /* UNIVERSAL FONT OVERRIDE - Forces Pixelify Sans on ALL elements */
@@ -214,38 +220,30 @@
     image-rendering: crisp-edges;
   }
 
-  /* Custom Cursor System */
+  /* Custom Cursor for Interactive Elements */
   a,
   button,
   input,
+  textarea,
+  select,
   [role="button"],
-  .clickable {
-    cursor: url(/assets/workos/cursor-hover.png) 28 26, auto !important;
+  [role="link"],
+  [tabindex],
+  .clickable,
+  label {
+    cursor: url(/assets/workos/cursor-hover.png) 28 26, pointer !important;
   }
 
   a:active,
   button:active,
   input:active,
+  textarea:active,
+  select:active,
   [role="button"]:active,
-  .clickable:active {
-    cursor: url(/assets/workos/cursor-click.png) 28 26, auto !important;
-  }
-
-  /* Custom Cursor System */
-  a,
-  button,
-  input,
-  [role="button"],
-  .clickable {
-    cursor: url(/assets/workos/cursor-hover.png) 28 26, auto !important;
-  }
-
-  a:active,
-  button:active,
-  input:active,
-  [role="button"]:active,
-  .clickable:active {
-    cursor: url(/assets/workos/cursor-click.png) 28 26, auto !important;
+  [role="link"]:active,
+  .clickable:active,
+  label:active {
+    cursor: url(/assets/workos/cursor-click.png) 28 26, pointer !important;
   }
 
   /* Arabic Text Styling */
