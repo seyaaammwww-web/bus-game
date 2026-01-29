@@ -454,7 +454,7 @@ export default function Home() {
 
 
       <div className="fixed bottom-6 left-0 right-0 text-center">
-        <p className="text-[12px] text-black font-pixel-text tracking-tight animate-pulse font-bold">
+        <p className="text-[12px] text-white font-pixel-text tracking-tight animate-pulse font-bold">
           BY MOHAMED SEYAM
         </p>
       </div>

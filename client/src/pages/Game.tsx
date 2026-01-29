@@ -139,7 +139,7 @@ export default function Game() {
       <AnimatePresence>
         {showCountdown && (
           <motion.div
-            className="fixed inset-0 z-50 bg-background/90 flex flex-col items-center justify-center"
+            className="fixed inset-0 z-50 bg-[#0f0a1f]/95 flex flex-col items-center justify-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -151,49 +151,49 @@ export default function Game() {
               exit={{ scale: 0, opacity: 0 }}
             >
               <motion.div
-                className="w-32 h-32 bg-[#2C0834] rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl border-4 border-[#FFFDD1]"
-                animate={{ rotate: [0, 10, -10, 0] }}
+                className="w-40 h-40 bg-gradient-to-br from-[#7c3aed] to-[#4c1d95] rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-[0_0_60px_rgba(139,92,246,0.5)] border-4 border-white/20"
+                animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.05, 1] }}
                 transition={{ duration: 0.5, repeat: Infinity }}
               >
-                <span className="text-6xl font-pixel-title text-white">{letter}</span>
+                <span className="text-7xl font-pixel-title text-white drop-shadow-lg">{letter}</span>
               </motion.div>
-              <motion.p className="text-3xl text-[#FFFDD1] mb-4 font-pixel-text">
-                الجولة {room.currentRound + 1}
+              <motion.p className="text-4xl text-white mb-6 font-pixel-title">
+                الجولة {room.currentRound + 1} / {room.totalRounds}
               </motion.p>
               <motion.div
                 key={countdown}
                 initial={{ scale: 2, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0, opacity: 0 }}
-                className="text-8xl font-pixel-title text-white"
+                className="text-9xl font-pixel-title text-white drop-shadow-[0_0_30px_rgba(139,92,246,0.8)]"
               >
-                {countdown === 0 ? '!' : countdown}
+                {countdown === 0 ? 'ابدأ!' : countdown}
               </motion.div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <div className="max-w-4xl mx-auto relative z-10">
-        <div className="flex justify-between items-center mb-2">
+      <div className="max-w-5xl mx-auto relative z-10 px-4">
+        {/* Header Section */}
+        <motion.div
+          className="flex items-center justify-between mb-6"
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+        >
+          {/* Left - Exit Button */}
           <Button
             variant="ghost"
             size="icon"
             onClick={disconnect}
-            className="text-white hover:bg-white/10"
+            className="text-white/80 hover:bg-white/10 hover:text-white"
             data-testid="button-exit-game"
           >
             <LogOut className="w-5 h-5" />
           </Button>
 
-        </div>
-
-        <motion.div
-          className="flex items-center justify-between mb-4 gap-2"
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-        >
-          <div className="flex gap-2 items-center flex-1">
+          {/* Center - Letter Display */}
+          <div className="flex-1 flex justify-center">
             <LetterDisplay
               letter={letter}
               round={room.currentRound + 1}
@@ -201,12 +201,13 @@ export default function Game() {
             />
           </div>
 
-          <div className="flex flex-col items-end gap-1">
+          {/* Right - Timer and Streak */}
+          <div className="flex flex-col items-end gap-2">
             <Timer timeLeft={state.timeLeft} isRush={state.isRush} />
             {currentPlayer?.busStreak && currentPlayer.busStreak > 0 ? (
-              <div className="flex items-center gap-1 text-orange-400 font-bold text-xs animate-pulse">
-                <Flame className="w-3 h-3" />
-                Streak: {currentPlayer.busStreak}
+              <div className="flex items-center gap-1.5 bg-gradient-to-r from-orange-500 to-amber-500 px-3 py-1 rounded-full text-white font-bold text-sm shadow-lg">
+                <Flame className="w-4 h-4" />
+                <span className="font-pixel-text">×{currentPlayer.busStreak}</span>
               </div>
             ) : null}
           </div>
@@ -262,44 +263,44 @@ export default function Game() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[60] bg-[#2C0834]/95 backdrop-blur-xl flex flex-col items-center justify-center p-4 overflow-hidden"
+              className="fixed inset-0 z-[60] bg-[#0f0a1f]/98 backdrop-blur-xl flex flex-col items-center justify-center p-4 overflow-hidden"
             >
               <div className="relative z-10 flex flex-col items-center">
                 <motion.div
-                  className="relative w-32 h-32 mb-8 flex items-center justify-center"
+                  className="relative w-36 h-36 mb-8 flex items-center justify-center"
                   initial={{ scale: 0.8 }}
                   animate={{ scale: 1 }}
                   transition={{ repeat: Infinity, repeatType: "reverse", duration: 1.5 }}
                 >
-                  <div className="absolute inset-0 bg-white/20 rounded-full animate-ping opacity-20" />
-                  <div className="absolute inset-4 bg-gradient-to-tr from-primary/20 to-secondary/20 rounded-full blur-md" />
+                  <div className="absolute inset-0 bg-[#7c3aed]/30 rounded-full animate-ping opacity-30" />
+                  <div className="absolute inset-4 bg-gradient-to-tr from-[#7c3aed]/40 to-[#8b5cf6]/40 rounded-full blur-md" />
                   <motion.div
-                    className="relative z-10 w-20 h-20 bg-[#FFFDD1] rounded-2xl shadow-xl flex items-center justify-center border-4 border-[#2C0834]"
+                    className="relative z-10 w-24 h-24 bg-gradient-to-br from-white to-[#faf5ff] rounded-2xl shadow-[0_0_40px_rgba(139,92,246,0.4)] flex items-center justify-center border-4 border-[#4c1d95]"
                     animate={{ rotate: [0, 5, -5, 0] }}
                     transition={{ repeat: Infinity, duration: 2 }}
                   >
-                    <Sparkles className="w-10 h-10 text-[#2C0834]" />
+                    <Sparkles className="w-12 h-12 text-[#7c3aed]" />
                   </motion.div>
                 </motion.div>
 
                 <motion.h2
-                  className="text-4xl font-pixel-title text-white mb-2"
+                  className="text-5xl font-pixel-title text-white mb-4"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
                   جاري المراجعة...
                 </motion.h2>
 
-                <div className="h-6 overflow-hidden relative w-64 text-center">
+                <div className="h-8 overflow-hidden relative w-72 text-center">
                   <motion.div
-                    animate={{ y: [-24, 0, -24] }}
+                    animate={{ y: [-30, 0, -30] }}
                     transition={{ duration: 4, repeat: Infinity, times: [0, 0.2, 1] }}
-                    className="flex flex-col gap-2 font-pixel-text text-lg"
+                    className="flex flex-col gap-3 font-pixel-text text-xl"
                   >
-                    <span className="text-[#FFFDD1] font-bold">نتأكد من الإجابات... 🧐</span>
-                    <span className="text-[#FFFDD1] font-bold">نحسب النقاط... 🔢</span>
-                    <span className="text-[#FFFDD1] font-bold">نبحث عن الهبد... 🤔</span>
-                    <span className="text-[#FFFDD1] font-bold">نجهز النتائج... 🏆</span>
+                    <span className="text-[#e9d5ff] font-bold">نتأكد من الإجابات... 🧐</span>
+                    <span className="text-[#e9d5ff] font-bold">نحسب النقاط... 🔢</span>
+                    <span className="text-[#e9d5ff] font-bold">نبحث عن الهبد... 🤔</span>
+                    <span className="text-[#e9d5ff] font-bold">نجهز النتائج... 🏆</span>
                   </motion.div>
                 </div>
               </div>
@@ -351,6 +352,7 @@ export default function Game() {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.3 }}
+            className="mt-6"
           >
             <BusCompleteButton
               onPress={handleBusComplete}
@@ -361,17 +363,17 @@ export default function Game() {
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="text-center p-8 bg-[#FFFDD1] rounded-2xl border-[3px] border-[#2C0834] shadow-lg"
+            className="text-center p-8 mt-6 bg-gradient-to-b from-white to-[#faf5ff] rounded-2xl border-[3px] border-[#4c1d95] shadow-[4px_4px_0_0_#2e1065,_0_0_20px_rgba(139,92,246,0.2)]"
           >
             <motion.div
-              className="w-16 h-16 bg-[#2C0834] rounded-full flex items-center justify-center mx-auto mb-4"
+              className="w-16 h-16 bg-gradient-to-br from-[#7c3aed] to-[#4c1d95] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg"
               animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
               transition={{ repeat: Infinity, duration: 1.5 }}
             >
               <Send className="w-8 h-8 text-white" />
             </motion.div>
-            <p className="font-pixel-title text-2xl text-[#31093A] mb-2">تم الإرسال!</p>
-            <motion.p className="text-lg text-[#31093A] font-bold font-pixel-text"
+            <p className="font-pixel-title text-2xl text-[#4c1d95] mb-2">تم الإرسال!</p>
+            <motion.p className="text-lg text-[#7c3aed] font-bold font-pixel-text"
               animate={{ opacity: [0.8, 1, 0.8] }}
               transition={{ repeat: Infinity, duration: 2 }}
             >
@@ -389,7 +391,7 @@ export default function Game() {
       <Confetti active={room.phase === 'results' || room.phase === 'final'} />
 
       <div className="fixed bottom-2 left-0 right-0 text-center z-0 pointer-events-none">
-        <p className="text-[10px] text-black/40 font-pixel-text font-bold">
+        <p className="text-[10px] text-white/60 font-pixel-text font-bold">
           BY MOHAMED SEYAM
         </p>
       </div>

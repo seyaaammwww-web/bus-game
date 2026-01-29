@@ -44,7 +44,7 @@ export default function Lobby() {
           >
             <LogOut className="w-5 h-5" />
           </Button>
-          <span className="text-[12px] text-[#2C0834] font-pixel-text tracking-tight animate-pulse font-bold">BY MOHAMED SEYAM</span>
+          <span className="text-[12px] text-white font-pixel-text tracking-tight animate-pulse font-bold">BY MOHAMED SEYAM</span>
         </div>
 
         <motion.div
@@ -53,15 +53,15 @@ export default function Lobby() {
           animate={{ y: 0, opacity: 1 }}
         >
           <motion.div
-            className="inline-flex items-center gap-2 px-6 py-3 bg-[#FFFDD1] border-[3px] border-[#2C0834] rounded-full mb-4 shadow-[4px_4px_0_0_#2C0834]"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-white to-[#faf5ff] border-[3px] border-[#4c1d95] rounded-full mb-4 shadow-[4px_4px_0_0_#2e1065,_0_0_20px_rgba(139,92,246,0.2)]"
             animate={{ scale: [1, 1.05, 1] }}
             transition={{ repeat: Infinity, duration: 2 }}
           >
-            <Sparkles className="w-6 h-6 text-[#2C0834]" />
-            <span className="font-bold text-lg text-[#31093A] font-pixel-text">غرفة الانتظار</span>
+            <Sparkles className="w-6 h-6 text-[#7c3aed]" />
+            <span className="font-bold text-lg text-[#4c1d95] font-pixel-text">غرفة الانتظار</span>
           </motion.div>
           <h1 className="text-5xl font-pixel-title mb-3 text-white font-bold">في انتظار اللاعبين...</h1>
-          <p className="text-3xl text-[#FFFDD1] font-bold font-pixel-text">ادعي أصحابك وعيلتك!</p>
+          <p className="text-3xl text-[#e9d5ff] font-bold font-pixel-text">ادعي أصحابك وعيلتك!</p>
         </motion.div>
 
         <motion.div
@@ -83,7 +83,7 @@ export default function Lobby() {
                   {room.code.split('').map((char, i) => (
                     <motion.span
                       key={i}
-                      className="w-14 h-16 flex items-center justify-center text-3xl font-bold bg-[#31093A] text-[#F9D794] rounded-lg shadow-[4px_4px_0_0_#2C0834] border-2 border-[#2C0834] font-pixel-title"
+                      className="w-14 h-16 flex items-center justify-center text-3xl font-bold bg-[#4c1d95] text-white rounded-lg shadow-[4px_4px_0_0_#2e1065,_0_0_10px_rgba(139,92,246,0.3)] border-2 border-[#7c3aed] font-pixel-title"
                       initial={{ rotateY: 90 }}
                       animate={{ rotateY: 0 }}
                       transition={{ delay: 0.3 + i * 0.1 }}
@@ -96,7 +96,7 @@ export default function Lobby() {
                   variant="outline"
                   size="icon"
                   onClick={copyCode}
-                  className="h-16 w-16 border-[3px] border-[#2C0834] text-[#2C0834] hover:bg-[#2C0834] hover:text-[#FFFDD1] bg-[#FFFDD1] shadow-[4px_4px_0_0_#2C0834] active:translate-y-[2px] active:shadow-[2px_2px_0_0_#2C0834] rounded-none transition-all"
+                  className="h-16 w-16 border-[3px] border-[#4c1d95] text-[#4c1d95] hover:bg-[#4c1d95] hover:text-white bg-white shadow-[4px_4px_0_0_#2e1065] active:translate-y-[2px] active:shadow-[2px_2px_0_0_#4c1d95] rounded-none transition-all"
                   data-testid="button-copy-code"
                 >
                   {copied ? (
@@ -123,13 +123,13 @@ export default function Lobby() {
           transition={{ delay: 0.2 }}
         >
           <RetroCard className="mb-6">
-            <div className="flex flex-row items-center justify-between gap-2 pb-4 border-b-2 border-[#2C0834]/10 mb-3">
-              <h2 className="text-xl flex items-center gap-2 font-pixel-title text-[#31093A] font-bold">
-                <Users className="w-6 h-6 text-primary" />
+            <div className="flex flex-row items-center justify-between gap-2 pb-4 border-b-2 border-[#4c1d95]/10 mb-3">
+              <h2 className="text-xl flex items-center gap-2 font-pixel-title text-[#4c1d95] font-bold">
+                <Users className="w-6 h-6 text-[#7c3aed]" />
                 اللاعبين
               </h2>
               <motion.span
-                className="text-sm px-4 py-2 bg-[#31093A] text-[#F9D794] rounded-full font-bold border-2 border-[#2C0834] font-pixel-text text-lg"
+                className="text-sm px-4 py-2 bg-gradient-to-r from-[#7c3aed] to-[#8b5cf6] text-white rounded-full font-bold border-2 border-[#4c1d95] font-pixel-text text-lg shadow-[2px_2px_0_0_#2e1065]"
                 animate={{ scale: room.players.length >= 1 ? [1, 1.1, 1] : 1 }}
                 transition={{ repeat: room.players.length >= 1 ? Infinity : 0, duration: 1.5 }}
               >
@@ -166,15 +166,15 @@ export default function Lobby() {
             transition={{ delay: 0.25 }}
             className="mb-4"
           >
-            <RetroCard className="border-[3px] border-dashed !bg-[#FFFDD1]/80">
+            <RetroCard className="border-[3px] border-dashed">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#31093A]/10 flex items-center justify-center border-2 border-[#31093A]">
-                    <Shield className="w-5 h-5 text-[#31093A]" />
+                  <div className="w-12 h-12 rounded-full bg-[#7c3aed]/20 flex items-center justify-center border-2 border-[#4c1d95]">
+                    <Shield className="w-6 h-6 text-[#7c3aed]" />
                   </div>
                   <div>
-                    <p className="font-bold text-sm text-[#31093A]">الحكم (اختياري)</p>
-                    <p className="text-xs text-[#31093A] font-medium">
+                    <p className="font-bold text-lg text-[#4c1d95] font-pixel-text">الحكم (اختياري)</p>
+                    <p className="text-base text-[#7c3aed] font-bold font-pixel-text">
                       {referee ? referee.name : 'اختر حكم للمباراة'}
                     </p>
                   </div>
@@ -184,17 +184,17 @@ export default function Lobby() {
                     variant="ghost"
                     size="icon"
                     onClick={() => removeReferee()}
-                    className="text-[#31093A] hover:bg-red-100 hover:text-red-900"
+                    className="text-[#7c3aed] hover:bg-red-100 hover:text-red-900"
                     data-testid="button-remove-referee"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-5 h-5" />
                   </Button>
                 ) : (
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setShowRefereeSelect(true)}
-                    className="h-8 border-2"
+                    className="h-10 border-2 border-[#4c1d95] text-[#4c1d95] font-pixel-text font-bold text-base"
                     data-testid="button-choose-referee"
                   >
                     اختر حكم
@@ -208,27 +208,27 @@ export default function Lobby() {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    className="mt-4 pt-4 border-t-2 border-[#31093A]/10 overflow-hidden"
+                    className="mt-4 pt-4 border-t-2 border-[#4c1d95]/20 overflow-hidden"
                   >
-                    <p className="text-sm text-[#31093A]/70 mb-3 font-pixel-text">اختر واحد من اللاعبين:</p>
+                    <p className="text-base text-[#4c1d95] mb-3 font-pixel-text font-bold">اختر واحد من اللاعبين:</p>
                     <div className="grid grid-cols-2 gap-2">
                       {room.players.map((player) => (
                         <Button
                           key={player.id}
                           variant="outline"
-                          className="justify-start gap-2 h-10 border-2"
+                          className="justify-start gap-2 h-12 border-2 border-[#4c1d95] text-[#4c1d95] font-pixel-text font-bold"
                           onClick={() => handleSetReferee(player.id)}
                           data-testid={`button-select-referee-${player.id}`}
                         >
-                          {player.isHost && <Crown className="w-3 h-3 text-orange-500" />}
-                          <span className="truncate">{player.name}</span>
+                          {player.isHost && <Crown className="w-4 h-4 text-orange-500" />}
+                          <span className="truncate text-base">{player.name}</span>
                         </Button>
                       ))}
                     </div>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="w-full mt-2 text-[#31093A] hover:bg-[#31093A]/10"
+                      className="w-full mt-3 text-[#7c3aed] hover:bg-[#7c3aed]/10 font-pixel-text font-bold text-base"
                       onClick={() => setShowRefereeSelect(false)}
                     >
                       إلغاء
@@ -252,9 +252,9 @@ export default function Lobby() {
               whileTap={{ scale: 0.98 }}
             >
               <Button
-                variant="retro"
+                variant="primary"
                 size="lg"
-                className="w-full h-16 text-lg font-pixel-title bg-[#2C0834] text-[#F9D794] hover:bg-[#1C0524] border-[#F9D794]"
+                className="w-full h-16 text-xl font-pixel-title"
                 onClick={setReady}
                 data-testid="button-ready"
               >
@@ -266,7 +266,7 @@ export default function Lobby() {
 
           {currentPlayer?.isReady && !isHost && (
             <motion.div
-              className="text-center p-4 bg-[#FFFDD1] rounded-xl border-[3px] border-[#2C0834] shadow-[4px_4px_0_0_#2C0834]"
+              className="text-center p-4 bg-gradient-to-b from-white to-[#faf5ff] rounded-xl border-[3px] border-[#4c1d95] shadow-[4px_4px_0_0_#2e1065,_0_0_15px_rgba(139,92,246,0.2)]"
               animate={{ scale: [1, 1.02, 1] }}
               transition={{ repeat: Infinity, duration: 2 }}
             >
@@ -274,10 +274,10 @@ export default function Lobby() {
                 animate={{ rotate: [0, 10, -10, 0] }}
                 transition={{ repeat: Infinity, duration: 1 }}
               >
-                <Check className="w-8 h-8 text-[#2C0834] mx-auto mb-2" />
+                <Check className="w-8 h-8 text-[#7c3aed] mx-auto mb-2" />
               </motion.div>
-              <p className="font-bold text-[#31093A] font-pixel-text">أنت جاهز!</p>
-              <p className="text-sm text-[#31093A] font-bold font-pixel-text">في انتظار باقي اللاعبين...</p>
+              <p className="font-bold text-[#4c1d95] font-pixel-text">أنت جاهز!</p>
+              <p className="text-sm text-[#7c3aed] font-bold font-pixel-text">في انتظار باقي اللاعبين...</p>
             </motion.div>
           )}
 
@@ -300,35 +300,6 @@ export default function Lobby() {
             </motion.div>
           )}
         </motion.div>
-
-        <RetroCard className="mt-6">
-          <h3 className="font-bold mb-3 flex items-center gap-2 font-pixel-title text-[#31093A]">
-            <Sparkles className="w-4 h-4 text-primary" />
-            قواعد اللعبة
-          </h3>
-          <ul className="text-sm text-[#31093A] font-medium space-y-2 font-pixel-text">
-            <li className="flex items-center gap-3 p-2 bg-[#31093A]/5 border border-[#31093A]/10">
-              <span className="w-8 h-8 bg-[#31093A] text-[#F9D794] flex items-center justify-center text-sm font-bold border-2 border-[#2C0834] shadow-[2px_2px_0_0_#2C0834]">10</span>
-              <span className="font-bold">جولات مختلفة</span>
-            </li>
-            <li className="flex items-center gap-3 p-2 bg-[#31093A]/5 border border-[#31093A]/10">
-              <span className="w-8 h-8 bg-[#31093A] text-[#F9D794] flex items-center justify-center text-sm font-bold border-2 border-[#2C0834] shadow-[2px_2px_0_0_#2C0834]">45</span>
-              <span className="font-bold">ثانية لكل جولة</span>
-            </li>
-            <li className="flex items-center gap-3 p-2 bg-[#31093A]/5 border border-[#31093A]/10">
-              <span className="w-8 h-8 bg-white border-2 border-[#2C0834] flex items-center justify-center text-sm shadow-[2px_2px_0_0_#2C0834]">🚌</span>
-              <span className="font-bold">اضغط "أوتوبيس كومبليت" لو خلصت!</span>
-            </li>
-            <li className="flex items-center gap-3 p-2 bg-[#31093A]/5 border border-[#31093A]/10">
-              <span className="w-8 h-8 bg-green-500 text-white border-2 border-[#2C0834] flex items-center justify-center text-xs font-bold shadow-[2px_2px_0_0_#2C0834]">20</span>
-              <span className="font-bold text-green-700">نقطة للإجابة المميزة</span>
-            </li>
-            <li className="flex items-center gap-3 p-2 bg-[#31093A]/5 border border-[#31093A]/10">
-              <span className="w-8 h-8 bg-yellow-400 text-[#2C0834] border-2 border-[#2C0834] flex items-center justify-center text-xs font-bold shadow-[2px_2px_0_0_#2C0834]">10</span>
-              <span className="font-bold text-yellow-700">نقاط للإجابة المكررة</span>
-            </li>
-          </ul>
-        </RetroCard>
       </div>
     </div>
   );
