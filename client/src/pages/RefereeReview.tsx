@@ -75,7 +75,7 @@ export default function RefereeReview() {
           animate={{ y: 0, opacity: 1 }}
         >
           <motion.div
-            className="w-20 h-20 bg-[#2C0834] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl border-4 border-[#FFFDD1]"
+            className="w-20 h-20 bg-[#2e1065] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl border-4 border-[#FFFDD1]"
             animate={{ scale: [1, 1.05, 1] }}
             transition={{ repeat: Infinity, duration: 2 }}
           >
@@ -98,7 +98,7 @@ export default function RefereeReview() {
           className="mb-4"
         >
           <RetroCard className="mb-4">
-            <div className="flex items-center justify-between font-pixel-title text-[#31093A] mb-4">
+            <div className="flex items-center justify-between font-pixel-title text-[#4c1d95] mb-4">
               <span className="flex items-center gap-2">
                 <Shield className="w-5 h-5 text-accent" />
                 الجولة {room.currentRound + 1} - حرف {round.letter}
@@ -110,10 +110,10 @@ export default function RefereeReview() {
                 return (
                   <div key={category} className="space-y-3">
                     <div className="flex items-center gap-2 font-pixel-text">
-                      <div className={`w-8 h-8 ${categoryColors[category]} flex items-center justify-center border-2 border-[#2C0834] shadow-[2px_2px_0_0_#2C0834]`}>
+                      <div className={`w-8 h-8 ${categoryColors[category]} flex items-center justify-center border-2 border-[#2e1065] shadow-[2px_2px_0_0_#2e1065]`}>
                         <Icon className="w-4 h-4 text-white" />
                       </div>
-                      <span className="font-bold text-[#31093A] text-lg">{category}</span>
+                      <span className="font-bold text-[#4c1d95] text-lg">{category}</span>
                     </div>
 
                     <div className="grid gap-2">
@@ -129,17 +129,17 @@ export default function RefereeReview() {
                             key={submission.playerId}
                             className={`flex items-center justify-between p-3 border-[3px] transition-all font-pixel-text ${deducted
                               ? 'bg-red-500/10 border-red-500/50 opacity-60'
-                              : 'bg-white border-[#31093A] hover:shadow-[2px_2px_0_0_#2C0834]'
+                              : 'bg-white border-[#4c1d95] hover:shadow-[2px_2px_0_0_#2e1065]'
                               }`}
                             layout
                           >
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 bg-[#31093A] text-white flex items-center justify-center text-sm font-bold border-2 border-[#2C0834]">
+                              <div className="w-8 h-8 bg-[#4c1d95] text-white flex items-center justify-center text-sm font-bold border-2 border-[#2e1065]">
                                 {submission.playerName.charAt(0)}
                               </div>
                               <div>
-                                <p className="font-medium text-xs text-[#31093A]/70">{submission.playerName}</p>
-                                <p className={`text-base font-bold text-[#31093A] ${deducted ? 'line-through opacity-50' : ''}`}>
+                                <p className="font-medium text-xs text-[#4c1d95]/70">{submission.playerName}</p>
+                                <p className={`text-base font-bold text-[#4c1d95] ${deducted ? 'line-through opacity-50' : ''}`}>
                                   {answer}
                                 </p>
                               </div>
@@ -155,7 +155,7 @@ export default function RefereeReview() {
                                 <>
                                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${score === 20 ? 'bg-green-500/20 text-green-600' :
                                     score === 10 ? 'bg-yellow-500/20 text-yellow-600' :
-                                      'bg-gray-100 text-[#31093A]/40'
+                                      'bg-gray-100 text-[#4c1d95]/40'
                                     }`}>
                                     {score} نقطة
                                   </span>
@@ -165,7 +165,7 @@ export default function RefereeReview() {
                                       <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="h-7 w-7 rounded-none border-2 border-[#31093A]/20 hover:bg-[#31093A] hover:text-white"
+                                        className="h-7 w-7 rounded-none border-2 border-[#4c1d95]/20 hover:bg-[#4c1d95] hover:text-white"
                                         onClick={() => refereeToggleUnique(submission.playerId, category)}
                                       >
                                         <Users className="w-3 h-3" />
@@ -196,7 +196,7 @@ export default function RefereeReview() {
 
         {isReferee && (
           <Button
-            className="w-full h-14 text-lg font-bold bg-[#2C0834] text-white shadow-xl font-pixel-title hover:bg-[#31093A]"
+            className="w-full h-14 text-lg font-bold bg-[#2e1065] text-white shadow-xl font-pixel-title hover:bg-[#4c1d95]"
             onClick={refereeApprove}
             data-testid="button-referee-approve"
           >
@@ -216,3 +216,4 @@ export default function RefereeReview() {
     </div>
   );
 }
+

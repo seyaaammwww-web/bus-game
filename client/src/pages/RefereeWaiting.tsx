@@ -39,7 +39,7 @@ export default function RefereeWaiting() {
                     animate={{ y: 0, opacity: 1 }}
                 >
                     <motion.div
-                        className="w-24 h-24 bg-[#2C0834] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl border-4 border-[#FFFDD1]"
+                        className="w-24 h-24 bg-[#2e1065] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl border-4 border-[#FFFDD1]"
                         animate={{
                             scale: [1, 1.05, 1],
                             rotate: [0, 5, -5, 0]
@@ -64,9 +64,9 @@ export default function RefereeWaiting() {
                 >
                     <RetroCard className="mb-6">
                         <div className="flex items-center justify-between mb-4 font-pixel-text">
-                            <span className="text-[#31093A]/60">الجولة {room.currentRound + 1}</span>
+                            <span className="text-[#4c1d95]/60">الجولة {room.currentRound + 1}</span>
                             <motion.div
-                                className="w-14 h-14 bg-[#31093A] rounded-xl flex items-center justify-center shadow-lg"
+                                className="w-14 h-14 bg-[#4c1d95] rounded-xl flex items-center justify-center shadow-lg"
                                 animate={{ scale: [1, 1.1, 1] }}
                                 transition={{ repeat: Infinity, duration: 2 }}
                             >
@@ -76,18 +76,18 @@ export default function RefereeWaiting() {
 
                         <div className="space-y-4 font-pixel-text">
                             <div className="flex items-center justify-between text-xs">
-                                <span className="flex items-center gap-2 text-[#31093A]">
+                                <span className="flex items-center gap-2 text-[#4c1d95]">
                                     <Users className="w-4 h-4 text-primary" />
                                     اللاعبين المرسلين
                                 </span>
-                                <span className="font-bold text-[#31093A]">
+                                <span className="font-bold text-[#4c1d95]">
                                     {submittedCount} / {totalPlayers}
                                 </span>
                             </div>
 
-                            <div className="w-full bg-[#31093A]/10 rounded-full h-3 overflow-hidden">
+                            <div className="w-full bg-[#4c1d95]/10 rounded-full h-3 overflow-hidden">
                                 <motion.div
-                                    className="h-full bg-[#31093A] rounded-full"
+                                    className="h-full bg-[#4c1d95] rounded-full"
                                     initial={{ width: 0 }}
                                     animate={{ width: `${(submittedCount / totalPlayers) * 100}%` }}
                                     transition={{ duration: 0.5 }}
@@ -102,15 +102,15 @@ export default function RefereeWaiting() {
                                             key={player.id}
                                             className={`flex items-center gap-2 p-2 rounded-lg transition-all border-2 ${hasSubmitted
                                                 ? 'bg-green-500/10 border-green-500/30'
-                                                : 'bg-white/50 border-[#31093A]/5'
+                                                : 'bg-white/50 border-[#4c1d95]/5'
                                                 }`}
                                             animate={hasSubmitted ? { scale: [1, 1.05, 1] } : {}}
                                         >
-                                            <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${hasSubmitted ? 'bg-green-500 text-white' : 'bg-[#31093A]/10 text-[#31093A]/40'
+                                            <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${hasSubmitted ? 'bg-green-500 text-white' : 'bg-[#4c1d95]/10 text-[#4c1d95]/40'
                                                 }`}>
                                                 {hasSubmitted ? '✓' : player.name.charAt(0)}
                                             </div>
-                                            <span className={`text-[10px] ${hasSubmitted ? 'text-green-600 font-bold' : 'text-[#31093A]/50'}`}>
+                                            <span className={`text-[10px] ${hasSubmitted ? 'text-green-600 font-bold' : 'text-[#4c1d95]/50'}`}>
                                                 {player.name}
                                             </span>
                                         </motion.div>
@@ -154,3 +154,4 @@ export default function RefereeWaiting() {
         </div>
     );
 }
+

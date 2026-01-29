@@ -39,7 +39,7 @@ export function Timer({ timeLeft, isRush }: TimerProps) {
 
   return (
     <motion.div
-      className={`flex items-center justify-center gap-4 p-4 rounded-xl bg-[#FFFDD1] border-[3px] ${isDanger ? 'border-red-500' : isWarning ? 'border-orange-500' : 'border-[#2C0834]'
+      className={`flex items-center justify-center gap-4 p-4 rounded-xl bg-[#FFFDD1] border-[3px] ${isDanger ? 'border-red-500' : isWarning ? 'border-orange-500' : 'border-[#2e1065]'
         } shadow-lg relative overflow-hidden font-pixel-text`}
       initial={{ scale: 0.8, opacity: 0, rotate: -10 }}
       animate={{ scale: 1, opacity: 1, rotate: 0 }}
@@ -83,7 +83,7 @@ export function Timer({ timeLeft, isRush }: TimerProps) {
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.5, opacity: 0 }}
       >
-        <span className={`text-4xl font-pixel-title tabular-nums ${isDanger ? 'text-red-600' : isWarning ? 'text-orange-600' : 'text-[#31093A]'} relative z-10`}>
+        <span className={`text-4xl font-pixel-title tabular-nums ${isDanger ? 'text-red-600' : isWarning ? 'text-orange-600' : 'text-[#4c1d95]'} relative z-10`}>
           {String(timeLeft).padStart(2, '0')}
         </span>
         {isDanger && (
@@ -116,3 +116,4 @@ export function Timer({ timeLeft, isRush }: TimerProps) {
     </motion.div>
   );
 }
+
