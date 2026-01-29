@@ -1,0 +1,203 @@
+/* WorkOS Pixel Background Styles */
+
+/* Font Faces */
+@font-face {
+    font-family: 'BitFont';
+    src: url('/fonts/04b03/400.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Dogica';
+    src: url('/fonts/DogicaPixel/400.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Dogica';
+    src: url('/fonts/DogicaPixel/700.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+}
+
+/* WorkOS Background Container */
+.workos-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #2e1065;
+    /* Deep Purple */
+    z-index: -10;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+/* Stars */
+.workos-stars-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.workos-star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: white;
+    opacity: 0.8;
+    box-shadow: 0 0 4px white;
+    border-radius: 50%;
+}
+
+.workos-star.blink {
+    animation: workos-blink 2s infinite alternate;
+}
+
+@keyframes workos-blink {
+    from {
+        opacity: 0.2;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* Moon */
+.workos-moon {
+    position: absolute;
+    top: 8%;
+    right: 12%;
+    width: 100px;
+    image-rendering: pixelated;
+    animation: workos-float 6s ease-in-out infinite;
+    filter: drop-shadow(0 0 15px rgba(6, 182, 212, 0.6));
+    z-index: 5;
+}
+
+@keyframes workos-float {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-12px);
+    }
+}
+
+/* Clouds */
+.workos-clouds-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 3;
+    pointer-events: none;
+}
+
+.workos-cloud {
+    position: absolute;
+    image-rendering: pixelated;
+    opacity: 0.85;
+    will-change: transform;
+}
+
+.workos-cloud-1 {
+    top: 12%;
+    width: 80px;
+    animation: workos-moveClouds 50s linear infinite;
+}
+
+.workos-cloud-2 {
+    top: 25%;
+    width: 120px;
+    opacity: 0.7;
+    animation: workos-moveClouds 70s linear infinite;
+    animation-delay: -20s;
+}
+
+.workos-cloud-3 {
+    top: 18%;
+    width: 60px;
+    opacity: 0.5;
+    animation: workos-moveClouds 90s linear infinite;
+    animation-delay: -40s;
+}
+
+.workos-cloud-4 {
+    top: 35%;
+    width: 100px;
+    opacity: 0.6;
+    animation: workos-moveClouds 60s linear infinite reverse;
+}
+
+.workos-cloud-5 {
+    top: 45%;
+    width: 70px;
+    opacity: 0.4;
+    animation: workos-moveClouds 80s linear infinite;
+    animation-delay: -10s;
+}
+
+@keyframes workos-moveClouds {
+    from {
+        transform: translateX(100vw);
+    }
+
+    to {
+        transform: translateX(-150px);
+    }
+}
+
+/* Dots Overlay */
+.workos-dots-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('/images/hero/dots.png');
+    background-repeat: repeat;
+    opacity: 0.08;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Vignette Effect */
+.workos-vignette {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.5) 100%);
+    z-index: 8;
+    pointer-events: none;
+}
+
+/* Custom Cursor (Optional - apply to body) */
+.workos-cursor * {
+    cursor: url('/images/cursor-normal.png'), auto;
+}
+
+.workos-cursor a,
+.workos-cursor button,
+.workos-cursor [role="button"],
+.workos-cursor .clickable {
+    cursor: url('/images/cursor-hover.png'), pointer !important;
+}
+
+.workos-cursor a:active,
+.workos-cursor button:active {
+    cursor: url('/images/cursor-click.png'), pointer !important;
+}
