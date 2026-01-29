@@ -1,11 +1,14 @@
-/* Pixelify Sans - THICK blocky pixel font from Google Fonts */
+/* 🎮 UNIFIED THEME - Import first */
+@import './theme.css';
+
+/* Pixelify Sans - Fallback pixel font from Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* All fonts unified to Pixelify Sans - the BOLD pixel font */
+/* Theme loaded from theme.css */
 
 /* LIGHT MODE - Egyptian Fun Theme */
 :root {
