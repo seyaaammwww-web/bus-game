@@ -11,7 +11,7 @@ import { resumeAudioContext } from '@/lib/sounds';
 import InstructionSlides from '@/components/InstructionSlides';
 import { HelpCircle } from 'lucide-react';
 import { RetroQuote } from '@/components/ui/RetroQuote';
-import { MouseSparkles } from '@/components/MouseSparkles';
+
 
 
 const PUBLIC_ROOM_CODE = 'PLAY';
@@ -57,7 +57,6 @@ export default function Home() {
   // ... inside component
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden relative text-white">
-      <MouseSparkles />
 
       <InstructionSlides isOpen={showHelp} onClose={() => setShowHelp(false)} />
 
