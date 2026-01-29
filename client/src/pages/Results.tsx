@@ -349,55 +349,39 @@ export default function Results() {
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.3 }}
           >
-            <RetroCard className="mb-4">
-              <div className="flex items-center gap-2 mb-3 font-pixel-title text-[#4c1d95] text-base">
-                <div className="w-7 h-7 bg-gradient-to-br from-[#7c3aed] to-[#8b5cf6] rounded-lg flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-white" />
-                </div>
-                الإجابات
-              </div>
-              <div className="space-y-3">
-                {categories.map((category) => {
-                  const Icon = categoryIcons[category];
-                  const categorySubmissions = currentRound.submissions.map(s => ({
-                    playerId: s.playerId,
-                    playerName: s.playerName,
-                    answer: s.answers[category],
-                  })).filter(a => a.answer && a.answer.trim());
-                  return (
-                    <div key={category} className="border-[2px] rounded-lg bg-white/90 overflow-hidden border-[#4c1d95]/20">
-                      <div className={`flex items-center gap-2 px-3 py-2 ${categoryColors[category]}`}>
-                        <Icon className="w-4 h-4 text-white" />
-                        <span className="font-bold text-sm text-white">{category}</span>
-                      </div>
-                      <div className="p-2 space-y-1">
-                        {categorySubmissions.map((s, idx) => {
-                          const validation = currentRound.validatedAnswers.find(v => v.playerId === s.playerId && v.category === category);
-                          const isValid = validation?.isValid;
-                          const score = validation?.score || 0;
-                          const isMe = s.playerId === state.playerId;
-                          return (
-                            <div key={idx} className={`flex items-center justify-between p-2 rounded ${isValid ? 'bg-green-50' : 'bg-red-50'}`}>
-                              <div className="flex items-center gap-2 min-w-0 flex-1">
-                                <span className="text-xs text-[#4c1d95] truncate">{s.playerName}{isMe && ' (أنت)'}</span>
-                                <span className="text-sm font-bold text-[#4c1d95] truncate">{s.answer}</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <span className={`text-sm font-bold ${isValid ? 'text-green-600' : 'text-red-500'}`}>{isValid ? `+${score}` : '❌'}</span>
-                                {isReferee && (
-                                  <button onClick={() => refereeToggleUnique(s.playerId, category)} className="p-0.5">
-                                    <Star className={`w-3 h-3 ${validation?.isUnique ? 'fill-amber-400 text-amber-400' : 'text-[#4c1d95]/30'}`} />
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
+            <RetroCard className="mb-4 p-3">
+              <div className="text-[#4c1d95] text-sm font-bold mb-2">📝 الإجابات</div>
+              {categories.map((category) => {
+                const Icon = categoryIcons[category];
+                const categorySubmissions = currentRound.submissions.map(s => ({
+                  playerId: s.playerId,
+                  playerName: s.playerName,
+                  answer: s.answers[category],
+                })).filter(a => a.answer && a.answer.trim());
+
+                if (categorySubmissions.length === 0) return null;
+
+                return (
+                  <div key={category} className="mb-2 last:mb-0">
+                    <div className={`${categoryColors[category]} text-white text-xs px-2 py-1 rounded-t font-bold flex items-center gap-1`}>
+                      <Icon className="w-3 h-3" /> {category}
                     </div>
-                  );
-                })}
-              </div>
+                    <div className="bg-white/80 border border-[#4c1d95]/10 rounded-b text-xs">
+                      {categorySubmissions.map((s, idx) => {
+                        const validation = currentRound.validatedAnswers.find(v => v.playerId === s.playerId && v.category === category);
+                        const isValid = validation?.isValid;
+                        const score = validation?.score || 0;
+                        return (
+                          <div key={idx} className={`flex justify-between items-center px-2 py-1 border-b last:border-0 ${isValid ? 'bg-green-50' : 'bg-red-50'}`}>
+                            <span className="text-[#4c1d95]">{s.playerName}: <b>{s.answer}</b></span>
+                            <span className={isValid ? 'text-green-600 font-bold' : 'text-red-500'}>{isValid ? `+${score}` : '❌'}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
             </RetroCard>
           </motion.div>
         )}
