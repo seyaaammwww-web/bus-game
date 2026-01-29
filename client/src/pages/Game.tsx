@@ -309,7 +309,7 @@ export default function Game() {
         </AnimatePresence>
 
         <div className="w-full relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-2 md:gap-4">
             {currentCategories.map((category, i) => {
               const Icon = categoryIcons[category as Category] || Box;
               return (
@@ -317,15 +317,15 @@ export default function Game() {
                   key={category}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
+                  transition={{ delay: i * 0.05 }}
                   className="relative"
                 >
-                  <div className="bg-gradient-to-b from-white to-[#faf5ff] border-[3px] border-[#4c1d95] shadow-[4px_4px_0px_0px_#2e1065,_0_0_10px_rgba(139,92,246,0.1)] rounded-none overflow-hidden">
-                    <div className={`${categoryColors[category]} p-2 border-b-[3px] border-[#4c1d95] flex items-center justify-center gap-2`}>
-                      <Icon className="w-4 h-4 text-white" />
-                      <span className="font-bold text-white font-pixel-text text-lg">{category}</span>
+                  <div className="bg-gradient-to-b from-white to-[#faf5ff] border-2 md:border-[3px] border-[#4c1d95] shadow-[2px_2px_0px_0px_#2e1065] md:shadow-[4px_4px_0px_0px_#2e1065] rounded-none overflow-hidden">
+                    <div className={`${categoryColors[category]} py-1 md:p-2 border-b-2 md:border-b-[3px] border-[#4c1d95] flex items-center justify-center gap-1 md:gap-2`}>
+                      <Icon className="w-3 h-3 md:w-4 md:h-4 text-white" />
+                      <span className="font-bold text-white font-pixel-text text-sm md:text-lg">{category}</span>
                     </div>
-                    <div className="p-2 bg-gradient-to-b from-white to-[#faf5ff]">
+                    <div className="p-1.5 md:p-2 bg-gradient-to-b from-white to-[#faf5ff]">
                       <Input
                         ref={(el) => { inputRefs.current[category] = el; }}
                         type="text"
@@ -334,7 +334,7 @@ export default function Game() {
                         onKeyDown={(e) => handleKeyDown(category, e)}
                         disabled={hasSubmitted}
                         placeholder={category}
-                        className={`text-center text-xl h-14 border-[2px] border-[#4c1d95]/20 focus:border-[#8b5cf6] focus:ring-0 focus:shadow-[2px_2px_0px_0px_#4c1d95] transition-all font-pixel-text font-bold bg-white text-[#4c1d95] placeholder:text-[#8b5cf6]/50 rounded-none ${hasSubmitted ? 'opacity-60 grayscale' : ''}`}
+                        className={`text-center text-base md:text-xl h-10 md:h-14 border-2 border-[#4c1d95]/20 focus:border-[#8b5cf6] focus:ring-0 focus:shadow-[2px_2px_0px_0px_#4c1d95] transition-all font-pixel-text font-bold bg-white text-[#4c1d95] placeholder:text-[#8b5cf6]/50 rounded-none ${hasSubmitted ? 'opacity-60 grayscale' : ''}`}
                         data-testid={`input-${category}`}
                       />
                     </div>

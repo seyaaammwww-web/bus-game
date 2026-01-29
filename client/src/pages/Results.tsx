@@ -358,7 +358,7 @@ export default function Results() {
 
               {/* Table Container - Scrollable on mobile */}
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[400px]">
+                <table className="w-full text-[11px] md:text-sm">
                   {/* Table Header */}
                   <thead>
                     <tr className="bg-[#4c1d95]/10">
@@ -387,14 +387,13 @@ export default function Results() {
                       return (
                         <tr key={submission.playerId} className={`${playerIdx % 2 === 0 ? 'bg-white' : 'bg-[#faf5ff]'} hover:bg-[#f3e8ff] transition-colors`}>
                           {/* Player Name */}
-                          <td className="p-2 border-b border-[#4c1d95]/10">
-                            <div className="flex items-center gap-2">
-                              <div className="w-6 h-6 rounded-full bg-[#4c1d95] text-white flex items-center justify-center text-xs font-bold">
+                          <td className="p-1 md:p-2 border-b border-[#4c1d95]/10">
+                            <div className="flex items-center gap-1">
+                              <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-[#4c1d95] text-white flex items-center justify-center text-[10px] md:text-xs font-bold flex-shrink-0">
                                 {playerIdx + 1}
                               </div>
-                              <span className="font-bold text-[#4c1d95] text-sm truncate max-w-[60px]">
+                              <span className={`font-bold text-[10px] md:text-sm truncate max-w-[50px] md:max-w-[80px] ${submission.playerId === state.playerId ? 'text-[#7c3aed]' : 'text-[#4c1d95]'}`}>
                                 {submission.playerName}
-                                {submission.playerId === state.playerId && <span className="text-[#7c3aed]"> (أنت)</span>}
                               </span>
                             </div>
                           </td>
@@ -410,16 +409,16 @@ export default function Results() {
                             if (isValid) totalRoundScore += score;
 
                             return (
-                              <td key={cat} className={`p-2 text-center border-b border-[#4c1d95]/10 ${isValid ? 'bg-green-50' : answer ? 'bg-red-50' : ''}`}>
+                              <td key={cat} className={`p-1 md:p-2 text-center border-b border-[#4c1d95]/10 ${isValid ? 'bg-green-50' : answer ? 'bg-red-50' : ''}`}>
                                 {answer ? (
                                   <div className="flex flex-col items-center">
-                                    <span className="text-[#4c1d95] text-xs font-bold truncate max-w-[60px]">{answer}</span>
-                                    <span className={`text-xs font-bold ${isValid ? 'text-green-600' : 'text-red-500'}`}>
+                                    <span className="text-[#4c1d95] text-[10px] md:text-xs font-bold truncate max-w-[40px] md:max-w-[60px]">{answer}</span>
+                                    <span className={`text-[10px] font-bold ${isValid ? 'text-green-600' : 'text-red-500'}`}>
                                       {isValid ? `+${score}` : '✗'}
                                     </span>
                                   </div>
                                 ) : (
-                                  <span className="text-gray-300 text-lg">—</span>
+                                  <span className="text-gray-300">—</span>
                                 )}
                               </td>
                             );
