@@ -13,6 +13,8 @@ import { HelpCircle } from 'lucide-react';
 import ArcadeBackground from '@/components/ArcadeBackground';
 import { RetroQuote } from '@/components/ui/RetroQuote';
 import { FloatingShapes } from '@/components/ui/FloatingShapes';
+import { MouseSparkles } from '@/components/MouseSparkles';
+
 
 const PUBLIC_ROOM_CODE = 'PLAY';
 
@@ -59,6 +61,8 @@ export default function Home() {
     <div className="min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden relative text-white">
       <ArcadeBackground />
       <FloatingShapes />
+      <MouseSparkles />
+
       <InstructionSlides isOpen={showHelp} onClose={() => setShowHelp(false)} />
 
       {/* Large Floating Help Button */}

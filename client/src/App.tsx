@@ -12,6 +12,8 @@ import RefereeReview from "@/pages/RefereeReview";
 import RefereeWaiting from "@/pages/RefereeWaiting";
 import Results from "@/pages/Results";
 
+import DynamicPixelBackground from "@/components/DynamicPixelBackground";
+
 function GameRouter() {
   const { state, isReferee } = useGame();
 
@@ -45,6 +47,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
+        <DynamicPixelBackground />
         <GameProvider>
           <GameRouter />
         </GameProvider>

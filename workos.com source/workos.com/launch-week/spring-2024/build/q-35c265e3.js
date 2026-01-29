@@ -1,0 +1,1 @@
+import{l as u,q as l,_ as i}from"./q-3a477662.js";const s=.03,a=n=>{const t=u(),e=u(s),o=u(0);return l(()=>i(()=>import("./q-ff77ec13.js"),[]),"s_Ee1C0I5O1Qk",[e,t,n,o])},c=n=>{let t,e=s,o=0;return()=>{clearTimeout(o),t||(t=new Audio(n));const r=t.cloneNode(!0);e=Math.max(e-.01,s),r.volume=e,r.play(),r.remove(),o=window.setTimeout(()=>{e=s},1e3)}};export{s as V,c as i,a as u};
