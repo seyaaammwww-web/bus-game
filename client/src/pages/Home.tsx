@@ -76,7 +76,7 @@ export default function Home() {
         transition={{ type: 'spring', stiffness: 200 }}
         className="text-center mb-8 relative z-10"
       >
-        <div className="logo-container animate-slow-float logo-shine">
+        <div className="logo-container animate-slow-float">
           <img
             src="/assets/logo.png"
             alt="أوتوبيس كومبليت"
