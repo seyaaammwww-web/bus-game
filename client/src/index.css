@@ -573,20 +573,30 @@
   @apply text-destructive animate-pulse-warning;
 }
 
-/* WorkOS Retro Card Styles */
+/* WorkOS Retro Card Styles - Updated Purple Theme */
 .retro-card {
-  background: #FFFDD1;
-  border: 3px solid #2C0834;
-  box-shadow: 4px 4px 0px 0px #2C0834;
+  background: linear-gradient(to bottom, white, #faf5ff);
+  border: 3px solid #4c1d95;
+  box-shadow: 4px 4px 0px 0px #2e1065, 0 0 15px rgba(139, 92, 246, 0.1);
   border-radius: 0;
 }
 
-.retro-card-dark {
-  background: #2C0834;
-  border: 3px solid #FFFDD1;
-  box-shadow: 4px 4px 0px 0px #FFFDD1;
-  border-radius: 0;
+.retro-card:hover {
+  box-shadow: 6px 6px 0px 0px #4c1d95, 0 0 25px rgba(139, 92, 246, 0.2);
 }
+
+.retro-card-dark {
+  background: linear-gradient(to bottom, #2e1065, #1a0533);
+  border: 3px solid #8b5cf6;
+  box-shadow: 4px 4px 0px 0px #4c1d95, 0 0 15px rgba(139, 92, 246, 0.3);
+  border-radius: 0;
+  color: white;
+}
+
+.retro-card-dark:hover {
+  box-shadow: 6px 6px 0px 0px #7c3aed, 0 0 25px rgba(167, 139, 250, 0.4);
+}
+
 
 /* Category Colors - WorkOS Theme */
 .category-boy {
