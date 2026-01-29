@@ -2,7 +2,6 @@ import { motion } from 'framer-motion';
 import { Gavel, Timer, Users, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useGame } from '@/lib/gameContext';
-import ArcadeBackground from '@/components/ArcadeBackground';
 import { RetroCard } from '@/components/ui/RetroCard';
 
 export default function RefereeWaiting() {
@@ -20,7 +19,6 @@ export default function RefereeWaiting() {
 
     return (
         <div className="min-h-screen p-4 overflow-hidden relative text-white font-pixel-text">
-            <ArcadeBackground />
             <div className="max-w-lg mx-auto relative z-10">
                 <div className="flex justify-between items-center mb-6">
                     <Button

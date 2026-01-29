@@ -6,11 +6,9 @@ import { Confetti } from '@/components/Confetti';
 import { useGame } from '@/lib/gameContext';
 import { categories, type Category } from '@shared/schema';
 import { playSuccessSound, playCountdownSound, playBonusSound } from '@/lib/sounds';
-import ArcadeBackground from '@/components/ArcadeBackground';
 import { RetroCard } from '@/components/ui/RetroCard';
 import { PixelAvatar } from '@/components/ui/PixelAvatar';
 import { RetroQuote } from '@/components/ui/RetroQuote';
-import { FloatingShapes } from '@/components/ui/FloatingShapes';
 import { LetterDisplay } from '@/components/LetterDisplay';
 import {
   AlertDialog,
@@ -126,8 +124,6 @@ export default function Results() {
 
   return (
     <div className="min-h-screen p-4 overflow-hidden relative text-white font-pixel-text">
-      <ArcadeBackground />
-      <FloatingShapes />
       <Confetti active={isFinal} />
 
       <div className="max-w-3xl mx-auto relative z-10">

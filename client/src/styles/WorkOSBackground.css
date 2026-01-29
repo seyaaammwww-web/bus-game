@@ -218,6 +218,16 @@
     }
 }
 
+/* Random Cloud - Used for dynamically generated clouds */
+.workos-cloud-random {
+    position: absolute;
+    image-rendering: pixelated;
+    will-change: transform;
+    left: -200px;
+    filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.2));
+    animation: workos-cloud-drift linear infinite;
+}
+
 /* Vignette Effect - Softer */
 .workos-vignette {
     position: absolute;

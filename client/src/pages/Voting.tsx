@@ -6,7 +6,6 @@ import { ReactionButtons, ReactionDisplay } from '@/components/Reactions';
 import { useGame } from '@/lib/gameContext';
 import { categories, type Category } from '@shared/schema';
 import { playVoteSound } from '@/lib/sounds';
-import ArcadeBackground from '@/components/ArcadeBackground';
 import { RetroCard } from '@/components/ui/RetroCard';
 
 const categoryIcons: Record<Category, any> = {
@@ -59,7 +58,6 @@ export default function Voting() {
 
   return (
     <div className="min-h-screen p-4 overflow-hidden relative text-white font-pixel-text">
-      <ArcadeBackground />
       <div className="max-w-2xl mx-auto relative z-10">
         <div className="flex justify-between items-center mb-4">
           <Button

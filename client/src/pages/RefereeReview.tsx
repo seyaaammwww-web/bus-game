@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useGame } from '@/lib/gameContext';
 import { categories, type Category } from '@shared/schema';
-import ArcadeBackground from '@/components/ArcadeBackground';
 import { RetroCard } from '@/components/ui/RetroCard';
 
 const categoryIcons: Record<Category, any> = {
@@ -49,7 +48,6 @@ export default function RefereeReview() {
   if (!round) {
     return (
       <div className="min-h-screen flex items-center justify-center font-pixel-text text-white">
-        <ArcadeBackground />
         <p className="relative z-10 text-white animate-pulse">جاري التحميل...</p>
       </div>
     );
@@ -57,7 +55,6 @@ export default function RefereeReview() {
 
   return (
     <div className="min-h-screen p-4 overflow-hidden relative text-white font-pixel-text">
-      <ArcadeBackground />
       <div className="max-w-lg mx-auto relative z-10">
         <div className="flex justify-between items-center mb-4">
           <Button

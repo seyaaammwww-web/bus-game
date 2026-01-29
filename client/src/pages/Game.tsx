@@ -17,10 +17,7 @@ import { AlertTriangle, Send, User, Users, Globe, PawPrint, Box, LogOut, Zap, Ey
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { playCountdownSound, playCountdownFinalSound, playRoundStart, playBusSound, playFreezeSound, playWildcardSound, playBanishSound, playSubmitSound, playClickSound, playRushActivateSound, playBonusSound } from '@/lib/sounds';
-import ArcadeBackground from '@/components/ArcadeBackground';
-
 import { RetroCard } from '@/components/ui/RetroCard';
-import { FloatingShapes } from '@/components/ui/FloatingShapes';
 
 const categoryIcons: Record<Category, any> = {
   'ولد': User,
@@ -139,8 +136,6 @@ export default function Game() {
     <motion.div
       className={`min-h-screen p-3 overflow-hidden relative text-white font-pixel-text ${shake ? 'animate-shake' : ''}`}
     >
-      <ArcadeBackground />
-      <FloatingShapes />
       <AnimatePresence>
         {showCountdown && (
           <motion.div
@@ -324,12 +319,12 @@ export default function Game() {
                   transition={{ delay: i * 0.1 }}
                   className="relative"
                 >
-                  <div className="bg-[#FFFDD1] border-[3px] border-[#2C0834] shadow-[4px_4px_0px_0px_#2C0834] rounded-none overflow-hidden">
-                    <div className={`${categoryColors[category]} p-2 border-b-[3px] border-[#2C0834] flex items-center justify-center gap-2`}>
+                  <div className="bg-gradient-to-b from-white to-[#faf5ff] border-[3px] border-[#4c1d95] shadow-[4px_4px_0px_0px_#2e1065,_0_0_10px_rgba(139,92,246,0.1)] rounded-none overflow-hidden">
+                    <div className={`${categoryColors[category]} p-2 border-b-[3px] border-[#4c1d95] flex items-center justify-center gap-2`}>
                       <Icon className="w-4 h-4 text-white" />
                       <span className="font-bold text-white font-pixel-text text-lg">{category}</span>
                     </div>
-                    <div className="p-2 bg-[#FFFDD1]">
+                    <div className="p-2 bg-gradient-to-b from-white to-[#faf5ff]">
                       <Input
                         ref={(el) => { inputRefs.current[category] = el; }}
                         type="text"
@@ -338,7 +333,7 @@ export default function Game() {
                         onKeyDown={(e) => handleKeyDown(category, e)}
                         disabled={hasSubmitted}
                         placeholder={category}
-                        className={`text-center text-xl h-14 border-[2px] border-[#2C0834]/20 focus:border-[#2C0834] focus:ring-0 focus:shadow-[2px_2px_0px_0px_#2C0834] transition-all font-pixel-text font-bold bg-white text-[#2C0834] placeholder:text-[#2C0834]/50 rounded-none ${hasSubmitted ? 'opacity-60 grayscale' : ''}`}
+                        className={`text-center text-xl h-14 border-[2px] border-[#4c1d95]/20 focus:border-[#8b5cf6] focus:ring-0 focus:shadow-[2px_2px_0px_0px_#4c1d95] transition-all font-pixel-text font-bold bg-white text-[#4c1d95] placeholder:text-[#8b5cf6]/50 rounded-none ${hasSubmitted ? 'opacity-60 grayscale' : ''}`}
                         data-testid={`input-${category}`}
                       />
                     </div>

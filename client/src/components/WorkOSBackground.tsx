@@ -19,18 +19,20 @@ interface MicroDot {
     duration: number;
 }
 
+interface Cloud {
+    id: number;
+    src: string;
+    top: number;
+    width: number;
+    opacity: number;
+    duration: number;
+    delay: number;
+}
+
 // Purple gradient colors for artistic effect
 const purpleGradient = [
-    '#7c3aed', // vibrant purple
-    '#8b5cf6', // light purple
-    '#a78bfa', // lavender
-    '#c4b5fd', // soft lavender
-    '#6d28d9', // deep purple
-    '#5b21b6', // darker purple
-    '#4c1d95', // very dark purple
-    '#e9d5ff', // pale purple
-    '#06b6d4', // cyan accent
-    '#22d3ee', // light cyan
+    '#7c3aed', '#8b5cf6', '#a78bfa', '#c4b5fd', '#6d28d9',
+    '#5b21b6', '#4c1d95', '#e9d5ff', '#06b6d4', '#22d3ee',
 ];
 
 const WorkOSBackground: React.FC = () => {
@@ -58,9 +60,32 @@ const WorkOSBackground: React.FC = () => {
                 top: Math.random() * 100,
                 left: Math.random() * 100,
                 delay: Math.random() * 5,
-                size: Math.random() * 2 + 1, // 1-3px
+                size: Math.random() * 2 + 1,
                 color: purpleGradient[Math.floor(Math.random() * purpleGradient.length)],
-                duration: Math.random() * 3 + 2, // 2-5s
+                duration: Math.random() * 3 + 2,
+            });
+        }
+        return generated;
+    }, []);
+
+    // Generate clouds with RANDOM positions, speeds, and delays
+    const clouds = useMemo(() => {
+        const cloudImages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+        const generated: Cloud[] = [];
+
+        // Create 8-10 clouds with random properties
+        const numClouds = 8 + Math.floor(Math.random() * 3);
+
+        for (let i = 0; i < numClouds; i++) {
+            const cloudNum = cloudImages[Math.floor(Math.random() * cloudImages.length)];
+            generated.push({
+                id: i,
+                src: `/images/hero/clouds/${cloudNum}.png`,
+                top: 5 + Math.random() * 50, // Random vertical position 5-55%
+                width: 100 + Math.random() * 150, // Random size 100-250px
+                opacity: 0.4 + Math.random() * 0.5, // Random opacity 0.4-0.9
+                duration: 40 + Math.random() * 60, // Random speed 40-100s
+                delay: -Math.random() * 50, // Random start position
             });
         }
         return generated;
@@ -115,13 +140,23 @@ const WorkOSBackground: React.FC = () => {
                 className="workos-moon"
             />
 
-            {/* Clouds Layer */}
+            {/* Clouds Layer - RANDOMIZED */}
             <div className="workos-clouds-container">
-                <img src="/images/hero/clouds/1.png" className="workos-cloud workos-cloud-1" alt="" />
-                <img src="/images/hero/clouds/2.png" className="workos-cloud workos-cloud-2" alt="" />
-                <img src="/images/hero/clouds/3.png" className="workos-cloud workos-cloud-3" alt="" />
-                <img src="/images/hero/clouds/4.png" className="workos-cloud workos-cloud-4" alt="" />
-                <img src="/images/hero/clouds/5.png" className="workos-cloud workos-cloud-5" alt="" />
+                {clouds.map((cloud) => (
+                    <img
+                        key={`cloud-${cloud.id}`}
+                        src={cloud.src}
+                        alt=""
+                        className="workos-cloud-random"
+                        style={{
+                            top: `${cloud.top}%`,
+                            width: cloud.width,
+                            opacity: cloud.opacity,
+                            animationDuration: `${cloud.duration}s`,
+                            animationDelay: `${cloud.delay}s`,
+                        }}
+                    />
+                ))}
             </div>
 
             {/* Vignette */}

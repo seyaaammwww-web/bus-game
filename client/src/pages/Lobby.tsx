@@ -7,9 +7,7 @@ import { Label } from '@/components/ui/label';
 import { categories } from '@shared/schema';
 import { PlayerCard } from '@/components/PlayerCard';
 import { useGame } from '@/lib/gameContext';
-import ArcadeBackground from '@/components/ArcadeBackground';
 import { RetroCard } from '@/components/ui/RetroCard';
-import { FloatingShapes } from '@/components/ui/FloatingShapes';
 
 export default function Lobby() {
   const { state, currentPlayer, isHost, setReady, startGame, setReferee, removeReferee, referee, disconnect, updateSettings } = useGame();
@@ -35,8 +33,6 @@ export default function Lobby() {
 
   return (
     <div className="min-h-screen p-4 overflow-hidden relative text-white font-pixel-text">
-      <ArcadeBackground />
-      <FloatingShapes />
       <div className="max-w-2xl mx-auto relative z-10">
         <div className="flex justify-between items-center mb-4">
           <Button
