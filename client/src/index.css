@@ -179,6 +179,13 @@
     @apply border-border;
   }
 
+  /* UNIVERSAL CURSOR - applies to html and body first */
+  html {
+    cursor: url(/assets/workos/cursor-normal.png) 28 26, auto !important;
+    min-height: 100%;
+    height: 100%;
+  }
+
   body {
     @apply font-sans antialiased text-foreground;
     direction: rtl;
@@ -186,6 +193,10 @@
     font-family: 'Pixelify Sans', sans-serif !important;
     font-weight: 700 !important;
     letter-spacing: 1px;
+    cursor: url(/assets/workos/cursor-normal.png) 28 26, auto !important;
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
   }
 
   /* UNIVERSAL CURSOR - applies to ALL elements */
