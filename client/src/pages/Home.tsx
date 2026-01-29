@@ -63,12 +63,12 @@ export default function Home() {
 
       {/* Large Floating Help Button */}
       <motion.button
-        className="fixed bottom-4 right-4 z-50 w-12 h-12 bg-[#FFFDD1] rounded-full flex items-center justify-center shadow-[4px_4px_0px_0px_#2C0834] border-[3px] border-[#2C0834] hover:bg-[#FFFEF0] hover:scale-110 active:scale-95 transition-all"
+        className="fixed bottom-4 right-4 z-50 w-12 h-12 bg-[#FFFDD1] rounded-full flex items-center justify-center shadow-[4px_4px_0px_0px_#2e1065] border-[3px] border-[#2e1065] hover:bg-[#FFFEF0] hover:scale-110 active:scale-95 transition-all"
         onClick={() => setShowHelp(true)}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
       >
-        <span className="text-2xl font-bold text-[#2C0834] font-pixel-title">؟</span>
+        <span className="text-2xl font-bold text-[#2e1065] font-pixel-title">؟</span>
       </motion.button>
 
       <motion.div
@@ -128,7 +128,7 @@ export default function Home() {
                 <Globe className="w-8 h-8 ml-3" />
                 الغرفة العامة
                 <motion.span
-                  className="mr-2 bg-[#31093A]/20 px-2 py-0.5 rounded text-sm font-pixel-text"
+                  className="mr-2 bg-[#4c1d95]/20 px-2 py-0.5 rounded text-sm font-pixel-text"
                   animate={{ scale: [1, 1.1, 1] }}
                   transition={{ repeat: Infinity, duration: 1.5 }}
                 >
@@ -461,3 +461,4 @@ export default function Home() {
     </div>
   );
 }
+

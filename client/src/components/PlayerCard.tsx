@@ -100,11 +100,11 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
         player.isReady ? (
           <motion.div
             className={cn(
-              "bg-[#FFFDD1] border-[3px] border-[#2C0834] p-4 flex items-center gap-4 relative transition-all duration-300",
-              "shadow-[4px_4px_0_0_#2C0834]",
-              "hover:shadow-[6px_6px_0_0_#2C0834] hover:translate-x-[-2px] hover:translate-y-[-2px]",
-              "before:absolute before:inset-[4px] before:border-[2px] before:border-[#2C0834]/10 before:pointer-events-none",
-              isCurrentPlayer && "bg-[#FFFEF0] border-[3px] shadow-[6px_6px_0_0_#2C0834] scale-105 z-10",
+              "bg-[#FFFDD1] border-[3px] border-[#2e1065] p-4 flex items-center gap-4 relative transition-all duration-300",
+              "shadow-[4px_4px_0_0_#2e1065]",
+              "hover:shadow-[6px_6px_0_0_#2e1065] hover:translate-x-[-2px] hover:translate-y-[-2px]",
+              "before:absolute before:inset-[4px] before:border-[2px] before:border-[#2e1065]/10 before:pointer-events-none",
+              isCurrentPlayer && "bg-[#FFFEF0] border-[3px] shadow-[6px_6px_0_0_#2e1065] scale-105 z-10",
               "overflow-hidden"
             )}
           >
@@ -125,3 +125,4 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
     </motion.div>
   );
 }
+

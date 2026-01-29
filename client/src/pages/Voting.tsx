@@ -90,7 +90,7 @@ export default function Voting() {
         </motion.div>
 
         <motion.div
-          className="flex items-center justify-center gap-2 mb-6 p-4 bg-[#FFFDD1] border-[3px] border-[#2C0834] shadow-[4px_4px_0_0_#2C0834]"
+          className="flex items-center justify-center gap-2 mb-6 p-4 bg-[#FFFDD1] border-[3px] border-[#2e1065] shadow-[4px_4px_0_0_#2e1065]"
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
         >
@@ -102,11 +102,11 @@ export default function Voting() {
             return (
               <motion.div
                 key={cat}
-                className={`w-10 h-10 flex items-center justify-center transition-all border-2 border-[#2C0834] ${isActive
-                  ? `bg-[#31093A] text-white scale-110 shadow-[2px_2px_0_0_#F9D794]`
+                className={`w-10 h-10 flex items-center justify-center transition-all border-2 border-[#2e1065] ${isActive
+                  ? `bg-[#4c1d95] text-white scale-110 shadow-[2px_2px_0_0_#F9D794]`
                   : isDone
                     ? 'bg-green-500 text-white'
-                    : 'bg-white text-[#31093A]/40'
+                    : 'bg-white text-[#4c1d95]/40'
                   }`}
                 animate={isActive ? { y: [0, -3, 0] } : {}}
                 transition={{ repeat: Infinity, duration: 1 }}
@@ -131,7 +131,7 @@ export default function Voting() {
             className="mb-6"
           >
             <RetroCard className="p-0 overflow-hidden">
-              <div className={`p-4 bg-gradient-to-r ${categoryColors[currentCategory]} border-b-[3px] border-[#31093A]/20`}>
+              <div className={`p-4 bg-gradient-to-r ${categoryColors[currentCategory]} border-b-[3px] border-[#4c1d95]/20`}>
                 <div className="flex items-center gap-3 text-white">
                   <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
                     <Icon className="w-5 h-5 text-white" />
@@ -147,7 +147,7 @@ export default function Voting() {
               <div className="p-6 space-y-5 font-pixel-text">
                 {otherSubmissions.length === 0 ? (
                   <motion.p
-                    className="text-center text-[#31093A]/50 py-12 text-xl font-bold"
+                    className="text-center text-[#4c1d95]/50 py-12 text-xl font-bold"
                     animate={{ opacity: [0.5, 1, 0.5] }}
                     transition={{ repeat: Infinity, duration: 2 }}
                   >
@@ -169,7 +169,7 @@ export default function Voting() {
                           ? isAccepted
                             ? 'border-green-600 bg-green-50'
                             : 'border-red-600 bg-red-50'
-                          : 'border-[#31093A] shadow-[4px_4px_0_0_#31093A]'
+                          : 'border-[#4c1d95] shadow-[4px_4px_0_0_#4c1d95]'
                           }`}
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
@@ -177,13 +177,13 @@ export default function Voting() {
                       >
                         <div className="flex items-center justify-between mb-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-[#31093A] text-white flex items-center justify-center font-bold text-sm border-2 border-[#2C0834]">
+                            <div className="w-10 h-10 bg-[#4c1d95] text-white flex items-center justify-center font-bold text-sm border-2 border-[#2e1065]">
                               {submission.playerName.charAt(0)}
                             </div>
-                            <span className="text-sm font-bold text-[#31093A] font-pixel-text">{submission.playerName}</span>
+                            <span className="text-sm font-bold text-[#4c1d95] font-pixel-text">{submission.playerName}</span>
                           </div>
                           <motion.span
-                            className="font-bold text-3xl text-[#31093A] font-pixel-title"
+                            className="font-bold text-3xl text-[#4c1d95] font-pixel-title"
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             transition={{ type: 'spring', delay: 0.2 }}
@@ -240,7 +240,7 @@ export default function Voting() {
             animate={{ y: 0, opacity: 1 }}
           >
             <Button
-              className={`w-full h-16 text-xl font-bold bg-[#2C0834] text-white shadow-xl hover:bg-[#31093A] font-pixel-title`}
+              className={`w-full h-16 text-xl font-bold bg-[#2e1065] text-white shadow-xl hover:bg-[#4c1d95] font-pixel-title`}
               onClick={handleNextCategory}
             >
               التالي: {categories[currentCategoryIndex + 1]}
@@ -252,18 +252,18 @@ export default function Voting() {
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="text-center p-8 bg-[#FFFDD1] rounded-2xl border-[3px] border-[#2C0834]"
+            className="text-center p-8 bg-[#FFFDD1] rounded-2xl border-[3px] border-[#2e1065]"
           >
             <motion.div
-              className="w-16 h-16 bg-[#2C0834] rounded-full flex items-center justify-center mx-auto mb-4"
+              className="w-16 h-16 bg-[#2e1065] rounded-full flex items-center justify-center mx-auto mb-4"
               animate={{ rotate: [0, 360] }}
               transition={{ repeat: Infinity, duration: 3, ease: 'linear' }}
             >
               <Sparkles className="w-8 h-8 text-white" />
             </motion.div>
-            <p className="font-pixel-title text-2xl text-[#31093A] mb-2 font-bold">تم التصويت!</p>
+            <p className="font-pixel-title text-2xl text-[#4c1d95] mb-2 font-bold">تم التصويت!</p>
             <motion.p
-              className="text-lg text-[#31093A]/50 font-pixel-text font-bold"
+              className="text-lg text-[#4c1d95]/50 font-pixel-text font-bold"
               animate={{ opacity: [0.5, 1, 0.5] }}
               transition={{ repeat: Infinity, duration: 2 }}
             >
@@ -281,3 +281,4 @@ export default function Voting() {
     </div>
   );
 }
+

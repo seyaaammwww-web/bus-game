@@ -213,14 +213,14 @@ export default function Results() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          <RetroCard className="mb-6">
-            <div className="flex items-center gap-3 mb-5 font-pixel-title text-[#4c1d95] text-xl">
-              <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-lg flex items-center justify-center shadow-md">
-                <Trophy className="w-5 h-5 text-white" />
+          <RetroCard className="mb-4">
+            <div className="flex items-center gap-2 mb-3 font-pixel-title text-[#4c1d95] text-base">
+              <div className="w-7 h-7 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-lg flex items-center justify-center">
+                <Trophy className="w-4 h-4 text-white" />
               </div>
               الترتيب
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2">
               <AnimatePresence>
                 {sortedPlayers.map((player, index) => {
                   const RankIcon = rankIcons[index] || Star;
@@ -228,38 +228,38 @@ export default function Results() {
                   return (
                     <motion.div
                       key={player.id}
-                      className={`flex items-center gap-4 p-4 rounded-xl border-[2px] transition-all ${player.id === state.playerId
-                        ? 'bg-gradient-to-r from-[#7c3aed]/10 to-[#8b5cf6]/10 border-[#7c3aed] shadow-[2px_2px_0_0_#4c1d95]'
-                        : 'bg-white/80 border-[#4c1d95]/20 hover:border-[#7c3aed]/50'
-                        } font-pixel-text text-lg`}
+                      className={`flex items-center gap-2 p-2 rounded-lg border-[2px] ${player.id === state.playerId
+                        ? 'bg-gradient-to-r from-[#7c3aed]/10 to-[#8b5cf6]/10 border-[#7c3aed]'
+                        : 'bg-white/80 border-[#4c1d95]/20'
+                        } font-pixel-text text-sm`}
                       initial={{ x: -20, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: 0.1 * index }}
+                      transition={{ delay: 0.05 * index }}
                     >
                       {index < 3 ? (
-                        <div className={`w-14 h-14 rounded-xl ${rankColors[index]} flex items-center justify-center text-white shadow-lg border-2 border-white/50`}>
-                          <RankIcon className="w-7 h-7" />
+                        <div className={`w-8 h-8 rounded-lg ${rankColors[index]} flex items-center justify-center text-white border border-white/50`}>
+                          <RankIcon className="w-4 h-4" />
                         </div>
                       ) : (
-                        <div className="w-14 h-14 rounded-xl bg-[#4c1d95]/10 flex items-center justify-center text-[#4c1d95] font-bold text-2xl border-2 border-[#4c1d95]/20">
+                        <div className="w-8 h-8 rounded-lg bg-[#4c1d95]/10 flex items-center justify-center text-[#4c1d95] font-bold text-sm">
                           {index + 1}
                         </div>
                       )}
 
                       <PixelAvatar
                         src={player.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${player.id}`}
-                        className="w-14 h-14 border-2 border-[#4c1d95]/30"
+                        className="w-8 h-8 border border-[#4c1d95]/30"
                         size="sm"
                       />
 
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="font-bold text-xl text-[#4c1d95] font-pixel-text">{player.name}</p>
-                          {player.isHost && <Crown className="w-5 h-5 text-amber-500" />}
-                          {isReferee && <Shield className="w-5 h-5 text-[#7c3aed]" />}
-                        </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-sm text-[#4c1d95] font-pixel-text truncate">
+                          {player.name}
+                          {player.isHost && <Crown className="w-3 h-3 text-amber-500 inline mr-1" />}
+                          {isReferee && <Shield className="w-3 h-3 text-[#7c3aed] inline mr-1" />}
+                        </p>
                       </div>
-                      <span className="text-3xl font-bold text-[#4c1d95] font-pixel-title">{player.score}</span>
+                      <span className="text-lg font-bold text-[#4c1d95] font-pixel-title">{player.score}</span>
                     </motion.div>
                   );
                 })}
@@ -349,15 +349,15 @@ export default function Results() {
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.3 }}
           >
-            <RetroCard className="mb-6">
-              <div className="flex items-center gap-3 mb-5 font-pixel-title text-[#4c1d95] text-xl">
-                <div className="w-10 h-10 bg-gradient-to-br from-[#7c3aed] to-[#8b5cf6] rounded-lg flex items-center justify-center shadow-md">
-                  <Sparkles className="w-5 h-5 text-white" />
+            <RetroCard className="mb-4">
+              <div className="flex items-center gap-2 mb-3 font-pixel-title text-[#4c1d95] text-base">
+                <div className="w-7 h-7 bg-gradient-to-br from-[#7c3aed] to-[#8b5cf6] rounded-lg flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-white" />
                 </div>
                 الإجابات
               </div>
-              <div className="space-y-4">
-                {categories.map((category, catIndex) => {
+              <div className="space-y-3">
+                {categories.map((category) => {
                   const Icon = categoryIcons[category];
                   const categorySubmissions = currentRound.submissions.map(s => ({
                     playerId: s.playerId,
@@ -365,43 +365,34 @@ export default function Results() {
                     answer: s.answers[category],
                   })).filter(a => a.answer && a.answer.trim());
                   return (
-                    <div key={category} className="border-[2px] rounded-xl bg-white/90 overflow-hidden border-[#4c1d95]/20 font-pixel-text shadow-sm">
-                      <div className={`flex items-center gap-3 p-4 ${categoryColors[category]}`}>
-                        <Icon className="w-5 h-5 text-white" />
-                        <span className="font-bold text-lg text-white font-pixel-text">{category}</span>
+                    <div key={category} className="border-[2px] rounded-lg bg-white/90 overflow-hidden border-[#4c1d95]/20">
+                      <div className={`flex items-center gap-2 px-3 py-2 ${categoryColors[category]}`}>
+                        <Icon className="w-4 h-4 text-white" />
+                        <span className="font-bold text-sm text-white">{category}</span>
                       </div>
-                      <div className="p-0 overflow-x-auto">
-                        <table className="w-full text-base">
-                          <thead>
-                            <tr className="border-b-2 border-[#4c1d95]/10 bg-[#4c1d95]/5">
-                              <th className="p-4 text-right text-[#4c1d95] font-bold font-pixel-text">اللاعب</th>
-                              <th className="p-4 text-right text-[#4c1d95] font-bold font-pixel-text">الكلمة</th>
-                              <th className="p-4 text-right text-[#4c1d95] font-bold font-pixel-text">النتيجة</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {categorySubmissions.map((s, idx) => {
-                              const validation = currentRound.validatedAnswers.find(v => v.playerId === s.playerId && v.category === category);
-                              const isValid = validation?.isValid;
-                              const score = validation?.score || 0;
-                              const isMe = s.playerId === state.playerId;
-                              return (
-                                <tr key={idx} className={`border-b border-[#4c1d95]/10 last:border-0 ${isValid ? 'bg-green-50' : 'bg-red-50'}`}>
-                                  <td className="p-4 text-[#4c1d95] font-pixel-text text-base font-bold">{s.playerName} {isMe && <span className="text-[#7c3aed]">(أنت)</span>}</td>
-                                  <td className="p-4 font-bold text-lg text-[#4c1d95] font-pixel-text">{s.answer}</td>
-                                  <td className="p-4">
-                                    <div className="flex items-center gap-2">
-                                      <span className={`font-bold text-xl ${isValid ? 'text-green-600' : 'text-red-500'} font-pixel-title`}>{isValid ? `+${score}` : '❌'}</span>
-                                      {isReferee && (
-                                        <button onClick={() => refereeToggleUnique(s.playerId, category)} className="p-1 hover:bg-[#7c3aed]/10 rounded"><Star className={`w-5 h-5 ${validation?.isUnique ? 'fill-amber-400 text-amber-400' : 'text-[#4c1d95]/30'}`} /></button>
-                                      )}
-                                    </div>
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
+                      <div className="p-2 space-y-1">
+                        {categorySubmissions.map((s, idx) => {
+                          const validation = currentRound.validatedAnswers.find(v => v.playerId === s.playerId && v.category === category);
+                          const isValid = validation?.isValid;
+                          const score = validation?.score || 0;
+                          const isMe = s.playerId === state.playerId;
+                          return (
+                            <div key={idx} className={`flex items-center justify-between p-2 rounded ${isValid ? 'bg-green-50' : 'bg-red-50'}`}>
+                              <div className="flex items-center gap-2 min-w-0 flex-1">
+                                <span className="text-xs text-[#4c1d95] truncate">{s.playerName}{isMe && ' (أنت)'}</span>
+                                <span className="text-sm font-bold text-[#4c1d95] truncate">{s.answer}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <span className={`text-sm font-bold ${isValid ? 'text-green-600' : 'text-red-500'}`}>{isValid ? `+${score}` : '❌'}</span>
+                                {isReferee && (
+                                  <button onClick={() => refereeToggleUnique(s.playerId, category)} className="p-0.5">
+                                    <Star className={`w-3 h-3 ${validation?.isUnique ? 'fill-amber-400 text-amber-400' : 'text-[#4c1d95]/30'}`} />
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   );
@@ -437,7 +428,7 @@ export default function Results() {
           <Button
             onClick={() => refereeApprove()}
             size="lg"
-            className="w-full h-16 mt-4 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#2C0834] border-[3px] border-[#2C0834] animate-pulse font-pixel-title"
+            className="w-full h-16 mt-4 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#2e1065] border-[3px] border-[#2e1065] animate-pulse font-pixel-title"
           >
             اعتماد النتيجة ✅
           </Button>
@@ -446,3 +437,4 @@ export default function Results() {
     </div >
   );
 }
+

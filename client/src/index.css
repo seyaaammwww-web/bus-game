@@ -1,40 +1,11 @@
-/* Removed Google Fonts import - using only local pixel fonts */
+/* Pixelify Sans - THICK blocky pixel font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-  font-family: 'DogicaPixel';
-  src: url('/assets/fonts/DogicaPixel/dogicapixel.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'AraPix';
-  src: url('/assets/fonts/AraPix/arapix.otf') format('opentype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'DogicaPixel';
-  src: url('/assets/fonts/DogicaPixel/dogicapixelbold.ttf') format('truetype');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: '04b03';
-  src: url('/assets/fonts/04b03/04B_03__.TTF') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
+/* All fonts unified to Pixelify Sans - the BOLD pixel font */
 
 /* LIGHT MODE - Egyptian Fun Theme */
 :root {
@@ -79,7 +50,7 @@
   --chart-4: 200 80% 55%;
   --chart-5: 280 70% 55%;
 
-  --font-sans: 'AraPix', 'DogicaPixel', sans-serif;
+  --font-sans: 'Pixelify Sans', sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
   --radius: 0;
@@ -210,8 +181,17 @@
     direction: rtl;
     background-color: hsl(var(--hero-piece-15));
     cursor: url(/assets/workos/cursor-normal.png) 28 26, auto;
-    font-family: 'AraPix', 'DogicaPixel', sans-serif;
+    font-family: 'Pixelify Sans', sans-serif !important;
+    font-weight: 700 !important;
     letter-spacing: 1px;
+  }
+
+  /* UNIVERSAL FONT OVERRIDE - Forces Pixelify Sans on ALL elements */
+  *,
+  *::before,
+  *::after {
+    font-family: 'Pixelify Sans', sans-serif !important;
+    font-weight: 700;
   }
 
   /* Pixel-style icons - make Lucide icons look 8-bit */
@@ -277,11 +257,11 @@
   h6,
   label,
   button {
-    font-family: 'AraPix', 'DogicaPixel', sans-serif;
+    font-family: 'Pixelify Sans', sans-serif;
   }
 
   .font-pixel-title {
-    font-family: 'AraPix', 'DogicaPixel', sans-serif;
+    font-family: 'Pixelify Sans', sans-serif;
     font-weight: 800;
     font-size: 3.5rem;
     letter-spacing: 0px;
@@ -289,7 +269,7 @@
   }
 
   .font-pixel-text {
-    font-family: 'AraPix', 'DogicaPixel', sans-serif;
+    font-family: 'Pixelify Sans', sans-serif;
     font-weight: 700;
     font-size: 2.25rem;
     line-height: 1.6;
@@ -323,14 +303,14 @@
   }
 
   .font-pixel-button {
-    font-family: 'AraPix', 'DogicaPixel', sans-serif;
+    font-family: 'Pixelify Sans', sans-serif;
     letter-spacing: 0px;
     font-weight: 700;
   }
 
   /* Make text on background clearer */
   .text-on-bg {
-    text-shadow: 2px 2px 0px #2C0834;
+    text-shadow: 2px 2px 0px #2e1065;
     font-weight: 700;
     color: white;
   }
@@ -344,7 +324,7 @@
   --sn: 2px;
   --s: 4px;
   --sd: 6px;
-  --color: #2C0834;
+  --color: #2e1065;
   text-shadow:
     var(--sn) var(--sn) 0 var(--color),
     0 var(--sn) 0 var(--color),
@@ -638,7 +618,7 @@
 
 /* Text Utilities */
 .text-on-light {
-  color: #2C0834;
+  color: #2e1065;
 }
 
 .text-on-dark {

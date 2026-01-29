@@ -74,7 +74,7 @@ html,
 :host {
     line-height: 1.5;
     -webkit-text-size-adjust: 100%;
-    font-family: 'AraPix', 'DogicaPixel', sans-serif;
+    font-family: 'Pixelify Sans', sans-serif;
     -webkit-tap-highlight-color: transparent;
 }
 
@@ -265,7 +265,7 @@ body {
 }
 
 .text {
-    font-family: monospace, sans-serif;
+    font-family: 'Pixelify Sans', sans-serif;
     /* Define vars locally in inline style or here */
     --color: #36053c;
     --shadow: 3px;
@@ -282,7 +282,7 @@ body {
 
 /* Specific component styles */
 .header {
-    font-family: monospace, sans-serif;
+    font-family: 'Pixelify Sans', sans-serif;
     color: #fff;
 }
 
@@ -337,7 +337,7 @@ input:hover {
 }
 
 .giveaway-notice {
-    font-family: monospace, sans-serif;
+    font-family: 'Pixelify Sans', sans-serif;
     position: relative;
 }
 
@@ -357,8 +357,8 @@ input:hover {
     border-width: 3px !important;
 }
 
-.before\:border-\[\#2C0834\]:before {
-    border-color: #2C0834;
+.before\:border-\[\#2e1065\]:before {
+    border-color: #2e1065;
 }
 
 .bg-\[\#FFFDD1\] {

@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useMemo } from "react";
 
 // SVG Shapes extracted from reference or recreated
 const shapes = [
@@ -45,38 +46,61 @@ const shapes = [
     }
 ];
 
+// Grid-based positions to prevent overlap - 12 fixed zones
+const gridPositions = [
+    { left: '5%', top: '10%' },
+    { left: '30%', top: '5%' },
+    { left: '55%', top: '15%' },
+    { left: '80%', top: '8%' },
+    { left: '10%', top: '35%' },
+    { left: '45%', top: '40%' },
+    { left: '75%', top: '32%' },
+    { left: '8%', top: '60%' },
+    { left: '35%', top: '65%' },
+    { left: '65%', top: '58%' },
+    { left: '88%', top: '62%' },
+    { left: '20%', top: '85%' },
+    { left: '50%', top: '88%' },
+    { left: '78%', top: '82%' },
+    { left: '92%', top: '45%' },
+];
+
 export function FloatingShapes() {
+    // Memoize random values so they don't change on re-render
+    const shapeConfigs = useMemo(() => {
+        return gridPositions.map((pos, i) => ({
+            shape: shapes[i % shapes.length],
+            position: pos,
+            // SLOW animations: 30-50 seconds duration
+            duration: 30 + (i * 3) % 20,
+            delay: i * 2,
+            // Small, gentle movement
+            yOffset: 20 + (i % 3) * 10,
+        }));
+    }, []);
+
     return (
         <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-            {/* Generate multiple floating shapes */}
-            {Array.from({ length: 15 }).map((_, i) => {
-                const shape = shapes[i % shapes.length];
-                const randomLeft = `${Math.random() * 100}%`;
-                const randomTop = `${Math.random() * 100}%`;
-                const randomDelay = Math.random() * 5;
-                const randomDuration = 10 + Math.random() * 10;
-
-                return (
-                    <motion.div
-                        key={i}
-                        className="absolute w-8 h-8 opacity-20"
-                        style={{ left: randomLeft, top: randomTop }}
-                        animate={{
-                            y: [0, -100, 0],
-                            rotate: [0, 180, 360],
-                            scale: [1, 1.2, 1]
-                        }}
-                        transition={{
-                            duration: randomDuration,
-                            repeat: Infinity,
-                            delay: randomDelay,
-                            ease: "easeInOut"
-                        }}
-                    >
-                        {shape.svg}
-                    </motion.div>
-                );
-            })}
+            {shapeConfigs.map((config, i) => (
+                <motion.div
+                    key={i}
+                    className="absolute w-6 h-6 opacity-15"
+                    style={{ left: config.position.left, top: config.position.top }}
+                    animate={{
+                        y: [0, -config.yOffset, 0],
+                        rotate: [0, 10, -10, 0],
+                        scale: [1, 1.05, 1]
+                    }}
+                    transition={{
+                        duration: config.duration,
+                        repeat: Infinity,
+                        delay: config.delay,
+                        ease: "linear"
+                    }}
+                >
+                    {config.shape.svg}
+                </motion.div>
+            ))}
         </div>
     );
 }

@@ -86,14 +86,14 @@ const RetroGiveaway = () => {
             <div className="flex justify-center mb-4">
                 <svg fill="none" height="44" viewBox="0 0 44 44" width="44" xmlns="http://www.w3.org/2000/svg" className="relative z-10 w-44 h-44">
                     <path d="M4 4H20V8H24V4H40V28H32V32H28V40H16V32H12V28H4V4Z" fill="#FFE8AD"></path>
-                    <rect fill="#2C0834" height="4" width="8" x="36" transform="scale(-1, 1)" style={{ transformOrigin: 'center' }}></rect>
+                    <rect fill="#2e1065" height="4" width="8" x="36" transform="scale(-1, 1)" style={{ transformOrigin: 'center' }}></rect>
                     {/* Simplified details for visual similarity */}
-                    <rect fill="#2C0834" height="4" width="4" x="28" y="4" transform="scale(-1, 1)" style={{ transformOrigin: 'center' }}></rect>
+                    <rect fill="#2e1065" height="4" width="4" x="28" y="4" transform="scale(-1, 1)" style={{ transformOrigin: 'center' }}></rect>
                     <rect fill="#FFFDD1" height="4" width="8" x="36" y="4" transform="scale(-1, 1)" style={{ transformOrigin: 'center' }}></rect>
                 </svg>
             </div>
 
-            <div className="giveaway-notice text-center py-9 px-23 mt-62 max-w-500 mx-auto relative before:inside-border before:!border-3 before:border-[#2C0834] bg-[#FFFDD1] text-[#31093A]">
+            <div className="giveaway-notice text-center py-9 px-23 mt-62 max-w-500 mx-auto relative before:inside-border before:!border-3 before:border-[#2e1065] bg-[#FFFDD1] text-[#4c1d95]">
                 <div className="relative text-[12px] leading-[24px] tracking-[-0.96px]">
                     One lucky subscriber won an <strong className="mx-4 font-bold">Analogue Pocket.</strong>
                     Keep an eye out for more giveaways!
@@ -102,22 +102,22 @@ const RetroGiveaway = () => {
                 {/* Corner Decoration SVGs */}
                 <svg fill="none" height="15" viewBox="0 0 15 15" width="15" xmlns="http://www.w3.org/2000/svg" className="top-0 left-0 absolute text-[#FFFEF0]">
                     <rect fill="var(--hero-piece-15)" height="15" width="15"></rect>
-                    <rect fill="#2C0834" height="3" width="7" x="8"></rect>
+                    <rect fill="#2e1065" height="3" width="7" x="8"></rect>
                     <rect fill="currentColor" height="4" width="4" x="11" y="3"></rect>
                 </svg>
                 <svg fill="none" height="15" viewBox="0 0 15 15" width="15" xmlns="http://www.w3.org/2000/svg" className="top-0 right-0 absolute rotate-90 text-[#FFFEF0]">
                     <rect fill="var(--hero-piece-15)" height="15" width="15"></rect>
-                    <rect fill="#2C0834" height="3" width="7" x="8"></rect>
+                    <rect fill="#2e1065" height="3" width="7" x="8"></rect>
                     <rect fill="currentColor" height="4" width="4" x="11" y="3"></rect>
                 </svg>
                 <svg fill="none" height="15" viewBox="0 0 15 15" width="15" xmlns="http://www.w3.org/2000/svg" className="bottom-0 left-0 absolute -rotate-90 text-[#FFE8AD]">
                     <rect fill="var(--hero-piece-15)" height="15" width="15"></rect>
-                    <rect fill="#2C0834" height="3" width="7" x="8"></rect>
+                    <rect fill="#2e1065" height="3" width="7" x="8"></rect>
                     <rect fill="currentColor" height="4" width="4" x="11" y="3"></rect>
                 </svg>
                 <svg fill="none" height="15" viewBox="0 0 15 15" width="15" xmlns="http://www.w3.org/2000/svg" className="bottom-0 right-0 absolute rotate-180 text-[#FFE8AD]">
                     <rect fill="var(--hero-piece-15)" height="15" width="15"></rect>
-                    <rect fill="#2C0834" height="3" width="7" x="8"></rect>
+                    <rect fill="#2e1065" height="3" width="7" x="8"></rect>
                     <rect fill="currentColor" height="4" width="4" x="11" y="3"></rect>
                 </svg>
             </div>
@@ -127,22 +127,22 @@ const RetroGiveaway = () => {
                 {/* Left Arrow */}
                 <svg fill="none" height="18" viewBox="0 0 24 18" width="24" xmlns="http://www.w3.org/2000/svg" className="absolute top-1/2 left-[10%] -translate-y-1/2">
                     <path d="M14 2H2V16H14V12H22V6H14V2Z" fill="#FFFDD1"></path>
-                    <rect fill="#2C0834" height="10" width="2" y="4"></rect>
-                    <rect fill="#2C0834" height="2" width="2" x="2" y="2"></rect>
-                    <rect fill="#2C0834" height="2" width="2" x="2" y="14"></rect>
-                    <rect fill="#2C0834" height="2" width="2" x="22" y="8"></rect>
-                    <rect fill="#2C0834" height="2" width="6" x="4"></rect>
-                    <rect fill="#2C0834" height="2" width="6" x="4" y="16"></rect>
+                    <rect fill="#2e1065" height="10" width="2" y="4"></rect>
+                    <rect fill="#2e1065" height="2" width="2" x="2" y="2"></rect>
+                    <rect fill="#2e1065" height="2" width="2" x="2" y="14"></rect>
+                    <rect fill="#2e1065" height="2" width="2" x="22" y="8"></rect>
+                    <rect fill="#2e1065" height="2" width="6" x="4"></rect>
+                    <rect fill="#2e1065" height="2" width="6" x="4" y="16"></rect>
                 </svg>
                 {/* Right Arrow */}
                 <svg fill="none" height="18" viewBox="0 0 24 18" width="24" xmlns="http://www.w3.org/2000/svg" className="absolute top-1/2 right-[10%] -translate-y-1/2 rotate-180">
                     <path d="M14 2H2V16H14V12H22V6H14V2Z" fill="#FFFDD1"></path>
-                    <rect fill="#2C0834" height="10" width="2" y="4"></rect>
-                    <rect fill="#2C0834" height="2" width="2" x="2" y="2"></rect>
-                    <rect fill="#2C0834" height="2" width="2" x="2" y="14"></rect>
-                    <rect fill="#2C0834" height="2" width="2" x="22" y="8"></rect>
-                    <rect fill="#2C0834" height="2" width="6" x="4"></rect>
-                    <rect fill="#2C0834" height="2" width="6" x="4" y="16"></rect>
+                    <rect fill="#2e1065" height="10" width="2" y="4"></rect>
+                    <rect fill="#2e1065" height="2" width="2" x="2" y="2"></rect>
+                    <rect fill="#2e1065" height="2" width="2" x="2" y="14"></rect>
+                    <rect fill="#2e1065" height="2" width="2" x="22" y="8"></rect>
+                    <rect fill="#2e1065" height="2" width="6" x="4"></rect>
+                    <rect fill="#2e1065" height="2" width="6" x="4" y="16"></rect>
                 </svg>
             </div>
         </div>
@@ -164,3 +164,4 @@ export const RetroLayout = () => {
 };
 
 export default RetroLayout;
+

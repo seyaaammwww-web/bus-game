@@ -26,7 +26,7 @@ export default function ArcadeBackground() {
             <div
                 className="absolute inset-0 z-10 opacity-20 pointer-events-none"
                 style={{
-                    backgroundImage: 'radial-gradient(#2C0834 2px, transparent 2px)',
+                    backgroundImage: 'radial-gradient(#2e1065 2px, transparent 2px)',
                     backgroundSize: '32px 32px',
                     imageRendering: 'pixelated',
                 }}
@@ -40,3 +40,4 @@ export default function ArcadeBackground() {
         </div>
     );
 }
+

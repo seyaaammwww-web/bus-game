@@ -1,26 +1,6 @@
 /* WorkOS Pixel Background Styles - ARTISTIC VERSION */
 
-/* Font Faces */
-@font-face {
-    font-family: 'BitFont';
-    src: url('/fonts/04b03/400.woff2') format('woff2');
-    font-weight: 400;
-    font-style: normal;
-}
-
-@font-face {
-    font-family: 'Dogica';
-    src: url('/fonts/DogicaPixel/400.woff2') format('woff2');
-    font-weight: 400;
-    font-style: normal;
-}
-
-@font-face {
-    font-family: 'Dogica';
-    src: url('/fonts/DogicaPixel/700.woff2') format('woff2');
-    font-weight: 700;
-    font-style: normal;
-}
+/* All fonts unified to Pixelify Sans */
 
 /* WorkOS Background Container */
 .workos-background {

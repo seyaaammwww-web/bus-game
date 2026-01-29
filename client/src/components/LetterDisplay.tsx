@@ -15,7 +15,7 @@ export function LetterDisplay({ letter, round, totalRounds }: LetterDisplayProps
         initial={{ scale: 0, rotate: -180 }}
         animate={{ scale: 1, rotate: -6 }}
         whileHover={{ scale: 1.1, rotate: 0 }}
-        transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+        transition={{ type: 'spring', stiffness: 80, damping: 20, duration: 1.5 }}
       >
         {/* Glow Effect */}
         <div className="absolute inset-0 bg-[#7c3aed]/30 blur-xl rounded-xl" />
@@ -30,19 +30,19 @@ export function LetterDisplay({ letter, round, totalRounds }: LetterDisplayProps
             className="relative text-6xl font-pixel-title text-white font-bold drop-shadow-[0_0_20px_rgba(255,255,255,0.5)]"
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3, type: 'spring' }}
+            transition={{ delay: 0.5, type: 'spring', stiffness: 60, damping: 15 }}
           >
             {letter}
           </motion.span>
 
-          {/* Sparkle Effect */}
+          {/* Sparkle Effect - SLOWER */}
           <motion.div
             className="absolute top-2 right-2 w-3 h-3 bg-white rounded-full"
             animate={{
               opacity: [0.5, 1, 0.5],
               scale: [0.8, 1.2, 0.8]
             }}
-            transition={{ duration: 1.5, repeat: Infinity }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
           />
         </div>
       </motion.div>

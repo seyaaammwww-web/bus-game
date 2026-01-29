@@ -219,7 +219,7 @@ export default function Game() {
               initial={{ y: -50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: -50, opacity: 0 }}
-              className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-[#2C0834] text-white px-6 py-3 rounded-full shadow-xl flex items-center gap-3 border-2 border-[#FFFDD1]"
+              className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-[#2e1065] text-white px-6 py-3 rounded-full shadow-xl flex items-center gap-3 border-2 border-[#FFFDD1]"
             >
               <div className="bg-white/20 p-2 rounded-full">
                 {activePowerUpNotification.type === 'wildcard' && <Sparkles className="w-6 h-6 animate-spin" />}
@@ -398,3 +398,4 @@ export default function Game() {
     </motion.div>
   );
 }
+

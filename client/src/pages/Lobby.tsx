@@ -71,7 +71,7 @@ export default function Lobby() {
         >
           <RetroCard className="mb-6">
             <div className="text-center">
-              <p className="text-lg text-[#31093A] font-bold mb-3 font-pixel-text">كود الغرفة</p>
+              <p className="text-lg text-[#4c1d95] font-bold mb-3 font-pixel-text">كود الغرفة</p>
               <div className="flex items-center justify-center gap-4">
                 <motion.div
                   className="flex gap-2"
@@ -107,7 +107,7 @@ export default function Lobby() {
                 </Button>
               </div>
               <motion.p
-                className="text-sm text-[#31093A] mt-4 font-pixel-text font-bold"
+                className="text-sm text-[#4c1d95] mt-4 font-pixel-text font-bold"
                 animate={{ opacity: [0.5, 1, 0.5] }}
                 transition={{ repeat: Infinity, duration: 2 }}
               >
@@ -304,3 +304,4 @@ export default function Lobby() {
     </div>
   );
 }
+
