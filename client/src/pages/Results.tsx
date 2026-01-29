@@ -349,39 +349,101 @@ export default function Results() {
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.3 }}
           >
-            <RetroCard className="mb-4 p-3">
-              <div className="text-[#4c1d95] text-sm font-bold mb-2">📝 الإجابات</div>
-              {categories.map((category) => {
-                const Icon = categoryIcons[category];
-                const categorySubmissions = currentRound.submissions.map(s => ({
-                  playerId: s.playerId,
-                  playerName: s.playerName,
-                  answer: s.answers[category],
-                })).filter(a => a.answer && a.answer.trim());
+            <RetroCard className="mb-4 p-0 overflow-hidden">
+              {/* Header */}
+              <div className="bg-gradient-to-r from-[#4c1d95] to-[#7c3aed] text-white px-4 py-3 flex items-center gap-2">
+                <Sparkles className="w-5 h-5" />
+                <span className="font-bold text-lg">📝 نتائج الجولة</span>
+              </div>
 
-                if (categorySubmissions.length === 0) return null;
-
-                return (
-                  <div key={category} className="mb-2 last:mb-0">
-                    <div className={`${categoryColors[category]} text-white text-xs px-2 py-1 rounded-t font-bold flex items-center gap-1`}>
-                      <Icon className="w-3 h-3" /> {category}
-                    </div>
-                    <div className="bg-white/80 border border-[#4c1d95]/10 rounded-b text-xs">
-                      {categorySubmissions.map((s, idx) => {
-                        const validation = currentRound.validatedAnswers.find(v => v.playerId === s.playerId && v.category === category);
-                        const isValid = validation?.isValid;
-                        const score = validation?.score || 0;
+              {/* Table Container - Scrollable on mobile */}
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[400px]">
+                  {/* Table Header */}
+                  <thead>
+                    <tr className="bg-[#4c1d95]/10">
+                      <th className="p-2 text-right text-[#4c1d95] font-bold text-sm border-b-2 border-[#4c1d95]/20 w-24">اللاعب</th>
+                      {categories.map((cat) => {
+                        const Icon = categoryIcons[cat];
                         return (
-                          <div key={idx} className={`flex justify-between items-center px-2 py-1 border-b last:border-0 ${isValid ? 'bg-green-50' : 'bg-red-50'}`}>
-                            <span className="text-[#4c1d95]">{s.playerName}: <b>{s.answer}</b></span>
-                            <span className={isValid ? 'text-green-600 font-bold' : 'text-red-500'}>{isValid ? `+${score}` : '❌'}</span>
-                          </div>
+                          <th key={cat} className={`p-2 text-center text-white font-bold text-xs border-b-2 border-[#4c1d95]/20 ${categoryColors[cat]}`}>
+                            <div className="flex flex-col items-center gap-1">
+                              <Icon className="w-4 h-4" />
+                              <span>{cat}</span>
+                            </div>
+                          </th>
                         );
                       })}
-                    </div>
-                  </div>
-                );
-              })}
+                      <th className="p-2 text-center text-[#4c1d95] font-bold text-sm border-b-2 border-[#4c1d95]/20 w-16">المجموع</th>
+                    </tr>
+                  </thead>
+
+                  {/* Table Body - One row per player */}
+                  <tbody>
+                    {currentRound.submissions.map((submission, playerIdx) => {
+                      // Calculate total score for this player in this round
+                      let totalRoundScore = 0;
+
+                      return (
+                        <tr key={submission.playerId} className={`${playerIdx % 2 === 0 ? 'bg-white' : 'bg-[#faf5ff]'} hover:bg-[#f3e8ff] transition-colors`}>
+                          {/* Player Name */}
+                          <td className="p-2 border-b border-[#4c1d95]/10">
+                            <div className="flex items-center gap-2">
+                              <div className="w-6 h-6 rounded-full bg-[#4c1d95] text-white flex items-center justify-center text-xs font-bold">
+                                {playerIdx + 1}
+                              </div>
+                              <span className="font-bold text-[#4c1d95] text-sm truncate max-w-[60px]">
+                                {submission.playerName}
+                                {submission.playerId === state.playerId && <span className="text-[#7c3aed]"> (أنت)</span>}
+                              </span>
+                            </div>
+                          </td>
+
+                          {/* Category Answers */}
+                          {categories.map((cat) => {
+                            const answer = submission.answers[cat];
+                            const validation = currentRound.validatedAnswers.find(
+                              v => v.playerId === submission.playerId && v.category === cat
+                            );
+                            const isValid = validation?.isValid;
+                            const score = validation?.score || 0;
+                            if (isValid) totalRoundScore += score;
+
+                            return (
+                              <td key={cat} className={`p-2 text-center border-b border-[#4c1d95]/10 ${isValid ? 'bg-green-50' : answer ? 'bg-red-50' : ''}`}>
+                                {answer ? (
+                                  <div className="flex flex-col items-center">
+                                    <span className="text-[#4c1d95] text-xs font-bold truncate max-w-[60px]">{answer}</span>
+                                    <span className={`text-xs font-bold ${isValid ? 'text-green-600' : 'text-red-500'}`}>
+                                      {isValid ? `+${score}` : '✗'}
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <span className="text-gray-300 text-lg">—</span>
+                                )}
+                              </td>
+                            );
+                          })}
+
+                          {/* Total Score */}
+                          <td className="p-2 text-center border-b border-[#4c1d95]/10">
+                            <span className={`inline-flex items-center justify-center w-10 h-8 rounded-lg font-bold text-sm ${totalRoundScore > 0 ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'}`}>
+                              +{totalRoundScore}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Legend */}
+              <div className="px-4 py-2 bg-[#4c1d95]/5 flex items-center justify-center gap-4 text-xs">
+                <span className="flex items-center gap-1"><span className="w-3 h-3 bg-green-500 rounded"></span> صحيح</span>
+                <span className="flex items-center gap-1"><span className="w-3 h-3 bg-red-400 rounded"></span> خطأ</span>
+                <span className="flex items-center gap-1 text-[#7c3aed]">+15 فريد | +10 مكرر</span>
+              </div>
             </RetroCard>
           </motion.div>
         )}
