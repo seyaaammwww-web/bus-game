@@ -361,6 +361,12 @@ class GameManager {
     targetPlayer.isReferee = true;
     room.refereeId = playerId;
 
+    // EXCLUSIVE LOGIC: If Referee Set, Disable Voting
+    if (room.settings?.enableVoting) {
+      console.log(`[Referee] Referee set -> Disabling Voting`);
+      room.settings.enableVoting = false;
+    }
+
     this.broadcastToRoom(room.code, {
       type: 'sync_state',
       payload: { room },
@@ -692,6 +698,13 @@ class GameManager {
     if (typeof settings.enableVoting === 'boolean') {
       if (!room.settings) room.settings = {};
       room.settings.enableVoting = settings.enableVoting;
+
+      // EXCLUSIVE LOGIC: If Voting ON, Remove Referee
+      if (settings.enableVoting && room.refereeId) {
+        console.log(`[Settings] Voting enabled -> Removing Ref ${room.refereeId}`);
+        room.players.forEach(p => p.isReferee = false);
+        room.refereeId = undefined;
+      }
     }
 
     this.broadcastToRoom(room.code, {
@@ -1580,6 +1593,8 @@ class GameManager {
 
     room.voteQueue.push(request);
 
+    room.voteQueue.push(request);
+
     // Broadcast Queue Update
     this.broadcastToRoom(room.code, {
       type: 'vote_update',
@@ -1589,10 +1604,12 @@ class GameManager {
       }
     });
 
-    // Auto-start if it's the only one and not currently voting?
-    // User requested "host control", but maybe auto-queueing is better UX?
-    // Let's stick to "Host starts session" or if session active, strictly queue.
-    // For now, just queue. Host sees queue and hits "Start Voting".
+    // Auto-start if it's the only one and not currently voting
+    if (!room.currentVote) {
+      console.log(`[Vote] Auto-starting voting session for room ${room.code}`);
+      this.startVotingPhase(room);
+      this.startNextVote(room);
+    }
   }
 
   private processVoteQueue(ws: WebSocket): void {
@@ -1610,11 +1627,17 @@ class GameManager {
   private startNextVote(room: GameRoom): void {
     if (!room.voteQueue || room.voteQueue.length === 0) {
       room.currentVote = null;
-      // Notify end of voting session
+      console.log(`[Vote] Session complete. Reverting to results.`);
+
+      // Revert phase to 'results' so players see the scorecard again
+      room.phase = 'results';
+
       this.broadcastToRoom(room.code, {
         type: 'vote_session_result',
         payload: { status: 'complete' }
       });
+
+      // Determine if we should auto-proceed? No, Manual Flow control (Host decides Next Round)
       return;
     }
 
@@ -1990,7 +2013,7 @@ class GameManager {
     if (!round) return;
 
     // Cost Check
-    const COST = 40;
+    const COST = 350;
     if ((player.totalEarnedPoints || 0) < COST) {
       this.send(ws, { type: 'error', payload: { message: `تحتاج ${COST} نقطة لاستخدام الطرد!` } });
       return;
@@ -2063,7 +2086,7 @@ class GameManager {
     if (!round) return;
 
     // Cost Check
-    const COST = 50;
+    const COST = 600;
 
     // Check if already used first
     if (player.usedPowerUps.wildcard) {
@@ -2142,8 +2165,8 @@ class GameManager {
     // If used, set to 0 regardless of points.
 
     player.powerUps = {
-      wildcard: player.usedPowerUps.wildcard ? 0 : Math.floor(points / 50),
-      banish: player.usedPowerUps.banish ? 0 : Math.floor(points / 40),
+      wildcard: player.usedPowerUps.wildcard ? 0 : Math.floor(points / 600),
+      banish: player.usedPowerUps.banish ? 0 : Math.floor(points / 350),
       hint: 0,
       steal: 0,
     };

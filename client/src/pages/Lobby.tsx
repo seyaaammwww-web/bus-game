@@ -8,12 +8,15 @@ import { categories } from '@shared/schema';
 import { PlayerCard } from '@/components/PlayerCard';
 import { useGame } from '@/lib/gameContext';
 import { RetroCard } from '@/components/ui/RetroCard';
+import { Tutorial } from '@/components/Tutorial';
+import { HelpCircle } from 'lucide-react';
 
 export default function Lobby() {
   const { state, currentPlayer, isHost, setReady, startGame, setReferee, removeReferee, referee, disconnect, updateSettings } = useGame();
   const [copied, setCopied] = useState(false);
   const [showRefereeSelect, setShowRefereeSelect] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
   const [customCats, setCustomCats] = useState(categories);
 
   const room = state.room!;
@@ -42,10 +45,23 @@ export default function Lobby() {
             className="text-white hover:bg-white/10"
             data-testid="button-exit-lobby"
           >
-            <LogOut className="w-5 h-5" />
           </Button>
-          <span className="text-[12px] text-white font-pixel-text tracking-tight animate-pulse font-bold">BY MOHAMED SEYAM</span>
+
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowTutorial(true)}
+              className="text-white hover:bg-white/10"
+              title="طريقة اللعب"
+            >
+              <HelpCircle className="w-5 h-5" />
+            </Button>
+            <span className="text-[12px] text-white font-pixel-text tracking-tight animate-pulse font-bold self-center">BY MOHAMED SEYAM</span>
+          </div>
         </div>
+
+        {showTutorial && <Tutorial onClose={() => setShowTutorial(false)} />}
 
         <motion.div
           className="text-center mb-6"
@@ -146,7 +162,9 @@ export default function Lobby() {
                     </div>
                     <div>
                       <p className="font-bold text-[#4c1d95] font-pixel-text text-sm">التحكيم الديمقراطي</p>
-                      <p className="text-[10px] text-[#4c1d95]/70 font-pixel-text">اللاعبين يصوتوا على الإجابات</p>
+                      <p className="text-[10px] text-[#4c1d95]/70 font-pixel-text">
+                        {referee ? <span className="text-red-500 font-bold">⚠️ سيلغي الحكم الحالي</span> : "اللاعبين يصوتوا على الإجابات"}
+                      </p>
                     </div>
                   </div>
                   <Button
@@ -227,7 +245,7 @@ export default function Lobby() {
                     className="h-10 border-2 border-[#4c1d95] text-[#4c1d95] font-pixel-text font-bold text-base"
                     data-testid="button-choose-referee"
                   >
-                    اختر حكم
+                    {room.settings?.enableVoting ? <span className="text-xs text-red-500 ml-2">(سيلغي التصويت)</span> : 'اختر حكم'}
                   </Button>
                 )}
               </div>
