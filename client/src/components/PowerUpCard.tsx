@@ -13,6 +13,7 @@ interface PowerUpCardProps {
     isDisabled: boolean; // Globally disabled (round locked)
     onActivate: () => void;
     icon: React.ElementType;
+    className?: string; // Allow overrides
 }
 
 export function PowerUpCard({
@@ -24,7 +25,8 @@ export function PowerUpCard({
     isUsed,
     isDisabled,
     onActivate,
-    icon: Icon
+    icon: Icon,
+    className
 }: PowerUpCardProps) {
 
     // If used, show empty/burnt slot

@@ -431,13 +431,16 @@ export default function Game() {
         </div>
 
         <div className="pb-20"></div>
-        <Confetti active={room.phase === 'results' || room.phase === 'final'} />
+      </div>
 
-        <div className="fixed bottom-2 left-0 right-0 text-center z-0 pointer-events-none">
-          <p className="text-[10px] text-white/60 font-pixel-text font-bold">
-            BY MOHAMED SEYAM
-          </p>
-        </div>
+      <ReactionDisplay />
+      <Confetti active={room.phase === 'results' || room.phase === 'final'} />
+
+      <div className="fixed bottom-2 left-0 right-0 text-center z-0 pointer-events-none">
+        <p className="text-[10px] text-white/60 font-pixel-text font-bold">
+          BY MOHAMED SEYAM
+        </p>
+      </div>
     </motion.div>
   );
 }
