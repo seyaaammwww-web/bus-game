@@ -225,9 +225,79 @@ export default function Game() {
       </AnimatePresence>
 
       <div className="max-w-5xl mx-auto relative z-10 px-4">
-        {/* Header Section */}
+        {/* Mobile Header Layout - Optimized for "Under Timer" request */}
         <motion.div
-          className="flex items-center justify-between mb-6"
+          className="flex md:hidden items-start justify-between mb-4 relative z-10"
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+        >
+          {/* Left Column: Timer + PowerUps */}
+          <div className="flex flex-col items-center gap-2 z-20">
+            <Timer timeLeft={state.timeLeft} isRush={state.isRush} />
+
+            {/* PowerUps Stacked Below Timer */}
+            <div className="flex flex-col gap-1.5 mt-1">
+              <PowerUpCard
+                type="wildcard"
+                title="جوكر"
+                description="يملأ الكل"
+                cost={600}
+                icon={Crown}
+                isUnlocked={(currentPlayer?.totalEarnedPoints || 0) >= 600}
+                isUsed={currentPlayer?.usedPowerUps?.wildcard || false}
+                isDisabled={!!currentRound?.activePowerUp && currentRound.activePowerUp.playerId !== currentPlayer?.id}
+                onActivate={() => activatePowerUp('wildcard')}
+                className="w-10 h-14 text-[8px]" // Micro sizing for mobile stack
+              />
+              <PowerUpCard
+                type="banish"
+                title="طرد"
+                description="طرد"
+                cost={350}
+                icon={Skull}
+                isUnlocked={(currentPlayer?.totalEarnedPoints || 0) >= 350}
+                isUsed={currentPlayer?.usedPowerUps?.banish || false}
+                isDisabled={!!currentRound?.activePowerUp && currentRound.activePowerUp.playerId !== currentPlayer?.id}
+                onActivate={() => setBanishOverlay(true)}
+                className="w-10 h-14 text-[8px]"
+              />
+            </div>
+
+            {/* Streak Badge */}
+            {currentPlayer?.busStreak && currentPlayer.busStreak > 0 && (
+              <div className="flex items-center gap-1 bg-orange-500 px-1.5 py-0.5 rounded text-white text-[8px] font-bold shadow-sm">
+                <Flame className="w-2.5 h-2.5" />
+                <span>×{currentPlayer.busStreak}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Center: Letter Display (Taking remaining space) */}
+          <div className="flex-1 flex justify-center -mt-2">
+            <LetterDisplay
+              letter={letter}
+              round={room.currentRound + 1}
+              totalRounds={room.totalRounds}
+            // We might need to adjust LetterDisplay props/css for a smaller mobile footprint if it's too big
+            />
+          </div>
+
+          {/* Right: Exit Button */}
+          <div className="z-20">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={disconnect}
+              className="text-white/80 hover:bg-white/10 hover:text-white h-8 w-8"
+            >
+              <LogOut className="w-4 h-4" />
+            </Button>
+          </div>
+        </motion.div>
+
+        {/* Desktop Header - Unchanged */}
+        <motion.div
+          className="hidden md:flex items-center justify-between mb-6"
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
         >
@@ -251,10 +321,10 @@ export default function Game() {
             />
           </div>
 
-          {/* Right - Timer and Streak (PowerUps moved for mobile) */}
+          {/* Right - Timer and Streak and PowerUps */}
           <div className="flex items-center gap-2 md:gap-3">
             {/* Desktop PowerUps */}
-            <div className="hidden md:flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <PowerUpCard
                 type="wildcard"
                 title="جوكر"
@@ -289,36 +359,6 @@ export default function Game() {
               ) : null}
             </div>
           </div>
-        </motion.div>
-
-        {/* Mobile PowerUps Row - Dedicated Space */}
-        <motion.div
-          className="flex md:hidden items-center justify-center gap-3 mb-4"
-          initial={{ y: -10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-        >
-          <PowerUpCard
-            type="wildcard"
-            title="جوكر"
-            description="يملأ كل الخانات"
-            cost={600}
-            icon={Crown}
-            isUnlocked={(currentPlayer?.totalEarnedPoints || 0) >= 600}
-            isUsed={currentPlayer?.usedPowerUps?.wildcard || false}
-            isDisabled={!!currentRound?.activePowerUp && currentRound.activePowerUp.playerId !== currentPlayer?.id}
-            onActivate={() => activatePowerUp('wildcard')}
-          />
-          <PowerUpCard
-            type="banish"
-            title="طرد"
-            description="يطرد منافس"
-            cost={350}
-            icon={Skull}
-            isUnlocked={(currentPlayer?.totalEarnedPoints || 0) >= 350}
-            isUsed={currentPlayer?.usedPowerUps?.banish || false}
-            isDisabled={!!currentRound?.activePowerUp && currentRound.activePowerUp.playerId !== currentPlayer?.id}
-            onActivate={() => setBanishOverlay(true)}
-          />
         </motion.div>
 
         <AnimatePresence>
