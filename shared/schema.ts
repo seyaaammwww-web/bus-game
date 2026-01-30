@@ -78,6 +78,7 @@ export interface ValidatedAnswer {
   reason?: string;
   isFabricated?: boolean;
   isPendingVote?: boolean;
+  voterIds?: string[]; // Track who voted to prevent double voting
 }
 
 // Round state

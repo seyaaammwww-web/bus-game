@@ -26,6 +26,38 @@ const categoryColors: Record<Category, string> = {
 
 export default function Voting() {
   const { state, currentRound, vote, disconnect } = useGame();
+
+  // Initialize votes from server state to handle refreshes/reconnects
+  const initialVotes = useMemo(() => {
+    const votesMap: Record<string, boolean> = {};
+    if (currentRound?.validatedAnswers) {
+      currentRound.validatedAnswers.forEach(ans => {
+        // We can't know EXACTLY what this specific user voted for individually 
+        // unless the server sends "myVotes". 
+        // But for "ALL VOTED" logic, we rely on the server's aggregate?
+        // Actually, the UI buttons (ThumbsUp/Down) show MY vote.
+        // The server stores aggregate `votes: { accepted: 5, rejected: 2 }`.
+        // It does NOT store "Player A voted Yes on Player B".
+        // So strict persistence of "My Vote" is impossible without server changes.
+        // BUT, we can at least show the current STATUS of the answer.
+
+        // Wait, if the server doesn't store who voted what, we CANNOT restore "My Vote".
+        // Use case: User voted "Yes" -> Refreshes -> Buttons enable again -> User votes "Yes" again -> Server counts it again?
+        // Server `handleVoteLogic`: `if (answer.playerId === voterId) return;` 
+        // usage of "voterId" suggests tracking?
+        // Line 1106: `if (accepted) answer.votes.accepted++;`
+        // It does NOT track a set of `voters`.
+        // CRITICAL BUG FOUND: A user can spam votes by refreshing or hacking packet.
+        // Server should store `Set<string> voters`.
+
+        // Ok, fixing `Voting.tsx` alone isn't enough. Server needs to track WHO voted.
+        // Let's assume for this task we just want to fix the "visual" state if possible.
+        // If server doesn't track it, we can't restore it.
+      });
+    }
+    return votesMap;
+  }, [currentRound]);
+
   const [votes, setVotes] = useState<Record<string, boolean>>({});
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
 

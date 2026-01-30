@@ -4,6 +4,7 @@ import { Timer } from '@/components/Timer';
 import { LetterDisplay } from '@/components/LetterDisplay';
 import { BusCompleteButton } from '@/components/BusCompleteButton';
 import { ReactionButtons, ReactionDisplay } from '@/components/Reactions';
+import { PowerUpCard } from '@/components/PowerUpCard';
 import { WildcardPowerUp } from '@/components/WildcardPowerUp';
 import { WildcardOverlay } from '@/components/WildcardOverlay';
 import { WildcardNotification } from '@/components/WildcardNotification';
@@ -13,7 +14,7 @@ import { BanishNotification } from '@/components/BanishNotification';
 import { Confetti } from '@/components/Confetti';
 import { useGame } from '@/lib/gameContext';
 import { categories, type Category, type RoundAnswers } from '@shared/schema';
-import { AlertTriangle, Send, User, Users, Globe, PawPrint, Box, LogOut, Zap, Eye, Trophy, Flame, Sparkles, Snowflake } from 'lucide-react';
+import { AlertTriangle, Send, User, Users, Globe, PawPrint, Box, LogOut, Zap, Eye, Trophy, Flame, Sparkles, Snowflake, Crown, Skull } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { playCountdownSound, playCountdownFinalSound, playRoundStart, playBusSound, playFreezeSound, playWildcardSound, playBanishSound, playSubmitSound, playClickSound, playRushActivateSound, playBonusSound } from '@/lib/sounds';
@@ -94,6 +95,19 @@ export default function Game() {
       handleSubmit();
     }
   }, [state.timeLeft, hasSubmitted]);
+
+  // Sync with server submission (e.g. if Wildcard submitted for us)
+  useEffect(() => {
+    if (currentRound?.submissions && currentPlayer?.id) {
+      const mySub = currentRound.submissions.find(s => s.playerId === currentPlayer.id);
+      if (mySub && !hasSubmitted) {
+        setHasSubmitted(true);
+        if (mySub.answers) {
+          setAnswers(mySub.answers);
+        }
+      }
+    }
+  }, [currentRound, currentPlayer, hasSubmitted]);
 
   const updateAnswer = (category: string, value: string) => {
     setAnswers(prev => ({ ...prev, [category]: value }));
@@ -332,9 +346,9 @@ export default function Game() {
                         value={answers[category]}
                         onChange={(e) => updateAnswer(category, e.target.value)}
                         onKeyDown={(e) => handleKeyDown(category, e)}
-                        disabled={hasSubmitted}
+                        disabled={hasSubmitted || isBanished} // Disable if submitted OR banished
                         placeholder={category}
-                        className={`text-center text-base md:text-xl h-10 md:h-14 border-2 border-[#4c1d95]/20 focus:border-[#8b5cf6] focus:ring-0 focus:shadow-[2px_2px_0px_0px_#4c1d95] transition-all font-pixel-text font-bold bg-white text-[#4c1d95] placeholder:text-[#8b5cf6]/50 rounded-none ${hasSubmitted ? 'opacity-60 grayscale' : ''}`}
+                        className={`text-center text-base md:text-xl h-10 md:h-14 border-2 border-[#4c1d95]/20 focus:border-[#8b5cf6] focus:ring-0 focus:shadow-[2px_2px_0px_0px_#4c1d95] transition-all font-pixel-text font-bold bg-white text-[#4c1d95] placeholder:text-[#8b5cf6]/50 rounded-none ${hasSubmitted || isBanished ? 'opacity-60 grayscale' : ''}`}
                         data-testid={`input-${category}`}
                       />
                     </div>
@@ -356,7 +370,7 @@ export default function Game() {
           >
             <BusCompleteButton
               onPress={handleBusComplete}
-              disabled={!canBusComplete}
+              disabled={!canBusComplete || isBanished} // Disable button if banished
             />
           </motion.div>
         ) : (
@@ -384,6 +398,32 @@ export default function Game() {
 
         <div className="mt-3">
           <ReactionButtons />
+        </div>
+
+        {/* Power-ups Section - High Stakes Cards */}
+        <div className="mt-8 flex justify-center gap-4 relative z-20 pb-20">
+          <PowerUpCard
+            type="wildcard"
+            title="الجوكر"
+            description="يملأ كل الخانات"
+            cost={50}
+            icon={Crown}
+            isUnlocked={(currentPlayer?.totalEarnedPoints || 0) >= 50}
+            isUsed={currentPlayer?.usedPowerUps?.wildcard || false}
+            isDisabled={!!currentRound?.activePowerUp && currentRound.activePowerUp.playerId !== currentPlayer?.id} // Disable if someone else used powerup
+            onActivate={() => activatePowerUp('wildcard')}
+          />
+          <PowerUpCard
+            type="banish"
+            title="الطرد"
+            description="يطرد منافس"
+            cost={40}
+            icon={Skull}
+            isUnlocked={(currentPlayer?.totalEarnedPoints || 0) >= 40}
+            isUsed={currentPlayer?.usedPowerUps?.banish || false}
+            isDisabled={!!currentRound?.activePowerUp && currentRound.activePowerUp.playerId !== currentPlayer?.id} // Disable if someone else used powerup
+            onActivate={() => setBanishOverlay(true)}
+          />
         </div>
       </div>
 

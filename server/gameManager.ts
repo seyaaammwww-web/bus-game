@@ -43,6 +43,28 @@ class GameManager {
   private timers: Map<string, NodeJS.Timeout> = new Map();
   private answerVotes: Map<string, AnswerVotes[]> = new Map(); // roomCode -> votes
 
+  constructor() {
+    this.startCleanupInterval();
+  }
+
+  private startCleanupInterval() {
+    // Clean up empty/old rooms every 1 hour
+    setInterval(() => {
+      const oneDay = 24 * 60 * 60 * 1000;
+      const now = Date.now();
+      let deleted = 0;
+
+      for (const [code, room] of this.rooms.entries()) {
+        if (now - room.createdAt > oneDay) {
+          this.rooms.delete(code);
+          this.answerVotes.delete(code);
+          deleted++;
+        }
+      }
+      if (deleted > 0) console.log(`[Cleanup] Removed ${deleted} old rooms`);
+    }, 60 * 60 * 1000);
+  }
+
   private generateRoomCode(): string {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let code = '';
@@ -1102,6 +1124,18 @@ class GameManager {
     if (!answer || !answer.isPendingVote) return;
     if (answer.playerId === voterId) return; // Self-voting prevented
 
+    // Initialize voterIds if not present
+    if (!answer.voterIds) answer.voterIds = [];
+
+    // Prevent double voting
+    if (answer.voterIds.includes(voterId)) {
+      console.log(`[Vote] Player ${voterId} already voted on this answer`);
+      return;
+    }
+
+    // Record vote
+    answer.voterIds.push(voterId);
+
     // Apply Vote
     if (accepted) answer.votes.accepted++;
     else answer.votes.rejected++;
@@ -1693,7 +1727,7 @@ class GameManager {
     }
 
     if (round.powerUpUsedInRound) {
-      this.send(ws, { type: 'error', payload: { message: 'تم استخدام مساعدة في هذه الجولة بالفعل' } });
+      this.send(ws, { type: 'error', payload: { message: 'تم استخدام مساعدة في هذه الجولة بالفعل! (مساعدة واحدة لكل جولة)' } });
       return;
     }
 
@@ -1768,7 +1802,7 @@ class GameManager {
     }
 
     if (round.banishedPlayerId === playerInfo.playerId || round.powerUpUsedInRound) {
-      this.send(ws, { type: 'error', payload: { message: 'غير مسموح حالياً' } });
+      this.send(ws, { type: 'error', payload: { message: 'تم استخدام مساعدة في هذه الجولة بالفعل! (مساعدة واحدة لكل جولة)' } });
       return;
     }
 
