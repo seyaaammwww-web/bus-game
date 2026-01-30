@@ -51,8 +51,8 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
         whileHover={{ scale: 1.15, rotate: 3 }}
         transition={{ type: 'spring', stiffness: 300, damping: 20 }}
       >
-        {/* Outer Glow */}
-        <div className="absolute -inset-1 bg-gradient-to-br from-[#fbbf24] via-[#8b5cf6] to-[#7c3aed] rounded-lg opacity-60 blur-sm animate-pulse" />
+        {/* Outer Border Frame */}
+        <div className="absolute -inset-0.5 bg-gradient-to-br from-[#fbbf24] via-[#8b5cf6] to-[#7c3aed] rounded-lg opacity-80" />
 
         {/* Main Avatar Container */}
         <div className="relative w-11 h-11 bg-gradient-to-br from-[#4c1d95] via-[#7c3aed] to-[#8b5cf6] rounded-lg border-[3px] border-[#fbbf24] shadow-[3px_3px_0_0_#2e1065,_0_0_12px_rgba(251,191,36,0.4)] flex items-center justify-center overflow-hidden">
