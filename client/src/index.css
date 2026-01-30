@@ -384,6 +384,40 @@
     letter-spacing: 0px;
   }
 
+  /* Logo Shine Effect */
+  .logo-shine {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+  }
+
+  .logo-shine::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 255, 255, 0.4),
+        transparent);
+    transform: skewX(-25deg);
+    animation: logo-shine-sweep 3s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes logo-shine-sweep {
+    0% {
+      left: -100%;
+    }
+
+    50%,
+    100% {
+      left: 150%;
+    }
+  }
+
   /* Enhanced text sizes for better readability */
   .text-4xl {
     font-size: 2.25rem;
