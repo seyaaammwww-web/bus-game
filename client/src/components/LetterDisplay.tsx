@@ -8,7 +8,7 @@ interface LetterDisplayProps {
 
 export function LetterDisplay({ letter, round, totalRounds }: LetterDisplayProps) {
   return (
-    <div className="flex flex-col items-center relative z-20">
+    <div className="flex flex-col items-center gap-6 relative z-20">
       {/* Main Letter Card */}
       <motion.div
         className="relative"
@@ -47,13 +47,13 @@ export function LetterDisplay({ letter, round, totalRounds }: LetterDisplayProps
         </div>
       </motion.div>
 
-      {/* Round Badge */}
+      {/* Round Badge - Below the card with proper spacing */}
       <motion.div
-        className="absolute -bottom-4 bg-gradient-to-r from-amber-400 to-yellow-500 text-[#2e1065] px-5 py-1.5 rounded-full border-[3px] border-[#4c1d95] font-bold text-lg shadow-[3px_3px_0_0_#2e1065,_0_0_15px_rgba(251,191,36,0.3)] font-pixel-text whitespace-nowrap rotate-[2deg] z-10"
+        className="bg-gradient-to-r from-amber-400 to-yellow-500 text-[#2e1065] px-5 py-1.5 rounded-full border-[3px] border-[#4c1d95] font-bold text-lg shadow-[3px_3px_0_0_#2e1065,_0_0_15px_rgba(251,191,36,0.3)] font-pixel-text whitespace-nowrap"
         initial={{ y: 20, opacity: 0, scale: 0.8 }}
         animate={{ y: 0, opacity: 1, scale: 1 }}
         transition={{ delay: 0.4, type: 'spring' }}
-        whileHover={{ scale: 1.05 }}
+        whileHover={{ scale: 1.05, rotate: 2 }}
       >
         جولة {round} / {totalRounds}
       </motion.div>
