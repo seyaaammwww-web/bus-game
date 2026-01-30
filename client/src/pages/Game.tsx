@@ -131,7 +131,8 @@ export default function Game() {
 
   const handleBusComplete = () => {
     if (!hasSubmitted) {
-      if (!allFilled) return;
+      // if (!allFilled) return; // Allow submitting incomplete to stop round strategically
+
       playClickSound();
       handleSubmit();
       triggerBusComplete();

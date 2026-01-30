@@ -86,25 +86,27 @@ export function PowerUpCard({
             {/* Card Face Content */}
             <div className="absolute inset-0 flex flex-col items-center justify-center p-0.5 md:p-1">
                 {/* Cost Badge - Top */}
-                <div className="absolute top-0.5 left-0.5 md:top-1 md:left-1 flex items-center gap-0.5 bg-black/30 px-1 py-0.5 rounded text-[6px] md:text-[8px] text-white font-bold">
-                    <span>{cost}</span>
-                    <Zap className="w-2 h-2 md:w-2.5 md:h-2.5 fill-yellow-300 text-yellow-300" />
+                <div className="absolute top-0.5 left-0.5 md:top-1 md:left-1 flex items-center gap-0.5 bg-black/20 px-1.5 py-0.5 md:px-2 md:py-1 rounded-full z-20 border border-white/10 shadow-sm backdrop-blur-[1px]">
+                    <span className="text-[6px] md:text-[8px] font-bold font-pixel-text text-white drop-shadow-md">{cost}</span>
+                    <Zap className="w-2 h-2 md:w-2.5 md:h-2.5 fill-yellow-300 text-yellow-300 drop-shadow-sm" />
                 </div>
 
                 {/* Icon - Center */}
                 {!isUnlocked ? (
-                    <Lock className="w-4 h-4 md:w-6 md:h-6 text-gray-400" />
+                    <Lock className="w-4 h-4 md:w-6 md:h-6 text-gray-400 mt-2" />
                 ) : (
-                    <Icon className={cn("w-5 h-5 md:w-7 md:h-7", style.iconColor)} />
+                    <Icon className={cn("w-5 h-5 md:w-7 md:h-7 mt-2", style.iconColor)} />
                 )}
 
                 {/* Title - Bottom */}
-                <span className={cn(
-                    "absolute bottom-0.5 md:bottom-1 text-[5px] md:text-[7px] font-bold font-pixel-text",
-                    isUnlocked ? "text-white drop-shadow-md" : "text-gray-400"
-                )}>
-                    {title}
-                </span>
+                <div className="absolute bottom-1 md:bottom-2 z-20 w-full px-1">
+                    <h3 className={cn(
+                        "text-[6px] md:text-[9px] font-bold font-pixel-title text-center py-0.5 md:py-1 rounded-md shadow-sm border border-white/10",
+                        isUnlocked ? "text-white bg-black/20 backdrop-blur-[1px]" : "text-gray-400 bg-gray-800/10"
+                    )}>
+                        {title}
+                    </h3>
+                </div>
             </div>
 
             {/* Shine Effect */}
