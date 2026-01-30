@@ -356,8 +356,21 @@ export default function Results() {
                 <span className="font-bold text-lg font-pixel-title">📝 نتائج الجولة</span>
               </div>
 
-              {/* Mobile Card View */}
-              <div className="md:hidden space-y-3 p-3">
+              {/* Compact Category Header */}
+              <div className="flex items-center justify-center gap-2 p-3 bg-gradient-to-r from-[#4c1d95]/5 to-[#7c3aed]/5 border-b border-[#4c1d95]/10">
+                {categories.map((cat) => {
+                  const Icon = categoryIcons[cat];
+                  return (
+                    <div key={cat} className={`flex items-center gap-1 px-2 py-1 rounded-lg text-white text-xs font-bold ${categoryColors[cat]}`}>
+                      <Icon className="w-3 h-3" />
+                      <span>{cat}</span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Results Grid - Works for both mobile and desktop */}
+              <div className="divide-y divide-[#4c1d95]/10">
                 {currentRound.submissions.map((submission, playerIdx) => {
                   let totalRoundScore = 0;
                   categories.forEach((cat) => {
@@ -370,33 +383,32 @@ export default function Results() {
                   return (
                     <motion.div
                       key={submission.playerId}
-                      className={`rounded-xl border-[3px] overflow-hidden ${submission.playerId === state.playerId
-                          ? 'border-[#7c3aed] bg-gradient-to-br from-purple-50 to-violet-50'
-                          : 'border-[#4c1d95]/30 bg-white'
+                      className={`p-3 ${submission.playerId === state.playerId
+                        ? 'bg-purple-50'
+                        : playerIdx % 2 === 0 ? 'bg-white' : 'bg-[#faf5ff]/30'
                         }`}
-                      initial={{ x: -20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: 0.05 * playerIdx }}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.03 * playerIdx }}
                     >
-                      {/* Player Header */}
-                      <div className="flex items-center justify-between p-3 bg-gradient-to-r from-[#4c1d95]/10 to-[#7c3aed]/5">
+                      {/* Player Row Header */}
+                      <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#4c1d95] to-[#7c3aed] text-white flex items-center justify-center text-sm font-bold">
+                          <span className="w-6 h-6 rounded-md bg-[#4c1d95] text-white text-xs font-bold flex items-center justify-center">
                             {playerIdx + 1}
-                          </div>
-                          <span className={`font-bold text-sm font-pixel-text ${submission.playerId === state.playerId ? 'text-[#7c3aed]' : 'text-[#4c1d95]'}`}>
+                          </span>
+                          <span className={`font-bold text-sm ${submission.playerId === state.playerId ? 'text-[#7c3aed]' : 'text-[#4c1d95]'}`}>
                             {submission.playerName}
                           </span>
                         </div>
-                        <div className={`px-3 py-1 rounded-full font-bold text-sm ${totalRoundScore > 0 ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white' : 'bg-gray-200 text-gray-500'}`}>
+                        <span className={`px-3 py-1 rounded-md text-xs font-bold ${totalRoundScore > 0 ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'}`}>
                           +{totalRoundScore}
-                        </div>
+                        </span>
                       </div>
 
                       {/* Answers Grid */}
-                      <div className="grid grid-cols-5 gap-1 p-2">
+                      <div className="grid grid-cols-5 gap-1">
                         {categories.map((cat) => {
-                          const Icon = categoryIcons[cat];
                           const answer = submission.answers[cat];
                           const validation = currentRound.validatedAnswers.find(
                             v => v.playerId === submission.playerId && v.category === cat
@@ -407,21 +419,22 @@ export default function Results() {
                           return (
                             <div
                               key={cat}
-                              className={`flex flex-col items-center p-2 rounded-lg ${isValid ? 'bg-green-100 border-2 border-green-400' :
-                                  answer ? 'bg-red-50 border-2 border-red-300' :
-                                    'bg-gray-50 border-2 border-gray-200'
+                              className={`text-center p-1.5 rounded-md text-xs ${isValid
+                                ? 'bg-green-100 border border-green-400'
+                                : answer
+                                  ? 'bg-red-50 border border-red-300'
+                                  : 'bg-gray-100 border border-gray-200'
                                 }`}
                             >
-                              <Icon className={`w-4 h-4 mb-1 ${isValid ? 'text-green-600' : answer ? 'text-red-400' : 'text-gray-400'}`} />
                               {answer ? (
                                 <>
-                                  <span className="text-[10px] font-bold text-[#4c1d95] truncate max-w-full text-center">{answer}</span>
-                                  <span className={`text-[10px] font-bold ${isValid ? 'text-green-600' : 'text-red-500'}`}>
+                                  <div className="font-bold text-[#4c1d95] truncate">{answer}</div>
+                                  <div className={`text-[10px] font-bold ${isValid ? 'text-green-600' : 'text-red-500'}`}>
                                     {isValid ? `+${score}` : '✗'}
-                                  </span>
+                                  </div>
                                 </>
                               ) : (
-                                <span className="text-[10px] text-gray-400">—</span>
+                                <span className="text-gray-400">—</span>
                               )}
                             </div>
                           );
@@ -432,109 +445,11 @@ export default function Results() {
                 })}
               </div>
 
-              {/* Desktop Table View */}
-              <div className="hidden md:block overflow-x-auto">
-                <table className="w-full text-sm">
-                  {/* Table Header */}
-                  <thead>
-                    <tr className="bg-gradient-to-r from-[#4c1d95]/10 to-[#7c3aed]/5">
-                      <th className="p-3 text-right text-[#4c1d95] font-bold text-sm border-b-2 border-[#4c1d95]/20 w-32 font-pixel-text">اللاعب</th>
-                      {categories.map((cat) => {
-                        const Icon = categoryIcons[cat];
-                        return (
-                          <th key={cat} className={`p-3 text-center text-white font-bold text-xs border-b-2 border-[#4c1d95]/20 ${categoryColors[cat]} rounded-t-lg`}>
-                            <div className="flex flex-col items-center gap-1">
-                              <Icon className="w-5 h-5" />
-                              <span className="font-pixel-text">{cat}</span>
-                            </div>
-                          </th>
-                        );
-                      })}
-                      <th className="p-3 text-center text-[#4c1d95] font-bold text-sm border-b-2 border-[#4c1d95]/20 w-20 font-pixel-text">المجموع</th>
-                    </tr>
-                  </thead>
-
-                  {/* Table Body */}
-                  <tbody>
-                    {currentRound.submissions.map((submission, playerIdx) => {
-                      let totalRoundScore = 0;
-
-                      return (
-                        <tr
-                          key={submission.playerId}
-                          className={`${submission.playerId === state.playerId
-                              ? 'bg-gradient-to-r from-purple-50 to-violet-50'
-                              : playerIdx % 2 === 0 ? 'bg-white' : 'bg-[#faf5ff]/50'
-                            } hover:bg-purple-100/50 transition-colors`}
-                        >
-                          {/* Player Name */}
-                          <td className="p-3 border-b border-[#4c1d95]/10">
-                            <div className="flex items-center gap-2">
-                              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#4c1d95] to-[#7c3aed] text-white flex items-center justify-center text-sm font-bold shadow-sm">
-                                {playerIdx + 1}
-                              </div>
-                              <span className={`font-bold text-sm font-pixel-text ${submission.playerId === state.playerId ? 'text-[#7c3aed]' : 'text-[#4c1d95]'}`}>
-                                {submission.playerName}
-                              </span>
-                            </div>
-                          </td>
-
-                          {/* Category Answers */}
-                          {categories.map((cat) => {
-                            const answer = submission.answers[cat];
-                            const validation = currentRound.validatedAnswers.find(
-                              v => v.playerId === submission.playerId && v.category === cat
-                            );
-                            const isValid = validation?.isValid;
-                            const score = validation?.score || 0;
-                            if (isValid) totalRoundScore += score;
-
-                            return (
-                              <td
-                                key={cat}
-                                className={`p-2 text-center border-b border-[#4c1d95]/10 ${isValid ? 'bg-green-50' : answer ? 'bg-red-50' : ''
-                                  }`}
-                              >
-                                {answer ? (
-                                  <div className="flex flex-col items-center gap-1">
-                                    <span className="text-[#4c1d95] text-sm font-bold font-pixel-text">{answer}</span>
-                                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${isValid
-                                        ? 'bg-green-500 text-white'
-                                        : 'bg-red-400 text-white'
-                                      }`}>
-                                      {isValid ? `+${score}` : '✗'}
-                                    </span>
-                                  </div>
-                                ) : (
-                                  <div className="flex items-center justify-center">
-                                    <span className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-gray-400 text-xs">—</span>
-                                  </div>
-                                )}
-                              </td>
-                            );
-                          })}
-
-                          {/* Total Score */}
-                          <td className="p-3 text-center border-b border-[#4c1d95]/10">
-                            <span className={`inline-flex items-center justify-center px-4 py-2 rounded-lg font-bold text-base shadow-sm ${totalRoundScore > 0
-                                ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white'
-                                : 'bg-gray-200 text-gray-500'
-                              }`}>
-                              +{totalRoundScore}
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Legend */}
-              <div className="px-4 py-3 bg-gradient-to-r from-[#4c1d95]/5 to-[#7c3aed]/5 flex items-center justify-center gap-6 text-sm font-pixel-text border-t border-[#4c1d95]/10">
-                <span className="flex items-center gap-2"><span className="w-4 h-4 bg-gradient-to-br from-green-500 to-emerald-500 rounded shadow-sm"></span> صحيح</span>
-                <span className="flex items-center gap-2"><span className="w-4 h-4 bg-gradient-to-br from-red-400 to-red-500 rounded shadow-sm"></span> خطأ</span>
-                <span className="flex items-center gap-1 text-[#7c3aed] font-bold">+20 فريد | +10 مكرر</span>
+              {/* Simple Legend */}
+              <div className="px-3 py-2 bg-[#4c1d95]/5 flex items-center justify-center gap-4 text-xs border-t border-[#4c1d95]/10">
+                <span className="flex items-center gap-1"><span className="w-2 h-2 bg-green-500 rounded"></span> صحيح</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 bg-red-400 rounded"></span> خطأ</span>
+                <span className="text-[#7c3aed] font-bold">+20 فريد | +10 مكرر</span>
               </div>
             </RetroCard>
           </motion.div>
