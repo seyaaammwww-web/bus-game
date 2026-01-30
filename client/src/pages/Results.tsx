@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, ArrowLeft, RotateCcw, User, Users, Globe, PawPrint, Box, Crown, Star, Sparkles, Medal, Shield, LogOut, Home, Zap, Award, Target, Timer, Plus, UserX, AlertTriangle } from 'lucide-react';
+import { Trophy, ArrowLeft, RotateCcw, User, Users, Globe, PawPrint, Box, Crown, Star, Sparkles, Medal, Shield, LogOut, Home, Zap, Award, Target, Timer, Plus, UserX, AlertTriangle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Confetti } from '@/components/Confetti';
 import { useGame } from '@/lib/gameContext';
@@ -434,7 +434,7 @@ export default function Results() {
                             <div
                               key={cat}
                               onClick={() => {
-                                if (isCurrentPlayer && !isValid && answer) {
+                                if (isCurrentPlayer && !isValid && answer && !isReferee) {
                                   setAppealDialog({
                                     playerId: submission.playerId,
                                     category: cat,
@@ -442,29 +442,58 @@ export default function Results() {
                                   });
                                 }
                               }}
-                              className={`text-center p-1 border-2 shadow-[1px_1px_0_0_rgba(0,0,0,0.3)] transition-all ${isValid
+                              className={`text-center p-1 border-2 shadow-[1px_1px_0_0_rgba(0,0,0,0.3)] transition-all relative group h-full flex flex-col justify-center ${isValid
                                 ? 'bg-[#bbf7d0] border-[#22c55e]'
                                 : answer
-                                  ? isCurrentPlayer
-                                    ? 'bg-[#fecaca] border-[#ef4444] cursor-pointer hover:scale-105 active:scale-95 hover:shadow-[2px_2px_0_0_#dc2626] relative group'
+                                  ? isCurrentPlayer && !isReferee
+                                    ? 'bg-[#fecaca] border-[#ef4444] cursor-pointer hover:scale-105 active:scale-95 hover:shadow-[2px_2px_0_0_#dc2626]'
                                     : 'bg-[#fecaca] border-[#ef4444]'
                                   : 'bg-white border-[#d1d5db]'
                                 }`}
                             >
-                              {isCurrentPlayer && !isValid && answer && (
+                              {isCurrentPlayer && !isValid && answer && !isReferee && (
                                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-600 rounded-full border border-white z-10 flex items-center justify-center animate-pulse group-hover:block hidden">
                                   <span className="text-[8px] text-white">?</span>
                                 </div>
                               )}
+
                               {answer ? (
-                                <div className="space-y-0.5">
-                                  <div className="text-[10px] font-bold text-[#2e1065] truncate leading-tight">{answer}</div>
+                                <div className="space-y-0.5 w-full">
+                                  <div className="text-[10px] font-bold text-[#2e1065] truncate leading-tight px-0.5">{answer}</div>
                                   <div className={`text-[9px] font-bold ${isValid ? 'text-[#15803d]' : 'text-[#dc2626]'}`}>
                                     {isValid ? `+${score}` : '✗'}
                                   </div>
                                 </div>
                               ) : (
                                 <span className="text-[10px] text-[#9ca3af]">—</span>
+                              )}
+
+                              {/* Referee Controls Overlay (Only for Referee) */}
+                              {isReferee && answer && (
+                                <div className="absolute inset-0 bg-black/60 hidden group-hover:flex items-center justify-center gap-1 backdrop-blur-[1px] z-20">
+                                  {isValid && (
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        refereeToggleUnique(submission.playerId, cat);
+                                      }}
+                                      className="w-5 h-5 bg-blue-500 hover:bg-blue-600 text-white rounded border border-white flex items-center justify-center shadow-sm"
+                                      title="تبديل (فريد/مكرر)"
+                                    >
+                                      <Users className="w-3 h-3" />
+                                    </button>
+                                  )}
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      refereeDeduct(submission.playerId, cat, 'رفض الحكم');
+                                    }}
+                                    className="w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded border border-white flex items-center justify-center shadow-sm"
+                                    title="خصم النقاط (رفض)"
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                </div>
                               )}
                             </div>
                           );

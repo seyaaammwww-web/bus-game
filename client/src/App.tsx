@@ -7,8 +7,6 @@ import { GameProvider, useGame } from "@/lib/gameContext";
 import Home from "@/pages/Home";
 import Lobby from "@/pages/Lobby";
 import Game from "@/pages/Game";
-import Voting from "@/pages/Voting";
-import RefereeReview from "@/pages/RefereeReview";
 import RefereeWaiting from "@/pages/RefereeWaiting";
 import Results from "@/pages/Results";
 
@@ -31,10 +29,6 @@ function GameRouter() {
         return <RefereeWaiting />;
       }
       return <Game />;
-    case 'voting':
-      return <Voting />;
-    case 'referee_review':
-      return <RefereeReview />;
     case 'results':
     case 'final':
       return <Results />;
