@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { RetroCard } from '@/components/ui/RetroCard';
 import { useGame } from '@/lib/gameContext';
 import { resumeAudioContext } from '@/lib/sounds';
-import InstructionSlides from '@/components/InstructionSlides';
+import { Tutorial } from '@/components/Tutorial';
 import { HelpCircle } from 'lucide-react';
 import { RetroQuote } from '@/components/ui/RetroQuote';
 
@@ -58,7 +58,7 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden relative text-white">
 
-      <InstructionSlides isOpen={showHelp} onClose={() => setShowHelp(false)} />
+      {showHelp && <Tutorial onClose={() => setShowHelp(false)} />}
 
       {/* Large Floating Help Button */}
       <motion.button
