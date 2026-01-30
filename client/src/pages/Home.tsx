@@ -77,7 +77,7 @@ export default function Home() {
         className="text-center mb-8 relative z-10"
       >
         <div className="logo-container animate-slow-float">
-          {/* Logo with proper shine effect using CSS mask */}
+          {/* Logo with shine effect - uses CSS mask to constrain glow to logo shape */}
           <div className="logo-shine">
             <img
               src="/assets/logo.png"
