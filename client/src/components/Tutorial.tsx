@@ -25,7 +25,15 @@ export function Tutorial({ onClose }: TutorialProps) {
                     </div>
                 </div>
             ),
-            icon: <img src="/bus-logo.png" alt="Bus" className="w-24 h-24 mx-auto mb-4 animate-bounce" /> // Placeholder or icon
+            icon: (
+                <motion.img
+                    src="/assets/logo.png"
+                    alt="Bus"
+                    className="w-32 h-auto mx-auto mb-4 object-contain"
+                    animate={{ y: [0, -10, 0] }}
+                    transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+                />
+            )
         },
         {
             title: "نظام النقط المحدث ⭐",
@@ -148,14 +156,7 @@ export function Tutorial({ onClose }: TutorialProps) {
                             السابق
                         </Button>
 
-                        <div className="flex gap-1">
-                            {slides.map((_, i) => (
-                                <div
-                                    key={i}
-                                    className={`w-2 h-2 rounded-full transition-colors ${i === step ? 'bg-[#7c3aed]' : 'bg-gray-200'}`}
-                                />
-                            ))}
-                        </div>
+                        <div />
 
                         {step === slides.length - 1 ? (
                             <Button
