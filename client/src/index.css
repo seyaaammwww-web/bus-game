@@ -240,9 +240,21 @@
   [role="button"],
   [role="link"],
   [tabindex],
+  [tabindex]:not([tabindex="-1"]),
   .clickable,
-  label {
+  label,
+  summary {
     cursor: url(/assets/workos/cursor-hover.png) 28 26, pointer !important;
+  }
+
+  /* Ensure cursor on child elements of interactive items */
+  a *,
+  button *,
+  [role="button"] *,
+  [role="link"] *,
+  [tabindex] *,
+  .clickable * {
+    cursor: inherit !important;
   }
 
   a:active,
@@ -253,8 +265,92 @@
   [role="button"]:active,
   [role="link"]:active,
   .clickable:active,
-  label:active {
+  label:active,
+  a:active *,
+  button:active *,
+  [role="button"]:active *,
+  .clickable:active * {
     cursor: url(/assets/workos/cursor-click.png) 28 26, pointer !important;
+  }
+
+  /* Ensure SVG and icon elements inherit cursor from parent */
+  svg,
+  svg *,
+  path,
+  circle,
+  rect,
+  line,
+  polyline,
+  polygon,
+  use,
+  .lucide,
+  .lucide *,
+  [class*="lucide-"],
+  [class*="lucide-"] * {
+    cursor: inherit !important;
+  }
+
+  /* Text elements should use normal cursor by default */
+  p,
+  span,
+  div,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  strong,
+  em,
+  b,
+  i,
+  small,
+  li,
+  td,
+  th,
+  tr,
+  table,
+  header,
+  footer,
+  main,
+  section,
+  article,
+  aside,
+  nav,
+  figure,
+  figcaption {
+    cursor: url(/assets/workos/cursor-normal.png) 28 26, auto !important;
+  }
+
+  /* But if they're inside interactive elements, inherit the hover cursor */
+  a p,
+  a span,
+  a div,
+  a h1,
+  a h2,
+  a h3,
+  a h4,
+  a h5,
+  a h6,
+  button p,
+  button span,
+  button div,
+  button h1,
+  button h2,
+  button h3,
+  button h4,
+  button h5,
+  button h6,
+  [role="button"] p,
+  [role="button"] span,
+  [role="button"] div,
+  [tabindex] p,
+  [tabindex] span,
+  [tabindex] div,
+  .clickable p,
+  .clickable span,
+  .clickable div {
+    cursor: inherit !important;
   }
 
   /* Arabic Text Styling */
