@@ -131,18 +131,12 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
       {!showScore && (
         player.isReady ? (
           <motion.div
-            className={cn(
-              "bg-[#FFFDD1] border-[3px] border-[#2e1065] p-4 flex items-center gap-4 relative transition-all duration-300",
-              "shadow-[4px_4px_0_0_#2e1065]",
-              "hover:shadow-[6px_6px_0_0_#2e1065] hover:translate-x-[-2px] hover:translate-y-[-2px]",
-              "before:absolute before:inset-[4px] before:border-[2px] before:border-[#2e1065]/10 before:pointer-events-none",
-              isCurrentPlayer && "bg-[#FFFEF0] border-[3px] shadow-[6px_6px_0_0_#2e1065] scale-105 z-10",
-              "overflow-hidden"
-            )}
+            className="w-8 h-8 bg-gradient-to-br from-[#10b981] to-[#059669] rounded-full flex items-center justify-center border-[2px] border-[#047857] shadow-[2px_2px_0_0_#065f46]"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', stiffness: 300 }}
           >
-            <div className="relative z-10 flex items-center gap-4 w-full">
-              <Check className="w-5 h-5 text-accent-foreground" />
-            </div>
+            <Check className="w-5 h-5 text-white stroke-[3]" />
           </motion.div>
         ) : (
           <motion.div
