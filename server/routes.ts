@@ -3,35 +3,18 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { gameManager } from "./gameManager";
 import { HybridValidator } from "./hybridValidator";
-import { AIValidator } from "./aiValidator";
 import { GroqService } from "./services/groqService";
 
 export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+
   // Debug AI initialization
   console.log("=== AI INITIALIZATION DEBUG ===");
-  console.log("GEMINI_API_KEY exists:", !!process.env.GEMINI_API_KEY);
-  console.log("GEMINIAPIKEY exists:", !!process.env.GEMINIAPIKEY);
-  console.log("GEMINI_MODEL_NAME:", process.env.GEMINI_MODEL_NAME);
-  console.log("GEMINIMODEL:", process.env.GEMINIMODEL);
-
-  try {
-    const hybridValidator = HybridValidator.getInstance();
-    const aiValidator = AIValidator.getInstance();
-    console.log("AI Validators initialized successfully");
-
-    // Test AI connection (non-blocking)
-    console.log("Testing AI connection...");
-    aiValidator.validate("بلد", "أ", "أمريكا")
-      .then(result => console.log("AI Test Result:", result))
-      .catch(err => console.error("AI Test Error:", err));
-
-  } catch (error) {
-    console.error("AI Initialization Error:", error);
-  }
+  console.log("GROQ API KEY exists:", !!process.env.GROQ_API_KEY);
   console.log("=== END DEBUG ===");
+
   // Create WebSocket server
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
 
@@ -62,62 +45,9 @@ export async function registerRoutes(
     });
   });
 
-  // AI Test endpoint
-  app.get('/api/test-ai', async (_req, res) => {
-    try {
-      const hybridValidator = HybridValidator.getInstance();
-      const aiValidator = AIValidator.getInstance();
-
-      // Test single validation with strict prompt
-      const testResult = await aiValidator.validate("بلد", "أ", "أمريكا");
-
-      // Test batch validation with tricky/mixed cases
-      const batchItems = [
-        { playerId: "test1", category: "بلد", letter: "أ", answer: "أمريكا" }, // Correct
-        { playerId: "test2", category: "بلد", letter: "أ", answer: "أوفخن" }, // Gibberish (should fail)
-        { playerId: "test3", category: "حيوان", letter: "أ", answer: "أسد" }, // Correct
-        { playerId: "test4", category: "بنت", letter: "أ", answer: "أحمد" }   // Wrong category (should fail)
-      ];
-
-      const batchResult = await aiValidator.validateAllRoundAnswers(batchItems);
-
-      res.json({
-        status: 'success',
-        singleTest: testResult,
-        batchTest: Array.from(batchResult.entries()),
-        hybridMetrics: hybridValidator.getMetrics(),
-        aiMetrics: aiValidator.getMetrics(),
-        modelInfo: {
-          name: 'gemini-3-flash-preview',
-          status: 'active',
-          config: 'Strict JSON + Timeout'
-        }
-      });
-    } catch (error: any) {
-      res.status(500).json({
-        status: 'error',
-        message: error.message,
-        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
-        model: 'gemini-3-flash-preview'
-      });
-    }
-  });
-
   // Health check endpoint
   app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok' });
-  });
-
-  // AI Test endpoint
-  app.get('/api/test-ai', async (_req, res) => {
-    // ... existing content (kept via context matching if I could, but replacer replaces block)
-    // Actually I should Append the NEW endpoints, not replace existing test-ai unless I want to merge functionality
-    // The user asked to ADD endpoints.
-    // I will use replace to APPEND before the end of the registerRoutes function?
-    // Or just insert them before 'return httpServer;'
-    // I need to be careful with 'EndLine'.
-    // I will replace the Health Check endpoint block to include the new ones below it, or use `replace_file_content` targeting a known block.
-    // Let's replace the `app.get('/api/metrics' ...` to include the new ones after it.
   });
 
   // Groq Health Endpoint

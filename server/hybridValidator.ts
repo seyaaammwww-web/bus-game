@@ -1,7 +1,5 @@
 import { WildcardService } from './services/wildcardService';
 import type { Category } from '@shared/schema';
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { AIValidator } from './aiValidator';
 import dotenv from "dotenv";
 import { GroqService } from './services/groqService';
 
@@ -24,8 +22,6 @@ interface CacheEntry {
  */
 export class HybridValidator {
   private static instance: HybridValidator;
-  private genAI: GoogleGenerativeAI | null = null;
-  private model: any = null;
 
   private cache = new Map<string, CacheEntry>();
   private maxCacheSize = 10000;
@@ -41,31 +37,9 @@ export class HybridValidator {
   };
 
   private constructor() {
-    const apiKey = process.env.GEMINI_API_KEY || process.env.GEMINIAPIKEY;
-    const modelName = process.env.GEMINI_MODEL_NAME || process.env.GEMINIMODEL || 'gemini-3-flash-preview';
-
-    console.log(`[HybridValidator] API Key: ${apiKey ? 'Provided' : 'Missing'}`);
-    console.log(`[HybridValidator] Model: ${modelName}`);
-
-    if (apiKey) {
-      try {
-        this.genAI = new GoogleGenerativeAI(apiKey);
-        this.model = this.genAI.getGenerativeModel({
-          model: modelName,
-          generationConfig: {
-            maxOutputTokens: 100,
-            temperature: 0.1,
-          }
-        });
-        console.log("[HybridValidator] AI initialized successfully");
-      } catch (error: any) {
-        console.warn("[HybridValidator] AI initialization failed:", error.message);
-        console.warn("[HybridValidator] Falling back to database-only mode");
-        this.model = null; // Ensure partial failure doesn't leave bad state
-      }
-    } else {
-      console.warn("[HybridValidator] No API key - using database-only mode");
-    }
+    // No direct AI initialization here anymore.
+    // GroqService handles the AI part now.
+    console.log("[HybridValidator] Initialized in DB-First mode.");
   }
 
   static getInstance(): HybridValidator {

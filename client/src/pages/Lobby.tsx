@@ -137,6 +137,36 @@ export default function Lobby() {
               </motion.span>
             </div>
             <div className="space-y-3">
+              {/* Voting Toggle (New) */}
+              {isHost ? (
+                <div className="flex items-center justify-between p-3 bg-white/50 rounded-lg border-2 border-[#4c1d95]/20">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-[#7c3aed] rounded-lg flex items-center justify-center text-white">
+                      <Users className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-[#4c1d95] font-pixel-text text-sm">التحكيم الديمقراطي</p>
+                      <p className="text-[10px] text-[#4c1d95]/70 font-pixel-text">اللاعبين يصوتوا على الإجابات</p>
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant={room.settings?.enableVoting ? "default" : "outline"}
+                    onClick={() => updateSettings({ enableVoting: !room.settings?.enableVoting })}
+                    className={`h-8 font-bold font-pixel-text ${room.settings?.enableVoting ? 'bg-[#7c3aed]' : 'text-[#4c1d95]'}`}
+                  >
+                    {room.settings?.enableVoting ? 'مفعل ✅' : 'معطل ❌'}
+                  </Button>
+                </div>
+              ) : (
+                room.settings?.enableVoting && (
+                  <div className="flex items-center gap-2 p-2 bg-[#7c3aed]/10 rounded-lg border border-[#7c3aed]/30 justify-center mb-2">
+                    <Users className="w-4 h-4 text-[#7c3aed]" />
+                    <span className="text-xs font-bold text-[#4c1d95] font-pixel-text">نظام التحكيم الديمقراطي مفعل</span>
+                  </div>
+                )
+              )}
+
               <AnimatePresence>
                 {room.players.map((player, index) => (
                   <motion.div

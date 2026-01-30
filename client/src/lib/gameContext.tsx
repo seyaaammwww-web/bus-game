@@ -22,6 +22,8 @@ type GameAction =
   | { type: 'UPDATE_PLAYERS'; players: Player[] }
   | { type: 'UPDATE_PHASE'; phase: GamePhase }
   | { type: 'UPDATE_ROUND'; round: Round }
+  | { type: 'UPDATE_ROUND'; round: Round }
+  | { type: 'UPDATE_VOTE_STATE'; payload: any }
   | { type: 'RESET' };
 
 const initialState: GameState = {
@@ -59,6 +61,16 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const rounds = [...state.room.rounds];
       rounds[state.room.currentRound] = action.round;
       return { ...state, room: { ...state.room, rounds } };
+    case 'UPDATE_VOTE_STATE':
+      if (!state.room) return state;
+      return {
+        ...state,
+        room: {
+          ...state.room,
+          currentVote: action.payload.vote || action.payload.currentVote || state.room.currentVote,
+          voteQueue: action.payload.queue || state.room.voteQueue
+        }
+      };
     case 'RESET':
       return initialState;
     default:
@@ -92,6 +104,8 @@ interface GameContextType {
   isReferee: boolean;
   referee: Player | null;
   updateSettings: (settings: any) => void;
+  requestVote: (playerId: string, category: string, word: string) => void;
+  castDemocraticVote: (vote: 'yes' | 'no') => void;
   activatePowerUp: (type: PowerUpType, targetId?: string) => void;
   activePowerUpNotification: { type: PowerUpType; playerName: string } | null;
   isBanished: boolean;
@@ -140,9 +154,16 @@ export function GameProvider({ children }: { children: ReactNode }) {
       case 'voting_start':
       case 'round_results':
       case 'game_end':
+      case 'game_end':
       case 'sync_state':
         dispatch({ type: 'SET_ROOM', room: message.payload.room });
         dispatch({ type: 'SET_RUSH', isRush: false });
+        break;
+      case 'vote_session_start':
+      case 'vote_update':
+      case 'vote_session_result':
+        // Update specific voting fields in room
+        dispatch({ type: 'UPDATE_VOTE_STATE', payload: message.payload });
         break;
       case 'error':
         dispatch({ type: 'SET_ERROR', error: message.payload.message });
@@ -332,6 +353,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
     sendMessage('update_settings', settings);
   }, [sendMessage]);
 
+  const requestVote = useCallback((playerId: string, category: string, word: string) => {
+    sendMessage('request_vote', { playerId, category, word });
+  }, [sendMessage]);
+
+  const castDemocraticVote = useCallback((vote: 'yes' | 'no') => {
+    sendMessage('vote_cast', { vote });
+  }, [sendMessage]);
+
   const activatePowerUp = useCallback((type: PowerUpType, targetId?: string) => {
     if (targetId) {
       sendMessage('activate_powerup', { type, targetPlayerId: targetId });
@@ -408,6 +437,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
       isReferee,
       referee,
       updateSettings,
+      requestVote,
+      castDemocraticVote,
       activatePowerUp,
       activePowerUpNotification,
       isBanished,

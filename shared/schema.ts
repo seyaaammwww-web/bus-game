@@ -112,6 +112,21 @@ export interface RefereeDeduction {
 // Game state
 export type GamePhase = 'lobby' | 'playing' | 'voting' | 'ai_processing' | 'referee_review' | 'results' | 'final';
 
+// Voting System Types
+export interface VoteRequest {
+  requestId: string;
+  requesterId: string;
+  requesterName: string;
+  category: Category;
+  word: string;
+}
+
+export interface ActiveVote extends VoteRequest {
+  votes: { yes: number; no: number };
+  voterIds: string[]; // Who voted in this session
+  startTime: number;
+}
+
 export interface GameRoom {
   id: string;
   code: string;
@@ -127,8 +142,14 @@ export interface GameRoom {
   refereeId?: string;
   refereeDeductions?: RefereeDeduction[];
   nextRoundAt?: number;
+
+  // Voting State
+  voteQueue?: VoteRequest[];
+  currentVote?: ActiveVote | null;
+
   settings?: {
     customCategories?: string[];
+    enableVoting?: boolean; // New Toggle
   };
 }
 
@@ -188,7 +209,12 @@ export type WSMessageType =
   | 'waiting_for_freeze_player'
   | 'appeal_answer'
   | 'appeal_result'
-  | 'toast';
+  | 'toast'
+  // Voting System Specific
+  | 'request_vote'
+  | 'vote_cast'
+  | 'vote_session_start' // Individual word vote start
+  | 'vote_session_result';
 
 export interface WSMessage {
   type: WSMessageType;

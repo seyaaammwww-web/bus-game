@@ -47,7 +47,7 @@ async function generateForLetter(letter: string): Promise<any> {
 }`;
 
     try {
-        const chatCompletion = await groq['groq'].chat.completions.create({
+        const chatCompletion = await groq.rawClient.chat.completions.create({
             messages: [
                 {
                     role: "system",

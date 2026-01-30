@@ -9,12 +9,13 @@ import type {
   RoundAnswers,
   PlayerSubmission,
   ValidatedAnswer,
-  WSMessage
+  WSMessage,
+  VoteRequest,
+  ActiveVote
 } from '@shared/schema';
 import { categories } from '@shared/schema';
 import { arabicWords, getRandomLetters } from '@shared/arabicWords';
 import { HybridValidator } from './hybridValidator';
-import { AIValidator } from './aiValidator';
 import { GroqService } from './services/groqService';
 import { WildcardService } from './services/wildcardService';
 
@@ -282,6 +283,12 @@ class GameManager {
       phase: 'lobby',
       letters: getRandomLetters(10),
       createdAt: Date.now(),
+      voteQueue: [],
+      currentVote: null,
+      settings: {
+        enableVoting: false,
+        customCategories: []
+      }
     };
 
     this.rooms.set(roomCode, room);
@@ -682,6 +689,11 @@ class GameManager {
       room.settings = { ...room.settings, customCategories: settings.customCategories };
     }
 
+    if (typeof settings.enableVoting === 'boolean') {
+      if (!room.settings) room.settings = {};
+      room.settings.enableVoting = settings.enableVoting;
+    }
+
     this.broadcastToRoom(room.code, {
       type: 'sync_state',
       payload: { room }
@@ -935,9 +947,9 @@ class GameManager {
 
     room.phase = 'results';
 
-    // ✅ Referee Logic: If referee exists, PAUSE and wait for manual approval
-    if (room.refereeId) {
-      console.log(`[Finish Round] Referee present (${room.refereeId}). Pausing for review.`);
+    // ✅ Referee Logic OR Voting Mode: PAUSE and wait for manual approval
+    if (room.refereeId || room.settings?.enableVoting) {
+      console.log(`[Finish Round] Pausing for review (Referee: ${!!room.refereeId}, Voting: ${!!room.settings?.enableVoting}).`);
       room.nextRoundAt = undefined; // No auto timer
     } else {
       // Standard Flow: Auto-timer
@@ -1508,10 +1520,223 @@ class GameManager {
         }
         break;
       case 'appeal_answer':
-        this.appealAnswer(ws, message.payload.playerId, message.payload.category, message.payload.word);
+        // If democratic voting is enabled, this becomes a vote request
+        const pInfo = this.players.get(ws);
+        const r = pInfo ? this.rooms.get(pInfo.roomId) : null;
+        if (r?.settings?.enableVoting) {
+          this.requestVote(ws, message.payload);
+        } else {
+          this.appealAnswer(ws, message.payload.playerId, message.payload.category, message.payload.word);
+        }
+        break;
+
+      // Democratic Voting Messages
+      case 'vote_cast':
+        this.castDemocraticVote(ws, message.payload);
+        break;
+      case 'vote_session_start': // Host triggers start of voting queue
+        this.processVoteQueue(ws); // Helper to start/continue queue
         break;
     }
   }
+
+  // ==========================================
+  // 🗳️ DEMOCRATIC VOTING SYSTEM
+  // ==========================================
+
+  private requestVote(ws: WebSocket, payload: any): void {
+    const playerInfo = this.players.get(ws);
+    if (!playerInfo) return;
+    const room = this.rooms.get(playerInfo.roomId);
+    if (!room) return;
+
+    const { playerId, category, word } = payload;
+
+    // Validation: Ensure valid request
+    const round = room.rounds[room.currentRound];
+    if (!round) return;
+
+    // Check if answer exists
+    const answer = round.validatedAnswers.find(a =>
+      a.playerId === playerId && a.category === category && this.normalizeArabic(a.answer) === this.normalizeArabic(word)
+    );
+    if (!answer) return;
+
+    if (!room.voteQueue) room.voteQueue = [];
+
+    // Check if already in queue
+    const exists = room.voteQueue.find(v =>
+      v.requesterId === playerId && v.category === category && v.word === word
+    );
+    if (exists) return;
+
+    const request: VoteRequest = {
+      requestId: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      requesterId: playerId,
+      requesterName: room.players.find(p => p.id === playerId)?.name || 'Unknown',
+      category,
+      word
+    };
+
+    room.voteQueue.push(request);
+
+    // Broadcast Queue Update
+    this.broadcastToRoom(room.code, {
+      type: 'vote_update',
+      payload: {
+        queue: room.voteQueue,
+        currentVote: room.currentVote
+      }
+    });
+
+    // Auto-start if it's the only one and not currently voting?
+    // User requested "host control", but maybe auto-queueing is better UX?
+    // Let's stick to "Host starts session" or if session active, strictly queue.
+    // For now, just queue. Host sees queue and hits "Start Voting".
+  }
+
+  private processVoteQueue(ws: WebSocket): void {
+    const playerInfo = this.players.get(ws);
+    if (!playerInfo) return;
+    const room = this.rooms.get(playerInfo.roomId);
+    if (!room) return;
+
+    // Only host
+    if (room.hostId !== playerInfo.playerId) return;
+
+    this.startNextVote(room);
+  }
+
+  private startNextVote(room: GameRoom): void {
+    if (!room.voteQueue || room.voteQueue.length === 0) {
+      room.currentVote = null;
+      // Notify end of voting session
+      this.broadcastToRoom(room.code, {
+        type: 'vote_session_result',
+        payload: { status: 'complete' }
+      });
+      return;
+    }
+
+    if (room.currentVote) return; // Already voting
+
+    const nextRequest = room.voteQueue.shift(); // Dequeue
+    if (!nextRequest) return;
+
+    const activeVote: ActiveVote = {
+      ...nextRequest,
+      votes: { yes: 0, no: 0 },
+      voterIds: [],
+      startTime: Date.now()
+    };
+
+    room.currentVote = activeVote;
+
+    this.broadcastToRoom(room.code, {
+      type: 'vote_session_start',
+      payload: {
+        vote: activeVote,
+        queue: room.voteQueue
+      }
+    });
+
+    // Set Timeout for this specific vote (e.g. 20 seconds)
+    setTimeout(() => {
+      const r = this.rooms.get(room.code);
+      if (r && r.currentVote?.requestId === activeVote.requestId) {
+        this.finalizeVote(r);
+      }
+    }, 20000);
+  }
+
+  private castDemocraticVote(ws: WebSocket, payload: { vote: 'yes' | 'no' }): void {
+    const playerInfo = this.players.get(ws);
+    if (!playerInfo) return;
+    const room = this.rooms.get(playerInfo.roomId);
+    if (!room || !room.currentVote) return;
+
+    const voterId = playerInfo.playerId;
+
+    // Prevent Double Voting
+    if (room.currentVote.voterIds.includes(voterId)) return;
+
+    // Prevent Requester from voting? (Usually fair to let them vote yes, or block them?)
+    // Let's allow everyone to vote for simplicity, or block requester?
+    // "Democratic" implies everyone.
+
+    room.currentVote.voterIds.push(voterId);
+    if (payload.vote === 'yes') room.currentVote.votes.yes++;
+    else room.currentVote.votes.no++;
+
+    this.broadcastToRoom(room.code, {
+      type: 'vote_update',
+      payload: { currentVote: room.currentVote }
+    });
+
+    // Check if everyone voted
+    // Active players count (maybe exclude requester?)
+    const activeCount = room.players.length;
+    if (room.currentVote.voterIds.length >= activeCount) {
+      this.finalizeVote(room);
+    }
+  }
+
+  private finalizeVote(room: GameRoom): void {
+    if (!room.currentVote) return;
+
+    const { yes, no } = room.currentVote.votes;
+    const isAccepted = yes > no; // Simple majority
+
+    // Apply result
+    const round = room.rounds[room.currentRound];
+    if (round) {
+      const answer = round.validatedAnswers.find(a =>
+        a.playerId === room.currentVote!.requesterId &&
+        a.category === room.currentVote!.category &&
+        this.normalizeArabic(a.answer) === this.normalizeArabic(room.currentVote!.word)
+      );
+
+      if (answer) {
+        if (isAccepted) {
+          answer.isValid = true;
+          answer.reason = 'تمت الموافقة (تصويت)';
+          answer.score = 10; // Base score
+          // Recalculate uniqueness
+          this.updateRoundScores(room, round);
+        } else {
+          answer.isValid = false;
+          answer.reason = 'تم الرفض (تصويت)';
+          answer.score = 0;
+          // Recalculate uniqueness (removing a valid answer might make another unique)
+          this.updateRoundScores(room, round);
+        }
+      }
+    }
+
+    const result = {
+      ...room.currentVote,
+      approved: isAccepted
+    };
+
+    room.currentVote = null;
+
+    this.broadcastToRoom(room.code, {
+      type: 'vote_session_result',
+      payload: {
+        result,
+        queue: room.voteQueue
+      }
+    });
+
+    // Update Room State (scores etc)
+    this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
+
+    // Auto-proceed to next in queue
+    setTimeout(() => {
+      this.startNextVote(room);
+    }, 3000);
+  }
+
 
   // ✅ NEW: Handle Appeal
   private async appealAnswer(ws: WebSocket, playerId: string, category: string, word: string): Promise<void> {
@@ -1526,65 +1751,77 @@ class GameManager {
 
     console.log(`[Appeal] Player ${playerId} appealing word: ${word} in ${category}`);
 
-    // Notify everyone appeal is in progress
+    // Notify everyone appeal is in progress (Fun Message - Simple Egyptian)
+    const funMessages = [
+      `استنى بنشوفلك واسطة تمشيها..`,
+      `يا مسهل.. بنسأل الكمبيوتر`,
+      `بندور عليها في القاموس، خليك صبور`,
+      `يا رب تطلع صح عشان شكلك ميبقاش وحش`,
+      `بنشوف الكلام ده بجد ولا أي كلام..`
+    ];
+    const randomMsg = funMessages[Math.floor(Math.random() * funMessages.length)];
+
     this.broadcastToRoom(room.code, {
       type: 'toast',
-      payload: { message: `جاري مراجعة الكلمة: ${word}... 🤖`, type: 'info' }
+      payload: { message: randomMsg, type: 'info' }
     });
 
-    const isValid = await HybridValidator.getInstance().verifyWordWithAI(round.letter, category, word);
-
-    if (isValid) {
-      // Update the answer in the current round
-      // Note: We might need to handle past rounds if appeal happens late, 
-      // but usually appeals happen in Results phase of current round.
-
-      const answerEntry = round.validatedAnswers.find(
-        a => a.playerId === playerId && a.category === category && this.normalizeArabic(a.answer) === this.normalizeArabic(word)
-      );
-
-      if (answerEntry) {
-        answerEntry.isValid = true;
-        answerEntry.reason = 'تمت الموافقة (مراجعة AI)';
-        answerEntry.score = 10; // Base score, uniqueness updated later or now? 
-        // For simplicity, give 10 points immediately. 
-        // Ideally we re-run calculateScores but that might change other scores (uniqueness).
-        // Let's rely on standard scoring if possible, or just grant bonus.
-
-        // Let's try to recalculate scores for the whole round to ensure fairness (uniqueness check)
-        // Check if calculateScores is safe to run again.
-        // Assuming yes since it iterates over validatedAnswers.
-        this.updateRoundScores(room, round);
-      }
-
-      this.broadcastToRoom(room.code, {
-        type: 'appeal_result',
-        payload: {
-          success: true,
-          playerId,
-          category,
-          word,
-          message: `✅ تم قبول الكلمة "${word}"! أضيفت للقاعدة.`
+    // Use Groq Service (Batching)
+    GroqService.getInstance().enqueueAppeal(playerId, category, round.letter, word)
+      .then((result) => {
+        // Safety Check: Ensure room still exists (async delay)
+        if (!this.rooms.has(room.code)) {
+          console.log(`[Appeal] Ignored result for closed room ${room.code}`);
+          return;
         }
-      });
 
-      this.broadcastToRoom(room.code, {
-        type: 'sync_state',
-        payload: { room }
-      });
+        if (!result) return;
 
-    } else {
-      this.send(ws, {
-        type: 'appeal_result',
-        payload: {
-          success: false,
-          playerId,
-          category,
-          word,
-          message: `❌ تم رفض الكلمة "${word}".`
+        if (result.isValid) {
+          const answerEntry = round.validatedAnswers.find(
+            a => a.playerId === playerId && a.category === category && this.normalizeArabic(a.answer) === this.normalizeArabic(word)
+          );
+
+          if (answerEntry) {
+            answerEntry.isValid = true;
+            answerEntry.reason = result.reason; // AI reason
+            answerEntry.score = 10;
+            this.updateRoundScores(room, round);
+          }
+
+          this.broadcastToRoom(room.code, {
+            type: 'appeal_result',
+            payload: {
+              success: true,
+              playerId,
+              category,
+              word,
+              message: `✅ تم قبول الكلمة "${word}"! ${result.reason}`
+            }
+          });
+
+          this.broadcastToRoom(room.code, {
+            type: 'sync_state',
+            payload: { room }
+          });
+
+        } else {
+          this.send(ws, {
+            type: 'appeal_result',
+            payload: {
+              success: false,
+              playerId,
+              category,
+              word,
+              message: `❌ تم رفض "${word}". ${result.reason}`
+            }
+          });
         }
+      })
+      .catch(err => {
+        console.error("Appeal Error:", err);
+        this.send(ws, { type: 'error', payload: { message: "حدث خطأ أثناء المراجعة" } });
       });
-    }
   }
 
   /**

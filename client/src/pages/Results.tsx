@@ -10,6 +10,7 @@ import { RetroCard } from '@/components/ui/RetroCard';
 import { PixelAvatar } from '@/components/ui/PixelAvatar';
 import { RetroQuote } from '@/components/ui/RetroQuote';
 import { LetterDisplay } from '@/components/LetterDisplay';
+import { VotingOverlay } from '@/components/VotingOverlay';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,7 +42,7 @@ const rankColors = ['bg-gradient-to-br from-amber-300 to-yellow-500', 'bg-gradie
 const rankIcons = [Crown, Medal, Star];
 
 export default function Results() {
-  const { state, currentRound, isHost, nextRound, playAgain, disconnect, isReferee, refereeDeduct, refereeToggleUnique, refereeApprove, appealAnswer } = useGame();
+  const { state, currentRound, isHost, nextRound, playAgain, disconnect, isReferee, refereeDeduct, refereeToggleUnique, refereeApprove, appealAnswer, requestVote } = useGame();
   const [countdown, setCountdown] = useState(5);
   const [appealDialog, setAppealDialog] = useState<{ playerId: string; category: string; word: string } | null>(null);
 
@@ -125,6 +126,7 @@ export default function Results() {
   return (
     <div className="min-h-screen p-4 overflow-hidden relative text-white font-pixel-text">
       <Confetti active={isFinal} />
+      <VotingOverlay />
 
       <div className="max-w-3xl mx-auto relative z-10">
         <div className="flex justify-between items-center mb-4">
@@ -557,11 +559,25 @@ export default function Results() {
                         ✅ اعتماد النتيجة وبدء الجولة
                       </Button>
                     </div>
+                  ) : room.settings?.enableVoting && isHost ? (
+                    // Host Control for Voting Mode
+                    <div className="space-y-2">
+                      <p className="text-[#FFFDD1] font-bold font-pixel-text text-lg">
+                        🗳️ وضع التصويت مفعل
+                      </p>
+                      <Button
+                        onClick={() => nextRound()}
+                        size="lg"
+                        className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
+                      >
+                        ➡️ الاستمرار للجولة التالية
+                      </Button>
+                    </div>
                   ) : (
                     <div className="flex flex-col items-center gap-2">
                       <Timer className="w-8 h-8 text-[#FFFDD1] animate-spin-slow" />
                       <p className="text-[#FFFDD1] font-bold font-pixel-text text-xl">
-                        في انتظار اعتماد الحكم...
+                        {room.settings?.enableVoting ? 'في انتظار المضيف...' : 'في انتظار اعتماد الحكم...'}
                       </p>
                     </div>
                   )}
@@ -582,7 +598,9 @@ export default function Results() {
                 متأكد إن "{appealDialog?.word}" كلمة صحيحة في فئة "{appealDialog?.category}"؟
                 <br />
                 <span className="text-sm text-[#4c1d95]/70 block mt-2">
-                  (الذكاء الاصطناعي هيراجعها تاني ولو طلعت صح هتاخد حقك!)
+                  {room.settings?.enableVoting
+                    ? "(الناس هي الي هتحكم، وريهم شطارتك!)"
+                    : "(هنسأل الكمبيوتر ولو ليك حق هتاخده متخافش)"}
                 </span>
               </AlertDialogDescription>
             </AlertDialogHeader>
@@ -595,7 +613,11 @@ export default function Results() {
               <AlertDialogAction
                 onClick={() => {
                   if (appealDialog) {
-                    appealAnswer(appealDialog.playerId, appealDialog.category, appealDialog.word);
+                    if (room.settings?.enableVoting) {
+                      requestVote(appealDialog.playerId, appealDialog.category, appealDialog.word);
+                    } else {
+                      appealAnswer(appealDialog.playerId, appealDialog.category, appealDialog.word);
+                    }
                     setAppealDialog(null);
                   }
                 }}
