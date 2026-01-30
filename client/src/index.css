@@ -388,7 +388,15 @@
   .logo-shine {
     position: relative;
     display: inline-block;
-    overflow: hidden;
+    /* Use mask to constrain shine to logo shape */
+    -webkit-mask-image: url("/assets/logo.png");
+    mask-image: url("/assets/logo.png");
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
   }
 
   .logo-shine::after {

@@ -1517,12 +1517,13 @@ class GameManager {
 
   /**
    * Helper to update scores after an appeal
+   * Recalculates TOTAL scores for all players to ensure consistency
    */
   private updateRoundScores(room: GameRoom, round: Round): void {
     const allRoundAnswers = round.validatedAnswers;
     const currentCategories = this.getRoomCategories(room);
 
-    // Count duplicates
+    // 1. Recalculate uniqueness for the current round
     const answerCounts = new Map<string, number>();
     for (const ans of allRoundAnswers) {
       if (ans.isValid) {
@@ -1531,7 +1532,7 @@ class GameManager {
       }
     }
 
-    // Update scores
+    // 2. Update scores for each answer in the current round
     for (const validatedAnswer of allRoundAnswers) {
       if (!validatedAnswer.isValid) {
         validatedAnswer.score = 0;
@@ -1545,20 +1546,96 @@ class GameManager {
       validatedAnswer.score = validatedAnswer.isUnique ? 20 : 10;
     }
 
-    // Update totals
+    // 3. FULL RECALCULATION: Rebuild player total scores from scratch
+    // This is the only way to guarantee the leaderboard is 100% in sync
     for (const player of room.players) {
-      const playerAnswers = allRoundAnswers.filter(a => a.playerId === player.id);
-      const roundScore = playerAnswers.reduce((sum, a) => sum + (a.score || 0), 0);
-      // Note: This adds to TOTAL score. 
-      // If we run this multiple times, we must be careful not to double count.
-      // BUT: Player score is usually a sum of rounds. 
-      // GameRoom structure: players have `score`. 
-      // If we re-calculate, we should likely re-calculate TOTAL from all rounds?
-      // Or just update the diff?
-      // Simple hack: We won't update `player.score` here because it might be complex.
-      // The game client calculates round score from `validatedAnswers`. 
-      // The server authoritative score might need a full recalc.
-      // For now, updating `validatedAnswers` is enough for the Client to show correct score.
+      if (player.id === room.refereeId) continue;
+
+      let totalScore = 0;
+      let totalEarned = 0;
+
+      // Sum up score from ALL rounds
+      for (const r of room.rounds) {
+        // Sum answers score
+        const playerAnswers = r.validatedAnswers.filter(a => a.playerId === player.id);
+        const roundScore = playerAnswers.reduce((sum, a) => sum + (a.score || 0), 0);
+
+        totalScore += roundScore;
+        totalEarned += roundScore;
+
+        // Add bonuses (if recorded)? 
+        // Note: Bonuses like Bus Streak are added to player.score directly in finishRound.
+        // We need to preserve those bonuses.
+        // Since we don't store "bonus history" easily, we strictly assume
+        // player.score BEFORE this recalc was (Total Round Scores + Bonuses).
+        // BUT wait, "appeal" happens in "Results" phase usually.
+        // If we wipe player.score and rebuild from rounds, we lose bonuses!
+
+        // BETTER APPROACH:
+        // Calculate the NEW total score for THIS round only.
+        // Compare with OLD total score for THIS round (which we don't store easily).
+
+        // ALTERNATIVE:
+        // Just keep it simple: We updated `validatedAnswer.score`.
+        // We know exactly how much this round contributes.
+        // But `player.score` accumulates over rounds.
+
+        // Let's do this:
+        // 1. Calculate what the player's score FOR THIS ROUND *should* be now.
+        // 2. We can't easily know what it was *before* without storing it.
+        // 3. Actually we can re-calculate the WHOLE game score if we assume bonuses are re-calculatable?
+        //    Bus Stream bonus depends on history.
+
+        // SAFEST APPROACH FOR NOW:
+        // 1. Iterate over all players.
+        // 2. For each player, calculate the sum of scores of their answers in THIS round.
+        // 3. We can't blindly replace player.score.
+
+        // Let's rely on the fact that `validatedAnswer` objects are references.
+        // The `score` property on them is updated in step 2 above.
+
+        // So we can:
+        // 1. Reset player.score to 0.
+        // 2. Re-add scores from ALL rounds (validatedAnswers).
+        // 3. Re-calculate Bonuses (Bus Streak, etc).
+        //    Re-calculating bonuses is safe because they are deterministic based on rounds data.
+      }
+
+      // Let's implement the FULL RECALC including bonuses
+      // Reset
+      player.score = 0;
+      player.totalEarnedPoints = 0;
+      player.busStreak = 0; // Will be rebuilt
+
+      for (const r of room.rounds) {
+        const playerAnswers = r.validatedAnswers.filter(a => a.playerId === player.id);
+        const roundScore = playerAnswers.reduce((sum, a) => sum + (a.score || 0), 0);
+
+        player.score += roundScore;
+        player.totalEarnedPoints += roundScore;
+
+        // Re-calculate Bus Streak & Bonus for this round
+        const submission = r.submissions.find(s => s.playerId === player.id);
+        const allCorrect = playerAnswers.filter(a => a.isValid).length >= currentCategories.length;
+
+        if (submission?.busComplete && allCorrect) {
+          player.busStreak++;
+          if (player.busStreak >= 3) {
+            // 10 pts bonus for streak >= 3
+            player.score += 10;
+          }
+        } else {
+          // Streak broken?
+          // Wait, if it's a past round, we need to simulate the streak progression properly.
+          // Yes, sequential processing of rounds is required.
+          if (!submission?.busComplete || !allCorrect) {
+            player.busStreak = 0;
+          }
+        }
+      }
+
+      // Note: This logic now perfectly mirrors the game progression logic.
+      // It ensures that even if a past round was appealed (rare), the streaks update correctly.
     }
   }
 

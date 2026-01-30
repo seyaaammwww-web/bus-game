@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, ArrowLeft, RotateCcw, User, Users, Globe, PawPrint, Box, Crown, Star, Sparkles, Medal, Shield, LogOut, Home, Zap, Award, Target, Timer, Plus, UserX } from 'lucide-react';
+import { Trophy, ArrowLeft, RotateCcw, User, Users, Globe, PawPrint, Box, Crown, Star, Sparkles, Medal, Shield, LogOut, Home, Zap, Award, Target, Timer, Plus, UserX, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Confetti } from '@/components/Confetti';
 import { useGame } from '@/lib/gameContext';
@@ -413,8 +413,8 @@ export default function Results() {
                         </div>
                         {/* Score Badge - Pixel Style */}
                         <div className={`px-2 py-1 border-2 shadow-[2px_2px_0_0_#1a1a1a] font-bold text-xs ${totalRoundScore > 0
-                            ? 'bg-[#22c55e] border-[#15803d] text-white'
-                            : 'bg-[#d1d5db] border-[#9ca3af] text-[#6b7280]'
+                          ? 'bg-[#22c55e] border-[#15803d] text-white'
+                          : 'bg-[#d1d5db] border-[#9ca3af] text-[#6b7280]'
                           }`}>
                           +{totalRoundScore}
                         </div>
@@ -433,13 +433,29 @@ export default function Results() {
                           return (
                             <div
                               key={cat}
-                              className={`text-center p-1 border-2 shadow-[1px_1px_0_0_rgba(0,0,0,0.3)] ${isValid
-                                  ? 'bg-[#bbf7d0] border-[#22c55e]'
-                                  : answer
-                                    ? 'bg-[#fecaca] border-[#ef4444]'
-                                    : 'bg-white border-[#d1d5db]'
+                              onClick={() => {
+                                if (isCurrentPlayer && !isValid && answer) {
+                                  setAppealDialog({
+                                    playerId: submission.playerId,
+                                    category: cat,
+                                    word: answer
+                                  });
+                                }
+                              }}
+                              className={`text-center p-1 border-2 shadow-[1px_1px_0_0_rgba(0,0,0,0.3)] transition-all ${isValid
+                                ? 'bg-[#bbf7d0] border-[#22c55e]'
+                                : answer
+                                  ? isCurrentPlayer
+                                    ? 'bg-[#fecaca] border-[#ef4444] cursor-pointer hover:scale-105 active:scale-95 hover:shadow-[2px_2px_0_0_#dc2626] relative group'
+                                    : 'bg-[#fecaca] border-[#ef4444]'
+                                  : 'bg-white border-[#d1d5db]'
                                 }`}
                             >
+                              {isCurrentPlayer && !isValid && answer && (
+                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-600 rounded-full border border-white z-10 flex items-center justify-center animate-pulse group-hover:block hidden">
+                                  <span className="text-[8px] text-white">?</span>
+                                </div>
+                              )}
                               {answer ? (
                                 <div className="space-y-0.5">
                                   <div className="text-[10px] font-bold text-[#2e1065] truncate leading-tight">{answer}</div>
@@ -506,6 +522,42 @@ export default function Results() {
             اعتماد النتيجة ✅
           </Button>
         )}
+        {/* Appeal Confirmation Dialog */}
+        <AlertDialog open={!!appealDialog} onOpenChange={(open) => !open && setAppealDialog(null)}>
+          <AlertDialogContent className="bg-[#FFFDD1] border-[4px] border-[#4c1d95] rounded-none shadow-[8px_8px_0_0_#2e1065]">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-2xl font-bold font-pixel-title text-[#4c1d95] flex items-center gap-2">
+                <AlertTriangle className="w-6 h-6 text-[#ef4444]" />
+                ظلموني؟ 🤨
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-lg font-bold font-pixel-text text-[#7c3aed]">
+                متأكد إن "{appealDialog?.word}" كلمة صحيحة في فئة "{appealDialog?.category}"؟
+                <br />
+                <span className="text-sm text-[#4c1d95]/70 block mt-2">
+                  (الذكاء الاصطناعي هيراجعها تاني ولو طلعت صح هتاخد حقك!)
+                </span>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="gap-3">
+              <AlertDialogCancel
+                className="bg-white border-2 border-[#4c1d95] text-[#4c1d95] font-bold font-pixel-text hover:bg-gray-100 rounded-none h-12"
+              >
+                خلاص مش متأكد
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  if (appealDialog) {
+                    appealAnswer(appealDialog.playerId, appealDialog.category, appealDialog.word);
+                    setAppealDialog(null);
+                  }
+                }}
+                className="bg-[#7c3aed] border-2 border-[#4c1d95] text-white font-bold font-pixel-text hover:bg-[#6d28d9] rounded-none h-12 shadow-[2px_2px_0_0_#2e1065]"
+              >
+                أيوه متأكد! 😤
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div >
   );
