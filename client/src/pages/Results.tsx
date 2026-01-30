@@ -527,30 +527,49 @@ export default function Results() {
           transition={{ delay: 0.4 }}
         >
           {!isFinal && (
-            <div className="w-full h-20 bg-gradient-to-r from-[#7c3aed]/20 to-[#8b5cf6]/20 rounded-2xl flex items-center justify-center gap-5 border-[3px] border-[#4c1d95] shadow-[3px_3px_0_0_#2e1065] font-pixel-text text-xl font-bold">
-              <span className="text-white text-xl">الجولة التالية في</span>
-              <motion.span
-                key={countdown}
-                initial={{ scale: 1.5, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="w-14 h-14 bg-gradient-to-br from-white to-[#faf5ff] text-[#4c1d95] rounded-full flex items-center justify-center font-bold shadow-lg border-2 border-[#4c1d95] font-pixel-title text-2xl"
-              >
-                {countdown}
-              </motion.span>
-            </div>
+            <>
+              {/* Case 1: Countdown Running (Approved or Auto) */}
+              {room.nextRoundAt ? (
+                <div className="w-full h-20 bg-gradient-to-r from-[#7c3aed]/20 to-[#8b5cf6]/20 rounded-2xl flex items-center justify-center gap-5 border-[3px] border-[#4c1d95] shadow-[3px_3px_0_0_#2e1065] font-pixel-text text-xl font-bold">
+                  <span className="text-white text-xl">الجولة التالية في</span>
+                  <motion.span
+                    key={countdown}
+                    initial={{ scale: 1.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="w-14 h-14 bg-gradient-to-br from-white to-[#faf5ff] text-[#4c1d95] rounded-full flex items-center justify-center font-bold shadow-lg border-2 border-[#4c1d95] font-pixel-title text-2xl"
+                  >
+                    {countdown}
+                  </motion.span>
+                </div>
+              ) : (
+                /* Case 2: Waiting for Referee (No Timer) */
+                <div className="w-full p-4 bg-[#4c1d95]/80 rounded-2xl text-center border-[3px] border-[#FFFDD1] shadow-lg backdrop-blur-sm">
+                  {isReferee ? (
+                    <div className="space-y-2">
+                      <p className="text-[#FFFDD1] font-bold font-pixel-text text-lg animate-pulse">
+                        🕐 الوقت متوقف للمراجعة
+                      </p>
+                      <Button
+                        onClick={() => refereeApprove()}
+                        size="lg"
+                        className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
+                      >
+                        ✅ اعتماد النتيجة وبدء الجولة
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-2">
+                      <Timer className="w-8 h-8 text-[#FFFDD1] animate-spin-slow" />
+                      <p className="text-[#FFFDD1] font-bold font-pixel-text text-xl">
+                        في انتظار اعتماد الحكم...
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
           )}
         </motion.div>
-
-        {/* Referee Control */}
-        {!isFinal && room.refereeId === state.playerId && (
-          <Button
-            onClick={() => refereeApprove()}
-            size="lg"
-            className="w-full h-16 mt-4 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#2e1065] border-[3px] border-[#2e1065] animate-pulse font-pixel-title"
-          >
-            اعتماد النتيجة ✅
-          </Button>
-        )}
         {/* Appeal Confirmation Dialog */}
         <AlertDialog open={!!appealDialog} onOpenChange={(open) => !open && setAppealDialog(null)}>
           <AlertDialogContent className="bg-[#FFFDD1] border-[4px] border-[#4c1d95] rounded-none shadow-[8px_8px_0_0_#2e1065]">

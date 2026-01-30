@@ -935,33 +935,35 @@ class GameManager {
 
     room.phase = 'results';
 
-    const nextRoundTime = Date.now() + 20000;
-    room.nextRoundAt = nextRoundTime;
+    // ✅ Referee Logic: If referee exists, PAUSE and wait for manual approval
+    if (room.refereeId) {
+      console.log(`[Finish Round] Referee present (${room.refereeId}). Pausing for review.`);
+      room.nextRoundAt = undefined; // No auto timer
+    } else {
+      // Standard Flow: Auto-timer
+      const nextRoundTime = Date.now() + 20000;
+      room.nextRoundAt = nextRoundTime;
+
+      if (room.currentRound < room.totalRounds - 1) {
+        const code = room.code;
+        setTimeout(() => {
+          const currentRoom = this.rooms.get(code);
+          // Ensure we are still in the correct state and round
+          if (currentRoom && currentRoom.currentRound === round.number - 1 && currentRoom.phase === 'results') {
+            this.startNextRound(currentRoom);
+          }
+        }, 20000);
+      }
+    }
 
     this.broadcastToRoom(room.code, {
       type: 'round_results',
       payload: { room },
     });
 
-    if (room.currentRound >= room.totalRounds - 1) {
-      // GAME END - Calculate Bus Streak bonuses NOW
-      this.calculateFinalBonuses(room);
-
-      setTimeout(() => {
-        room.phase = 'final';
-        this.broadcastToRoom(room.code, {
-          type: 'game_end',
-          payload: { room }
-        });
-      }, 10000);
-    } else {
-      const code = room.code;
-      setTimeout(() => {
-        const currentRoom = this.rooms.get(code);
-        if (currentRoom && currentRoom.currentRound === round.number - 1 && currentRoom.phase === 'results') {
-          this.startNextRound(currentRoom);
-        }
-      }, 20000);
+    if (room.currentRound >= room.totalRounds - 1 && !room.refereeId) {
+      // Only auto-end game if NO referee (Referee will manually approve final round results too)
+      this.handleGameEnd(room);
     }
   }
 
@@ -1298,7 +1300,43 @@ class GameManager {
   }
 
   private _refereeApprove(room: GameRoom): void {
-    this.finishRound(room);
+    const round = room.rounds[room.currentRound];
+    if (!round) return;
+
+    console.log(`[Referee] Approved results for round ${room.currentRound + 1}. Starting countdown.`);
+
+    // 1. Set Countdown for everyone to see "Final Results" briefly
+    const countdownDuration = 10000; // 10 seconds after approval
+    room.nextRoundAt = Date.now() + countdownDuration;
+
+    // 2. Broadcast update
+    this.broadcastToRoom(room.code, {
+      type: 'sync_state',
+      payload: { room }
+    });
+
+    // 3. Set Timeout to actually move next
+    setTimeout(() => {
+      const currentRoom = this.rooms.get(room.code);
+      // Ensure state is still valid
+      if (currentRoom && currentRoom.currentRound === round.number - 1 && currentRoom.phase === 'results') {
+        if (currentRoom.currentRound >= currentRoom.totalRounds - 1) {
+          this.handleGameEnd(currentRoom);
+        } else {
+          this.startNextRound(currentRoom);
+        }
+      }
+    }, countdownDuration);
+  }
+
+  // Extracted Game End logic to reuse
+  private handleGameEnd(room: GameRoom): void {
+    this.calculateFinalBonuses(room);
+    room.phase = 'final';
+    this.broadcastToRoom(room.code, {
+      type: 'game_end',
+      payload: { room }
+    });
   }
 
   refereeApprove(ws: WebSocket): void {
