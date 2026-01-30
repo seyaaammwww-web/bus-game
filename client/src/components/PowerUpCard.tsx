@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Lock, Zap, Skull, Crown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { RetroCard } from './ui/RetroCard';
+import { toast } from '@/hooks/use-toast';
 
 interface PowerUpCardProps {
     type: 'wildcard' | 'banish';
@@ -59,12 +60,39 @@ export function PowerUpCard({
         }
     }[type];
 
-    const canUse = isUnlocked && !isDisabled;
+    const canUse = isUnlocked && !isDisabled; // Only true if points enough AND not disabled by game
+    const hasPoints = isUnlocked; // Helper to know if we have points
+
+    const handleClick = () => {
+        if (!hasPoints) {
+            // Show temporary small error
+            toast({ // Using global toast
+                title: "محتاج نقط أكتر! ❌",
+                description: `تحتاج ${cost} نقطة لتفعيل ${title}`,
+                variant: "destructive",
+                duration: 1500,
+            });
+            return;
+        }
+
+        if (isDisabled) {
+            // Maybe show message "Not your turn / Already active"
+            toast({
+                title: "غير متاح حالياً 🔒",
+                description: "البطاقة غير متاحة للاستخدام الآن",
+                variant: "destructive",
+                duration: 1500,
+            });
+            return;
+        }
+
+        onActivate();
+    };
 
     return (
         <motion.button
-            onClick={() => canUse && onActivate()}
-            disabled={!canUse}
+            onClick={handleClick}
+            // decoding: removed disabled={!canUse} to allow click for error message
             className={cn(
                 "relative group",
                 "w-11 h-16 md:w-16 md:h-24", // Compact Pixel Card Size
@@ -72,60 +100,56 @@ export function PowerUpCard({
                 "flex flex-col items-center justify-between p-1",
                 "rounded-sm", // Sharp corners for pixel feel (or slight round)
                 "transition-transform active:translate-y-1 active:shadow-none", // Mechanical click feel
-                canUse ? [
+
+                // Always render colored theme unless strictly DISABLED by game logic (not points)
+                // Actually user said "make them solid like they are open".
+                // So even if !hasPoints, we render THEME.
+                [
                     theme.bg,
                     theme.border,
                     "shadow-[2px_2px_0px_rgba(0,0,0,0.5)]", // Mobile Shadow
                     theme.shadow, // Desktop Deep Shadow
                     "cursor-pointer",
                     "hover:-translate-y-1" // Lift up 
-                ] : [
-                    "bg-gray-600 border-gray-700 grayscale opacity-80 cursor-not-allowed shadow-none"
                 ],
+                // We only gray out if 'isDisabled' which might be 'banished' or 'active by other'
+                isDisabled ? "opacity-80 grayscale contrast-125" : "",
+
                 className
             )}
-            whileTap={canUse ? { scale: 0.95 } : {}}
+            whileTap={{ scale: 0.95 }}
         >
             {/* Price Tag - Pixel Badge */}
             <div className="absolute -top-1.5 -right-1.5 z-20">
                 <div className={cn(
                     "flex items-center gap-0.5 px-1 pb-0.5 pt-1 bg-black border border-white/50 shadow-sm",
-                    "text-[8px] md:text-[10px] font-bold font-pixel-text text-white leading-none"
+                    "text-[8px] md:text-[10px] font-bold font-pixel-text text-white leading-none",
+                    !hasPoints && "text-red-400" // Highlight cost if not enough
                 )}>
-                    <Zap className="w-2 h-2 text-yellow-400 fill-yellow-400" />
+                    <Zap className={cn("w-2 h-2", hasPoints ? "text-yellow-400 fill-yellow-400" : "text-red-400")} />
                     <span>{cost}</span>
                 </div>
             </div>
 
             {/* Icon Area */}
             <div className="flex-1 flex items-center justify-center w-full mt-2">
-                {isUnlocked ? (
-                    <Icon className={cn("w-6 h-6 md:w-8 md:h-8 drop-shadow-sm", theme.iconColor)} />
-                ) : (
-                    <Lock className="w-5 h-5 md:w-6 md:h-6 text-gray-400" />
-                )}
+                <Icon className={cn("w-6 h-6 md:w-8 md:h-8 drop-shadow-sm", theme.iconColor)} />
             </div>
 
             {/* Title - Pixel Font */}
             <div className="w-full text-center pb-1">
                 <span className={cn(
                     "text-[8px] md:text-[10px] font-bold font-pixel-title tracking-normal",
-                    isUnlocked ? theme.text : "text-gray-400"
+                    theme.text
                 )}>
                     {title}
                 </span>
             </div>
 
-            {/* Lock Overlay (Pixelated) */}
-            {!isUnlocked && (
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                    {/* Just dimming */}
-                </div>
-            )}
-            {/* Disabled Round Overlay */}
-            {isUnlocked && isDisabled && (
-                <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                    <Lock className="w-5 h-5 text-white/50" />
+            {/* Disabled Round Overlay (Only for game logic disable, NOT points) */}
+            {isDisabled && (
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-sm">
+                    <Lock className="w-5 h-5 text-white/70" />
                 </div>
             )}
 
