@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import { Crown, Check, Clock, Shield, Zap, Trophy } from 'lucide-react';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import type { Player } from '@shared/schema';
 
@@ -46,12 +45,45 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
         </motion.div>
       )}
 
-      <motion.div whileHover={{ scale: 1.1 }}>
-        <Avatar className="w-10 h-10">
-          <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white font-bold">
+      {/* Premium Pixel Avatar */}
+      <motion.div
+        className="relative"
+        whileHover={{ scale: 1.15, rotate: 3 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+      >
+        {/* Outer Glow */}
+        <div className="absolute -inset-1 bg-gradient-to-br from-[#fbbf24] via-[#8b5cf6] to-[#7c3aed] rounded-lg opacity-60 blur-sm animate-pulse" />
+
+        {/* Main Avatar Container */}
+        <div className="relative w-11 h-11 bg-gradient-to-br from-[#4c1d95] via-[#7c3aed] to-[#8b5cf6] rounded-lg border-[3px] border-[#fbbf24] shadow-[3px_3px_0_0_#2e1065,_0_0_12px_rgba(251,191,36,0.4)] flex items-center justify-center overflow-hidden">
+          {/* Inner Shine Effect */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-transparent rounded-sm" />
+
+          {/* Shimmer Animation */}
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
+            animate={{ x: ['-100%', '200%'] }}
+            transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 1, ease: 'easeInOut' }}
+          />
+
+          {/* Letter */}
+          <span className="relative z-10 text-xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] font-pixel-title">
             {player.name.charAt(0)}
-          </AvatarFallback>
-        </Avatar>
+          </span>
+
+          {/* Pixel Corner Decorations */}
+          <div className="absolute top-0 left-0 w-1.5 h-1.5 bg-[#fbbf24]" />
+          <div className="absolute top-0 right-0 w-1.5 h-1.5 bg-[#fbbf24]" />
+          <div className="absolute bottom-0 left-0 w-1.5 h-1.5 bg-[#fbbf24]" />
+          <div className="absolute bottom-0 right-0 w-1.5 h-1.5 bg-[#fbbf24]" />
+        </div>
+
+        {/* Sparkle Effect */}
+        <motion.div
+          className="absolute -top-1 -right-1 w-2 h-2 bg-[#fbbf24] rounded-full shadow-[0_0_6px_#fbbf24]"
+          animate={{ scale: [0.8, 1.3, 0.8], opacity: [0.6, 1, 0.6] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+        />
       </motion.div>
 
       <div className="flex-1 min-w-0">
