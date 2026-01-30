@@ -350,27 +350,36 @@ export default function Results() {
             transition={{ delay: 0.3 }}
           >
             <RetroCard className="mb-4 p-0 overflow-hidden">
-              {/* Header */}
-              <div className="bg-gradient-to-r from-[#4c1d95] to-[#7c3aed] text-white px-4 py-3 flex items-center gap-2">
-                <Sparkles className="w-5 h-5" />
-                <span className="font-bold text-lg font-pixel-title">📝 نتائج الجولة</span>
+              {/* Retro Pixel Header */}
+              <div className="bg-[#4c1d95] text-[#FFFDD1] px-4 py-3 border-b-4 border-[#2e1065]">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">📝</span>
+                  <span className="font-pixel-title text-lg tracking-wide">نتائج الجولة</span>
+                </div>
               </div>
 
-              {/* Compact Category Header */}
-              <div className="flex items-center justify-center gap-2 p-3 bg-gradient-to-r from-[#4c1d95]/5 to-[#7c3aed]/5 border-b border-[#4c1d95]/10">
-                {categories.map((cat) => {
-                  const Icon = categoryIcons[cat];
-                  return (
-                    <div key={cat} className={`flex items-center gap-1 px-2 py-1 rounded-lg text-white text-xs font-bold ${categoryColors[cat]}`}>
-                      <Icon className="w-3 h-3" />
-                      <span>{cat}</span>
-                    </div>
-                  );
-                })}
+              {/* Pixel Style Category Bar */}
+              <div className="bg-[#FFFDD1] border-b-4 border-[#4c1d95] p-2">
+                <div className="flex justify-center gap-1">
+                  {categories.map((cat) => {
+                    const Icon = categoryIcons[cat];
+                    return (
+                      <div
+                        key={cat}
+                        className={`${categoryColors[cat]} px-2 py-1 border-2 border-[#2e1065] shadow-[2px_2px_0_0_#2e1065]`}
+                      >
+                        <div className="flex items-center gap-1 text-white">
+                          <Icon className="w-3 h-3" />
+                          <span className="text-[10px] font-bold">{cat}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
-              {/* Results Grid - Works for both mobile and desktop */}
-              <div className="divide-y divide-[#4c1d95]/10">
+              {/* Retro Results List */}
+              <div className="bg-[#FFFEE5]">
                 {currentRound.submissions.map((submission, playerIdx) => {
                   let totalRoundScore = 0;
                   categories.forEach((cat) => {
@@ -380,34 +389,39 @@ export default function Results() {
                     if (validation?.isValid) totalRoundScore += validation.score || 0;
                   });
 
+                  const isCurrentPlayer = submission.playerId === state.playerId;
+
                   return (
                     <motion.div
                       key={submission.playerId}
-                      className={`p-3 ${submission.playerId === state.playerId
-                        ? 'bg-purple-50'
-                        : playerIdx % 2 === 0 ? 'bg-white' : 'bg-[#faf5ff]/30'
-                        }`}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.03 * playerIdx }}
+                      className={`border-b-2 border-[#4c1d95]/30 ${isCurrentPlayer ? 'bg-[#e9d5ff]' : playerIdx % 2 === 0 ? 'bg-[#FFFEE5]' : 'bg-[#faf5ff]'}`}
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: 0.05 * playerIdx }}
                     >
-                      {/* Player Row Header */}
-                      <div className="flex items-center justify-between mb-2">
+                      {/* Player Name Row - Retro Style */}
+                      <div className={`flex items-center justify-between px-3 py-2 border-b border-[#4c1d95]/20 ${isCurrentPlayer ? 'bg-[#7c3aed]/20' : ''}`}>
                         <div className="flex items-center gap-2">
-                          <span className="w-6 h-6 rounded-md bg-[#4c1d95] text-white text-xs font-bold flex items-center justify-center">
-                            {playerIdx + 1}
-                          </span>
-                          <span className={`font-bold text-sm ${submission.playerId === state.playerId ? 'text-[#7c3aed]' : 'text-[#4c1d95]'}`}>
+                          {/* Pixel Number Badge */}
+                          <div className="w-6 h-6 bg-[#4c1d95] border-2 border-[#2e1065] shadow-[1px_1px_0_0_#2e1065] flex items-center justify-center">
+                            <span className="text-[#FFFDD1] text-xs font-bold">{playerIdx + 1}</span>
+                          </div>
+                          <span className={`font-bold text-sm ${isCurrentPlayer ? 'text-[#4c1d95]' : 'text-[#2e1065]'}`}>
                             {submission.playerName}
+                            {isCurrentPlayer && <span className="mr-1 text-xs">⭐</span>}
                           </span>
                         </div>
-                        <span className={`px-3 py-1 rounded-md text-xs font-bold ${totalRoundScore > 0 ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'}`}>
+                        {/* Score Badge - Pixel Style */}
+                        <div className={`px-2 py-1 border-2 shadow-[2px_2px_0_0_#1a1a1a] font-bold text-xs ${totalRoundScore > 0
+                            ? 'bg-[#22c55e] border-[#15803d] text-white'
+                            : 'bg-[#d1d5db] border-[#9ca3af] text-[#6b7280]'
+                          }`}>
                           +{totalRoundScore}
-                        </span>
+                        </div>
                       </div>
 
-                      {/* Answers Grid */}
-                      <div className="grid grid-cols-5 gap-1">
+                      {/* Answers Row - Pixel Grid */}
+                      <div className="grid grid-cols-5 gap-[2px] p-2 bg-[#2e1065]/10">
                         {categories.map((cat) => {
                           const answer = submission.answers[cat];
                           const validation = currentRound.validatedAnswers.find(
@@ -419,22 +433,22 @@ export default function Results() {
                           return (
                             <div
                               key={cat}
-                              className={`text-center p-1.5 rounded-md text-xs ${isValid
-                                ? 'bg-green-100 border border-green-400'
-                                : answer
-                                  ? 'bg-red-50 border border-red-300'
-                                  : 'bg-gray-100 border border-gray-200'
+                              className={`text-center p-1 border-2 shadow-[1px_1px_0_0_rgba(0,0,0,0.3)] ${isValid
+                                  ? 'bg-[#bbf7d0] border-[#22c55e]'
+                                  : answer
+                                    ? 'bg-[#fecaca] border-[#ef4444]'
+                                    : 'bg-white border-[#d1d5db]'
                                 }`}
                             >
                               {answer ? (
-                                <>
-                                  <div className="font-bold text-[#4c1d95] truncate">{answer}</div>
-                                  <div className={`text-[10px] font-bold ${isValid ? 'text-green-600' : 'text-red-500'}`}>
+                                <div className="space-y-0.5">
+                                  <div className="text-[10px] font-bold text-[#2e1065] truncate leading-tight">{answer}</div>
+                                  <div className={`text-[9px] font-bold ${isValid ? 'text-[#15803d]' : 'text-[#dc2626]'}`}>
                                     {isValid ? `+${score}` : '✗'}
                                   </div>
-                                </>
+                                </div>
                               ) : (
-                                <span className="text-gray-400">—</span>
+                                <span className="text-[10px] text-[#9ca3af]">—</span>
                               )}
                             </div>
                           );
@@ -445,11 +459,17 @@ export default function Results() {
                 })}
               </div>
 
-              {/* Simple Legend */}
-              <div className="px-3 py-2 bg-[#4c1d95]/5 flex items-center justify-center gap-4 text-xs border-t border-[#4c1d95]/10">
-                <span className="flex items-center gap-1"><span className="w-2 h-2 bg-green-500 rounded"></span> صحيح</span>
-                <span className="flex items-center gap-1"><span className="w-2 h-2 bg-red-400 rounded"></span> خطأ</span>
-                <span className="text-[#7c3aed] font-bold">+20 فريد | +10 مكرر</span>
+              {/* Retro Legend Bar */}
+              <div className="bg-[#4c1d95] text-[#FFFDD1] px-3 py-2 flex items-center justify-center gap-4 text-[10px] font-bold border-t-4 border-[#2e1065]">
+                <span className="flex items-center gap-1">
+                  <span className="w-3 h-3 bg-[#22c55e] border border-[#15803d]"></span>
+                  صحيح
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-3 h-3 bg-[#ef4444] border border-[#dc2626]"></span>
+                  خطأ
+                </span>
+                <span className="text-[#a78bfa]">+20 فريد | +10 مكرر</span>
               </div>
             </RetroCard>
           </motion.div>
