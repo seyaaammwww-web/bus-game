@@ -215,15 +215,45 @@ export default function Game() {
             />
           </div>
 
-          {/* Right - Timer and Streak */}
-          <div className="flex flex-col items-end gap-2">
-            <Timer timeLeft={state.timeLeft} isRush={state.isRush} />
-            {currentPlayer?.busStreak && currentPlayer.busStreak > 0 ? (
-              <div className="flex items-center gap-1.5 bg-gradient-to-r from-orange-500 to-amber-500 px-3 py-1 rounded-full text-white font-bold text-sm shadow-lg">
-                <Flame className="w-4 h-4" />
-                <span className="font-pixel-text">×{currentPlayer.busStreak}</span>
-              </div>
-            ) : null}
+          {/* Right - Timer, Streak, and PowerUps */}
+          <div className="flex items-center gap-2 md:gap-4">
+            {/* Mini PowerUps - Mobile Friendly */}
+            <div className="flex items-center gap-1.5 md:gap-3 mr-1 md:mr-4">
+              <PowerUpCard
+                type="wildcard"
+                title="الجوكر"
+                description="يملأ كل الخانات"
+                cost={600}
+                icon={Crown}
+                isUnlocked={(currentPlayer?.totalEarnedPoints || 0) >= 600}
+                isUsed={currentPlayer?.usedPowerUps?.wildcard || false}
+                isDisabled={!!currentRound?.activePowerUp && currentRound.activePowerUp.playerId !== currentPlayer?.id}
+                onActivate={() => activatePowerUp('wildcard')}
+                className="w-10 h-14 md:w-16 md:h-24 !border-[1.5px] md:!border-[2px]"
+              />
+              <PowerUpCard
+                type="banish"
+                title="الطرد"
+                description="يطرد منافس"
+                cost={350}
+                icon={Skull}
+                isUnlocked={(currentPlayer?.totalEarnedPoints || 0) >= 350}
+                isUsed={currentPlayer?.usedPowerUps?.banish || false}
+                isDisabled={!!currentRound?.activePowerUp && currentRound.activePowerUp.playerId !== currentPlayer?.id}
+                onActivate={() => setBanishOverlay(true)}
+                className="w-10 h-14 md:w-16 md:h-24 !border-[1.5px] md:!border-[2px]"
+              />
+            </div>
+
+            <div className="flex flex-col items-end gap-1 md:gap-2">
+              <Timer timeLeft={state.timeLeft} isRush={state.isRush} />
+              {currentPlayer?.busStreak && currentPlayer.busStreak > 0 ? (
+                <div className="flex items-center gap-1.5 bg-gradient-to-r from-orange-500 to-amber-500 px-2 py-0.5 md:px-3 md:py-1 rounded-full text-white font-bold text-[10px] md:text-sm shadow-sm md:shadow-lg">
+                  <Flame className="w-3 h-3 md:w-4 md:h-4" />
+                  <span className="font-pixel-text">×{currentPlayer.busStreak}</span>
+                </div>
+              ) : null}
+            </div>
           </div>
         </motion.div>
 
@@ -400,41 +430,14 @@ export default function Game() {
           <ReactionButtons />
         </div>
 
-        {/* Power-ups Section - High Stakes Cards */}
-        <div className="mt-8 flex justify-center gap-4 relative z-20 pb-20">
-          <PowerUpCard
-            type="wildcard"
-            title="الجوكر"
-            description="يملأ كل الخانات"
-            cost={50}
-            icon={Crown}
-            isUnlocked={(currentPlayer?.totalEarnedPoints || 0) >= 50}
-            isUsed={currentPlayer?.usedPowerUps?.wildcard || false}
-            isDisabled={!!currentRound?.activePowerUp && currentRound.activePowerUp.playerId !== currentPlayer?.id} // Disable if someone else used powerup
-            onActivate={() => activatePowerUp('wildcard')}
-          />
-          <PowerUpCard
-            type="banish"
-            title="الطرد"
-            description="يطرد منافس"
-            cost={40}
-            icon={Skull}
-            isUnlocked={(currentPlayer?.totalEarnedPoints || 0) >= 40}
-            isUsed={currentPlayer?.usedPowerUps?.banish || false}
-            isDisabled={!!currentRound?.activePowerUp && currentRound.activePowerUp.playerId !== currentPlayer?.id} // Disable if someone else used powerup
-            onActivate={() => setBanishOverlay(true)}
-          />
+        <div className="pb-20"></div>
+        <Confetti active={room.phase === 'results' || room.phase === 'final'} />
+
+        <div className="fixed bottom-2 left-0 right-0 text-center z-0 pointer-events-none">
+          <p className="text-[10px] text-white/60 font-pixel-text font-bold">
+            BY MOHAMED SEYAM
+          </p>
         </div>
-      </div>
-
-      <ReactionDisplay />
-      <Confetti active={room.phase === 'results' || room.phase === 'final'} />
-
-      <div className="fixed bottom-2 left-0 right-0 text-center z-0 pointer-events-none">
-        <p className="text-[10px] text-white/60 font-pixel-text font-bold">
-          BY MOHAMED SEYAM
-        </p>
-      </div>
     </motion.div>
   );
 }
