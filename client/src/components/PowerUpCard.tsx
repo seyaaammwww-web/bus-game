@@ -1,7 +1,6 @@
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Lock, Zap, Skull, Crown } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Button } from './ui/button';
 
 interface PowerUpCardProps {
     type: 'wildcard' | 'banish';
@@ -10,16 +9,15 @@ interface PowerUpCardProps {
     cost: number;
     isUnlocked: boolean;
     isUsed: boolean;
-    isDisabled: boolean; // Globally disabled (round locked)
+    isDisabled: boolean;
     onActivate: () => void;
     icon: React.ElementType;
-    className?: string; // Allow overrides
+    className?: string;
 }
 
 export function PowerUpCard({
     type,
     title,
-    description,
     cost,
     isUnlocked,
     isUsed,
@@ -29,91 +27,104 @@ export function PowerUpCard({
     className
 }: PowerUpCardProps) {
 
-    // If used, show empty/burnt slot
+    // Used state - burnt/empty slot
     if (isUsed) {
         return (
-            <div className="w-24 h-32 md:w-32 md:h-44 rounded-xl border-2 border-dashed border-gray-400/30 bg-black/10 flex flex-col items-center justify-center p-2 opacity-50 relative overflow-hidden">
-                <div className="absolute inset-0 bg-black/20" />
-                <span className="text-xs text-white/50 font-bold font-pixel-text z-10">تم الاستخدام</span>
+            <div className={cn(
+                "w-8 h-11 md:w-12 md:h-16 rounded-md border border-dashed border-white/20 bg-black/20 flex items-center justify-center opacity-40",
+                className
+            )}>
+                <span className="text-[6px] md:text-[8px] text-white/40 font-bold">✓</span>
             </div>
         );
     }
 
-    const borderColors = {
-        wildcard: 'border-[#F9D794]', // Gold
-        banish: 'border-[#ef4444]',   // Red
+    const cardStyles = {
+        wildcard: {
+            bg: 'bg-gradient-to-br from-amber-300 via-yellow-400 to-orange-400',
+            border: 'border-amber-500',
+            shadow: 'shadow-[0_4px_15px_rgba(251,191,36,0.4)]',
+            glow: 'hover:shadow-[0_0_20px_rgba(251,191,36,0.6)]',
+            iconColor: 'text-amber-800'
+        },
+        banish: {
+            bg: 'bg-gradient-to-br from-red-400 via-rose-500 to-red-600',
+            border: 'border-red-600',
+            shadow: 'shadow-[0_4px_15px_rgba(239,68,68,0.4)]',
+            glow: 'hover:shadow-[0_0_20px_rgba(239,68,68,0.6)]',
+            iconColor: 'text-red-900'
+        }
     };
 
-    const bgColors = {
-        wildcard: 'bg-gradient-to-b from-[#FFFDD1] to-[#F9D794]',
-        banish: 'bg-gradient-to-b from-red-100 to-red-200',
-    };
-
-    const shadowColors = {
-        wildcard: 'shadow-[4px_4px_0_0_#b45309]',
-        banish: 'shadow-[4px_4px_0_0_#991b1b]',
-    };
+    const style = cardStyles[type];
+    const canUse = isUnlocked && !isDisabled;
 
     return (
-        <motion.div
+        <motion.button
+            onClick={() => canUse && onActivate()}
+            disabled={!canUse}
             className={cn(
-                "relative w-24 h-32 md:w-32 md:h-44 rounded-xl border-[3px] transition-all flex flex-col items-center justify-between p-2 overflow-hidden group select-none",
-                isUnlocked && !isDisabled ? `${borderColors[type]} ${bgColors[type]} ${shadowColors[type]} cursor-pointer hover:-translate-y-2 hover:shadow-[6px_6px_0_0_rgba(0,0,0,0.3)]` : "border-gray-500 bg-gray-300 cursor-not-allowed grayscale",
-                isDisabled && isUnlocked && "opacity-50 cursor-not-allowed"
+                // Base card shape - small playing card style
+                "relative w-9 h-12 md:w-14 md:h-20 rounded-lg overflow-hidden transition-all duration-200",
+                // Border
+                "border-2",
+                // Conditional styling
+                canUse ? [
+                    style.bg,
+                    style.border,
+                    style.shadow,
+                    style.glow,
+                    "cursor-pointer hover:scale-110 hover:-translate-y-1 active:scale-95"
+                ] : [
+                    "bg-gray-600/80 border-gray-500 cursor-not-allowed grayscale opacity-60"
+                ],
+                className
             )}
-            onClick={() => {
-                if (isUnlocked && !isDisabled) onActivate();
-            }}
-            whileTap={isUnlocked && !isDisabled ? { scale: 0.95 } : {}}
+            whileHover={canUse ? { rotate: [-1, 1, -1], transition: { repeat: Infinity, duration: 0.3 } } : {}}
+            whileTap={canUse ? { scale: 0.9 } : {}}
         >
-            {/* Shine Effect Overlay */}
-            {isUnlocked && !isDisabled && (
-                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent translate-x-[-150%] group-hover:animate-shimmer z-10 pointer-events-none" />
-            )}
+            {/* Card Face Content */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center p-0.5 md:p-1">
+                {/* Cost Badge - Top */}
+                <div className="absolute top-0.5 left-0.5 md:top-1 md:left-1 flex items-center gap-0.5 bg-black/30 px-1 py-0.5 rounded text-[6px] md:text-[8px] text-white font-bold">
+                    <span>{cost}</span>
+                    <Zap className="w-2 h-2 md:w-2.5 md:h-2.5 fill-yellow-300 text-yellow-300" />
+                </div>
 
-            {/* Header Cost */}
-            <div className="flex items-center gap-1 bg-black/10 px-2 py-0.5 rounded-full z-20">
-                <span className="text-[10px] md:text-xs font-bold font-pixel-text text-black/80">{cost}</span>
-                <Zap className="w-3 h-3 text-yellow-600 fill-yellow-600" />
-            </div>
-
-            {/* Icon */}
-            <div className="relative z-20">
+                {/* Icon - Center */}
                 {!isUnlocked ? (
-                    <Lock className="w-8 h-8 md:w-12 md:h-12 text-gray-500" />
+                    <Lock className="w-4 h-4 md:w-6 md:h-6 text-gray-400" />
                 ) : (
-                    <Icon className={cn("w-8 h-8 md:w-12 md:h-12", type === 'wildcard' ? 'text-yellow-700' : 'text-red-700')} />
+                    <Icon className={cn("w-5 h-5 md:w-7 md:h-7", style.iconColor)} />
                 )}
-            </div>
 
-            {/* Title */}
-            <div className="text-center z-20">
-                <h3 className={cn("text-[10px] md:text-xs font-bold font-pixel-title", !isUnlocked ? "text-gray-600" : "text-black")}>
+                {/* Title - Bottom */}
+                <span className={cn(
+                    "absolute bottom-0.5 md:bottom-1 text-[5px] md:text-[7px] font-bold font-pixel-text",
+                    isUnlocked ? "text-white drop-shadow-md" : "text-gray-400"
+                )}>
                     {title}
-                </h3>
-                {isUnlocked && (
-                    <p className="text-[8px] md:text-[9px] font-pixel-text leading-tight text-black/60 hidden md:block">
-                        {description}
-                    </p>
-                )}
+                </span>
             </div>
 
-            {/* Locked Overlay Text */}
+            {/* Shine Effect */}
+            {canUse && (
+                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/30 to-transparent opacity-0 hover:opacity-100 transition-opacity pointer-events-none" />
+            )}
+
+            {/* Locked Overlay */}
             {!isUnlocked && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/10 z-30">
-                    <span className="text-[10px] font-bold text-gray-700 font-pixel-text bg-white/50 px-2 py-1 rounded">
-                        مغلق
-                    </span>
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                    <Lock className="w-3 h-3 md:w-4 md:h-4 text-white/60" />
                 </div>
             )}
 
-            {/* Disabled Overlay (Round Locked) */}
+            {/* Disabled State (Round Locked) */}
             {isUnlocked && isDisabled && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/40 z-30">
-                    <Lock className="w-6 h-6 text-white" />
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center backdrop-blur-[1px]">
+                    <Lock className="w-3 h-3 text-white/80" />
                 </div>
             )}
-
-        </motion.div>
+        </motion.button>
     );
 }

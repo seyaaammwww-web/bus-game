@@ -216,12 +216,12 @@ export default function Game() {
           </div>
 
           {/* Right - Timer, Streak, and PowerUps */}
-          <div className="flex items-center gap-2 md:gap-4">
-            {/* Mini PowerUps - Mobile Friendly */}
-            <div className="flex items-center gap-1.5 md:gap-3 mr-1 md:mr-4">
+          <div className="flex items-center gap-2 md:gap-3">
+            {/* Mini PowerUps - Playing Card Style */}
+            <div className="flex items-center gap-1 md:gap-2">
               <PowerUpCard
                 type="wildcard"
-                title="الجوكر"
+                title="جوكر"
                 description="يملأ كل الخانات"
                 cost={600}
                 icon={Crown}
@@ -229,11 +229,10 @@ export default function Game() {
                 isUsed={currentPlayer?.usedPowerUps?.wildcard || false}
                 isDisabled={!!currentRound?.activePowerUp && currentRound.activePowerUp.playerId !== currentPlayer?.id}
                 onActivate={() => activatePowerUp('wildcard')}
-                className="w-10 h-14 md:w-16 md:h-24 !border-[1.5px] md:!border-[2px]"
               />
               <PowerUpCard
                 type="banish"
-                title="الطرد"
+                title="طرد"
                 description="يطرد منافس"
                 cost={350}
                 icon={Skull}
@@ -241,15 +240,14 @@ export default function Game() {
                 isUsed={currentPlayer?.usedPowerUps?.banish || false}
                 isDisabled={!!currentRound?.activePowerUp && currentRound.activePowerUp.playerId !== currentPlayer?.id}
                 onActivate={() => setBanishOverlay(true)}
-                className="w-10 h-14 md:w-16 md:h-24 !border-[1.5px] md:!border-[2px]"
               />
             </div>
 
-            <div className="flex flex-col items-end gap-1 md:gap-2">
+            <div className="flex flex-col items-end gap-1">
               <Timer timeLeft={state.timeLeft} isRush={state.isRush} />
               {currentPlayer?.busStreak && currentPlayer.busStreak > 0 ? (
-                <div className="flex items-center gap-1.5 bg-gradient-to-r from-orange-500 to-amber-500 px-2 py-0.5 md:px-3 md:py-1 rounded-full text-white font-bold text-[10px] md:text-sm shadow-sm md:shadow-lg">
-                  <Flame className="w-3 h-3 md:w-4 md:h-4" />
+                <div className="flex items-center gap-1 bg-gradient-to-r from-orange-500 to-amber-500 px-2 py-0.5 rounded-full text-white font-bold text-[9px] md:text-xs shadow-sm">
+                  <Flame className="w-3 h-3" />
                   <span className="font-pixel-text">×{currentPlayer.busStreak}</span>
                 </div>
               ) : null}
