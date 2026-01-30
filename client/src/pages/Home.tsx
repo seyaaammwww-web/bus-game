@@ -78,7 +78,7 @@ export default function Home() {
       >
         <div className="logo-container animate-slow-float">
           {/* Logo with shine effect - uses CSS mask to constrain glow to logo shape */}
-          <div className="logo-shine">
+          <div className="logo-container animate-slow-float">
             <img
               src="/assets/logo.png"
               alt="أوتوبيس كومبليت"

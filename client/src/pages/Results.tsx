@@ -551,7 +551,7 @@ export default function Results() {
                     setAppealDialog(null);
                   }
                 }}
-                className="bg-[#7c3aed] border-2 border-[#4c1d95] text-white font-bold font-pixel-text hover:bg-[#6d28d9] rounded-none h-12 shadow-[2px_2px_0_0_#2e1065]"
+                className="bg-white border-2 border-[#4c1d95] text-[#4c1d95] font-bold font-pixel-text hover:bg-[#f3e8ff] rounded-none h-12 shadow-[2px_2px_0_0_#2e1065]"
               >
                 أيوه متأكد! 😤
               </AlertDialogAction>
