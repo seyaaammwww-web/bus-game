@@ -160,23 +160,27 @@ export default function Game() {
     }
   };
 
-  // Robust Auto-submit: Trigger when time ends OR when component unmounts (e.g. phase change)
+  // 1. Time's Up Auto-submit
   useEffect(() => {
-    // Check if time is up
     if (state.timeLeft <= 1 && !hasSubmitted) {
       handleSubmit();
     }
+  }, [state.timeLeft, hasSubmitted]);
 
-    // Safety Force Submit on Unmount/Round End if we have answers and haven't submitted
+  // 2. Unmount/Phase Change Auto-submit (ONLY on unmount, never re-run during game)
+  useEffect(() => {
     return () => {
-      // Check REF not state, to avoid closure staleness causing double submit
+      // Check REF not state, to avoid closure staleness
+      // Only submit if we have SOME answers and haven't submitted yet
+      // AND checking if the reason is NOT just a re-render is tricky in React Strict Mode, 
+      // but in production 'return' with [] deps usually means unmount.
       if (answersRef.current && Object.values(answersRef.current).some(a => a.trim().length > 0) && !hasSubmittedRef.current) {
         console.log("Auto-submitting on unmount/round-end");
         submitAnswers(answersRef.current);
-        hasSubmittedRef.current = true; // Mark as submitted
+        hasSubmittedRef.current = true;
       }
     };
-  }, [state.timeLeft, hasSubmitted]); // Dependencies: Timer and Submitted state
+  }, []); // EMPTY DEPS = Run only on mount/unmount
 
   return (
     <motion.div
@@ -247,10 +251,10 @@ export default function Game() {
             />
           </div>
 
-          {/* Right - Timer, Streak, and PowerUps */}
+          {/* Right - Timer and Streak (PowerUps moved for mobile) */}
           <div className="flex items-center gap-2 md:gap-3">
-            {/* Mini PowerUps - Playing Card Style */}
-            <div className="flex items-center gap-1 md:gap-2">
+            {/* Desktop PowerUps */}
+            <div className="hidden md:flex items-center gap-2">
               <PowerUpCard
                 type="wildcard"
                 title="جوكر"
@@ -285,6 +289,36 @@ export default function Game() {
               ) : null}
             </div>
           </div>
+        </motion.div>
+
+        {/* Mobile PowerUps Row - Dedicated Space */}
+        <motion.div
+          className="flex md:hidden items-center justify-center gap-3 mb-4"
+          initial={{ y: -10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+        >
+          <PowerUpCard
+            type="wildcard"
+            title="جوكر"
+            description="يملأ كل الخانات"
+            cost={600}
+            icon={Crown}
+            isUnlocked={(currentPlayer?.totalEarnedPoints || 0) >= 600}
+            isUsed={currentPlayer?.usedPowerUps?.wildcard || false}
+            isDisabled={!!currentRound?.activePowerUp && currentRound.activePowerUp.playerId !== currentPlayer?.id}
+            onActivate={() => activatePowerUp('wildcard')}
+          />
+          <PowerUpCard
+            type="banish"
+            title="طرد"
+            description="يطرد منافس"
+            cost={350}
+            icon={Skull}
+            isUnlocked={(currentPlayer?.totalEarnedPoints || 0) >= 350}
+            isUsed={currentPlayer?.usedPowerUps?.banish || false}
+            isDisabled={!!currentRound?.activePowerUp && currentRound.activePowerUp.playerId !== currentPlayer?.id}
+            onActivate={() => setBanishOverlay(true)}
+          />
         </motion.div>
 
         <AnimatePresence>
