@@ -131,7 +131,7 @@ export default function Game() {
 
   const handleBusComplete = () => {
     if (!hasSubmitted) {
-      // if (!allFilled) return; // Allow submitting incomplete to stop round strategically
+      if (!allFilled) return;
 
       playClickSound();
       handleSubmit();
@@ -139,13 +139,38 @@ export default function Game() {
     }
   };
 
+  // Ref to track latest answers for robust submission
+  const answersRef = useRef(answers);
+  useEffect(() => {
+    answersRef.current = answers;
+  }, [answers]);
+
   const handleSubmit = () => {
     if (!hasSubmitted) {
       playSubmitSound();
-      submitAnswers(answers);
+      submitAnswers(answersRef.current);
       setHasSubmitted(true);
     }
   };
+
+  // Robust Auto-submit: Trigger when time ends OR when component unmounts (e.g. phase change)
+  useEffect(() => {
+    // Check if time is up
+    if (state.timeLeft <= 1 && !hasSubmitted) {
+      handleSubmit();
+    }
+
+    // Safety Force Submit on Unmount/Round End if we have answers and haven't submitted
+    return () => {
+      if (answersRef.current && Object.values(answersRef.current).some(a => a.trim().length > 0) && !hasSubmitted) {
+        // We can't use 'hasSubmitted' state reliably in cleanup, but we can check if we triggered it.
+        // Better: just try to submit. The backend handles duplicates.
+        // Note: state.timeLeft check might be stale here, so just submit if we have content.
+        console.log("Auto-submitting on unmount/round-end");
+        submitAnswers(answersRef.current);
+      }
+    };
+  }, [state.timeLeft, hasSubmitted]); // Dependencies: Timer and Submitted state
 
   return (
     <motion.div
