@@ -323,7 +323,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const sendReaction = useCallback((reactionType: ReactionType) => {
-    sendMessage('send_reaction', { type: reactionType });
+    sendMessage('send_reaction', { reactionType });
   }, [sendMessage]);
 
 
