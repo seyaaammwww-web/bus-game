@@ -42,6 +42,7 @@ class GameManager {
   private rooms: Map<string, GameRoom> = new Map();
   private players: Map<WebSocket, ConnectedPlayer> = new Map();
   private timers: Map<string, NodeJS.Timeout> = new Map();
+  private voteTimers: Map<string, NodeJS.Timeout> = new Map(); // roomCode -> vote timer
   private answerVotes: Map<string, AnswerVotes[]> = new Map(); // roomCode -> votes
 
   constructor() {
@@ -1130,7 +1131,26 @@ class GameManager {
 
     } catch (error) {
       console.error("Error in calculateScores:", error);
-      // Fallback?
+
+      // FALLBACK: If validation fails, accept "reasonable" answers to prevent game stall
+      console.log(`[Calculate Scores] validation failed, using fallback for ${allAnswers.length} answers.`);
+
+      round.validatedAnswers = allAnswers.map(item => ({
+        playerId: item.playerId,
+        playerName: room.players.find(p => p.id === item.playerId)?.name || '',
+        category: item.category as Category,
+        answer: item.answer,
+        isValid: item.answer.trim().length > 1, // Simple length check
+        isPendingVote: false,
+        isUnique: false, // Will be calculated in finalizeScores
+        score: 0,
+        votes: { accepted: 0, rejected: 0 },
+        reason: 'تم القبول (خطأ في النظام)',
+        isFabricated: false
+      }));
+
+      // Ensure we finish the round logic
+      this.finalizeScores(room);
     }
   }
 
@@ -1432,8 +1452,13 @@ class GameManager {
         }
         const autoTimer = this.timers.get(`${room.code}_auto`);
         if (autoTimer) {
-          clearTimeout(autoTimer);
           this.timers.delete(`${room.code}_auto`);
+        }
+
+        // Clear vote timer
+        if (this.voteTimers.has(room.code)) {
+          clearTimeout(this.voteTimers.get(room.code));
+          this.voteTimers.delete(room.code);
         }
       } else {
         // Assign new host if needed
@@ -1664,12 +1689,15 @@ class GameManager {
     });
 
     // Set Timeout for this specific vote (e.g. 20 seconds)
-    setTimeout(() => {
+    const voteTimer = setTimeout(() => {
       const r = this.rooms.get(room.code);
       if (r && r.currentVote?.requestId === activeVote.requestId) {
         this.finalizeVote(r);
       }
     }, 20000);
+
+    // Track timer to clear it if manual completion happens
+    this.voteTimers.set(room.code, voteTimer);
   }
 
   private castDemocraticVote(ws: WebSocket, payload: { vote: 'yes' | 'no' }): void {
@@ -1705,6 +1733,12 @@ class GameManager {
   }
 
   private finalizeVote(room: GameRoom): void {
+    // Clear timeout if exists
+    if (this.voteTimers.has(room.code)) {
+      clearTimeout(this.voteTimers.get(room.code));
+      this.voteTimers.delete(room.code);
+    }
+
     if (!room.currentVote) return;
 
     const { yes, no } = room.currentVote.votes;
@@ -2152,9 +2186,6 @@ class GameManager {
     this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
   }
 
-  // Update power-ups based on total earned points
-  // IMPORTANT: Do NOT re-grant power-ups that have already been used
-  // Calculate affordable powerups based on points
   // Update power-ups based on total earned points
   // IMPORTANT: Do NOT re-grant power-ups that have already been used
   // Calculate affordable powerups based on points
