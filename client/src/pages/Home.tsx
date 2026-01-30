@@ -76,12 +76,24 @@ export default function Home() {
         transition={{ type: 'spring', stiffness: 200 }}
         className="text-center mb-8 relative z-10"
       >
-        <div className="logo-container animate-slow-float">
-          <img
-            src="/assets/logo.png"
-            alt="أوتوبيس كومبليت"
-            className="w-full max-w-[500px] object-contain pixelated drop-shadow-2xl"
-          />
+        <div className="logo-container animate-slow-float relative">
+          {/* Logo with shine effect */}
+          <div className="relative overflow-hidden rounded-lg">
+            <img
+              src="/assets/logo.png"
+              alt="أوتوبيس كومبليت"
+              className="w-full max-w-[500px] object-contain pixelated"
+            />
+            {/* Shine sweep effect */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+              <div
+                className="absolute inset-0 w-[200%] h-full bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shine-sweep"
+                style={{
+                  transform: 'skewX(-20deg)',
+                }}
+              />
+            </div>
+          </div>
         </div>
       </motion.div>
 

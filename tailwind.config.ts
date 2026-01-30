@@ -98,10 +98,15 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "shine-sweep": {
+          "0%": { transform: "translateX(-100%) skewX(-20deg)" },
+          "100%": { transform: "translateX(100%) skewX(-20deg)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "shine-sweep": "shine-sweep 3.5s ease-in-out infinite",
       },
     },
   },
