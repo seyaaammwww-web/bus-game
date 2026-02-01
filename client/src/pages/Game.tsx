@@ -12,12 +12,13 @@ import { BanishPowerUp } from '@/components/BanishPowerUp';
 import { BanishOverlay } from '@/components/BanishOverlay';
 import { BanishNotification } from '@/components/BanishNotification';
 import { Confetti } from '@/components/Confetti';
+import { ActiveGamePlayerGrid } from '@/components/game/ActiveGamePlayerGrid';
 import { useGame } from '@/lib/gameContext';
 import { categories, type Category, type RoundAnswers } from '@shared/schema';
 import { AlertTriangle, Send, User, Users, Globe, PawPrint, Box, LogOut, Zap, Eye, Trophy, Flame, Sparkles, Snowflake, Crown, Skull } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { playCountdownSound, playCountdownFinalSound, playRoundStart, playBusSound, playFreezeSound, playWildcardSound, playBanishSound, playSubmitSound, playClickSound, playRushActivateSound, playBonusSound } from '@/lib/sounds';
+import { playCountdownSound, playCountdownFinalSound, playRoundStart, playBusSound, playFreezeSound, playWildcardSound, playBanishSound, playSubmitSound, playClickSound, playRushActivateSound, playBonusSound, playTypeSound } from '@/lib/sounds';
 import { RetroCard } from '@/components/ui/RetroCard';
 
 const categoryIcons: Record<Category, any> = {
@@ -58,6 +59,13 @@ export default function Game() {
   const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const letter = currentRound?.letter || room.letters[room.currentRound];
+
+  const getPowerUpStatus = (cost: number, isUsed: boolean) => {
+    if (isUsed) return 'used';
+    if (currentRound?.activePowerUp && currentRound.activePowerUp.playerId !== currentPlayer?.id) return 'disabled';
+    const points = currentPlayer?.totalEarnedPoints || 0;
+    return points >= cost ? 'available' : 'locked';
+  };
 
   useEffect(() => {
     const initial: RoundAnswers = {};
@@ -112,7 +120,12 @@ export default function Game() {
   }, [currentRound, currentPlayer, hasSubmitted]);
 
   const updateAnswer = (category: string, value: string) => {
-    setAnswers(prev => ({ ...prev, [category]: value }));
+    setAnswers(prev => {
+      if (value.length > prev[category].length) {
+        playTypeSound();
+      }
+      return { ...prev, [category]: value };
+    });
   };
 
   const handleKeyDown = (category: string, e: React.KeyboardEvent) => {
@@ -273,9 +286,7 @@ export default function Game() {
             description="يملأ الكل"
             cost={600}
             icon={Crown}
-            isUnlocked={(currentPlayer?.totalEarnedPoints || 0) >= 600}
-            isUsed={currentPlayer?.usedPowerUps?.wildcard || false}
-            isDisabled={!!currentRound?.activePowerUp && currentRound.activePowerUp.playerId !== currentPlayer?.id}
+            status={getPowerUpStatus(600, currentPlayer?.usedPowerUps?.wildcard || false)}
             onActivate={() => activatePowerUp('wildcard')}
             className="w-12 h-16 text-[9px] shadow-sm"
           />
@@ -285,9 +296,7 @@ export default function Game() {
             description="طرد"
             cost={350}
             icon={Skull}
-            isUnlocked={(currentPlayer?.totalEarnedPoints || 0) >= 350}
-            isUsed={currentPlayer?.usedPowerUps?.banish || false}
-            isDisabled={!!currentRound?.activePowerUp && currentRound.activePowerUp.playerId !== currentPlayer?.id}
+            status={getPowerUpStatus(350, currentPlayer?.usedPowerUps?.banish || false)}
             onActivate={() => setBanishOverlay(true)}
             className="w-12 h-16 text-[9px] shadow-sm"
           />
@@ -329,9 +338,7 @@ export default function Game() {
                 description="يملأ كل الخانات"
                 cost={600}
                 icon={Crown}
-                isUnlocked={(currentPlayer?.totalEarnedPoints || 0) >= 600}
-                isUsed={currentPlayer?.usedPowerUps?.wildcard || false}
-                isDisabled={!!currentRound?.activePowerUp && currentRound.activePowerUp.playerId !== currentPlayer?.id}
+                status={getPowerUpStatus(600, currentPlayer?.usedPowerUps?.wildcard || false)}
                 onActivate={() => activatePowerUp('wildcard')}
               />
               <PowerUpCard
@@ -340,9 +347,7 @@ export default function Game() {
                 description="يطرد منافس"
                 cost={350}
                 icon={Skull}
-                isUnlocked={(currentPlayer?.totalEarnedPoints || 0) >= 350}
-                isUsed={currentPlayer?.usedPowerUps?.banish || false}
-                isDisabled={!!currentRound?.activePowerUp && currentRound.activePowerUp.playerId !== currentPlayer?.id}
+                status={getPowerUpStatus(350, currentPlayer?.usedPowerUps?.banish || false)}
                 onActivate={() => setBanishOverlay(true)}
               />
             </div>
@@ -532,17 +537,27 @@ export default function Game() {
           <ReactionButtons />
         </div>
 
+
+        {/* Active Player Grid */}
+        <div className="mt-8 mb-4">
+          <ActiveGamePlayerGrid
+            players={room.players}
+            currentPlayerId={state.playerId!}
+            submissions={currentRound?.submissions?.reduce((acc: any, sub: any) => {
+              acc[sub.playerId] = sub;
+              return acc;
+            }, {}) || {}}
+            timeLeft={Number(state.timeLeft)}
+          />
+        </div>
+
         <div className="pb-20"></div>
       </div>
 
       <ReactionDisplay />
       <Confetti active={room.phase === 'results' || room.phase === 'final'} />
 
-      <div className="fixed bottom-2 left-0 right-0 text-center z-0 pointer-events-none">
-        <p className="text-[10px] text-white/60 font-pixel-text font-bold">
-          BY MOHAMED SEYAM
-        </p>
-      </div>
+
     </motion.div>
   );
 }

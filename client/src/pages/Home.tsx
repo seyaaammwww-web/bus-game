@@ -11,6 +11,8 @@ import { resumeAudioContext } from '@/lib/sounds';
 import { Tutorial } from '@/components/Tutorial';
 import { HelpCircle } from 'lucide-react';
 import { RetroQuote } from '@/components/ui/RetroQuote';
+import { PixelReveal } from '@/components/ui/PixelReveal';
+import { Text3D } from '@/components/ui/Text3D';
 
 
 
@@ -71,16 +73,26 @@ export default function Home() {
         transition={{ type: 'spring', stiffness: 200 }}
         className="text-center mb-12 relative z-10"
       >
-        <div className="logo-container animate-slow-float">
-          {/* Logo with shine effect - uses CSS mask to constrain glow to logo shape */}
-          <div className="logo-container animate-slow-float">
+        <PixelReveal pixelSize={6}>
+          <div className="logo-container animate-slow-float mb-2">
+            {/* Logo with shine effect - uses CSS mask to constrain glow to logo shape */}
             <img
               src="/assets/logo.png"
               alt="أوتوبيس كومبليت"
               className="w-full max-w-[500px] object-contain pixelated"
             />
           </div>
-        </div>
+        </PixelReveal>
+
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 }}
+        >
+          <Text3D className="text-2xl md:text-3xl text-[#FEFADE] mt-2 tracking-widest" shadowColor="#7c3aed" shadowDepth={3}>
+            MULTIPLAYER EDITION
+          </Text3D>
+        </motion.div>
       </motion.div>
 
       <AnimatePresence mode="wait">
@@ -326,11 +338,7 @@ export default function Home() {
 
 
 
-      <div className="fixed bottom-6 left-0 right-0 text-center">
-        <p className="text-[12px] text-white font-pixel-text tracking-tight animate-pulse font-bold">
-          BY MOHAMED SEYAM
-        </p>
-      </div>
+
     </div>
   );
 }

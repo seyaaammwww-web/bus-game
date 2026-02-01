@@ -76,4 +76,6 @@ export const playReactionSound = () => soundManager.play('notification');
 export const playSuccessSound = () => soundManager.play('win');
 export const playTimerWarning = () => soundManager.play('countdown');
 export const playTimerUrgent = () => soundManager.play('rush');
+export const playErrorSound = () => soundManager.play('rush');
+export const playTypeSound = () => soundManager.play('vote');
 export const resumeAudioContext = () => { };

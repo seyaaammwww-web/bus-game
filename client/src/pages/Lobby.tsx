@@ -57,7 +57,6 @@ export default function Lobby() {
             >
               <HelpCircle className="w-5 h-5" />
             </Button>
-            <span className="text-[12px] text-white font-pixel-text tracking-tight animate-pulse font-bold self-center">BY MOHAMED SEYAM</span>
           </div>
         </div>
 
@@ -349,7 +348,7 @@ export default function Lobby() {
           )}
         </motion.div>
       </div>
-    </div>
+    </div >
   );
 }
 

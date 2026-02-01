@@ -1,0 +1,97 @@
+
+import React from 'react';
+import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
+import { PixelAvatar } from '@/components/ui/PixelAvatar';
+import { Crown, PenTool, CheckCircle, Clock } from 'lucide-react';
+
+interface ActiveGamePlayerGridProps {
+    players: any[];
+    currentPlayerId: string;
+    submissions: Record<string, any>;
+    timeLeft: number;
+}
+
+export function ActiveGamePlayerGrid({ players, currentPlayerId, submissions, timeLeft }: ActiveGamePlayerGridProps) {
+    return (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
+            {players.map((player, index) => {
+                const hasSubmitted = !!submissions[player.id];
+                const isMe = player.id === currentPlayerId;
+
+                return (
+                    <motion.div
+                        key={player.id}
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: index * 0.1 }}
+                        className={cn(
+                            "relative flex flex-col items-center p-4 rounded-xl border-[3px] shadow-[4px_4px_0_0_rgba(0,0,0,0.2)] transition-all",
+                            isMe
+                                ? "bg-[#e9d5ff] border-[#7c3aed]"
+                                : hasSubmitted
+                                    ? "bg-[#dcfce7] border-[#22c55e]"
+                                    : "bg-white border-[#e5e7eb]"
+                        )}
+                    >
+                        {/* Status Indicator */}
+                        <div className="absolute top-2 right-2">
+                            {hasSubmitted ? (
+                                <div className="bg-green-500 text-white p-1 rounded-md shadow-sm animate-bounce-slight">
+                                    <CheckCircle className="w-4 h-4" />
+                                </div>
+                            ) : (
+                                <div className="bg-gray-200 text-gray-500 p-1 rounded-md shadow-sm">
+                                    <PenTool className="w-4 h-4 animate-pulse" />
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Avatar with Ring */}
+                        <div className="relative mb-2">
+                            <PixelAvatar
+                                src={player.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${player.id}`}
+                                size="md"
+                                className={cn(
+                                    "border-4",
+                                    isMe ? "border-[#7c3aed]" : "border-white"
+                                )}
+                            />
+                            {player.isHost && (
+                                <div className="absolute -top-2 -left-2 bg-yellow-400 text-yellow-900 p-0.5 rounded-full border-2 border-white shadow-sm">
+                                    <Crown className="w-3 h-3" />
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Name & Score */}
+                        <div className="text-center w-full">
+                            <div className="font-bold font-pixel-text text-sm truncate w-full text-[#4c1d95] mb-1">
+                                {player.name}
+                            </div>
+                            <div className="inline-block bg-[#4c1d95] text-[#FFFDD1] px-2 py-0.5 rounded text-xs font-pixel-title">
+                                {player.score} PTS
+                            </div>
+                        </div>
+
+                        {/* "You" Badge */}
+                        {isMe && (
+                            <div className="absolute -bottom-3 bg-[#7c3aed] text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm border-2 border-white">
+                                أنت
+                            </div>
+                        )}
+
+                        {/* Typing Indicator (Simulation) */}
+                        {!hasSubmitted && !isMe && Math.random() > 0.7 && (
+                            <div className="absolute bottom-2 left-2 flex gap-0.5">
+                                <motion.div animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0 }} className="w-1 h-1 bg-gray-400 rounded-full" />
+                                <motion.div animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }} className="w-1 h-1 bg-gray-400 rounded-full" />
+                                <motion.div animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.4 }} className="w-1 h-1 bg-gray-400 rounded-full" />
+                            </div>
+                        )}
+                    </motion.div>
+                );
+            })}
+        </div>
+    );
+}

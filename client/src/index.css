@@ -431,11 +431,20 @@
 }
 
 /* Advanced Retro Text Shadow */
+/* Advanced Retro Text Shadow - Dynamic */
 .text-original {
-  --sn: 2px;
-  --s: 4px;
-  --sd: 6px;
+  /* Default values if not set */
+  --shadow: 4px;
   --color: #2e1065;
+
+  /* Dynamic calculations */
+  --sn: calc(var(--shadow) * -1);
+  /* Negative shadow offset */
+  --s: var(--shadow);
+  /* Positive shadow offset */
+  --sd: calc(var(--shadow) * 2);
+  /* Double shadow (depth) */
+
   text-shadow:
     var(--sn) var(--sn) 0 var(--color),
     0 var(--sn) 0 var(--color),

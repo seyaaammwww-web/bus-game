@@ -75,6 +75,20 @@ export default {
           foreground: "hsl(var(--sidebar-accent-foreground) / <alpha-value>)",
           border: "var(--sidebar-accent-border)"
         },
+        pixel: {
+          amber: {
+            DEFAULT: '#fbbf24', // 400
+            border: '#b45309', // 700
+            shadow: '#78350f', // 900
+            text: '#451a03', // 950
+          },
+          red: {
+            DEFAULT: '#f87171', // 400
+            border: '#b91c1c', // 700
+            shadow: '#7f1d1d', // 900
+            text: '#450a0a', // 950
+          }
+        },
         status: {
           online: "rgb(34 197 94)",
           away: "rgb(245 158 11)",
@@ -102,11 +116,16 @@ export default {
           "0%": { transform: "translateX(-100%) skewX(-20deg)" },
           "100%": { transform: "translateX(100%) skewX(-20deg)" },
         },
+        "scanline": {
+          "0%": { backgroundPosition: "0% 0%" },
+          "100%": { backgroundPosition: "0% 100%" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "shine-sweep": "shine-sweep 3.5s ease-in-out infinite",
+        "scanline": "scanline 8s linear infinite",
       },
     },
   },

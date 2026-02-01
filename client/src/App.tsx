@@ -37,6 +37,10 @@ function GameRouter() {
   }
 }
 
+import { GameFooter } from "@/components/GameFooter";
+
+// ... imports
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -44,6 +48,7 @@ function App() {
         <WorkOSBackground />
         <GameProvider>
           <GameRouter />
+          <GameFooter />
         </GameProvider>
         <Toaster />
       </TooltipProvider>
