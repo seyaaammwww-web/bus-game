@@ -23,9 +23,6 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
         ? 'bg-gradient-to-r from-primary/10 to-accent/10 border-primary/50 border-2 p-4 shadow-md'
         : 'bg-card border-card-border p-3'
         }`}
-      initial={{ x: -20, opacity: 0, rotate: -5 }}
-      animate={{ x: 0, opacity: 1, rotate: 0 }}
-      transition={{ delay: index * 0.1, type: 'spring', stiffness: 100 }}
       whileHover={{ scale: 1.02, y: -2 }}
     >
       {rank !== undefined && rank < 3 && (
