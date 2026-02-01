@@ -49,15 +49,7 @@ export function ActiveGamePlayerGrid({ players, currentPlayerId, submissions, ti
 
 
 
-                        {/* Name & Score */}
-                        <div className="text-center w-full">
-                            <div className="font-bold font-pixel-text text-sm truncate w-full text-[#4c1d95] mb-1">
-                                {player.name}
-                            </div>
-                            <div className="inline-block bg-[#4c1d95] text-[#FFFDD1] px-2 py-0.5 rounded text-xs font-pixel-title">
-                                {player.score} PTS
-                            </div>
-                        </div>
+
 
                         {/* "You" Badge */}
                         {isMe && (
