@@ -1,7 +1,7 @@
 // ... imports
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Plus, ArrowLeft, Sparkles, Star, Heart } from 'lucide-react';
+import { Users, Plus, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -69,7 +69,7 @@ export default function Home() {
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 200 }}
-        className="text-center mb-8 relative z-10"
+        className="text-center mb-12 relative z-10"
       >
         <div className="logo-container animate-slow-float">
           {/* Logo with shine effect - uses CSS mask to constrain glow to logo shape */}
@@ -105,7 +105,7 @@ export default function Home() {
         {mode === 'home' && (
           <motion.div
             key="home"
-            className="flex flex-col gap-4 w-full max-w-sm relative z-10"
+            className="flex flex-col gap-6 w-full max-w-sm relative z-10"
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -30, opacity: 0 }}
@@ -119,7 +119,7 @@ export default function Home() {
             >
               <Button
                 size="lg"
-                variant="secondary"
+                variant="primary"
                 className="w-full h-20 text-3xl font-pixel-title"
                 onClick={() => setMode('create')}
                 data-testid="button-create-room"

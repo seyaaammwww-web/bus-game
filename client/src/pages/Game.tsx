@@ -40,7 +40,9 @@ export default function Game() {
   const { state, currentRound, submitAnswers, triggerBusComplete, disconnect, currentPlayer, activatePowerUp, activePowerUpNotification, isBanished, banishedBy, banishOverlay, setBanishOverlay } = useGame();
 
   const room = state.room!;
-  const currentCategories = room.settings?.customCategories || categories;
+  const currentCategories = (room.settings?.customCategories && room.settings.customCategories.length > 0)
+    ? room.settings.customCategories
+    : categories;
 
   const [answers, setAnswers] = useState<RoundAnswers>(() => {
     const initial: RoundAnswers = {};
@@ -124,7 +126,7 @@ export default function Game() {
     }
   };
 
-  const allFilled = currentCategories.every(cat => answers[cat] && answers[cat].trim().length > 0);
+  const allFilled = currentCategories.length > 0 && currentCategories.every(cat => answers[cat] && answers[cat].trim().length > 0);
   const filledCount = currentCategories.filter(cat => answers[cat] && answers[cat].trim().length > 0).length;
 
   const canBusComplete = allFilled;
