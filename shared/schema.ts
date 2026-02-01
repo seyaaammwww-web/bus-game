@@ -124,6 +124,7 @@ export interface VoteRequest {
 export interface ActiveVote extends VoteRequest {
   votes: { yes: number; no: number };
   voterIds: string[]; // Who voted in this session
+  votesDetails?: Record<string, 'yes' | 'no'>;
   startTime: number;
 }
 

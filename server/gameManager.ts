@@ -1675,6 +1675,7 @@ class GameManager {
       ...nextRequest,
       votes: { yes: 0, no: 0 },
       voterIds: [],
+      votesDetails: {},
       startTime: Date.now()
     };
 
@@ -1716,6 +1717,11 @@ class GameManager {
     // "Democratic" implies everyone.
 
     room.currentVote.voterIds.push(voterId);
+
+    // Track detailed vote
+    if (!room.currentVote.votesDetails) room.currentVote.votesDetails = {};
+    room.currentVote.votesDetails[voterId] = payload.vote;
+
     if (payload.vote === 'yes') room.currentVote.votes.yes++;
     else room.currentVote.votes.no++;
 
