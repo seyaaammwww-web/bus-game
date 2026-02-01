@@ -74,32 +74,35 @@ export function ResultsTable({
                                     : "bg-white border-[#e5e7eb] shadow-sm hover:border-[#a78bfa]"
                             )}
                         >
-                            {/* Mobile: Player Header */}
-                            <div className={cn(
-                                "flex items-center gap-3 p-3 border-b-2 border-dashed",
-                                isMe ? "border-[#7c3aed]/30 bg-[#7c3aed]/5" : "border-gray-200 bg-gray-50"
-                            )}>
-                                <div className="relative">
-                                    <PixelAvatar
-                                        src={player?.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${submission.playerId}`}
-                                        className="w-10 h-10 border-2 border-white shadow-sm"
-                                    />
-                                    {isMe && (
-                                        <div className="absolute -top-1 -right-1 bg-yellow-400 border border-white rounded-full w-4 h-4 flex items-center justify-center text-[10px]">⭐</div>
-                                    )}
-                                </div>
-                                <div className="flex-1">
-                                    <div className={cn("font-bold font-pixel-text", isMe ? "text-[#5b21b6]" : "text-gray-700")}>
-                                        {player?.name}
+                            <div className="grid grid-cols-1 md:grid-cols-[1.5fr,repeat(5,1fr)] bg-white/50">
+                                {/* Player Info Column (Desktop: Col 1, Mobile: Header) */}
+                                <div className={cn(
+                                    "flex items-center gap-3 p-3 border-b-2 md:border-b-0 md:border-l-2 border-dashed",
+                                    isMe ? "border-[#7c3aed]/30 bg-[#7c3aed]/5" : "border-gray-200 bg-gray-50"
+                                )}>
+                                    <div className="relative">
+                                        <PixelAvatar
+                                            src={player?.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${submission.playerId}`}
+                                            className="w-10 h-10 border-2 border-white shadow-sm"
+                                        />
+                                        {isMe && (
+                                            <div className="absolute -top-1 -right-1 bg-yellow-400 border border-white rounded-full w-4 h-4 flex items-center justify-center text-[10px]">⭐</div>
+                                        )}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className={cn("font-bold font-pixel-text truncate", isMe ? "text-[#5b21b6]" : "text-gray-700")}>
+                                            {player?.name}
+                                        </div>
+                                        <div className="text-xs text-gray-400 font-pixel-text md:hidden">
+                                            {isMe ? 'أنت' : 'لاعب'}
+                                        </div>
+                                    </div>
+                                    <div className="text-xl font-bold font-pixel-title text-[#4c1d95]">
+                                        +{calculateTotalScore(round, submission.playerId)}
                                     </div>
                                 </div>
-                                <div className="text-xl font-bold font-pixel-title text-[#4c1d95]">
-                                    +{calculateTotalScore(round, submission.playerId)}
-                                </div>
-                            </div>
 
-                            {/* Answers Grid */}
-                            <div className="grid grid-cols-1 md:grid-cols-5 divide-y md:divide-y-0 md:divide-x md:divide-x-reverse divide-gray-100 bg-white/50">
+                                {/* Answers Columns (Desktop: Cols 2-6, Mobile: Grid) */}
                                 {categories.map((cat) => {
                                     const answer = submission.answers[cat];
                                     const validation = round.validatedAnswers.find(
@@ -107,12 +110,11 @@ export function ResultsTable({
                                     );
                                     const isValid = validation?.isValid;
                                     const score = validation?.score || 0;
-                                    const isPending = !validation;
 
                                     // Status Color Logic
                                     let statusClass = "bg-gray-50/50";
                                     if (answer) {
-                                        if (isValid) statusClass = score > 10 ? "bg-green-50" : "bg-green-50/30"; // Unique vs Duplicate
+                                        if (isValid) statusClass = score > 10 ? "bg-green-50" : "bg-green-50/30";
                                         else statusClass = "bg-red-50";
                                     }
 
@@ -120,7 +122,7 @@ export function ResultsTable({
                                         <div
                                             key={cat}
                                             className={cn(
-                                                "relative p-3 flex md:flex-col items-center justify-between md:justify-center gap-2 transition-colors",
+                                                "relative p-3 flex md:flex-col items-center justify-between md:justify-center gap-2 transition-colors border-b md:border-b-0 border-gray-100 last:border-0 md:border-r md:border-gray-100",
                                                 statusClass
                                             )}
                                             onClick={() => {
@@ -139,40 +141,33 @@ export function ResultsTable({
                                             <div className="flex-1 text-center md:w-full">
                                                 {answer ? (
                                                     <span className={cn(
-                                                        "font-bold text-sm md:text-base break-words",
+                                                        "font-bold text-sm md:text-base break-words block",
                                                         isValid ? "text-[#15803d]" : "text-[#b91c1c] line-through decoration-2 decoration-red-300"
                                                     )}>
                                                         {answer}
                                                     </span>
                                                 ) : (
-                                                    <span className="text-gray-300 text-xs">-</span>
+                                                    <span className="text-gray-300 text-xs font-pixel-text">-</span>
                                                 )}
                                             </div>
 
                                             {/* Score Badge */}
-                                            <div className="shrink-0 md:absolute md:bottom-1 md:right-1">
+                                            <div className="shrink-0 md:absolute md:top-1 md:left-1">
                                                 {answer && (
                                                     isValid ? (
                                                         <span className={cn(
-                                                            "text-[10px] px-1.5 py-0.5 rounded border shadow-sm font-bold",
+                                                            "text-[10px] px-1.5 py-0.5 rounded border shadow-sm font-bold font-pixel-text",
                                                             score > 10
                                                                 ? "bg-yellow-100 text-yellow-700 border-yellow-200"
                                                                 : "bg-green-100 text-green-700 border-green-200"
                                                         )}>
-                                                            +{score}
+                                                            {score}
                                                         </span>
                                                     ) : (
                                                         <X className="w-4 h-4 text-red-400 opacity-50" />
                                                     )
                                                 )}
                                             </div>
-
-                                            {/* Referee Controls */}
-                                            {isReferee && answer && (
-                                                <div className="md:absolute md:inset-0 md:bg-black/5 md:opacity-0 md:group-hover/cell:opacity-100 flex items-center justify-center gap-1 z-10 transition-opacity">
-                                                    {/* Add referee buttons here if needed, keeping it clean for now */}
-                                                </div>
-                                            )}
                                         </div>
                                     );
                                 })}

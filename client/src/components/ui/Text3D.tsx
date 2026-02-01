@@ -14,7 +14,7 @@ interface Text3DProps extends React.HTMLAttributes<HTMLDivElement> {
 export function Text3D({
     children,
     shadowColor = '#2e1065',
-    shadowDepth = 4,
+    shadowDepth = 2,
     textColor = 'white',
     className,
     style,
