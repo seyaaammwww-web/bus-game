@@ -87,9 +87,9 @@ export default function Home() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8 }}
         >
-          <Text3D className="text-2xl md:text-3xl text-[#FEFADE] mt-2 tracking-widest" shadowColor="#7c3aed" shadowDepth={3}>
-            by mohamed seyam
-          </Text3D>
+          <div className="text-sm md:text-base font-pixel-text text-[#FEFADE]/90 mt-4 tracking-widest uppercase">
+            By Mohamed Seyam
+          </div>
         </motion.div>
       </motion.div>
 
