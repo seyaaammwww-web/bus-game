@@ -88,7 +88,7 @@ export default function Home() {
           transition={{ delay: 0.8 }}
         >
           <Text3D className="text-2xl md:text-3xl text-[#FEFADE] mt-2 tracking-widest" shadowColor="#7c3aed" shadowDepth={3}>
-            MULTIPLAYER EDITION
+            by mohamed seyam
           </Text3D>
         </motion.div>
       </motion.div>

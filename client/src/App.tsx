@@ -48,7 +48,7 @@ function App() {
         <WorkOSBackground />
         <GameProvider>
           <GameRouter />
-          <GameFooter />
+
         </GameProvider>
         <Toaster />
       </TooltipProvider>
