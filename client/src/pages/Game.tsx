@@ -252,7 +252,7 @@ export default function Game() {
 
           <div className="flex items-center gap-2">
             <Timer timeLeft={state.timeLeft} isRush={state.isRush} />
-            {currentPlayer?.busStreak && currentPlayer.busStreak > 0 && (
+            {!!currentPlayer?.busStreak && currentPlayer.busStreak > 0 && (
               <div className="flex items-center gap-1 bg-orange-500 px-1.5 py-0.5 rounded-full text-white text-[9px] font-bold shadow-sm">
                 <Flame className="w-3 h-3" />
                 <span>×{currentPlayer.busStreak}</span>
