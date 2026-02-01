@@ -286,120 +286,120 @@ export default function Results() {
             العودة للرئيسية
           </Button>
         </motion.div>
-      </motion.div>
-    )}
 
-      {!isFinal && currentRound && (
+
+        {!isFinal && currentRound && (
+          <motion.div
+            initial={{ y: 30, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            <PixelReveal delay={0.4} pixelSize={4}>
+              <div className="bg-[#4c1d95] text-[#FFFDD1] px-4 py-3 border-b-4 border-[#2e1065] rounded-t-lg">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">📝</span>
+                  <span className="font-pixel-title text-lg tracking-wide">نتائج الجولة</span>
+                </div>
+              </div>
+
+              <div className="bg-[#f3e8ff] p-4 rounded-b-lg border-x-4 border-b-4 border-[#4c1d95]">
+                <ResultsTable
+                  round={currentRound}
+                  players={room.players}
+                  currentPlayerId={state.playerId!}
+                  isReferee={isReferee}
+                  onRefereeToggle={refereeToggleUnique}
+                  onRefereeDeduct={(pid, cat) => refereeDeduct(pid, cat, 'رفض الحكم')}
+                  onAppeal={(pid, cat, ans) => setAppealDialog({ playerId: pid, category: cat, word: ans })}
+                />
+              </div>
+            </PixelReveal>
+          </motion.div>
+        )}
+
         <motion.div
+          className="space-y-3"
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.3 }}
+          transition={{ delay: 0.4 }}
         >
-          <PixelReveal delay={0.4} pixelSize={4}>
-            <div className="bg-[#4c1d95] text-[#FFFDD1] px-4 py-3 border-b-4 border-[#2e1065] rounded-t-lg">
-              <div className="flex items-center gap-2">
-                <span className="text-xl">📝</span>
-                <span className="font-pixel-title text-lg tracking-wide">نتائج الجولة</span>
-              </div>
-            </div>
-
-            <div className="bg-[#f3e8ff] p-4 rounded-b-lg border-x-4 border-b-4 border-[#4c1d95]">
-              <ResultsTable
-                round={currentRound}
-                players={room.players}
-                currentPlayerId={state.playerId!}
-                isReferee={isReferee}
-                onRefereeToggle={refereeToggleUnique}
-                onRefereeDeduct={(pid, cat) => refereeDeduct(pid, cat, 'رفض الحكم')}
-                onAppeal={(pid, cat, ans) => setAppealDialog({ playerId: pid, category: cat, word: ans })}
-              />
-            </div>
-          </PixelReveal>
+          {!isFinal && (
+            <>
+              {/* Case 1: Countdown Running (Approved or Auto) */}
+              {room.nextRoundAt ? (
+                <div className="w-full h-20 bg-gradient-to-r from-[#7c3aed]/20 to-[#8b5cf6]/20 rounded-2xl flex items-center justify-center gap-5 border-[3px] border-[#4c1d95] shadow-[3px_3px_0_0_#2e1065] font-pixel-text text-xl font-bold">
+                  <span className="text-white text-xl">الجولة التالية في</span>
+                  <motion.span
+                    key={countdown}
+                    initial={{ scale: 1.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="w-14 h-14 bg-gradient-to-br from-white to-[#faf5ff] text-[#4c1d95] rounded-full flex items-center justify-center font-bold shadow-lg border-2 border-[#4c1d95] font-pixel-title text-2xl"
+                  >
+                    {countdown}
+                  </motion.span>
+                </div>
+              ) : (
+                /* Case 2: Waiting for Referee (No Timer) */
+                <div className="w-full p-4 bg-[#4c1d95]/80 rounded-2xl text-center border-[3px] border-[#FFFDD1] shadow-lg backdrop-blur-sm">
+                  {isReferee ? (
+                    <div className="space-y-2">
+                      <p className="text-[#FFFDD1] font-bold font-pixel-text text-lg animate-pulse">
+                        🕐 الوقت متوقف للمراجعة
+                      </p>
+                      <Button
+                        onClick={() => refereeApprove()}
+                        size="lg"
+                        className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
+                      >
+                        ✅ اعتماد النتيجة وبدء الجولة
+                      </Button>
+                    </div>
+                  ) : room.settings?.enableVoting && isHost ? (
+                    // Host Control for Voting Mode
+                    <div className="space-y-2">
+                      <p className="text-[#FFFDD1] font-bold font-pixel-text text-lg">
+                        🗳️ وضع التصويت مفعل
+                      </p>
+                      <Button
+                        onClick={() => nextRound()}
+                        size="lg"
+                        className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
+                      >
+                        ➡️ الاستمرار للجولة التالية
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-2">
+                      <Timer className="w-8 h-8 text-[#FFFDD1] animate-spin-slow" />
+                      <p className="text-[#FFFDD1] font-bold font-pixel-text text-xl">
+                        {room.settings?.enableVoting ? 'في انتظار المضيف...' : 'في انتظار اعتماد الحكم...'}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
+          )}
         </motion.div>
-      )}
-
-      <motion.div
-        className="space-y-3"
-        initial={{ y: 30, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.4 }}
-      >
-        {!isFinal && (
-          <>
-            {/* Case 1: Countdown Running (Approved or Auto) */}
-            {room.nextRoundAt ? (
-              <div className="w-full h-20 bg-gradient-to-r from-[#7c3aed]/20 to-[#8b5cf6]/20 rounded-2xl flex items-center justify-center gap-5 border-[3px] border-[#4c1d95] shadow-[3px_3px_0_0_#2e1065] font-pixel-text text-xl font-bold">
-                <span className="text-white text-xl">الجولة التالية في</span>
-                <motion.span
-                  key={countdown}
-                  initial={{ scale: 1.5, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="w-14 h-14 bg-gradient-to-br from-white to-[#faf5ff] text-[#4c1d95] rounded-full flex items-center justify-center font-bold shadow-lg border-2 border-[#4c1d95] font-pixel-title text-2xl"
-                >
-                  {countdown}
-                </motion.span>
-              </div>
-            ) : (
-              /* Case 2: Waiting for Referee (No Timer) */
-              <div className="w-full p-4 bg-[#4c1d95]/80 rounded-2xl text-center border-[3px] border-[#FFFDD1] shadow-lg backdrop-blur-sm">
-                {isReferee ? (
-                  <div className="space-y-2">
-                    <p className="text-[#FFFDD1] font-bold font-pixel-text text-lg animate-pulse">
-                      🕐 الوقت متوقف للمراجعة
-                    </p>
-                    <Button
-                      onClick={() => refereeApprove()}
-                      size="lg"
-                      className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
-                    >
-                      ✅ اعتماد النتيجة وبدء الجولة
-                    </Button>
-                  </div>
-                ) : room.settings?.enableVoting && isHost ? (
-                  // Host Control for Voting Mode
-                  <div className="space-y-2">
-                    <p className="text-[#FFFDD1] font-bold font-pixel-text text-lg">
-                      🗳️ وضع التصويت مفعل
-                    </p>
-                    <Button
-                      onClick={() => nextRound()}
-                      size="lg"
-                      className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
-                    >
-                      ➡️ الاستمرار للجولة التالية
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center gap-2">
-                    <Timer className="w-8 h-8 text-[#FFFDD1] animate-spin-slow" />
-                    <p className="text-[#FFFDD1] font-bold font-pixel-text text-xl">
-                      {room.settings?.enableVoting ? 'في انتظار المضيف...' : 'في انتظار اعتماد الحكم...'}
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-          </>
-        )}
-      </motion.div>
-      {/* Appeal Confirmation Dialog */}
-      <AppealDialog
-        isOpen={!!appealDialog}
-        onClose={() => setAppealDialog(null)}
-        onConfirm={() => {
-          if (appealDialog) {
-            if (room.settings?.enableVoting) {
-              requestVote(appealDialog.playerId, appealDialog.category, appealDialog.word);
-            } else {
-              appealAnswer(appealDialog.playerId, appealDialog.category, appealDialog.word);
+        {/* Appeal Confirmation Dialog */}
+        <AppealDialog
+          isOpen={!!appealDialog}
+          onClose={() => setAppealDialog(null)}
+          onConfirm={() => {
+            if (appealDialog) {
+              if (room.settings?.enableVoting) {
+                requestVote(appealDialog.playerId, appealDialog.category, appealDialog.word);
+              } else {
+                appealAnswer(appealDialog.playerId, appealDialog.category, appealDialog.word);
+              }
+              setAppealDialog(null);
             }
-            setAppealDialog(null);
-          }
-        }}
-        itemName={appealDialog?.word}
-        categoryName={appealDialog?.category}
-        isVotingEnabled={room.settings?.enableVoting}
-      />
+          }}
+          itemName={appealDialog?.word}
+          categoryName={appealDialog?.category}
+          isVotingEnabled={room.settings?.enableVoting}
+        />
+      </div>
     </div>
   );
 }

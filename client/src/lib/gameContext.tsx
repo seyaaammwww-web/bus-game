@@ -154,7 +154,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
       case 'voting_start':
       case 'round_results':
       case 'game_end':
-      case 'game_end':
       case 'sync_state':
         dispatch({ type: 'SET_ROOM', room: message.payload.room });
         dispatch({ type: 'SET_RUSH', isRush: false });
