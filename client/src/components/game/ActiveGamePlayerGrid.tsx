@@ -47,22 +47,7 @@ export function ActiveGamePlayerGrid({ players, currentPlayerId, submissions, ti
                             )}
                         </div>
 
-                        {/* Avatar with Ring */}
-                        <div className="relative mb-2">
-                            <PixelAvatar
-                                src={player.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${player.id}`}
-                                size="md"
-                                className={cn(
-                                    "border-4",
-                                    isMe ? "border-[#7c3aed]" : "border-white"
-                                )}
-                            />
-                            {player.isHost && (
-                                <div className="absolute -top-2 -left-2 bg-yellow-400 text-yellow-900 p-0.5 rounded-full border-2 border-white shadow-sm">
-                                    <Crown className="w-3 h-3" />
-                                </div>
-                            )}
-                        </div>
+
 
                         {/* Name & Score */}
                         <div className="text-center w-full">

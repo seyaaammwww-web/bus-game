@@ -80,15 +80,7 @@ export function ResultsTable({
                                     "flex items-center gap-3 p-3 border-b-2 md:border-b-0 md:border-l-2 border-dashed",
                                     isMe ? "border-[#7c3aed]/30 bg-[#7c3aed]/5" : "border-gray-200 bg-gray-50"
                                 )}>
-                                    <div className="relative">
-                                        <PixelAvatar
-                                            src={player?.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${submission.playerId}`}
-                                            className="w-10 h-10 border-2 border-white shadow-sm"
-                                        />
-                                        {isMe && (
-                                            <div className="absolute -top-1 -right-1 bg-yellow-400 border border-white rounded-full w-4 h-4 flex items-center justify-center text-[10px]">⭐</div>
-                                        )}
-                                    </div>
+
                                     <div className="flex-1 min-w-0">
                                         <div className={cn("font-bold font-pixel-text truncate", isMe ? "text-[#5b21b6]" : "text-gray-700")}>
                                             {player?.name}

@@ -1,4 +1,5 @@
 import * as React from "react"
+import { User } from 'lucide-react';
 import { cn } from "@/lib/utils"
 
 interface PixelAvatarProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -31,17 +32,9 @@ export function PixelAvatar({ src, alt, size = 'md', className, ...props }: Pixe
             <div className="absolute bottom-0 left-0 w-1 h-1 bg-[#2e1065]" />
             <div className="absolute bottom-0 right-0 w-1 h-1 bg-[#2e1065]" />
 
-            {src ? (
-                <img
-                    src={src}
-                    alt={alt || "Avatar"}
-                    className="w-full h-full object-cover pixelated"
-                />
-            ) : (
-                <div className="w-full h-full bg-[#FFFEF0] flex items-center justify-center text-[#2e1065] font-pixel-title text-xl">
-                    ?
-                </div>
-            )}
+            <div className="w-full h-full bg-[#FFFEF0] flex items-center justify-center text-[#2e1065]">
+                <User className="w-1/2 h-1/2 opacity-50" />
+            </div>
         </div>
     )
 }
