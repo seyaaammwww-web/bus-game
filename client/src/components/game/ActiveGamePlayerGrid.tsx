@@ -15,7 +15,7 @@ interface ActiveGamePlayerGridProps {
 export function ActiveGamePlayerGrid({ players, currentPlayerId, submissions, timeLeft }: ActiveGamePlayerGridProps) {
     return (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 w-full">
-            {players.map((player, index) => {
+            {players.filter(p => p.id !== currentPlayerId).map((player, index) => {
                 const hasSubmitted = !!submissions[player.id];
                 const isMe = player.id === currentPlayerId;
 
