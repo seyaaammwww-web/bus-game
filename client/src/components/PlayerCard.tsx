@@ -19,9 +19,9 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
 
   return (
     <motion.div
-      className={`flex items-center gap-3 p-3 rounded-xl border relative overflow-hidden ${isCurrentPlayer
-        ? 'bg-gradient-to-r from-primary/10 to-accent/10 border-primary/30'
-        : 'bg-card border-card-border'
+      className={`flex items-center gap-3 rounded-xl border relative overflow-hidden transition-all ${isCurrentPlayer
+        ? 'bg-gradient-to-r from-primary/10 to-accent/10 border-primary/50 border-2 p-4 shadow-md'
+        : 'bg-card border-card-border p-3'
         }`}
       initial={{ x: -20, opacity: 0, rotate: -5 }}
       animate={{ x: 0, opacity: 1, rotate: 0 }}
@@ -55,7 +55,7 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
         <div className="absolute -inset-0.5 bg-gradient-to-br from-[#fbbf24] via-[#8b5cf6] to-[#7c3aed] rounded-lg opacity-80" />
 
         {/* Main Avatar Container */}
-        <div className="relative w-11 h-11 bg-gradient-to-br from-[#4c1d95] via-[#7c3aed] to-[#8b5cf6] rounded-lg border-[3px] border-[#fbbf24] shadow-[3px_3px_0_0_#2e1065,_0_0_12px_rgba(251,191,36,0.4)] flex items-center justify-center overflow-hidden">
+        <div className={`relative ${isCurrentPlayer ? 'w-14 h-14' : 'w-11 h-11'} bg-gradient-to-br from-[#4c1d95] via-[#7c3aed] to-[#8b5cf6] rounded-lg border-[3px] border-[#fbbf24] shadow-[3px_3px_0_0_#2e1065,_0_0_12px_rgba(251,191,36,0.4)] flex items-center justify-center overflow-hidden transition-all`}>
           {/* Inner Shine Effect */}
           <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-transparent rounded-sm" />
 
@@ -67,7 +67,7 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
           />
 
           {/* Letter */}
-          <span className="relative z-10 text-xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] font-pixel-title">
+          <span className={`relative z-10 ${isCurrentPlayer ? 'text-2xl' : 'text-xl'} font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] font-pixel-title`}>
             {player.name.charAt(0)}
           </span>
 

@@ -185,22 +185,28 @@ export default function Lobby() {
               )}
 
               <AnimatePresence>
-                {room.players.map((player, index) => (
-                  <motion.div
-                    key={player.id}
-                    initial={{ x: 50, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    exit={{ x: -50, opacity: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <PlayerCard
-                      player={player}
-                      isCurrentPlayer={player.id === state.playerId}
-                      isReferee={player.id === room.refereeId}
-                      index={index}
-                    />
-                  </motion.div>
-                ))}
+                {[...room.players]
+                  .sort((a, b) => {
+                    if (a.id === state.playerId) return -1;
+                    if (b.id === state.playerId) return 1;
+                    return 0;
+                  })
+                  .map((player, index) => (
+                    <motion.div
+                      key={player.id}
+                      initial={{ x: 50, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      exit={{ x: -50, opacity: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <PlayerCard
+                        player={player}
+                        isCurrentPlayer={player.id === state.playerId}
+                        isReferee={player.id === room.refereeId}
+                        index={index}
+                      />
+                    </motion.div>
+                  ))}
               </AnimatePresence>
             </div>
           </RetroCard>
