@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import '@/styles/globals.css'; // Ensure CSS variables are available
+
 
 interface Text3DProps extends React.HTMLAttributes<HTMLDivElement> {
     children: React.ReactNode;
