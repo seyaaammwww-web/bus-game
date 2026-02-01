@@ -37,7 +37,7 @@ function GameRouter() {
   }
 }
 
-import { GameFooter } from "@/components/GameFooter";
+
 
 // ... imports
 
