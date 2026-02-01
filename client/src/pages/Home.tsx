@@ -73,16 +73,14 @@ export default function Home() {
         transition={{ type: 'spring', stiffness: 200 }}
         className="text-center mb-12 relative z-10"
       >
-        <PixelReveal pixelSize={6}>
-          <div className="logo-container animate-slow-float mb-2">
-            {/* Logo with shine effect - uses CSS mask to constrain glow to logo shape */}
-            <img
-              src="/assets/logo.png"
-              alt="أوتوبيس كومبليت"
-              className="w-full max-w-[500px] object-contain pixelated"
-            />
-          </div>
-        </PixelReveal>
+        <div className="logo-container animate-slow-float mb-2">
+          {/* Logo with shine effect - uses CSS mask to constrain glow to logo shape */}
+          <img
+            src="/assets/logo.png"
+            alt="أوتوبيس كومبليت"
+            className="w-full max-w-[500px] object-contain pixelated"
+          />
+        </div>
 
         <motion.div
           initial={{ opacity: 0, y: 10 }}

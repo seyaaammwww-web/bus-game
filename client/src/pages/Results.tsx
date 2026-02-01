@@ -265,9 +265,7 @@ export default function Results() {
         </motion.div>
 
         {isFinal && gameStats && (
-          <PixelReveal delay={0.2} pixelSize={6}>
-            <GameStats gameStats={gameStats} />
-          </PixelReveal>
+          <GameStats gameStats={gameStats} />
         )}
 
         {/* End Game Button for Final Screen */}
@@ -294,26 +292,24 @@ export default function Results() {
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.3 }}
           >
-            <PixelReveal delay={0.4} pixelSize={4}>
-              <div className="bg-[#4c1d95] text-[#FFFDD1] px-4 py-3 border-b-4 border-[#2e1065] rounded-t-lg">
-                <div className="flex items-center gap-2">
-                  <span className="text-xl">📝</span>
-                  <span className="font-pixel-title text-lg tracking-wide">نتائج الجولة</span>
-                </div>
+            <div className="bg-[#4c1d95] text-[#FFFDD1] px-4 py-3 border-b-4 border-[#2e1065] rounded-t-lg">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">📝</span>
+                <span className="font-pixel-title text-lg tracking-wide">نتائج الجولة</span>
               </div>
+            </div>
 
-              <div className="bg-[#f3e8ff] p-4 rounded-b-lg border-x-4 border-b-4 border-[#4c1d95]">
-                <ResultsTable
-                  round={currentRound}
-                  players={room.players}
-                  currentPlayerId={state.playerId!}
-                  isReferee={isReferee}
-                  onRefereeToggle={refereeToggleUnique}
-                  onRefereeDeduct={(pid, cat) => refereeDeduct(pid, cat, 'رفض الحكم')}
-                  onAppeal={(pid, cat, ans) => setAppealDialog({ playerId: pid, category: cat, word: ans })}
-                />
-              </div>
-            </PixelReveal>
+            <div className="bg-[#f3e8ff] p-4 rounded-b-lg border-x-4 border-b-4 border-[#4c1d95]">
+              <ResultsTable
+                round={currentRound}
+                players={room.players}
+                currentPlayerId={state.playerId!}
+                isReferee={isReferee}
+                onRefereeToggle={refereeToggleUnique}
+                onRefereeDeduct={(pid, cat) => refereeDeduct(pid, cat, 'رفض الحكم')}
+                onAppeal={(pid, cat, ans) => setAppealDialog({ playerId: pid, category: cat, word: ans })}
+              />
+            </div>
           </motion.div>
         )}
 
