@@ -1,7 +1,7 @@
 // ... imports
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Plus, ArrowLeft, Globe, Sparkles, Star, Heart } from 'lucide-react';
+import { Users, Plus, ArrowLeft, Sparkles, Star, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,11 +14,11 @@ import { RetroQuote } from '@/components/ui/RetroQuote';
 
 
 
-const PUBLIC_ROOM_CODE = 'PLAY';
+
 
 export default function Home() {
-  const { createRoom, joinRoom, joinPublicRoom, state } = useGame();
-  const [mode, setMode] = useState<'home' | 'create' | 'join' | 'public'>('home');
+  const { createRoom, joinRoom, state } = useGame();
+  const [mode, setMode] = useState<'home' | 'create' | 'join'>('home');
   const [playerName, setPlayerName] = useState('');
   const [roomCode, setRoomCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -47,12 +47,7 @@ export default function Home() {
     }
   };
 
-  const handleJoinPublic = () => {
-    if (playerName.trim().length >= 2) {
-      setIsLoading(true);
-      joinPublicRoom(playerName.trim());
-    }
-  };
+
 
   // ... inside component
   return (
@@ -116,28 +111,7 @@ export default function Home() {
             exit={{ y: -30, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
           >
-            <motion.div
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-            >
-              <Button
-                size="lg"
-                variant="default"
-                className="w-full h-20 text-3xl tracking-wider font-pixel-title"
-                onClick={() => setMode('public')}
-                data-testid="button-public-room"
-              >
-                <Globe className="w-8 h-8 ml-3" />
-                الغرفة العامة
-                <motion.span
-                  className="mr-2 bg-[#4c1d95]/20 px-2 py-0.5 rounded text-sm font-pixel-text"
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ repeat: Infinity, duration: 1.5 }}
-                >
-                  PLAY
-                </motion.span>
-              </Button>
-            </motion.div>
+
 
             <motion.div
               whileHover={{ scale: 1.03 }}
@@ -347,110 +321,7 @@ export default function Home() {
           </motion.div>
         )}
 
-        {mode === 'public' && (
-          <motion.div
-            key="public"
-            initial={{ x: 100, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: -100, opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            className="w-full max-w-sm relative z-10"
-          >
-            <RetroCard className="shadow-xl">
-              <CardHeader>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-4 left-4"
-                  onClick={() => setMode('home')}
-                  data-testid="button-back-public"
-                >
-                  <ArrowLeft className="w-5 h-5" />
-                </Button>
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: 'spring', delay: 0.1 }}
-                >
-                  <CardTitle className="flex items-center gap-2 font-pixel-title text-4xl">
-                    <Globe className="w-7 h-7 text-accent" />
-                    الغرفة العامة
-                  </CardTitle>
-                </motion.div>
-                <CardDescription className="font-pixel-text text-xl mt-2">العب مع عائلتك وأصحابك في غرفة مشتركة</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <motion.div
-                  className="text-center p-6 bg-gradient-to-br from-accent/10 to-accent/20 rounded-2xl border-2 border-accent/30"
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <p className="text-xl text-muted-foreground mb-4 font-pixel-text font-bold">كود الغرفة العامة</p>
-                  <motion.div
-                    className="flex justify-center gap-2"
-                    dir="ltr"
-                    initial={{ y: 10 }}
-                    animate={{ y: 0 }}
-                  >
-                    {PUBLIC_ROOM_CODE.split('').map((char, i) => (
-                      <motion.span
-                        key={i}
-                        className="w-14 h-16 bg-accent text-white flex items-center justify-center text-3xl font-bold rounded-lg shadow-lg font-pixel-text"
-                        initial={{ rotateY: 90, opacity: 0 }}
-                        animate={{ rotateY: 0, opacity: 1 }}
-                        transition={{ delay: 0.3 + i * 0.1 }}
-                      >
-                        {char}
-                      </motion.span>
-                    ))}
-                  </motion.div>
-                </motion.div>
-                <motion.div
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.4 }}
-                >
-                  <label className="text-2xl font-bold mb-3 block font-pixel-text">اسمك</label>
-                  <Input
-                    type="text"
-                    placeholder="اكتب اسمك هنا"
-                    value={playerName}
-                    onChange={(e) => setPlayerName(e.target.value)}
-                    maxLength={20}
-                    className="h-16 text-xl font-pixel-text font-bold"
-                    data-testid="input-player-name-public"
-                  />
-                </motion.div>
-                <motion.div
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.5 }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <Button
-                    className="w-full h-14 text-xl font-bold bg-gradient-to-r from-accent to-accent/80 shadow-lg font-pixel-text"
-                    onClick={handleJoinPublic}
-                    disabled={playerName.trim().length < 2 || isLoading}
-                    data-testid="button-join-public"
-                  >
-                    {isLoading ? (
-                      <motion.span
-                        animate={{ opacity: [1, 0.5, 1] }}
-                        transition={{ repeat: Infinity, duration: 1 }}
-                      >
-                        جاري الانضمام...
-                      </motion.span>
-                    ) : (
-                      'ادخل الغرفة العامة'
-                    )}
-                  </Button>
-                </motion.div>
-              </CardContent>
-            </RetroCard>
-          </motion.div>
-        )}
+
       </AnimatePresence>
 
 

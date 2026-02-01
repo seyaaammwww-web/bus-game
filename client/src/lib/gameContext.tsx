@@ -82,7 +82,7 @@ interface GameContextType {
   state: GameState;
   createRoom: (playerName: string) => void;
   joinRoom: (roomCode: string, playerName: string) => void;
-  joinPublicRoom: (playerName: string) => void;
+
   setReady: () => void;
   startGame: () => void;
   submitAnswers: (answers: RoundAnswers) => void;
@@ -279,13 +279,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     };
   }, [connect]);
 
-  const joinPublicRoom = useCallback((playerName: string) => {
-    const ws = connect();
-    ws.onopen = () => {
-      dispatch({ type: 'SET_CONNECTED', connected: true });
-      ws.send(JSON.stringify({ type: 'join_public_room', payload: { playerName } }));
-    };
-  }, [connect]);
+
 
   const setReady = useCallback(() => {
     sendMessage('player_ready', { playerId: state.playerId });
@@ -415,7 +409,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       state,
       createRoom,
       joinRoom,
-      joinPublicRoom,
+
       setReady,
       startGame,
       submitAnswers,
