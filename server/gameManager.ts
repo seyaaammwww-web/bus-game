@@ -1104,6 +1104,9 @@ class GameManager {
 
     // 1. Collect and Normalize Answers
     const currentCategories = this.getRoomCategories(room);
+    console.log(`[Calculate Scores] Room ${room.code} Categories: ${JSON.stringify(currentCategories)}`);
+    console.log(`[Calculate Scores] Submissions Count: ${round.submissions.length}`);
+
     const allAnswers: { playerId: string, category: string, answer: string, normalized: string }[] = [];
 
     for (const category of currentCategories) {
@@ -1132,7 +1135,7 @@ class GameManager {
     }));
 
     try {
-      console.log(`[Calculate Scores] Validating ${itemsToValidate.length} answers...`);
+      console.log(`[Calculate Scores] Validating ${itemsToValidate.length} answers... Sample: ${JSON.stringify(itemsToValidate.slice(0, 2))}`);
       const validationResults = await HybridValidator.getInstance().validateBatch(itemsToValidate);
 
       let hasPendingVotes = false;
