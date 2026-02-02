@@ -98,11 +98,25 @@ export async function registerRoutes(
 
   // Validator metrics endpoint
   app.get('/api/metrics', (_req, res) => {
-    const metrics = HybridValidator.getInstance().getMetrics();
     res.json({
       validator: metrics,
       timestamp: new Date().toISOString()
     });
+  });
+
+  // Database Debug Endpoint
+  app.get('/api/debug/db', (_req, res) => {
+    try {
+      const { WildcardService } = require("./services/wildcardService");
+      const stats = WildcardService.getInstance().getStats();
+      res.json({
+        status: 'ok',
+        location: 'deployment',
+        stats
+      });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
   });
 
   return httpServer;
