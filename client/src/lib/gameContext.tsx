@@ -86,6 +86,7 @@ interface GameContextType {
   setReady: () => void;
   startGame: () => void;
   submitAnswers: (answers: RoundAnswers) => void;
+  sendDraftUpdate: (answers: RoundAnswers) => void;
   triggerBusComplete: () => void;
   vote: (playerId: string, category: Category, accepted: boolean) => void;
   setReferee: (playerId: string) => void;
@@ -296,6 +297,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
     sendMessage('bus_complete', {});
   }, [sendMessage]);
 
+  const sendDraftUpdate = useCallback((answers: RoundAnswers) => {
+    sendMessage('draft_update', { answers });
+  }, [sendMessage]);
+
   const vote = useCallback((playerId: string, category: Category, accepted: boolean) => {
     sendMessage('vote', { playerId, category, accepted });
   }, [sendMessage]);
@@ -439,6 +444,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       banishOverlay,
       setBanishOverlay,
       appealAnswer,
+      sendDraftUpdate,
     }}>
       {children}
     </GameContext.Provider>

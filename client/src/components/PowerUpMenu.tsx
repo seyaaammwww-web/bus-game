@@ -117,15 +117,14 @@ export function PowerUpMenu() {
         <>
             <Button
                 onClick={toggleOpen}
-                variant="primary" // Reusing our updated primary button style (no glow)
-                className="h-10 md:h-14 px-3 md:px-6 flex items-center gap-2 font-pixel-title relative"
+                variant="outline"
+                className="h-9 md:h-14 px-3 md:px-6 flex items-center gap-2 font-pixel-title relative bg-gradient-to-b from-indigo-500 to-indigo-700 text-white border-[#312e81] shadow-[3px_3px_0_0_#1e1b4b] hover:from-indigo-400 hover:to-indigo-600 active:shadow-none active:translate-y-1"
             >
-                <div className="bg-yellow-400 text-[#4c1d95] p-1 rounded-sm border-2 border-[#4c1d95]">
-                    <Zap className="w-4 h-4 md:w-5 md:h-5 fill-current" />
+                <div className="bg-yellow-400 text-[#1e1b4b] p-1 rounded-sm border-2 border-[#1e1b4b]">
+                    <Zap className="w-3.5 h-3.5 md:w-5 md:h-5 fill-current" />
                 </div>
                 <span className="hidden md:inline text-lg">مساعدات</span>
-                {/* Mobile Icon Only or condensed text */}
-                <span className="md:hidden text-sm">مساعدات</span>
+                <span className="md:hidden text-xs">مساعدات</span>
             </Button>
 
             <AnimatePresence>

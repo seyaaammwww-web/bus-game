@@ -46,6 +46,7 @@ class GameManager {
   private timers: Map<string, NodeJS.Timeout> = new Map();
   private voteTimers: Map<string, NodeJS.Timeout> = new Map(); // roomCode -> vote timer
   private answerVotes: Map<string, AnswerVotes[]> = new Map(); // roomCode -> votes
+  private drafts: Map<string, Map<string, RoundAnswers>> = new Map(); // roomCode -> (playerId -> answers)
 
   constructor() {
     this.startCleanupInterval();
@@ -753,15 +754,30 @@ class GameManager {
     for (const player of allNonRefereeNonBanished) {
       const hasSubmitted = round.submissions.some(s => s.playerId === player.id);
       if (!hasSubmitted) {
-        console.log(`[End Round] Player ${player.name} didn't submit - adding empty submission`);
+        // Try to get answers from draft first
+        const roomDrafts = this.drafts.get(room.code);
+        const draftAnswers = roomDrafts?.get(player.id);
+
+        if (draftAnswers) {
+          console.log(`[End Round] Player ${player.name} didn't submit - using DRAFT answers`);
+        } else {
+          console.log(`[End Round] Player ${player.name} didn't submit - no draft found, adding empty submission`);
+        }
+
         const currentCategories = this.getRoomCategories(room);
-        const emptyAnswers: RoundAnswers = {};
-        currentCategories.forEach(cat => emptyAnswers[cat] = '');
+        const finalAnswers: RoundAnswers = draftAnswers || {};
+
+        // Ensure all categories have at least an empty string if not in draft
+        currentCategories.forEach(cat => {
+          if (finalAnswers[cat] === undefined) {
+            finalAnswers[cat] = '';
+          }
+        });
 
         const submission: PlayerSubmission = {
           playerId: player.id,
           playerName: player.name,
-          answers: emptyAnswers,
+          answers: finalAnswers,
           submittedAt: Date.now(),
           busComplete: false,
         };
@@ -769,6 +785,9 @@ class GameManager {
         round.submissions.push(submission);
       }
     }
+
+    // Clear drafts for this room now that they've been used/fallback
+    this.drafts.delete(room.code);
 
     // ✅ Instant Scoring: Use Groq/HybridValidator immediately
     room.phase = 'ai_processing';
@@ -1056,8 +1075,18 @@ class GameManager {
   }
 
   handleDraftUpdate(ws: WebSocket, payload: { answers: RoundAnswers }): void {
-    // Draft updates are now only for local state sync if needed, or we can just ignore for now as peeking is removed.
-    // Keeping method signature if needed for future features
+    const playerInfo = this.players.get(ws);
+    if (!playerInfo) return;
+
+    const room = this.rooms.get(playerInfo.roomId);
+    if (!room || room.phase !== 'playing') return;
+
+    let roomDrafts = this.drafts.get(playerInfo.roomId);
+    if (!roomDrafts) {
+      roomDrafts = new Map();
+      this.drafts.set(playerInfo.roomId, roomDrafts);
+    }
+    roomDrafts.set(playerInfo.playerId, payload.answers);
   }
 
 

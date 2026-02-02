@@ -38,7 +38,21 @@ const categoryColors: Record<Category, string> = {
 };
 
 export default function Game() {
-  const { state, currentRound, submitAnswers, triggerBusComplete, disconnect, currentPlayer, activatePowerUp, activePowerUpNotification, isBanished, banishedBy, banishOverlay, setBanishOverlay } = useGame();
+  const {
+    state,
+    currentRound,
+    submitAnswers,
+    triggerBusComplete,
+    disconnect,
+    currentPlayer,
+    activatePowerUp,
+    activePowerUpNotification,
+    isBanished,
+    banishedBy,
+    banishOverlay,
+    setBanishOverlay,
+    sendDraftUpdate,
+  } = useGame();
 
   const room = state.room!;
   const currentCategories = (room.settings?.customCategories && room.settings.customCategories.length > 0)
@@ -57,6 +71,21 @@ export default function Game() {
   const [countdown, setCountdown] = useState(3);
   const [wildcardActive, setWildcardActive] = useState(false);
   const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+
+  // Debounced draft sync to server
+  useEffect(() => {
+    if (hasSubmitted || state.timeLeft <= 0 || state.room?.phase !== 'playing') return;
+
+    const timer = setTimeout(() => {
+      // Only send if there's at least one non-empty answer
+      const hasContent = Object.values(answers).some(a => a && a.trim().length > 0);
+      if (hasContent) {
+        sendDraftUpdate(answers);
+      }
+    }, 500); // 500ms debounce for better reliability
+
+    return () => clearTimeout(timer);
+  }, [answers, hasSubmitted, state.timeLeft, state.room?.phase, sendDraftUpdate]);
 
   const letter = currentRound?.letter || room.letters[room.currentRound];
 
@@ -272,7 +301,7 @@ export default function Game() {
           </div>
 
           {/* Mobile Bottom Row: PowerUps - Round Badge */}
-          <div className="flex items-center justify-between px-2">
+          <div className="flex items-center justify-between px-2 mt-4">
             <PowerUpMenu />
 
             <div className="bg-gradient-to-r from-amber-400 to-yellow-500 text-[#2e1065] px-4 py-1.5 rounded-full border-[3px] border-[#4c1d95] font-bold text-xs shadow-sm font-pixel-text">
@@ -428,15 +457,20 @@ export default function Game() {
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
             {currentCategories.map((category, i) => {
               const Icon = categoryIcons[category as Category] || Box;
+              const isLastOdd = isMobile && currentCategories.length % 2 !== 0 && i === currentCategories.length - 1;
+
               return (
                 <motion.div
                   key={category}
                   initial={isMobile ? { opacity: 0 } : { opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={isMobile ? { duration: 0.2 } : { delay: i * 0.05 }}
-                  className="relative group"
+                  className={cn("relative group", isLastOdd && "col-span-2 flex justify-center")}
                 >
-                  <div className="bg-white border-2 border-[#4c1d95] shadow-[3px_3px_0px_0px_#2e1065] rounded-xl overflow-hidden hover:-translate-y-1 hover:shadow-[5px_5px_0px_0px_#2e1065] transition-all duration-200">
+                  <div className={cn(
+                    "bg-white border-2 border-[#4c1d95] shadow-[3px_3px_0px_0px_#2e1065] rounded-xl overflow-hidden hover:-translate-y-1 hover:shadow-[5px_5px_0px_0px_#2e1065] transition-all duration-200",
+                    isLastOdd && "w-[calc(50%-6px)] md:w-full"
+                  )}>
                     <div className={`${categoryColors[category]} py-1.5 px-2 border-b-2 border-[#4c1d95] flex items-center justify-center gap-1.5`}>
                       <Icon className="w-3.5 h-3.5 text-white" />
                       <span className="font-bold text-white font-pixel-text text-xs md:text-sm whitespace-nowrap">{category}</span>
