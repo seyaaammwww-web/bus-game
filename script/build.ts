@@ -57,8 +57,15 @@ async function buildAll() {
     },
     minify: true,
     external: externals,
+    minify: true,
+    external: externals,
     logLevel: "info",
   });
+
+  // Copy server/data to dist/data to ensure JSON files are available in production
+  const { cp } = await import("fs/promises");
+  await cp("server/data", "dist/data", { recursive: true });
+  console.log("Copied server/data to dist/data");
 }
 
 buildAll().catch((err) => {

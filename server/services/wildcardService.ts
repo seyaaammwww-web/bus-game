@@ -46,27 +46,51 @@ export class WildcardService {
 
     private loadDatabase(): void {
         try {
-            // Priority: Clean Database > Original Database > Fallback
-            const cleanDbPath = path.join(process.cwd(), 'server/data/clean_wildcardDatabase.json');
-            const originalDbPath = path.join(process.cwd(), 'server/data/wildcardDatabase.json');
+            const filename = 'clean_wildcardDatabase.json';
+            // Search paths:
+            // 1. Source path (Local dev / Docker source mapping)
+            // 2. Build output path (Relative to compiled index.cjs)
+            // 3. Fallback relative to CWD
+            const candidates = [
+                path.join(process.cwd(), 'server', 'data', filename),
+                path.join(__dirname, 'data', filename),
+                path.join(process.cwd(), 'dist', 'data', filename)
+            ];
 
-            let dbPath = cleanDbPath;
-            if (!fs.existsSync(cleanDbPath)) {
-                console.warn('⚠️ Clean Wildcard Database not found, falling back to original.');
-                dbPath = originalDbPath;
+            let dbPath = '';
+            for (const candidate of candidates) {
+                console.log(`[WildcardService] Checking for DB at: ${candidate}`);
+                if (fs.existsSync(candidate)) {
+                    dbPath = candidate;
+                    break;
+                }
             }
 
-            if (fs.existsSync(dbPath)) {
+            if (!dbPath) {
+                // Try original as last resort
+                const origFilename = 'wildcardDatabase.json';
+                const origPath = path.join(process.cwd(), 'server', 'data', origFilename);
+                if (fs.existsSync(origPath)) dbPath = origPath;
+            }
+
+            if (dbPath && fs.existsSync(dbPath)) {
                 const data = fs.readFileSync(dbPath, 'utf-8');
                 this.database = JSON.parse(data);
                 const stats = this.getStats();
-                console.log(`✅ Wildcard Database loaded: ${path.basename(dbPath)} (${stats.totalAnswers} words across ${stats.letters} letters)`);
+                console.log(`✅ Wildcard Database loaded from: ${dbPath}`);
+                console.log(`📊 Stats: ${stats.totalAnswers} words, ${stats.letters} letters.`);
             } else {
+                console.error(`❌ Wildcard Database NOT found in any candidate path.`);
+                if (!arabicWords || Object.keys(arabicWords).length === 0) {
+                    console.error("❌ Fallback arabicWords is EMPTY/Undefined!");
+                }
                 throw new Error("JSON not found");
             }
         } catch (error) {
-            console.warn('⚠️ Wildcard Database JSON missing or invalid. Using built-in fallback.');
+            console.warn('⚠️ Wildcard Database JSON missing or invalid. Using built-in fallback.', error);
             this.database = arabicWords;
+            const nums = Object.keys(this.database).length;
+            console.log(`⚠️ Loaded fallback database with ${nums} letters.`);
         }
     }
 
