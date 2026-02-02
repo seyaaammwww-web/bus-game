@@ -143,12 +143,14 @@ const WorkOSBackground: React.FC<WorkOSBackgroundProps> = ({ performanceMode = f
                 ))}
             </div>
 
-            {/* Moon */}
-            <img
-                src="/images/hero/moon.png"
-                alt=""
-                className="workos-moon"
-            />
+            {/* Moon (Hidden in performance mode) */}
+            {!performanceMode && (
+                <img
+                    src="/images/hero/moon.png"
+                    alt=""
+                    className="workos-moon"
+                />
+            )}
 
             {/* Clouds Layer - RANDOMIZED */}
             <div className="workos-clouds-container">
