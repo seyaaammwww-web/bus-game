@@ -118,13 +118,26 @@ export function PowerUpMenu() {
             <Button
                 onClick={toggleOpen}
                 variant="outline"
-                className="h-9 md:h-14 px-3 md:px-6 flex items-center gap-2 font-pixel-title relative bg-gradient-to-b from-indigo-500 to-indigo-700 text-white border-[#312e81] shadow-[3px_3px_0_0_#1e1b4b] hover:from-indigo-400 hover:to-indigo-600 active:shadow-none active:translate-y-1"
+                className="h-9 md:h-14 px-3 md:px-6 flex items-center gap-2 font-pixel-title relative overflow-hidden bg-gradient-to-br from-[#fbbf24] via-[#f59e0b] to-[#d97706] text-[#451a03] border-[#451a03] border-[3px] shadow-[4px_4px_0_0_#78350f] hover:translate-y-[-2px] hover:shadow-[6px_6px_0_0_#78350f] active:translate-y-[2px] active:shadow-[2px_2px_0_0_#78350f] transition-all group rounded-xl"
             >
-                <div className="bg-yellow-400 text-[#1e1b4b] p-1 rounded-sm border-2 border-[#1e1b4b]">
+                {/* Shimmer Effect */}
+                <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-12 w-[40%]"
+                    animate={{ left: ['-100%', '200%'] }}
+                    transition={{ repeat: Infinity, duration: 3, ease: "linear", repeatDelay: 1 }}
+                />
+
+                <div className="relative z-10 bg-[#451a03] text-[#fbbf24] p-1 md:p-1.5 rounded-lg border-2 border-[#78350f] shadow-inner group-hover:scale-110 transition-transform">
                     <Zap className="w-3.5 h-3.5 md:w-5 md:h-5 fill-current" />
                 </div>
-                <span className="hidden md:inline text-lg">مساعدات</span>
-                <span className="md:hidden text-xs">مساعدات</span>
+
+                <div className="relative z-10 flex flex-col items-start leading-none gap-0.5">
+                    <span className="text-[10px] md:text-sm opacity-80 font-pixel-text font-bold">المتجر</span>
+                    <span className="text-sm md:text-xl">مساعدات</span>
+                </div>
+
+                <div className="absolute right-1 top-1 w-1 h-1 bg-white/60 rounded-full animate-pulse" />
+                <div className="absolute left-2 bottom-1 w-1.5 h-1.5 bg-white/30 rounded-full animate-pulse delay-700" />
             </Button>
 
             <AnimatePresence>
