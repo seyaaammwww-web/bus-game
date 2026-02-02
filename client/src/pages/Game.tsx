@@ -15,11 +15,12 @@ import { PowerUpMenu } from '@/components/PowerUpMenu';
 import { Confetti } from '@/components/Confetti';
 import { useGame } from '@/lib/gameContext';
 import { categories, type Category, type RoundAnswers } from '@shared/schema';
-import { AlertTriangle, Send, User, Users, Globe, PawPrint, Box, LogOut, Zap, Eye, Trophy, Flame, Sparkles, Snowflake, Crown, Skull } from 'lucide-react';
+import { AlertTriangle, Send, User, Users, Globe, PawPrint, Box, LogOut, Zap, Eye, Trophy, Flame, Sparkles, Crown, Skull } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { playCountdownSound, playCountdownFinalSound, playRoundStart, playBusSound, playFreezeSound, playWildcardSound, playBanishSound, playSubmitSound, playClickSound, playRushActivateSound, playBonusSound, playTypeSound } from '@/lib/sounds';
 import { RetroCard } from '@/components/ui/RetroCard';
+import { cn } from '@/lib/utils';
 
 const categoryIcons: Record<Category, any> = {
   'ولد': User,
@@ -128,12 +129,6 @@ export default function Game() {
       setTimeout(() => setShake(false), 500);
     }
   }, [state.isRush]);
-
-  useEffect(() => {
-    if (state.timeLeft <= 1 && !hasSubmitted) {
-      handleSubmit();
-    }
-  }, [state.timeLeft, hasSubmitted]);
 
   // Sync with server submission (e.g. if Wildcard submitted for us)
   useEffect(() => {
