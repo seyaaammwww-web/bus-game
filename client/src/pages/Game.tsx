@@ -243,36 +243,37 @@ export default function Game() {
       <div className="max-w-5xl mx-auto relative z-10 px-4">
         {/* Mobile Header: Clean Standard Layout (Exit - Letter - Timer) */}
         <motion.div
-          className="flex md:hidden items-center justify-between mb-4 relative z-10"
+          className="flex flex-col gap-2 mb-4 relative z-10 md:hidden"
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
         >
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={disconnect}
-            className="text-white/80 hover:bg-white/10 hover:text-white h-9 w-9"
-          >
-            <LogOut className="w-5 h-5" />
-          </Button>
+          {/* Mobile Top Row: Exit - Letter - Timer */}
+          <div className="flex items-center justify-between">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={disconnect}
+              className="text-white/80 hover:bg-white/10 hover:text-white h-9 w-9"
+            >
+              <LogOut className="w-5 h-5" />
+            </Button>
 
-          <div className="flex-1 flex justify-center">
-            <LetterDisplay
-              letter={letter}
-              round={room.currentRound + 1}
-              totalRounds={room.totalRounds}
-            />
+            <div className="flex-1 flex justify-center">
+              <LetterDisplay letter={letter} />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Timer timeLeft={state.timeLeft} isRush={state.isRush} />
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          {/* Mobile Bottom Row: PowerUps - Round Badge */}
+          <div className="flex items-center justify-between px-2">
             <PowerUpMenu />
-            <Timer timeLeft={state.timeLeft} isRush={state.isRush} />
-            {!!currentPlayer?.busStreak && currentPlayer.busStreak > 0 && (
-              <div className="flex items-center gap-1 bg-orange-500 px-1.5 py-0.5 rounded-full text-white text-[9px] font-bold shadow-sm">
-                <Flame className="w-3 h-3" />
-                <span>×{currentPlayer.busStreak}</span>
-              </div>
-            )}
+
+            <div className="bg-gradient-to-r from-amber-400 to-yellow-500 text-[#2e1065] px-4 py-1.5 rounded-full border-[3px] border-[#4c1d95] font-bold text-xs shadow-sm font-pixel-text">
+              جولة {room.currentRound + 1} / {room.totalRounds}
+            </div>
           </div>
         </motion.div>
 
@@ -284,24 +285,26 @@ export default function Game() {
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
         >
-          {/* Left - Exit Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={disconnect}
-            className="text-white/80 hover:bg-white/10 hover:text-white"
-            data-testid="button-exit-game"
-          >
-            <LogOut className="w-5 h-5" />
-          </Button>
+          {/* Left - Exit Button & Round Badge */}
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={disconnect}
+              className="text-white/80 hover:bg-white/10 hover:text-white"
+              data-testid="button-exit-game"
+            >
+              <LogOut className="w-5 h-5" />
+            </Button>
+
+            <div className="bg-gradient-to-r from-amber-400 to-yellow-500 text-[#2e1065] px-5 py-2 rounded-full border-[3px] border-[#4c1d95] font-bold text-lg shadow-[3px_3px_0_0_#2e1065] font-pixel-text whitespace-nowrap">
+              جولة {room.currentRound + 1} / {room.totalRounds}
+            </div>
+          </div>
 
           {/* Center - Letter Display */}
           <div className="flex-1 flex justify-center">
-            <LetterDisplay
-              letter={letter}
-              round={room.currentRound + 1}
-              totalRounds={room.totalRounds}
-            />
+            <LetterDisplay letter={letter} />
           </div>
 
           {/* Right - Timer and Streak and PowerUps */}
@@ -457,40 +460,42 @@ export default function Game() {
 
 
 
-        {!hasSubmitted ? (
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="mt-6"
-          >
-            <BusCompleteButton
-              onPress={handleBusComplete}
-              disabled={!canBusComplete || isBanished} // Disable button if banished
-            />
-          </motion.div>
-        ) : (
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="text-center p-8 mt-6 bg-gradient-to-b from-white to-[#faf5ff] rounded-2xl border-[3px] border-[#4c1d95] shadow-[4px_4px_0_0_#2e1065,_0_0_20px_rgba(139,92,246,0.2)]"
-          >
+        {
+          !hasSubmitted ? (
             <motion.div
-              className="w-16 h-16 bg-gradient-to-br from-[#7c3aed] to-[#4c1d95] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg"
-              animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
-              transition={{ repeat: Infinity, duration: 1.5 }}
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="mt-6"
             >
-              <Send className="w-8 h-8 text-white" />
+              <BusCompleteButton
+                onPress={handleBusComplete}
+                disabled={!canBusComplete || isBanished} // Disable button if banished
+              />
             </motion.div>
-            <p className="font-pixel-title text-2xl text-[#4c1d95] mb-2">تم الإرسال!</p>
-            <motion.p className="text-lg text-[#7c3aed] font-bold font-pixel-text"
-              animate={{ opacity: [0.8, 1, 0.8] }}
-              transition={{ repeat: Infinity, duration: 2 }}
+          ) : (
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="text-center p-8 mt-6 bg-gradient-to-b from-white to-[#faf5ff] rounded-2xl border-[3px] border-[#4c1d95] shadow-[4px_4px_0_0_#2e1065,_0_0_20px_rgba(139,92,246,0.2)]"
             >
-              في انتظار باقي اللاعبين...
-            </motion.p>
-          </motion.div>
-        )}
+              <motion.div
+                className="w-16 h-16 bg-gradient-to-br from-[#7c3aed] to-[#4c1d95] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg"
+                animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
+                transition={{ repeat: Infinity, duration: 1.5 }}
+              >
+                <Send className="w-8 h-8 text-white" />
+              </motion.div>
+              <p className="font-pixel-title text-2xl text-[#4c1d95] mb-2">تم الإرسال!</p>
+              <motion.p className="text-lg text-[#7c3aed] font-bold font-pixel-text"
+                animate={{ opacity: [0.8, 1, 0.8] }}
+                transition={{ repeat: Infinity, duration: 2 }}
+              >
+                في انتظار باقي اللاعبين...
+              </motion.p>
+            </motion.div>
+          )
+        }
 
         <div className="mt-3">
           <ReactionButtons />
@@ -511,13 +516,13 @@ export default function Game() {
         </div>
 
         <div className="pb-20"></div>
-      </div>
+      </div >
 
       <ReactionDisplay />
       <Confetti active={room.phase === 'results' || room.phase === 'final'} />
 
 
-    </motion.div>
+    </motion.div >
   );
 }
 
