@@ -131,8 +131,7 @@ export function PowerUpMenu() {
                     <Zap className="w-3.5 h-3.5 md:w-5 md:h-5 fill-current" />
                 </div>
 
-                <div className="relative z-10 flex flex-col items-start leading-none gap-0.5">
-                    <span className="text-[10px] md:text-sm opacity-80 font-pixel-text font-bold">المتجر</span>
+                <div className="relative z-10">
                     <span className="text-sm md:text-xl">مساعدات</span>
                 </div>
 
