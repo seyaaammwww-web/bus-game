@@ -9,6 +9,7 @@ interface ValidationResult {
   isValid: boolean;
   reason: string;
   source: 'database' | 'ai' | 'heuristic';
+  isSmart?: boolean;
 }
 
 interface CacheEntry {
@@ -56,11 +57,16 @@ export class HybridValidator {
     }
 
     // 1. Check Local DB
-    const isValid = WildcardService.getInstance().validateWord(letter, category, trimmed);
+    const dbResult = WildcardService.getInstance().validateWord(letter, category, trimmed);
 
-    if (isValid) {
+    if (dbResult.isValid) {
       this.metrics.dbHits++;
-      return { isValid: true, reason: 'Found in Database', source: 'database' };
+      return {
+        isValid: true,
+        reason: 'Found in Database',
+        source: 'database',
+        isSmart: dbResult.isSmart
+      };
     }
 
     // 2. Not found? LOG IT for review!

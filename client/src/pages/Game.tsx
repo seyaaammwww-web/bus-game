@@ -413,10 +413,10 @@ export default function Game() {
                     transition={{ duration: 4, repeat: Infinity, times: [0, 0.2, 1] }}
                     className="flex flex-col gap-3 font-pixel-text text-xl"
                   >
-                    <span className="text-[#e9d5ff] font-bold">نتأكد من الإجابات... 🧐</span>
-                    <span className="text-[#e9d5ff] font-bold">نحسب النقاط... 🔢</span>
-                    <span className="text-[#e9d5ff] font-bold">نبحث عن الهبد... 🤔</span>
-                    <span className="text-[#e9d5ff] font-bold">نجهز النتائج... 🏆</span>
+                    <span className="text-[#e9d5ff] font-bold">الكمسري بيراجع التذاكر... 🧐</span>
+                    <span className="text-[#e9d5ff] font-bold">بنحسب الأجرة... 🔢</span>
+                    <span className="text-[#e9d5ff] font-bold">بنكشف الهبد... 🤔</span>
+                    <span className="text-[#e9d5ff] font-bold">يا أسطى النتيجة بتجهز... 🏆</span>
                   </motion.div>
                 </div>
               </div>

@@ -77,6 +77,7 @@ export interface ValidatedAnswer {
   votes: { accepted: number; rejected: number };
   reason?: string;
   isFabricated?: boolean;
+  isSmart?: boolean;
   isPendingVote?: boolean;
   voterIds?: string[]; // Track who voted to prevent double voting
 }

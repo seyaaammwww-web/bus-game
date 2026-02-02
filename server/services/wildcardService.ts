@@ -29,7 +29,7 @@ export class WildcardService {
     private usedAnswers = new Map<string, Set<string>>(); // Track used answers per letter+category
 
     // Performance Optimization: Cache validation results
-    private validationCache = new Map<string, boolean>();
+    private validationCache = new Map<string, { isValid: boolean; isSmart: boolean }>();
     private MAX_CACHE_SIZE = 50000;
 
     private constructor() {
@@ -128,10 +128,10 @@ export class WildcardService {
     /**
      * Validate a word against the database with smart logic
      */
-    validateWord(letter: string, category: string, word: string): boolean {
+    validateWord(letter: string, category: string, word: string): { isValid: boolean; isSmart: boolean } {
         // 1. Basic cleaning
         const normalizedInput = this.normalizeArabic(word);
-        if (!normalizedInput || normalizedInput.length < 2) return false;
+        if (!normalizedInput || normalizedInput.length < 2) return { isValid: false, isSmart: false };
 
         // 2. Cache Check (O(1))
         const cacheKey = `${letter}:${category}:${normalizedInput}`;
@@ -140,6 +140,7 @@ export class WildcardService {
         }
 
         let isValid = false;
+        let isSmart = false;
 
         // 3. Strict letter check (must start with letter)
         const normalizedLetter = this.normalizeArabic(letter);
@@ -154,22 +155,27 @@ export class WildcardService {
 
         if (startsWith) {
             // 4. Database Check (Direct)
-            if (this.checkDatabase(letter, category, normalizedInput)) {
+            const dbCheck = this.checkDatabase(letter, category, normalizedInput);
+            if (dbCheck.isValid) {
                 isValid = true;
+                isSmart = dbCheck.isSmart;
             }
             // 5. Synonyms & Smart Logic
             else if (category === 'جماد' && this.checkJamadSmart(letter, normalizedInput)) {
                 isValid = true;
+                isSmart = true;
             }
         }
+
+        const result = { isValid, isSmart };
 
         // 6. Update Cache
         if (this.validationCache.size >= this.MAX_CACHE_SIZE) {
             this.validationCache.clear(); // Simple eviction strategy
         }
-        this.validationCache.set(cacheKey, isValid);
+        this.validationCache.set(cacheKey, result);
 
-        return isValid;
+        return result;
     }
 
     private normalizeArabic(text: string): string {
@@ -216,33 +222,32 @@ export class WildcardService {
         return matrix[b.length][a.length];
     }
 
-    private checkDatabase(letter: string, category: string, normalizedWord: string): boolean {
+    private checkDatabase(letter: string, category: string, normalizedWord: string): { isValid: boolean; isSmart: boolean } {
         const dbKey = this.getDatabaseKey(letter);
-        if (!dbKey) return false;
+        if (!dbKey) return { isValid: false, isSmart: false };
 
         const letterData = this.database[dbKey];
-        if (!letterData) return false;
+        if (!letterData) return { isValid: false, isSmart: false };
 
         const categoryAnswers = letterData[category];
-        if (!categoryAnswers) return false;
+        if (!categoryAnswers) return { isValid: false, isSmart: false };
 
         // 1. Exact Match (High Performance)
         if (categoryAnswers.some(answer => this.normalizeArabic(answer) === normalizedWord)) {
-            return true;
+            return { isValid: true, isSmart: false };
         }
 
         // 2. Advanced Logic: Fuzzy Match (Allow 1 character error)
-        // Optimized check: only check candidates of similar length
         for (const answer of categoryAnswers) {
             const normAnswer = this.normalizeArabic(answer);
             if (Math.abs(normAnswer.length - normalizedWord.length) <= 1) {
                 if (this.levenshtein(normAnswer, normalizedWord) <= 1) {
-                    return true;
+                    return { isValid: true, isSmart: true };
                 }
             }
         }
 
-        return false;
+        return { isValid: false, isSmart: false };
     }
 
     private checkJamadSmart(letter: string, normalizedWord: string): boolean {
