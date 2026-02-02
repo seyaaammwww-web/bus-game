@@ -1149,40 +1149,16 @@ class GameManager {
         // Override for Wildcard
         if (round.wildcardUsedByPlayerId === item.playerId) {
           isValid = true;
-          reason = 'جوكر';
-          isPendingVote = false;
-        }
-
-        // Logic: If not in DB (isValid=false), check if it starts with correct letter.
-        // If yes -> VOTE
-        // If no -> REJECT
-        if (!isValid && !isPendingVote && item.answer.trim().length >= 2) {
-          const startsWithLetter = this.validateAnswerLenient(item.category, item.answer, round.letter); // Corrected argument order? No, validateAnswerLenient(letter, category, answer) usually.
-          // Wait, validateAnswerLenient is (letter, category, answer). The call below:
-          const lenientCheck = this.validateAnswerLenient(round.letter, item.category as Category, item.answer);
-
-          if (lenientCheck) {
-            isPendingVote = true;
-            reason = 'تتطلب تصويت';
-            hasPendingVotes = true;
-          } else {
-            reason = 'حرف خطأ';
-          }
-        }
-
-        // Add to validated list
-        round.validatedAnswers.push({
-          playerId: item.playerId,
           playerName: room.players.find(p => p.id === item.playerId)?.name || '',
-          category: item.category as Category,
-          answer: item.answer,
-          isValid: isValid && !isPendingVote, // Only valid if confirmed DB and no vote needed
-          isPendingVote,
-          isUnique: false,
-          score: 0,
-          votes: { accepted: 0, rejected: 0 },
+            category: item.category as Category,
+              answer: item.answer,
+                isValid: isValid && !isPendingVote, // Only valid if confirmed DB and no vote needed
+                  isPendingVote,
+                  isUnique: false,
+                    score: 0,
+                      votes: { accepted: 0, rejected: 0 },
           reason,
-          isFabricated
+            isFabricated
         });
       }
 
