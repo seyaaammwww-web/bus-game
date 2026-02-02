@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Check, X, Shield, Users, Trophy, Sparkles } from 'lucide-react';
+import { Check, X, Shield, Users, Trophy } from 'lucide-react';
 import { PixelAvatar } from '@/components/ui/PixelAvatar';
 import { cn } from '@/lib/utils';
 import { categories, type Category } from '@shared/schema';
@@ -131,21 +131,15 @@ export function ResultsTable({
                                                 {cat}
                                             </div>
 
-                                            <div className="flex-1 text-center md:w-full flex items-center justify-center gap-1">
+                                            {/* The Answer */}
+                                            <div className="flex-1 text-center md:w-full">
                                                 {answer ? (
-                                                    <>
-                                                        <span className={cn(
-                                                            "font-bold text-sm md:text-base break-words block",
-                                                            isValid ? "text-[#15803d]" : "text-[#b91c1c] line-through decoration-2 decoration-red-300"
-                                                        )}>
-                                                            {answer}
-                                                        </span>
-                                                        {isValid && validation?.isSmart && (
-                                                            <span title="ذكاء اصطناعي / تصحيح إملائي" className="text-yellow-500">
-                                                                <Sparkles className="w-3 h-3" />
-                                                            </span>
-                                                        )}
-                                                    </>
+                                                    <span className={cn(
+                                                        "font-bold text-sm md:text-base break-words block",
+                                                        isValid ? "text-[#15803d]" : "text-[#b91c1c] line-through decoration-2 decoration-red-300"
+                                                    )}>
+                                                        {answer}
+                                                    </span>
                                                 ) : (
                                                     <span className="text-gray-300 text-xs font-pixel-text">-</span>
                                                 )}

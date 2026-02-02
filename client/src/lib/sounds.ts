@@ -8,13 +8,39 @@ class SoundManager {
   }
 
   private preload() {
-    // soundFiles removed to prevent 404s since sounds are disabled for this theme
-    console.log("[SoundManager] Running in Silent Mode (Theme Choice)");
+    const soundFiles = {
+      countdown: '/sounds/timer.mp3',
+      countdownFinal: '/sounds/whistle.mp3',
+      roundStart: '/sounds/start.mp3',
+      bus: '/sounds/bus_horn.mp3',
+      freeze: '/sounds/ice.mp3',
+      wildcard: '/sounds/magic.mp3',
+      banish: '/sounds/banish.mp3',
+      submit: '/sounds/submit.mp3',
+      click: '/sounds/click.mp3',
+      rush: '/sounds/alarm.mp3',
+      bonus: '/sounds/coin.mp3',
+      win: '/sounds/win.mp3',
+      notification: '/sounds/notification.mp3',
+      vote: '/sounds/click.mp3'
+    };
+
+    Object.entries(soundFiles).forEach(([key, src]) => {
+      const audio = new Audio(src);
+      audio.volume = this.volume;
+      this.sounds.set(key, audio);
+    });
   }
 
   public play(sound: string) {
-    // Playback disabled
-    return;
+    if (!this.enabled) return;
+    const audio = this.sounds.get(sound);
+    if (audio) {
+      audio.currentTime = 0;
+      audio.play().catch(e => {
+        // Ignore auto-play errors
+      });
+    }
   }
 
   public setEnabled(enabled: boolean) {

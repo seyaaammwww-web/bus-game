@@ -1143,8 +1143,7 @@ class GameManager {
           score: 0,
           votes: { accepted: 0, rejected: 0 },
           reason,
-          isFabricated,
-          isSmart: result?.isSmart
+          isFabricated
         });
       }
 
