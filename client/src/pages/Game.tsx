@@ -11,6 +11,7 @@ import { WildcardNotification } from '@/components/WildcardNotification';
 import { BanishPowerUp } from '@/components/BanishPowerUp';
 import { BanishOverlay } from '@/components/BanishOverlay';
 import { BanishNotification } from '@/components/BanishNotification';
+import { PowerUpMenu } from '@/components/PowerUpMenu';
 import { Confetti } from '@/components/Confetti';
 import { ActiveGamePlayerGrid } from '@/components/game/ActiveGamePlayerGrid';
 import { useGame } from '@/lib/gameContext';
@@ -264,6 +265,7 @@ export default function Game() {
           </div>
 
           <div className="flex items-center gap-2">
+            <PowerUpMenu />
             <Timer timeLeft={state.timeLeft} isRush={state.isRush} />
             {!!currentPlayer?.busStreak && currentPlayer.busStreak > 0 && (
               <div className="flex items-center gap-1 bg-orange-500 px-1.5 py-0.5 rounded-full text-white text-[9px] font-bold shadow-sm">
@@ -274,33 +276,7 @@ export default function Game() {
           </div>
         </motion.div>
 
-        {/* Mobile PowerUp Control Bar (Above Input Grid) */}
-        <motion.div
-          className="flex md:hidden items-center justify-end gap-3 mb-2 px-1"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <PowerUpCard
-            type="wildcard"
-            title="جوكر"
-            description="يملأ الكل"
-            cost={600}
-            icon={Crown}
-            status={getPowerUpStatus(600, currentPlayer?.usedPowerUps?.wildcard || false)}
-            onActivate={() => activatePowerUp('wildcard')}
-            className="w-12 h-16 text-[9px] shadow-sm"
-          />
-          <PowerUpCard
-            type="banish"
-            title="طرد"
-            description="طرد"
-            cost={350}
-            icon={Skull}
-            status={getPowerUpStatus(350, currentPlayer?.usedPowerUps?.banish || false)}
-            onActivate={() => setBanishOverlay(true)}
-            className="w-12 h-16 text-[9px] shadow-sm"
-          />
-        </motion.div>
+
 
         {/* Desktop Header - Unchanged */}
         <motion.div
@@ -332,24 +308,7 @@ export default function Game() {
           <div className="flex items-center gap-2 md:gap-3">
             {/* Desktop PowerUps */}
             <div className="flex items-center gap-2">
-              <PowerUpCard
-                type="wildcard"
-                title="جوكر"
-                description="يملأ كل الخانات"
-                cost={600}
-                icon={Crown}
-                status={getPowerUpStatus(600, currentPlayer?.usedPowerUps?.wildcard || false)}
-                onActivate={() => activatePowerUp('wildcard')}
-              />
-              <PowerUpCard
-                type="banish"
-                title="طرد"
-                description="يطرد منافس"
-                cost={350}
-                icon={Skull}
-                status={getPowerUpStatus(350, currentPlayer?.usedPowerUps?.banish || false)}
-                onActivate={() => setBanishOverlay(true)}
-              />
+              <PowerUpMenu />
             </div>
 
             <div className="flex flex-col items-end gap-1">
