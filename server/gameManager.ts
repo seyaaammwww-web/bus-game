@@ -37,6 +37,8 @@ interface AnswerVotes {
 }
 
 const PUBLIC_ROOM_CODE = 'PLAY';
+const MAX_TOTAL_PLAYERS = 800; // Scalability Limit
+const MAX_ROOMS = 100; // Scalability Limit
 
 class GameManager {
   private rooms: Map<string, GameRoom> = new Map();
@@ -257,6 +259,15 @@ class GameManager {
   }
 
   createRoom(ws: WebSocket, playerName: string): void {
+    if (this.rooms.size >= MAX_ROOMS) {
+      this.send(ws, { type: 'error', payload: { message: 'السيرفر مشغول جداً (الحد الأقصى للغرف). حاول لاحقاً.' } });
+      return;
+    }
+    if (this.players.size >= MAX_TOTAL_PLAYERS) {
+      this.send(ws, { type: 'error', payload: { message: 'السيرفر ممتلئ (800 لاعب). حاول مرة أخرى لاحقاً.' } });
+      return;
+    }
+
     const roomCode = this.generateRoomCode();
     const playerId = randomUUID();
     const roomId = randomUUID();
@@ -303,6 +314,11 @@ class GameManager {
   }
 
   joinPublicRoom(ws: WebSocket, playerName: string): void {
+    if (this.players.size >= MAX_TOTAL_PLAYERS) {
+      this.send(ws, { type: 'error', payload: { message: 'السيرفر ممتلئ (800 لاعب). حاول مرة أخرى لاحقاً.' } });
+      return;
+    }
+
     const room = this.ensurePublicRoom();
 
     if (room.players.length >= 8) {
@@ -412,6 +428,11 @@ class GameManager {
     if (room.players.length >= 8) {
       console.log(`[Join Room] Failed: Room ${roomCode} is full`);
       this.send(ws, { type: 'error', payload: { message: 'الغرفة ممتلئة' } });
+      return;
+    }
+
+    if (this.players.size >= MAX_TOTAL_PLAYERS) {
+      this.send(ws, { type: 'error', payload: { message: 'السيرفر ممتلئ (800 لاعب). حاول مرة أخرى لاحقاً.' } });
       return;
     }
 

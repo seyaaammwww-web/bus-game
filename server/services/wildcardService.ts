@@ -18,14 +18,19 @@ interface SynonymsConfig {
  * Service to provide wildcard answers from pre-built database
  * Features:
  * - Smart Validation (Synonyms, Normalization)
- * - Community Suggestion Logging (No AI)
- * - Fuzzy Validation (Typo Tolerance)
+ * - Caching (High Performance)
+ * - Community Suggestion Logging
+ * - NO Fuzzy Validation (Removed for Scalability)
  */
 export class WildcardService {
     private static instance: WildcardService;
     private database: WildcardDatabase = {};
     private synonyms: SynonymsConfig = { jamad_synonyms: {}, jamad_categories: {} };
     private usedAnswers = new Map<string, Set<string>>(); // Track used answers per letter+category
+
+    // Performance Optimization: Cache validation results
+    private validationCache = new Map<string, boolean>();
+    private MAX_CACHE_SIZE = 50000;
 
     private constructor() {
         this.loadDatabase();
@@ -127,10 +132,16 @@ export class WildcardService {
         const normalizedInput = this.normalizeArabic(word);
         if (!normalizedInput || normalizedInput.length < 2) return false;
 
-        // 2. Strict letter check (must start with letter)
-        const normalizedLetter = this.normalizeArabic(letter);
+        // 2. Cache Check (O(1))
+        const cacheKey = `${letter}:${category}:${normalizedInput}`;
+        if (this.validationCache.has(cacheKey)) {
+            return this.validationCache.get(cacheKey)!;
+        }
 
-        // CHECK if normalizedInput starts with normalizedLetter
+        let isValid = false;
+
+        // 3. Strict letter check (must start with letter)
+        const normalizedLetter = this.normalizeArabic(letter);
         let startsWith = normalizedInput.startsWith(normalizedLetter.charAt(0));
 
         // Allow "Al" prefix exception
@@ -140,19 +151,24 @@ export class WildcardService {
             }
         }
 
-        if (!startsWith) return false;
-
-        // 3. Database Check (Direct)
-        if (this.checkDatabase(letter, category, normalizedInput)) return true;
-
-        // 4. Synonyms & Smart Logic
-
-        // Check Synonyms (Input word -> Canonical word in DB)
-        if (category === 'جماد') {
-            if (this.checkJamadSmart(letter, normalizedInput)) return true;
+        if (startsWith) {
+            // 4. Database Check (Direct)
+            if (this.checkDatabase(letter, category, normalizedInput)) {
+                isValid = true;
+            }
+            // 5. Synonyms & Smart Logic
+            else if (category === 'جماد' && this.checkJamadSmart(letter, normalizedInput)) {
+                isValid = true;
+            }
         }
 
-        return false;
+        // 6. Update Cache
+        if (this.validationCache.size >= this.MAX_CACHE_SIZE) {
+            this.validationCache.clear(); // Simple eviction strategy
+        }
+        this.validationCache.set(cacheKey, isValid);
+
+        return isValid;
     }
 
     private checkDatabase(letter: string, category: string, normalizedWord: string): boolean {
@@ -165,25 +181,13 @@ export class WildcardService {
         const categoryAnswers = letterData[category];
         if (!categoryAnswers) return false;
 
-        // 1. Exact Match
+        // 1. Exact Match (High Performance O(N) but N is small per category)
         if (categoryAnswers.some(answer => this.normalizeArabic(answer) === normalizedWord)) {
             return true;
         }
 
-        // 2. Fuzzy Match (Permissive for typos like "yahya")
-        // Only if word length > 2
-        if (normalizedWord.length > 2) {
-            for (const answer of categoryAnswers) {
-                const normAnswer = this.normalizeArabic(answer);
-                // Skip if length diff > 1 (optimization)
-                if (Math.abs(normAnswer.length - normalizedWord.length) > 1) continue;
-
-                const dist = this.levenshtein(normAnswer, normalizedWord);
-                if (dist <= 1) { // Allow 1 edit (insert/delete/substitute)
-                    return true;
-                }
-            }
-        }
+        // REMOVED: Fuzzy Match (Levenshtein) - Too slow for 5000 concurrent users
+        // Users must type accurately now.
 
         return false;
     }
@@ -205,41 +209,6 @@ export class WildcardService {
         }
 
         return false;
-    }
-
-    // Direct Levenshtein implementation for dependency-free fuzzy matching
-    private levenshtein(a: string, b: string): number {
-        if (a.length === 0) return b.length;
-        if (b.length === 0) return a.length;
-
-        const matrix = [];
-
-        // increment along the first column of each row
-        let i;
-        for (i = 0; i <= b.length; i++) {
-            matrix[i] = [i];
-        }
-
-        // increment each column in the first row
-        let j;
-        for (j = 0; j <= a.length; j++) {
-            matrix[0][j] = j;
-        }
-
-        // Fill in the rest of the matrix
-        for (i = 1; i <= b.length; i++) {
-            for (j = 1; j <= a.length; j++) {
-                if (b.charAt(i - 1) == a.charAt(j - 1)) {
-                    matrix[i][j] = matrix[i - 1][j - 1];
-                } else {
-                    matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, // substitution
-                        Math.min(matrix[i][j - 1] + 1, // insertion
-                            matrix[i - 1][j] + 1)); // deletion
-                }
-            }
-        }
-
-        return matrix[b.length][a.length];
     }
 
     private normalizeArabic(text: string): string {
@@ -270,7 +239,8 @@ export class WildcardService {
             letters: letterCount,
             categoriesPerLetter: categoryCount,
             totalAnswers,
-            averagePerCategory: categoryCount > 0 ? Math.floor(totalAnswers / (letterCount * categoryCount)) : 0
+            averagePerCategory: categoryCount > 0 ? Math.floor(totalAnswers / (letterCount * categoryCount)) : 0,
+            cacheSize: this.validationCache.size
         };
     }
 
@@ -297,6 +267,10 @@ export class WildcardService {
         if (exists) return false;
 
         this.database[dbKey][category].push(word);
+
+        // Invalidate cache for this key if it existed as false
+        const cacheKey = `${letter}:${category}:${normalizedWord}`;
+        this.validationCache.delete(cacheKey);
 
         try {
             this.database[dbKey][category].sort();
