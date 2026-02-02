@@ -285,8 +285,8 @@ export default function Game() {
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
         >
-          {/* Left - Exit Button & Round Badge */}
-          <div className="flex items-center gap-4">
+          {/* Left - Exit Button & Round Badge & Letter */}
+          <div className="flex items-center gap-6">
             <Button
               variant="ghost"
               size="icon"
@@ -300,11 +300,10 @@ export default function Game() {
             <div className="bg-gradient-to-r from-amber-400 to-yellow-500 text-[#2e1065] px-5 py-2 rounded-full border-[3px] border-[#4c1d95] font-bold text-lg shadow-[3px_3px_0_0_#2e1065] font-pixel-text whitespace-nowrap">
               جولة {room.currentRound + 1} / {room.totalRounds}
             </div>
-          </div>
 
-          {/* Center - Letter Display */}
-          <div className="flex-1 flex justify-center">
-            <LetterDisplay letter={letter} />
+            <div className="scale-75 origin-right">
+              <LetterDisplay letter={letter} />
+            </div>
           </div>
 
           {/* Right - Timer and Streak and PowerUps */}
