@@ -59,7 +59,8 @@ export class WildcardService {
             if (fs.existsSync(dbPath)) {
                 const data = fs.readFileSync(dbPath, 'utf-8');
                 this.database = JSON.parse(data);
-                console.log(`✅ Wildcard Database loaded from ${path.basename(dbPath)}`);
+                const stats = this.getStats();
+                console.log(`✅ Wildcard Database loaded: ${path.basename(dbPath)} (${stats.totalAnswers} words across ${stats.letters} letters)`);
             } else {
                 throw new Error("JSON not found");
             }
@@ -171,6 +172,50 @@ export class WildcardService {
         return isValid;
     }
 
+    private normalizeArabic(text: string): string {
+        try {
+            return text
+                .trim()
+                .toLowerCase()
+                .replace(/[^\u0600-\u06FF\s]/g, '') // Keep Arabic only
+                .replace(/[أإآ]/g, 'ا')
+                .replace(/ة/g, 'ه')  // Normalized Taa Marbuta
+                .replace(/ى/g, 'ي')  // Aggressive normalization: Alef Maqsura -> Yaa globally
+                .replace(/[\u064B-\u065F]/g, ''); // Remove tashkeel
+        } catch (e) {
+            return text;
+        }
+    }
+
+    // Direct Levenshtein implementation for dependency-free fuzzy matching
+    private levenshtein(a: string, b: string): number {
+        if (a.length === 0) return b.length;
+        if (b.length === 0) return a.length;
+
+        const matrix = [];
+        for (let i = 0; i <= b.length; i++) {
+            matrix[i] = [i];
+        }
+        for (let j = 0; j <= a.length; j++) {
+            matrix[0][j] = j;
+        }
+
+        for (let i = 1; i <= b.length; i++) {
+            for (let j = 1; j <= a.length; j++) {
+                if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                    matrix[i][j] = matrix[i - 1][j - 1];
+                } else {
+                    matrix[i][j] = Math.min(
+                        matrix[i - 1][j - 1] + 1, // substitution
+                        matrix[i][j - 1] + 1,     // insertion
+                        matrix[i - 1][j] + 1      // deletion
+                    );
+                }
+            }
+        }
+        return matrix[b.length][a.length];
+    }
+
     private checkDatabase(letter: string, category: string, normalizedWord: string): boolean {
         const dbKey = this.getDatabaseKey(letter);
         if (!dbKey) return false;
@@ -181,13 +226,21 @@ export class WildcardService {
         const categoryAnswers = letterData[category];
         if (!categoryAnswers) return false;
 
-        // 1. Exact Match (High Performance O(N) but N is small per category)
+        // 1. Exact Match (High Performance)
         if (categoryAnswers.some(answer => this.normalizeArabic(answer) === normalizedWord)) {
             return true;
         }
 
-        // REMOVED: Fuzzy Match (Levenshtein) - Too slow for 5000 concurrent users
-        // Users must type accurately now.
+        // 2. Advanced Logic: Fuzzy Match (Allow 1 character error)
+        // Optimized check: only check candidates of similar length
+        for (const answer of categoryAnswers) {
+            const normAnswer = this.normalizeArabic(answer);
+            if (Math.abs(normAnswer.length - normalizedWord.length) <= 1) {
+                if (this.levenshtein(normAnswer, normalizedWord) <= 1) {
+                    return true;
+                }
+            }
+        }
 
         return false;
     }
@@ -209,21 +262,6 @@ export class WildcardService {
         }
 
         return false;
-    }
-
-    private normalizeArabic(text: string): string {
-        try {
-            return text
-                .trim()
-                .toLowerCase()
-                .replace(/[^\u0600-\u06FF\s]/g, '') // Keep Arabic only
-                .replace(/[أإآ]/g, 'ا')
-                .replace(/ة/g, 'ه')  // Normalized Taa Marbuta
-                .replace(/ى/g, 'ي')  // Aggressive normalization: Alef Maqsura -> Yaa globally
-                .replace(/[\u064B-\u065F]/g, ''); // Remove tashkeel
-        } catch (e) {
-            return text;
-        }
     }
 
     getStats() {
