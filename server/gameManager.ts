@@ -1135,6 +1135,8 @@ class GameManager {
       console.log(`[Calculate Scores] Validating ${itemsToValidate.length} answers...`);
       const validationResults = await HybridValidator.getInstance().validateBatch(itemsToValidate);
 
+      let hasPendingVotes = false;
+
       for (const item of allAnswers) {
         const key = `${item.playerId}:${item.category}`;
         const result = validationResults.get(key);
@@ -1142,7 +1144,7 @@ class GameManager {
         let isValid = result?.isValid || false;
         let isPendingVote = false;
         let reason = result?.reason || '';
-        const isFabricated = !!(result?.source === 'ai' && !result.isValid); // Mark as fabricated if AI explicitly rejected it
+        const isFabricated = false;
 
         // Override for Wildcard
         if (round.wildcardUsedByPlayerId === item.playerId) {
@@ -1151,23 +1153,31 @@ class GameManager {
           isPendingVote = false;
         }
 
-        // If invalid but strictly matches letter (and not explicitly fabricated/rejected by AI), chance for voting?
-        // Current logic: If AI rejected it, it's rejected. If HybridValidator returns invalid (not in DB, not AI confirmed), we might fallback to vote?
-        // But we want "Instant Scoring".
-        // Let's trust the HybridValidator (which now uses AI).
-        // If HybridValidator says invalid, it's invalid.
+        // Logic: If not in DB (isValid=false), check if it starts with correct letter.
+        // If yes -> VOTE
+        // If no -> REJECT
+        if (!isValid && !isPendingVote && item.answer.trim().length >= 2) {
+          const startsWithLetter = this.validateAnswerLenient(item.category, item.answer, round.letter); // Corrected argument order? No, validateAnswerLenient(letter, category, answer) usually.
+          // Wait, validateAnswerLenient is (letter, category, answer). The call below:
+          const lenientCheck = this.validateAnswerLenient(round.letter, item.category as Category, item.answer);
 
-        // HOWEVER: HybridValidator fallback is "Not in DB" if AI fails.
-        // So we might still want voting for "heuristic" source failures?
-        // Let's keep it simple: Trust validation.
+          if (lenientCheck) {
+            isPendingVote = true;
+            reason = 'تتطلب تصويت';
+            hasPendingVotes = true;
+          } else {
+            reason = 'حرف خطأ';
+          }
+        }
 
+        // Add to validated list
         round.validatedAnswers.push({
           playerId: item.playerId,
           playerName: room.players.find(p => p.id === item.playerId)?.name || '',
-          category: item.category,
+          category: item.category as Category,
           answer: item.answer,
-          isValid,
-          isPendingVote: false, // No voting phase anymore, AI decides!
+          isValid: isValid && !isPendingVote, // Only valid if confirmed DB and no vote needed
+          isPendingVote,
           isUnique: false,
           score: 0,
           votes: { accepted: 0, rejected: 0 },
@@ -1177,7 +1187,16 @@ class GameManager {
       }
 
       // Calculate logic for scoring (Unique/Common) happens in finalizeScores
-      this.finalizeScores(room);
+      // BUT if we have pending votes, we must go to Voting Phase!
+
+      if (hasPendingVotes) {
+        console.log(`[Calculate Scores] Pending votes found. Starting Voting Phase.`);
+        if (!room.settings) room.settings = {};
+        room.settings.enableVoting = true; // Force enable voting
+        this.startVotingPhase(room);
+      } else {
+        this.finalizeScores(room);
+      }
 
     } catch (error) {
       console.error("Error in calculateScores:", error);
