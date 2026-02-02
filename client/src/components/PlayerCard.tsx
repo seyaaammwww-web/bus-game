@@ -19,113 +19,104 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
 
   return (
     <motion.div
-      className={`flex items-center gap-3 rounded-xl border relative overflow-hidden transition-all ${isCurrentPlayer
-        ? 'bg-gradient-to-r from-primary/10 to-accent/10 border-primary/50 border-2 p-4 shadow-md'
-        : 'bg-card border-card-border p-3'
-        }`}
-      whileHover={{ scale: 1.02, y: -2 }}
+      className={cn(
+        "flex items-center gap-3 rounded-lg border-2 relative transition-all overflow-visible",
+        isCurrentPlayer
+          ? "bg-[#f5f3ff] border-[#7c3aed] shadow-[4px_4px_0_0_#4c1d95]"
+          : "bg-white border-gray-900 shadow-[4px_4px_0_0_rgba(0,0,0,0.2)]"
+      )}
+      whileHover={{ y: -4 }}
+      transition={{ type: "spring", stiffness: 400, damping: 20 }}
     >
+      {/* Rank Badge */}
       {rank !== undefined && rank < 3 && (
-        <motion.div
-          className={`w-8 h-8 ${rankColors[rank]} rounded-full flex items-center justify-center text-white font-bold text-sm relative`}
-          animate={{ scale: [1, 1.15, 1] }}
-          transition={{ duration: 1.5, repeat: Infinity, delay: index * 0.2 }}
-        >
-          {rankEmojis[rank]}
-          {rank === 0 && (
-            <motion.div
-              className="absolute inset-0 rounded-full border-2 border-yellow-300"
-              animate={{ scale: [1, 1.3], opacity: [1, 0] }}
-              transition={{ duration: 1, repeat: Infinity }}
-            />
-          )}
-        </motion.div>
+        <div className="absolute -top-3 -left-2 z-20">
+          <motion.div
+            className={cn(
+              "w-8 h-8 rounded-lg border-2 border-black flex items-center justify-center font-bold font-pixel-text text-white shadow-sm",
+              rankColors[rank]
+            )}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2 + (index * 0.1) }}
+          >
+            {rankEmojis[rank]}
+          </motion.div>
+        </div>
       )}
 
-      {/* Premium Pixel Avatar */}
-      <motion.div
-        className="relative"
-        whileHover={{ scale: 1.15, rotate: 3 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-      >
-        {/* Outer Border Frame */}
-        <div className="absolute -inset-0.5 bg-gradient-to-br from-[#fbbf24] via-[#8b5cf6] to-[#7c3aed] rounded-lg opacity-80" />
-
-        {/* Main Avatar Container */}
-        <div className={`relative ${isCurrentPlayer ? 'w-14 h-14' : 'w-11 h-11'} bg-gradient-to-br from-[#4c1d95] via-[#7c3aed] to-[#8b5cf6] rounded-lg border-[3px] border-[#fbbf24] shadow-[3px_3px_0_0_#2e1065,_0_0_12px_rgba(251,191,36,0.4)] flex items-center justify-center overflow-hidden transition-all`}>
-          {/* Inner Shine Effect */}
-          <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-transparent rounded-sm" />
+      {/* Avatar Container */}
+      <div className="relative p-2">
+        <div className={cn(
+          "relative flex items-center justify-center rounded-md border-2 overflow-hidden",
+          isCurrentPlayer ? "w-14 h-14 border-[#7c3aed] bg-[#7c3aed]" : "w-12 h-12 border-black bg-gray-100"
+        )}>
+          {/* Background Pattern */}
+          <div className={`absolute inset-0 opacity-20 ${isCurrentPlayer ? 'bg-[url("/patterns/pixel-dots.png")]' : ''}`} />
 
           {/* Letter */}
-          <span className={`relative z-10 ${isCurrentPlayer ? 'text-2xl' : 'text-xl'} font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] font-pixel-title`}>
+          <span className={cn(
+            "relative z-10 font-bold font-pixel-title drop-shadow-md",
+            isCurrentPlayer ? "text-3xl text-white" : "text-2xl text-gray-800"
+          )}>
             {player.name.charAt(0)}
           </span>
 
-          {/* Pixel Corner Decorations */}
-          <div className="absolute top-0 left-0 w-1.5 h-1.5 bg-[#fbbf24]" />
-          <div className="absolute top-0 right-0 w-1.5 h-1.5 bg-[#fbbf24]" />
-          <div className="absolute bottom-0 left-0 w-1.5 h-1.5 bg-[#fbbf24]" />
-          <div className="absolute bottom-0 right-0 w-1.5 h-1.5 bg-[#fbbf24]" />
-        </div>
-
-        {/* Sparkle Effect - Static */}
-        <div
-          className="absolute -top-1 -right-1 w-2 h-2 bg-[#fbbf24] rounded-full shadow-[0_0_6px_#fbbf24]"
-        />
-      </motion.div>
-
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="font-medium truncate">{player.name}</span>
-          {player.isHost && (
-            <div>
-              <Crown className="w-4 h-4 text-yellow-500 shrink-0" />
-            </div>
-          )}
-          {isReferee && (
-            <div>
-              <Shield className="w-4 h-4 text-accent shrink-0" />
-            </div>
-          )}
+          {/* Pixel Corners for Premium Layout */}
           {isCurrentPlayer && (
-            <span
-              className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-bold"
-            >
+            <>
+              <div className="absolute top-0 right-0 w-1.5 h-1.5 bg-[#fbbf24] z-20" />
+              <div className="absolute bottom-0 left-0 w-1.5 h-1.5 bg-[#fbbf24] z-20" />
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Info Section */}
+      <div className="flex-1 min-w-0 py-2 pr-2">
+        <div className="flex items-center gap-2 mb-1">
+          <span className={cn(
+            "font-bold truncate font-pixel-text text-base",
+            isCurrentPlayer ? "text-[#4c1d95]" : "text-gray-900"
+          )}>
+            {player.name}
+          </span>
+
+          {/* Status Badges */}
+          {player.isHost && <Crown className="w-4 h-4 text-yellow-500 fill-yellow-500 shrink-0" />}
+          {isReferee && <Shield className="w-4 h-4 text-blue-500 fill-blue-500 shrink-0" />}
+
+          {isCurrentPlayer && (
+            <span className="text-[10px] bg-[#7c3aed]/10 text-[#7c3aed] border border-[#7c3aed]/20 px-1.5 py-0.5 rounded-sm font-bold font-pixel-text">
               أنت
             </span>
           )}
         </div>
-        {showScore && (
-          <motion.div
-            className="flex items-center gap-1"
-            animate={rank === 0 ? { scale: [1, 1.05, 1] } : {}}
-            transition={{ duration: 1, repeat: rank === 0 ? Infinity : 0 }}
-          >
-            <span className="text-sm font-bold text-primary">{player.score}</span>
-            <span className="text-sm text-muted-foreground">نقطة</span>
-            {rank === 0 && <Trophy className="w-4 h-4 text-yellow-500 ml-1" />}
-          </motion.div>
+
+        {/* Score or Status */}
+        {showScore ? (
+          <div className="flex items-center gap-1.5">
+            <div className="px-2 py-0.5 bg-black/5 rounded-sm border border-black/10 flex items-center gap-1">
+              <span className="font-bold text-sm">{player.score}</span>
+              <Trophy className="w-3 h-3 text-yellow-600" />
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1">
+            {player.isReady ? (
+              <div className="flex items-center gap-1 text-green-600 text-xs font-bold bg-green-50 px-2 py-0.5 rounded-sm border border-green-200">
+                <Check className="w-3 h-3" />
+                جاهز
+              </div>
+            ) : (
+              <div className="flex items-center gap-1 text-gray-400 text-xs font-bold bg-gray-50 px-2 py-0.5 rounded-sm border border-gray-200">
+                <Clock className="w-3 h-3" />
+                ينتظر
+              </div>
+            )}
+          </div>
         )}
       </div>
-
-      {!showScore && (
-        player.isReady ? (
-          <motion.div
-            className="w-8 h-8 bg-gradient-to-br from-[#10b981] to-[#059669] rounded-full flex items-center justify-center border-[2px] border-[#047857] shadow-[2px_2px_0_0_#065f46]"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', stiffness: 300 }}
-          >
-            <Check className="w-5 h-5 text-white stroke-[3]" />
-          </motion.div>
-        ) : (
-          <div
-            className="w-8 h-8 bg-muted rounded-full flex items-center justify-center"
-          >
-            <Clock className="w-5 h-5 text-muted-foreground" />
-          </div>
-        )
-      )}
     </motion.div>
   );
 }
