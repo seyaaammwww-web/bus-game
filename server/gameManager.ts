@@ -128,7 +128,10 @@ class GameManager {
   }
 
   private getRoomCategories(room: GameRoom): readonly string[] {
-    return room.settings?.customCategories || categories;
+    if (room.settings?.customCategories && room.settings.customCategories.length > 0) {
+      return room.settings.customCategories;
+    }
+    return categories;
   }
 
   private checkStartsWithLetter(text: string, letter: string): boolean {
