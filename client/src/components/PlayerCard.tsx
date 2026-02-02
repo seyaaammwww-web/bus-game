@@ -56,13 +56,6 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
           {/* Inner Shine Effect */}
           <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-transparent rounded-sm" />
 
-          {/* Shimmer Animation */}
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
-            animate={{ x: ['-100%', '200%'] }}
-            transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 1, ease: 'easeInOut' }}
-          />
-
           {/* Letter */}
           <span className={`relative z-10 ${isCurrentPlayer ? 'text-2xl' : 'text-xl'} font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] font-pixel-title`}>
             {player.name.charAt(0)}
@@ -75,11 +68,9 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
           <div className="absolute bottom-0 right-0 w-1.5 h-1.5 bg-[#fbbf24]" />
         </div>
 
-        {/* Sparkle Effect */}
-        <motion.div
+        {/* Sparkle Effect - Static */}
+        <div
           className="absolute -top-1 -right-1 w-2 h-2 bg-[#fbbf24] rounded-full shadow-[0_0_6px_#fbbf24]"
-          animate={{ scale: [0.8, 1.3, 0.8], opacity: [0.6, 1, 0.6] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
         />
       </motion.div>
 
@@ -87,29 +78,21 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
         <div className="flex items-center gap-2">
           <span className="font-medium truncate">{player.name}</span>
           {player.isHost && (
-            <motion.div
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-            >
+            <div>
               <Crown className="w-4 h-4 text-yellow-500 shrink-0" />
-            </motion.div>
+            </div>
           )}
           {isReferee && (
-            <motion.div
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            >
+            <div>
               <Shield className="w-4 h-4 text-accent shrink-0" />
-            </motion.div>
+            </div>
           )}
           {isCurrentPlayer && (
-            <motion.span
+            <span
               className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-bold"
-              animate={{ scale: [1, 1.05, 1] }}
-              transition={{ duration: 1, repeat: Infinity }}
             >
               أنت
-            </motion.span>
+            </span>
           )}
         </div>
         {showScore && (
@@ -136,13 +119,11 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
             <Check className="w-5 h-5 text-white stroke-[3]" />
           </motion.div>
         ) : (
-          <motion.div
+          <div
             className="w-8 h-8 bg-muted rounded-full flex items-center justify-center"
-            animate={{ scale: [1, 1.1, 1], opacity: [1, 0.7, 1] }}
-            transition={{ duration: 1, repeat: Infinity }}
           >
             <Clock className="w-5 h-5 text-muted-foreground" />
-          </motion.div>
+          </div>
         )
       )}
     </motion.div>

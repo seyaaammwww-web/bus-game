@@ -25,7 +25,7 @@ const buttonVariants = cva(
           "bg-gradient-to-b from-white to-[#faf5ff] text-[#4c1d95] border-[3px] border-[#4c1d95] shadow-[4px_4px_0_0_#2e1065,_0_0_20px_rgba(139,92,246,0.2)] hover:shadow-[6px_6px_0_0_#7c3aed,_0_0_30px_rgba(139,92,246,0.4)] hover:border-[#7c3aed] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] font-bold",
         // NEW: Primary purple button
         primary:
-          "bg-gradient-to-b from-[#8b5cf6] to-[#7c3aed] text-white border-[3px] border-[#5b21b6] shadow-[4px_4px_0_0_#4c1d95,_0_0_15px_rgba(139,92,246,0.3)] hover:from-[#a78bfa] hover:to-[#8b5cf6] hover:shadow-[6px_6px_0_0_#5b21b6,_0_0_25px_rgba(139,92,246,0.5)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] font-bold uppercase",
+          "bg-gradient-to-b from-[#8b5cf6] to-[#7c3aed] text-white border-[3px] border-[#5b21b6] shadow-[4px_4px_0_0_#4c1d95] hover:from-[#a78bfa] hover:to-[#8b5cf6] hover:shadow-[6px_6px_0_0_#5b21b6] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] font-bold uppercase",
         // NEW: Accent cyan button
         accent:
           "bg-gradient-to-b from-[#22d3ee] to-[#06b6d4] text-[#1e1b4b] border-[3px] border-[#0891b2] shadow-[4px_4px_0_0_#0e7490,_0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[6px_6px_0_0_#0891b2,_0_0_25px_rgba(6,182,212,0.5)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] font-bold uppercase",
