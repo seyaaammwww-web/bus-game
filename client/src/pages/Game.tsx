@@ -13,7 +13,6 @@ import { BanishOverlay } from '@/components/BanishOverlay';
 import { BanishNotification } from '@/components/BanishNotification';
 import { PowerUpMenu } from '@/components/PowerUpMenu';
 import { Confetti } from '@/components/Confetti';
-import { ActiveGamePlayerGrid } from '@/components/game/ActiveGamePlayerGrid';
 import { useGame } from '@/lib/gameContext';
 import { categories, type Category, type RoundAnswers } from '@shared/schema';
 import { AlertTriangle, Send, User, Users, Globe, PawPrint, Box, LogOut, Zap, Eye, Trophy, Flame, Sparkles, Snowflake, Crown, Skull } from 'lucide-react';
@@ -501,18 +500,7 @@ export default function Game() {
         </div>
 
 
-        {/* Active Player Grid */}
-        <div className="mt-8 mb-4">
-          <ActiveGamePlayerGrid
-            players={room.players}
-            currentPlayerId={state.playerId!}
-            submissions={currentRound?.submissions?.reduce((acc: any, sub: any) => {
-              acc[sub.playerId] = sub;
-              return acc;
-            }, {}) || {}}
-            timeLeft={Number(state.timeLeft)}
-          />
-        </div>
+
 
         <div className="pb-20"></div>
       </div >
