@@ -1148,56 +1148,83 @@ class GameManager {
 
         // Override for Wildcard
         if (round.wildcardUsedByPlayerId === item.playerId) {
-          isValid = true;
+          reason = 'جوكر';
+          isPendingVote = false;
+        }
+
+        // Logic: If not in DB (isValid=false), check if it starts with correct letter.
+        // If yes -> Check Settings:
+        //    - If Voting Enabled -> VOTE
+        //    - If Voting Disabled -> REJECT (Strict Mode)
+        if (!isValid && !isPendingVote && item.answer.trim().length >= 2) {
+          const lenientCheck = this.validateAnswerLenient(round.letter, item.category as Category, item.answer);
+
+          if (lenientCheck) {
+            // Check if Host enabled voting
+            if (room.settings?.enableVoting) {
+              isPendingVote = true;
+              reason = 'تتطلب تصويت';
+              hasPendingVotes = true;
+            } else {
+              // STRICT MODE: Start letter matches, but word not in DB -> INVALID
+              reason = 'غير موجودة في القاموس';
+            }
+          } else {
+            reason = 'حرف خطأ';
+          }
+        }
+
+        // Add to validated list
+        round.validatedAnswers.push({
+          playerId: item.playerId,
           playerName: room.players.find(p => p.id === item.playerId)?.name || '',
-            category: item.category as Category,
-              answer: item.answer,
-                isValid: isValid && !isPendingVote, // Only valid if confirmed DB and no vote needed
-                  isPendingVote,
-                  isUnique: false,
-                    score: 0,
-                      votes: { accepted: 0, rejected: 0 },
+          category: item.category as Category,
+          answer: item.answer,
+          isValid: isValid && !isPendingVote, // Only valid if confirmed DB and no vote needed
+          isPendingVote,
+          isUnique: false,
+          score: 0,
+          votes: { accepted: 0, rejected: 0 },
           reason,
-            isFabricated
-        });
-      }
+          isFabricated
+        }
 
       // Calculate logic for scoring (Unique/Common) happens in finalizeScores
       // BUT if we have pending votes, we must go to Voting Phase!
 
       if (hasPendingVotes) {
-        console.log(`[Calculate Scores] Pending votes found. Starting Voting Phase.`);
-        if (!room.settings) room.settings = {};
-        room.settings.enableVoting = true; // Force enable voting
-        this.startVotingPhase(room);
-      } else {
+          console.log(`[Calculate Scores] Pending votes found. Starting Voting Phase.`);
+          if (!room.settings) room.settings = {};
+          room.settings.enableVoting = true; // Force enable voting
+          this.startVotingPhase(room);
+        } else {
+          this.finalizeScores(room);
+        }
+
+      } catch (error) {
+        console.error("Error in calculateScores:", error);
+
+        // FALLBACK: If validation fails, accept "reasonable" answers to prevent game stall
+        console.log(`[Calculate Scores] validation failed, using fallback for ${allAnswers.length} answers.`);
+
+        round.validatedAnswers = allAnswers.map(item => ({
+          playerId: item.playerId,
+          playerName: room.players.find(p => p.id === item.playerId)?.name || '',
+          category: item.category as Category,
+          answer: item.answer,
+          isValid: item.answer.trim().length > 1, // Simple length check
+          isPendingVote: false,
+          isUnique: false, // Will be calculated in finalizeScores
+          score: 0,
+          votes: { accepted: 0, rejected: 0 },
+          reason: 'تم القبول (خطأ في النظام)',
+          isFabricated: false
+        }));
+
+        // Ensure we finish the round logic
         this.finalizeScores(room);
       }
-
-    } catch (error) {
-      console.error("Error in calculateScores:", error);
-
-      // FALLBACK: If validation fails, accept "reasonable" answers to prevent game stall
-      console.log(`[Calculate Scores] validation failed, using fallback for ${allAnswers.length} answers.`);
-
-      round.validatedAnswers = allAnswers.map(item => ({
-        playerId: item.playerId,
-        playerName: room.players.find(p => p.id === item.playerId)?.name || '',
-        category: item.category as Category,
-        answer: item.answer,
-        isValid: item.answer.trim().length > 1, // Simple length check
-        isPendingVote: false,
-        isUnique: false, // Will be calculated in finalizeScores
-        score: 0,
-        votes: { accepted: 0, rejected: 0 },
-        reason: 'تم القبول (خطأ في النظام)',
-        isFabricated: false
-      }));
-
-      // Ensure we finish the round logic
-      this.finalizeScores(room);
     }
-  }
 
   private startVotingPhase(room: GameRoom): void {
     room.phase = 'voting';
