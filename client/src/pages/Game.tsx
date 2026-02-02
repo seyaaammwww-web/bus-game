@@ -450,6 +450,13 @@ export default function Game() {
                         onKeyDown={(e) => handleKeyDown(category, e)}
                         disabled={hasSubmitted || isBanished}
                         placeholder="..."
+                        onFocus={(e) => {
+                          if (isMobile) {
+                            setTimeout(() => {
+                              e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 300);
+                          }
+                        }}
                         className={`text-center text-sm md:text-lg h-9 md:h-12 border-2 border-[#e5e7eb] focus:border-[#7c3aed] focus:ring-0 focus:shadow-[0_0_0_2px_rgba(124,58,237,0.1)] transition-all font-pixel-text font-bold bg-white text-[#4c1d95] placeholder:text-gray-300 rounded-lg ${hasSubmitted || isBanished ? 'opacity-60 grayscale' : ''}`}
                         data-testid={`input-${category}`}
                       />
