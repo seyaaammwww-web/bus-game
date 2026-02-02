@@ -41,14 +41,32 @@ function GameRouter() {
 
 // ... imports
 
+// Helper to check if mobile
+const isMobile = () => typeof window !== 'undefined' && window.innerWidth < 1024;
+
+function BackgroundManager() {
+  const { state } = useGame();
+
+  // Performance mode active on mobile during critical phases
+  const isCriticalPhase = state.room && (
+    state.room.phase === 'playing' ||
+    state.room.phase === 'ai_processing' ||
+    state.room.phase === 'results' ||
+    state.room.phase === 'final'
+  );
+
+  const performanceMode = isMobile() && isCriticalPhase;
+
+  return <WorkOSBackground performanceMode={!!performanceMode} />;
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <WorkOSBackground />
         <GameProvider>
+          <BackgroundManager />
           <GameRouter />
-
         </GameProvider>
         <Toaster />
       </TooltipProvider>

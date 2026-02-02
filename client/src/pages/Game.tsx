@@ -197,9 +197,14 @@ export default function Game() {
     };
   }, []); // EMPTY DEPS = Run only on mount/unmount
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
+
   return (
     <motion.div
-      className={`min-h-screen p-3 overflow-hidden relative text-white font-pixel-text ${shake ? 'animate-shake' : ''}`}
+      className={`min-h-screen text-white p-4 font-pixel-text relative overflow-x-hidden ${shake ? 'animate-shake' : ''}`}
+      initial={isMobile ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 1.05 }}
     >
       <AnimatePresence>
         {showCountdown && (
@@ -379,15 +384,15 @@ export default function Game() {
               <div className="relative z-10 flex flex-col items-center">
                 <motion.div
                   className="relative w-36 h-36 mb-8 flex items-center justify-center"
-                  initial={{ scale: 0.8 }}
-                  animate={{ scale: 1 }}
-                  transition={{ repeat: Infinity, repeatType: "reverse", duration: 1.5 }}
+                  initial={isMobile ? { opacity: 0.8 } : { scale: 0.8 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={isMobile ? { duration: 0.5 } : { repeat: Infinity, repeatType: "reverse", duration: 1.5 }}
                 >
-                  <div className="absolute inset-0 bg-[#7c3aed]/30 rounded-full animate-ping opacity-30" />
+                  {!isMobile && <div className="absolute inset-0 bg-[#7c3aed]/30 rounded-full animate-ping opacity-30" />}
                   <div className="absolute inset-4 bg-gradient-to-tr from-[#7c3aed]/40 to-[#8b5cf6]/40 rounded-full blur-md" />
                   <motion.div
                     className="relative z-10 w-24 h-24 bg-gradient-to-br from-white to-[#faf5ff] rounded-2xl shadow-[0_0_40px_rgba(139,92,246,0.4)] flex items-center justify-center border-4 border-[#4c1d95]"
-                    animate={{ rotate: [0, 5, -5, 0] }}
+                    animate={isMobile ? {} : { rotate: [0, 5, -5, 0] }}
                     transition={{ repeat: Infinity, duration: 2 }}
                   >
                     <Sparkles className="w-12 h-12 text-[#7c3aed]" />
@@ -426,9 +431,9 @@ export default function Game() {
               return (
                 <motion.div
                   key={category}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={isMobile ? { opacity: 0 } : { opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05 }}
+                  transition={isMobile ? { duration: 0.2 } : { delay: i * 0.05 }}
                   className="relative group"
                 >
                   <div className="bg-white border-2 border-[#4c1d95] shadow-[3px_3px_0px_0px_#2e1065] rounded-xl overflow-hidden hover:-translate-y-1 hover:shadow-[5px_5px_0px_0px_#2e1065] transition-all duration-200">

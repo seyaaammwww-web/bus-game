@@ -35,9 +35,14 @@ const purpleGradient = [
     '#5b21b6', '#4c1d95', '#e9d5ff', '#06b6d4', '#22d3ee',
 ];
 
-const WorkOSBackground: React.FC = () => {
+interface WorkOSBackgroundProps {
+    performanceMode?: boolean;
+}
+
+const WorkOSBackground: React.FC<WorkOSBackgroundProps> = ({ performanceMode = false }) => {
     // Generate white stars
     const stars = useMemo(() => {
+        if (performanceMode) return [];
         const generated: Star[] = [];
         for (let i = 0; i < 100; i++) {
             generated.push({
@@ -49,10 +54,11 @@ const WorkOSBackground: React.FC = () => {
             });
         }
         return generated;
-    }, []);
+    }, [performanceMode]);
 
     // Generate MANY micro dots with purple gradient colors
     const microDots = useMemo(() => {
+        if (performanceMode) return [];
         const generated: MicroDot[] = [];
         for (let i = 0; i < 300; i++) {
             generated.push({
@@ -66,10 +72,11 @@ const WorkOSBackground: React.FC = () => {
             });
         }
         return generated;
-    }, []);
+    }, [performanceMode]);
 
     // Generate clouds with RANDOM positions, speeds, and delays
     const clouds = useMemo(() => {
+        if (performanceMode) return [];
         const cloudImages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
         const generated: Cloud[] = [];
 
@@ -89,12 +96,15 @@ const WorkOSBackground: React.FC = () => {
             });
         }
         return generated;
-    }, []);
+    }, [performanceMode]);
 
     return (
-        <div className="workos-background">
+        <div className={`workos-background ${performanceMode ? 'static-mode' : ''}`}>
             {/* Gradient Overlay for depth */}
             <div className="workos-gradient-overlay" />
+
+            {/* Performance Pattern (Only in performance mode) */}
+            {performanceMode && <div className="workos-performance-pattern" />}
 
             {/* Micro Dots Layer - The Art */}
             <div className="workos-micro-dots-container">

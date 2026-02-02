@@ -61,12 +61,14 @@ export function ResultsTable({
                     const isMe = submission.playerId === currentPlayerId;
                     const player = players.find(p => p.id === submission.playerId);
 
+                    const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
+
                     return (
                         <motion.div
                             key={submission.playerId}
-                            initial={{ x: -20, opacity: 0 }}
+                            initial={isMobile ? { opacity: 0 } : { x: -20, opacity: 0 }}
                             animate={{ x: 0, opacity: 1 }}
-                            transition={{ delay: idx * 0.1 }}
+                            transition={isMobile ? { duration: 0.2 } : { delay: idx * 0.1 }}
                             className={cn(
                                 "relative group rounded-xl border-[3px] overflow-hidden transition-all duration-300",
                                 isMe

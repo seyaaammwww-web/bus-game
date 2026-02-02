@@ -118,9 +118,11 @@ export default function Results() {
     };
   }, [isFinal, room.rounds, room.players]);
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
+
   return (
     <div className="min-h-screen p-4 overflow-hidden relative text-white font-pixel-text">
-      <Confetti active={isFinal} />
+      <Confetti active={isFinal} count={isMobile ? 1 : 3} />
       <VotingOverlay />
 
       <div className="max-w-3xl mx-auto relative z-10">
@@ -138,7 +140,7 @@ export default function Results() {
 
         <motion.div
           className="text-center mb-8"
-          initial={{ y: -30, opacity: 0 }}
+          initial={isMobile ? { opacity: 0 } : { y: -30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
         >
           {isFinal ? (
