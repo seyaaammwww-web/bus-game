@@ -249,18 +249,22 @@ export class WildcardService {
         const categoryAnswers = letterData[category];
         if (!categoryAnswers) return false;
 
-        // 1. Exact Match (High Performance)
+        // 1. Exact Match (High Performance) - No fuzzy logic for very short words
         if (categoryAnswers.some(answer => this.normalizeArabic(answer) === normalizedWord)) {
             return true;
         }
 
-        // 2. Advanced Logic: Fuzzy Match (Allow 1 character error)
-        // Optimized check: only check candidates of similar length
-        for (const answer of categoryAnswers) {
-            const normAnswer = this.normalizeArabic(answer);
-            if (Math.abs(normAnswer.length - normalizedWord.length) <= 1) {
-                if (this.levenshtein(normAnswer, normalizedWord) <= 1) {
-                    return true;
+        // 2. Advanced Logic: Fuzzy Match (Allow 1 character error for longer words only)
+        // Strictly avoid fuzzy match on the first letter and keep it for words where a single typo is likely
+        if (normalizedWord.length > 4) {
+            const firstChar = normalizedWord.charAt(0);
+            for (const answer of categoryAnswers) {
+                const normAnswer = this.normalizeArabic(answer);
+                // First letter MUST match exactly, and length must be similar
+                if (normAnswer.charAt(0) === firstChar && Math.abs(normAnswer.length - normalizedWord.length) <= 1) {
+                    if (this.levenshtein(normAnswer, normalizedWord) <= 1) {
+                        return true;
+                    }
                 }
             }
         }

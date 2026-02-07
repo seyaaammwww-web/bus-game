@@ -145,9 +145,6 @@ export default function Game() {
 
   const updateAnswer = (category: string, value: string) => {
     setAnswers(prev => {
-      if (value.length > prev[category].length) {
-        playTypeSound();
-      }
       return { ...prev, [category]: value };
     });
   };
