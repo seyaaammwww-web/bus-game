@@ -262,7 +262,7 @@ export type VoteInput = z.infer<typeof voteSchema>;
 
 // Legacy user types (keeping for compatibility)
 export interface User {
-  id: string;
+  id: number;
   username: string;
   password: string;
 }

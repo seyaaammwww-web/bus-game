@@ -160,50 +160,8 @@ class GameManager {
 
   private validateAnswer(letter: string, category: Category, answer: string): boolean {
     const trimmedAnswer = answer.trim();
-    if (!trimmedAnswer) return false;
-
-    // Check if answer starts with the correct letter (or close variant)
-    const normalizedLetter = this.normalizeArabic(letter);
-    const normalizedAnswer = this.normalizeArabic(trimmedAnswer);
-
-    // Handle "ال" prefix for countries
-    const answerFirstChar = normalizedAnswer.startsWith('ال')
-      ? normalizedAnswer.charAt(2)
-      : normalizedAnswer.charAt(0);
-
-    const letterFirstChar = normalizedLetter.charAt(0);
-
-    // Check if first letter matches (with some tolerance for Arabic variants)
-    const letterVariants: Record<string, string[]> = {
-      'ا': ['ا', 'أ', 'إ', 'آ'],
-      'أ': ['ا', 'أ', 'إ', 'آ'],
-      'إ': ['ا', 'أ', 'إ', 'آ'],
-      'آ': ['ا', 'أ', 'إ', 'آ'],
-      'ه': ['ه', 'ة'],
-      'ة': ['ه', 'ة'],
-      'ي': ['ي', 'ى'],
-      'ى': ['ي', 'ى'],
-    };
-
-    const validFirstChars = letterVariants[letterFirstChar] || [letterFirstChar];
-    const startsWithLetter = validFirstChars.includes(answerFirstChar);
-
-    if (!startsWithLetter) return false;
-
-    // Check against database
-    const letterData = arabicWords[letter];
-    if (!letterData) return true; // If no database entry, accept if starts with letter
-
-    const validWords = letterData[category] || [];
-    if (validWords.length === 0) return true; // If no words for category, accept if starts with letter
-
-    // Check for exact or partial match in database
-    const normalizedValidWords = validWords.map(w => this.normalizeArabic(w));
-    return normalizedValidWords.some(word =>
-      word === normalizedAnswer ||
-      word.includes(normalizedAnswer) ||
-      normalizedAnswer.includes(word)
-    );
+    // Use WildcardService for comprehensive validation
+    return WildcardService.getInstance().validateWord(letter, category, trimmedAnswer);
   }
 
   private checkAndEndRound(room: GameRoom): void {

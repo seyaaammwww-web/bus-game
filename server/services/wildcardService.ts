@@ -53,7 +53,6 @@ export class WildcardService {
             // 3. Fallback relative to CWD
             const candidates = [
                 path.join(process.cwd(), 'server', 'data', filename),
-                path.join(__dirname, 'data', filename),
                 path.join(process.cwd(), 'dist', 'data', filename)
             ];
 

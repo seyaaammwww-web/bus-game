@@ -4,6 +4,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { gameManager } from "./gameManager";
 import { HybridValidator } from "./hybridValidator";
 import { GroqService } from "./services/groqService";
+import { WildcardService } from "./services/wildcardService";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -99,7 +100,7 @@ export async function registerRoutes(
   // Validator metrics endpoint
   app.get('/api/metrics', (_req, res) => {
     res.json({
-      validator: metrics,
+      validator: WildcardService.getInstance().getStats(),
       timestamp: new Date().toISOString()
     });
   });

@@ -2,9 +2,11 @@ import { motion } from 'framer-motion';
 
 interface LetterDisplayProps {
   letter: string;
+  round?: number;
+  totalRounds?: number;
 }
 
-export function LetterDisplay({ letter }: LetterDisplayProps) {
+export function LetterDisplay({ letter, round, totalRounds }: LetterDisplayProps) {
   return (
     <div className="flex flex-col items-center relative z-20">
       <motion.div
@@ -43,6 +45,17 @@ export function LetterDisplay({ letter }: LetterDisplayProps) {
           />
         </div>
       </motion.div>
+
+      {round && totalRounds && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 }}
+          className="absolute -bottom-8 bg-[#4c1d95]/80 px-3 py-1 rounded-full text-xs font-pixel-text text-[#FFFDD1] border border-[#FFFDD1]/30 backdrop-blur-sm"
+        >
+          جولة {round} من {totalRounds}
+        </motion.div>
+      )}
     </div>
   );
 }

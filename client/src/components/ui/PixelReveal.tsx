@@ -44,12 +44,12 @@ export function PixelReveal({
                 initial={{
                     opacity: 0,
                     maskPosition: '0% 212px',
-                    webkitMaskPosition: '0% 212px'
+                    WebkitMaskPosition: '0% 212px'
                 }}
                 animate={isVisible ? {
                     opacity: 1,
                     maskPosition: '0% 0px',
-                    webkitMaskPosition: '0% 0px'
+                    WebkitMaskPosition: '0% 0px'
                 } : {}}
                 transition={{
                     duration: duration,
