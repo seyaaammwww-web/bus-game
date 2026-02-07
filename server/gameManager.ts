@@ -1173,20 +1173,20 @@ class GameManager {
     } catch (error) {
       console.error("Error in calculateScores:", error);
 
-      // FALLBACK: If validation fails, accept "reasonable" answers to prevent game stall
-      console.log(`[Calculate Scores] validation failed, using fallback for ${allAnswers.length} answers.`);
+      // FALLBACK: If validation fails, REJECT all answers to prevent accepting invalid words
+      console.log(`[Calculate Scores] ❌ Validation failed! Rejecting all ${allAnswers.length} answers for safety.`);
 
       round.validatedAnswers = allAnswers.map(item => ({
         playerId: item.playerId,
         playerName: room.players.find(p => p.id === item.playerId)?.name || '',
         category: item.category as Category,
         answer: item.answer,
-        isValid: item.answer.trim().length > 1, // Simple length check
+        isValid: false, // ✅ Reject all on error for safety
         isPendingVote: false,
-        isUnique: false, // Will be calculated in finalizeScores
+        isUnique: false,
         score: 0,
         votes: { accepted: 0, rejected: 0 },
-        reason: 'تم القبول (خطأ في النظام)',
+        reason: 'خطأ في النظام - يرجى المحاولة مرة أخرى',
         isFabricated: false
       }));
 
