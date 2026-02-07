@@ -1,36 +1,14 @@
 class SoundManager {
   private sounds: Map<string, HTMLAudioElement> = new Map();
-  private enabled: boolean = true;
-  private volume: number = 0.5;
+  private enabled: boolean = false; // Disabled by default as per user request
+  private volume: number = 0;
 
   constructor() {
-    this.preload();
+    // No preloading, effectively disabling all sounds
   }
 
   private preload() {
-    const soundFiles = {
-      countdown: 'https://assets.mixkit.co/active_storage/sfx/2567/2567-preview.mp3', // Subtle tick
-      countdownFinal: 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3', // Pop
-      roundStart: 'https://assets.mixkit.co/active_storage/sfx/2581/2581-preview.mp3', // Level up
-      bus: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3', // Achievement
-      freeze: 'https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3',
-      wildcard: 'https://assets.mixkit.co/active_storage/sfx/2580/2580-preview.mp3',
-      banish: 'https://assets.mixkit.co/active_storage/sfx/2573/2573-preview.mp3',
-      submit: 'https://assets.mixkit.co/active_storage/sfx/2567/2567-preview.mp3',
-      click: 'https://assets.mixkit.co/active_storage/sfx/2567/2567-preview.mp3',
-      rush: 'https://assets.mixkit.co/active_storage/sfx/2574/2574-preview.mp3',
-      bonus: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3',
-      win: 'https://assets.mixkit.co/active_storage/sfx/2580/2580-preview.mp3',
-      notification: 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3', // More pleasant notification
-      vote: 'https://assets.mixkit.co/active_storage/sfx/2567/2567-preview.mp3',
-      error: 'https://assets.mixkit.co/active_storage/sfx/2574/2574-preview.mp3' // Clear but not annoying error
-    };
-
-    Object.entries(soundFiles).forEach(([key, src]) => {
-      const audio = new Audio(src);
-      audio.volume = this.volume;
-      this.sounds.set(key, audio);
-    });
+    // Empty per user request to remove all sounds
   }
 
   public play(sound: string) {
