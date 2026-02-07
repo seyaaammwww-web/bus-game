@@ -34,6 +34,8 @@ export default function Lobby() {
     setShowRefereeSelect(false);
   };
 
+  const isMobileView = typeof window !== 'undefined' && window.innerWidth < 1024;
+
   return (
     <div className="min-h-screen p-4 overflow-hidden relative text-white font-pixel-text">
       <div className="max-w-2xl mx-auto relative z-10">
@@ -69,7 +71,7 @@ export default function Lobby() {
         >
           <motion.div
             className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-white to-[#faf5ff] border-[3px] border-[#4c1d95] rounded-full mb-4 shadow-[4px_4px_0_0_#2e1065,_0_0_20px_rgba(139,92,246,0.2)]"
-            animate={{ scale: [1, 1.05, 1] }}
+            animate={isMobileView ? {} : { scale: [1, 1.05, 1] }}
             transition={{ repeat: Infinity, duration: 2 }}
           >
             <Sparkles className="w-6 h-6 text-[#7c3aed]" />
@@ -80,7 +82,7 @@ export default function Lobby() {
         </motion.div>
 
         <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
+          initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.1 }}
         >
@@ -93,14 +95,14 @@ export default function Lobby() {
                   dir="ltr"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  transition={{ type: 'spring', delay: 0.2 }}
+                  transition={{ type: 'spring', stiffness: isMobileView ? 100 : 200, delay: 0.2 }}
                 >
                   {room.code.split('').map((char, i) => (
                     <motion.span
                       key={i}
                       className="w-14 h-16 flex items-center justify-center text-3xl font-bold bg-[#4c1d95] text-white rounded-lg shadow-[4px_4px_0_0_#2e1065,_0_0_10px_rgba(139,92,246,0.3)] border-2 border-[#7c3aed] font-pixel-title"
-                      initial={{ rotateY: 90 }}
-                      animate={{ rotateY: 0 }}
+                      initial={isMobileView ? { opacity: 0 } : { rotateY: 90 }}
+                      animate={isMobileView ? { opacity: 1 } : { rotateY: 0 }}
                       transition={{ delay: 0.3 + i * 0.1 }}
                     >
                       {char}

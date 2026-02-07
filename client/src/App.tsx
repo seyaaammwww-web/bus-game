@@ -47,17 +47,10 @@ const isMobile = () => typeof window !== 'undefined' && window.innerWidth < 1024
 function BackgroundManager() {
   const { state } = useGame();
 
-  // Performance mode active on mobile during critical phases
-  const isCriticalPhase = state.room && (
-    state.room.phase === 'playing' ||
-    state.room.phase === 'ai_processing' ||
-    state.room.phase === 'results' ||
-    state.room.phase === 'final'
-  );
+  // Performance mode active on mobile to save GPU resources
+  const performanceMode = isMobile();
 
-  const performanceMode = isMobile() && isCriticalPhase;
-
-  return <WorkOSBackground performanceMode={!!performanceMode} />;
+  return <WorkOSBackground performanceMode={performanceMode} />;
 }
 
 function App() {
