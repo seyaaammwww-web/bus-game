@@ -22,6 +22,7 @@ export function BusCompleteButton({ onPress, disabled }: BusCompleteButtonProps)
       <Button
         onClick={() => {
           if (disabled) {
+            import('@/lib/sounds').then(({ playErrorSound }) => playErrorSound());
             // Show hint if clicked while not ready
             import('@/hooks/use-toast').then(({ toast }) => {
               toast({

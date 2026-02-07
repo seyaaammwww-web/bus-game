@@ -13,10 +13,11 @@ export function Timer({ timeLeft, isRush }: TimerProps) {
 
   useEffect(() => {
     if (prevTimeRef.current !== timeLeft) {
+      // Play a tick sound every second when time is low
       if (timeLeft <= 5 && timeLeft > 0) {
-        playTimerUrgent();
-      } else if (timeLeft <= 10 && timeLeft > 5) {
-        playTimerWarning();
+        playTimerUrgent(); // Urgent tick
+      } else if (timeLeft <= 15 && timeLeft > 5) {
+        playTimerWarning(); // Standard tick
       }
       prevTimeRef.current = timeLeft;
     }

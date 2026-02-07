@@ -9,20 +9,21 @@ class SoundManager {
 
   private preload() {
     const soundFiles = {
-      countdown: '/sounds/timer.mp3',
-      countdownFinal: '/sounds/whistle.mp3',
-      roundStart: '/sounds/start.mp3',
-      bus: '/sounds/bus_horn.mp3',
-      freeze: '/sounds/ice.mp3',
-      wildcard: '/sounds/magic.mp3',
-      banish: '/sounds/banish.mp3',
-      submit: '/sounds/submit.mp3',
-      click: '/sounds/click.mp3',
-      rush: '/sounds/alarm.mp3',
-      bonus: '/sounds/coin.mp3',
-      win: '/sounds/win.mp3',
-      notification: '/sounds/notification.mp3',
-      vote: '/sounds/click.mp3'
+      countdown: 'https://assets.mixkit.co/active_storage/sfx/2567/2567-preview.mp3', // 8-bit tick
+      countdownFinal: 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3', // 8-bit jump
+      roundStart: 'https://assets.mixkit.co/active_storage/sfx/2581/2581-preview.mp3', // 8-bit level start
+      bus: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3', // 8-bit coin/success
+      freeze: 'https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3', // 8-bit ice/shatter
+      wildcard: 'https://assets.mixkit.co/active_storage/sfx/2580/2580-preview.mp3', // 8-bit power up
+      banish: 'https://assets.mixkit.co/active_storage/sfx/2573/2573-preview.mp3', // 8-bit fail/banish
+      submit: 'https://assets.mixkit.co/active_storage/sfx/2567/2567-preview.mp3', // 8-bit blip
+      click: 'https://assets.mixkit.co/active_storage/sfx/2567/2567-preview.mp3', // 8-bit blip
+      rush: 'https://assets.mixkit.co/active_storage/sfx/2574/2574-preview.mp3', // 8-bit alarm/alert
+      bonus: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3', // 8-bit coin
+      win: 'https://assets.mixkit.co/active_storage/sfx/2580/2580-preview.mp3', // 8-bit fanfare
+      notification: 'https://assets.mixkit.co/active_storage/sfx/2567/2567-preview.mp3',
+      vote: 'https://assets.mixkit.co/active_storage/sfx/2567/2567-preview.mp3',
+      error: 'https://assets.mixkit.co/active_storage/sfx/2573/2573-preview.mp3' // Dedicated error sound
     };
 
     Object.entries(soundFiles).forEach(([key, src]) => {
