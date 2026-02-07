@@ -1110,8 +1110,10 @@ class GameManager {
         let reason = result?.reason || '';
         const isFabricated = false;
 
-        // Override for Wildcard
+        // Override for Wildcard - Accept ANY word if wildcard is used
         if (round.wildcardUsedByPlayerId === item.playerId) {
+          console.log(`[Wildcard] Player ${item.playerId} used wildcard for ${item.category}: ${item.answer}`);
+          isValid = true; // ✅ Wildcard accepts any word
           reason = 'جوكر';
           isPendingVote = false;
         }
@@ -1141,6 +1143,9 @@ class GameManager {
             reason = 'حرف خطأ';
           }
         }
+
+        // Log validation result for debugging
+        console.log(`[Validation] ${item.category}:${item.answer} => isValid:${isValid}, reason:${reason}, wildcard:${round.wildcardUsedByPlayerId === item.playerId}`);
 
         // Add to validated list
         round.validatedAnswers.push({
