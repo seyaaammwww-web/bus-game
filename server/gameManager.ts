@@ -1116,6 +1116,7 @@ class GameManager {
           isPendingVote = false;
         }
 
+
         // Logic: If not in DB (isValid=false), check if it starts with correct letter.
         // If yes -> Check Settings:
         //    - If Voting Enabled -> VOTE
@@ -1131,9 +1132,12 @@ class GameManager {
               hasPendingVotes = true;
             } else {
               // STRICT MODE: Start letter matches, but word not in DB -> INVALID
+              isValid = false; // Explicitly reject
               reason = 'غير موجودة في القاموس';
             }
           } else {
+            // Wrong starting letter
+            isValid = false; // Explicitly reject
             reason = 'حرف خطأ';
           }
         }
