@@ -1,6 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { arabicWords } from '../../shared/arabicWords';
+import { AdvancedNormalizer } from '../utils/AdvancedNormalizer';
+import { SmartToleranceEngine } from '../utils/SmartToleranceEngine';
 
 
 interface WildcardDatabase {
@@ -32,7 +34,13 @@ export class WildcardService {
     private validationCache = new Map<string, boolean>();
     private MAX_CACHE_SIZE = 50000;
 
+    // Advanced validation utilities
+    private normalizer: AdvancedNormalizer;
+    private toleranceEngine: SmartToleranceEngine;
+
     private constructor() {
+        this.normalizer = AdvancedNormalizer.getInstance();
+        this.toleranceEngine = SmartToleranceEngine.getInstance();
         this.loadDatabase();
         this.loadSynonyms();
     }
@@ -149,11 +157,11 @@ export class WildcardService {
     }
 
     /**
-     * Validate a word against the database with smart logic
+     * Validate a word against the database with ADVANCED smart logic
      */
     validateWord(letter: string, category: string, word: string): boolean {
-        // 1. Basic cleaning
-        const normalizedInput = this.normalizeArabic(word);
+        // 1. Basic cleaning using advanced normalizer
+        const normalizedInput = this.normalizer.normalize(word);
         if (!normalizedInput || normalizedInput.length < 2) return false;
 
         // 2. Cache Check (O(1))
@@ -164,26 +172,20 @@ export class WildcardService {
 
         let isValid = false;
 
-        // 3. Strict letter check (must start with letter)
-        const normalizedLetter = this.normalizeArabic(letter);
-        let startsWith = normalizedInput.startsWith(normalizedLetter.charAt(0));
-
-        // Allow "Al" prefix exception
-        if (!startsWith && normalizedInput.startsWith("ال") && normalizedInput.length > 2) {
-            if (normalizedInput.substring(2).startsWith(normalizedLetter.charAt(0))) {
-                startsWith = true;
-            }
+        // 3. Advanced letter check (with article support)
+        if (!this.toleranceEngine.startsWithLetter(word, letter)) {
+            // Cache and return false immediately if doesn't start with letter
+            this.validationCache.set(cacheKey, false);
+            return false;
         }
 
-        if (startsWith) {
-            // 4. Database Check (Direct)
-            if (this.checkDatabase(letter, category, normalizedInput)) {
-                isValid = true;
-            }
-            // 5. Synonyms & Smart Logic
-            else if (category === 'جماد' && this.checkJamadSmart(letter, normalizedInput)) {
-                isValid = true;
-            }
+        // 4. Advanced Database Check with all tolerance rules
+        if (this.checkDatabaseAdvanced(letter, category, word)) {
+            isValid = true;
+        }
+        // 5. Extended Synonyms & Smart Logic (all categories)
+        else if (this.checkSynonymsAdvanced(category, word)) {
+            isValid = true;
         }
 
         // 6. Update Cache
@@ -239,7 +241,10 @@ export class WildcardService {
         return matrix[b.length][a.length];
     }
 
-    private checkDatabase(letter: string, category: string, normalizedWord: string): boolean {
+    /**
+     * Advanced database check using SmartToleranceEngine
+     */
+    private checkDatabaseAdvanced(letter: string, category: string, word: string): boolean {
         const dbKey = this.getDatabaseKey(letter);
         if (!dbKey) return false;
 
@@ -247,43 +252,57 @@ export class WildcardService {
         if (!letterData) return false;
 
         const categoryAnswers = letterData[category];
-        if (!categoryAnswers) return false;
+        if (!categoryAnswers || categoryAnswers.length === 0) return false;
 
-        // 1. Exact Match (High Performance) - No fuzzy logic for very short words
-        if (categoryAnswers.some(answer => this.normalizeArabic(answer) === normalizedWord)) {
-            return true;
-        }
+        // Use SmartToleranceEngine to find matches with ALL tolerance rules:
+        // - Exact match after normalization
+        // - Match with/without "ال" article
+        // - Common spelling variations (يحيى/يحيي, etc.)
+        // - Fuzzy matching for typos (intelligent based on word length)
+        const matches = this.toleranceEngine.findMatches(word, categoryAnswers, category);
 
-        // 2. Advanced Logic: Fuzzy Match (Allow 1 character error for longer words only)
-        // Strictly avoid fuzzy match on the first letter and keep it for words where a single typo is likely
-        if (normalizedWord.length > 4) {
-            const firstChar = normalizedWord.charAt(0);
-            for (const answer of categoryAnswers) {
-                const normAnswer = this.normalizeArabic(answer);
-                // First letter MUST match exactly, and length must be similar
-                if (normAnswer.charAt(0) === firstChar && Math.abs(normAnswer.length - normalizedWord.length) <= 1) {
-                    if (this.levenshtein(normAnswer, normalizedWord) <= 1) {
-                        return true;
-                    }
-                }
-            }
+        return matches.length > 0;
+    }
+
+    /**
+     * Legacy checkDatabase for backward compatibility (now uses advanced version)
+     */
+    private checkDatabase(letter: string, category: string, normalizedWord: string): boolean {
+        return this.checkDatabaseAdvanced(letter, category, normalizedWord);
+    }
+
+    /**
+     * Advanced synonym checking for ALL categories
+     */
+    private checkSynonymsAdvanced(category: string, word: string): boolean {
+        // Check built-in synonyms from SmartToleranceEngine (all categories)
+        // This is automatically handled by toleranceEngine.isMatch() with category parameter
+
+        // Additionally check legacy synonyms.json for 'جماد' category
+        if (category === 'جماد') {
+            return this.checkJamadSmart(word);
         }
 
         return false;
     }
 
-    private checkJamadSmart(letter: string, normalizedWord: string): boolean {
+    /**
+     * Legacy Jamad smart check (enhanced with advanced normalizer)
+     */
+    private checkJamadSmart(word: string): boolean {
+        const normalizedWord = this.normalizer.normalize(word);
+
         // A. Direct Synonyms Check
         for (const [canonical, variants] of Object.entries(this.synonyms.jamad_synonyms)) {
             const allVariants = [canonical, ...variants];
-            if (allVariants.some(v => this.normalizeArabic(v) === normalizedWord)) {
+            if (allVariants.some(v => this.normalizer.areEquivalentWithArticle(v, word))) {
                 return true;
             }
         }
 
         // B. Check Sub-categories (General Knowledge)
         for (const list of Object.values(this.synonyms.jamad_categories)) {
-            if (list.some(item => this.normalizeArabic(item) === normalizedWord)) {
+            if (list.some(item => this.normalizer.areEquivalentWithArticle(item, word))) {
                 return true;
             }
         }
