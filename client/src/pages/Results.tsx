@@ -11,6 +11,7 @@ import { PixelAvatar } from '@/components/ui/PixelAvatar';
 import { RetroQuote } from '@/components/ui/RetroQuote';
 import { LetterDisplay } from '@/components/LetterDisplay';
 import { VotingOverlay } from '@/components/VotingOverlay';
+import { RefereeReviewOverlay } from '@/components/RefereeReviewOverlay';
 import { GameStats } from '@/components/results/GameStats';
 import { AppealDialog } from '@/components/results/AppealDialog';
 import { ResultsTable } from '@/components/results/ResultsTable';
@@ -124,6 +125,7 @@ export default function Results() {
     <div className="min-h-screen p-4 overflow-hidden relative text-white font-pixel-text">
       <Confetti active={isFinal} count={isMobile ? 1 : 3} />
       <VotingOverlay />
+      <RefereeReviewOverlay />
 
       <div className="max-w-3xl mx-auto relative z-10">
         <div className="flex justify-between items-center mb-4">

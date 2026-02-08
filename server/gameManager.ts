@@ -1049,19 +1049,27 @@ class GameManager {
   }
 
   private finishRound(room: GameRoom): void {
-    // Logic to transition to results
+    // Logic to transition to results or referee_review
     let shouldAutoStart = false;
 
     this.mutateRoom(room.code, (draft) => {
       const round = draft.rounds[draft.currentRound];
       round.powerUpUsedInRound = false;
-      draft.phase = 'results';
 
-      if (!draft.refereeId && !draft.settings?.enableVoting) {
+      // Determine next phase based on game mode
+      if (draft.refereeId) {
+        // Referee mode: go to referee_review
+        draft.phase = 'referee_review';
+        draft.nextRoundAt = undefined;
+      } else if (draft.settings?.enableVoting) {
+        // Voting mode: stay in results, players can request votes
+        draft.phase = 'results';
+        draft.nextRoundAt = undefined;
+      } else {
+        // Auto mode: go to results with auto-advance
+        draft.phase = 'results';
         draft.nextRoundAt = Date.now() + 20000;
         shouldAutoStart = true;
-      } else {
-        draft.nextRoundAt = undefined;
       }
     }, "finishRound");
 
@@ -1147,6 +1155,10 @@ class GameManager {
     if (!pInfo) return;
     this.mutateRoom(pInfo.roomId, (draft) => {
       if (draft.refereeId !== pInfo.playerId) return;
+      if (draft.phase !== 'referee_review') return;
+
+      // Transition to results
+      draft.phase = 'results';
       draft.nextRoundAt = Date.now() + 10000;
     }, "refereeApprove");
 
@@ -1218,6 +1230,12 @@ class GameManager {
       if (draft.refereeId === playerInfo.playerId) {
         draft.refereeId = undefined;
         draft.players.forEach(p => p.isReferee = false);
+
+        // If in referee_review, transition to results with auto-advance
+        if (draft.phase === 'referee_review') {
+          draft.phase = 'results';
+          draft.nextRoundAt = Date.now() + 20000;
+        }
       }
 
       draft.players = draft.players.filter(p => p.id !== playerInfo.playerId);
@@ -1259,6 +1277,181 @@ class GameManager {
     }
   }
 
+  // Democratic Voting System
+  requestVote(ws: WebSocket, payload: { category: Category; word: string }): void {
+    const playerInfo = this.players.get(ws);
+    if (!playerInfo) return;
+
+    this.mutateRoom(playerInfo.roomId, (draft) => {
+      if (draft.phase !== 'results') return;
+      if (!draft.settings?.enableVoting) return;
+
+      const player = draft.players.find(p => p.id === playerInfo.playerId);
+      if (!player) return;
+
+      if (!draft.voteQueue) draft.voteQueue = [];
+
+      const alreadyRequested = draft.voteQueue.some(
+        v => v.requesterId === playerInfo.playerId &&
+          v.category === payload.category &&
+          v.word === payload.word
+      );
+      if (alreadyRequested) return;
+
+      if (draft.currentVote &&
+        draft.currentVote.requesterId === playerInfo.playerId &&
+        draft.currentVote.category === payload.category &&
+        draft.currentVote.word === payload.word) {
+        return;
+      }
+
+      const requestId = `vote_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      draft.voteQueue.push({
+        requestId,
+        requesterId: playerInfo.playerId,
+        requesterName: player.name,
+        category: payload.category,
+        word: payload.word
+      });
+
+      if (!draft.currentVote && draft.voteQueue.length > 0) {
+        const nextVote = draft.voteQueue.shift()!;
+        draft.currentVote = {
+          ...nextVote,
+          votes: { yes: 0, no: 0 },
+          voterIds: [],
+          votesDetails: {},
+          startTime: Date.now()
+        };
+        draft.phase = 'voting';
+      }
+    }, "requestVote");
+
+    const room = this.getRoom(playerInfo.roomId);
+    if (room) {
+      this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
+
+      if (room.phase === 'voting' && room.currentVote) {
+        setTimeout(() => {
+          this.resolveVoteTimeout(room.code);
+        }, 30000);
+      }
+    }
+  }
+
+  castDemocraticVote(ws: WebSocket, vote: 'yes' | 'no'): void {
+    const playerInfo = this.players.get(ws);
+    if (!playerInfo) return;
+
+    this.mutateRoom(playerInfo.roomId, (draft) => {
+      if (draft.phase !== 'voting') return;
+      if (!draft.currentVote) return;
+
+      const player = draft.players.find(p => p.id === playerInfo.playerId);
+      if (!player) return;
+
+      if (draft.currentVote.requesterId === playerInfo.playerId) return;
+      if (player.isReferee) return;
+      if (draft.currentVote.voterIds.includes(playerInfo.playerId)) return;
+
+      draft.currentVote.voterIds.push(playerInfo.playerId);
+      if (vote === 'yes') {
+        draft.currentVote.votes.yes++;
+      } else {
+        draft.currentVote.votes.no++;
+      }
+
+      if (draft.currentVote.votesDetails) {
+        draft.currentVote.votesDetails[playerInfo.playerId] = vote;
+      }
+
+      const activePlayers = draft.players.filter(p =>
+        !p.isReferee &&
+        p.id !== draft.currentVote!.requesterId
+      ).length;
+
+      const totalVotes = draft.currentVote.votes.yes + draft.currentVote.votes.no;
+      const majority = Math.ceil(activePlayers / 2);
+
+      if (draft.currentVote.votes.yes >= majority ||
+        draft.currentVote.votes.no >= majority ||
+        totalVotes >= activePlayers) {
+        this.resolveCurrentVote(draft);
+      }
+    }, "castDemocraticVote");
+
+    const room = this.getRoom(playerInfo.roomId);
+    if (room) {
+      this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
+    }
+  }
+
+  private resolveCurrentVote(draft: GameRoom): void {
+    if (!draft.currentVote) return;
+
+    const activePlayers = draft.players.filter(p =>
+      !p.isReferee &&
+      p.id !== draft.currentVote!.requesterId
+    ).length;
+
+    const majority = Math.ceil(activePlayers / 2);
+    const accepted = draft.currentVote.votes.yes >= majority;
+
+    const round = draft.rounds[draft.currentRound];
+    if (round) {
+      const answer = round.validatedAnswers.find(a =>
+        a.playerId === draft.currentVote!.requesterId &&
+        a.category === draft.currentVote!.category &&
+        a.word === draft.currentVote!.word
+      );
+
+      if (answer) {
+        answer.isValid = accepted;
+        answer.reason = accepted ? 'تم قبوله بالتصويت' : 'تم رفضه بالتصويت';
+        answer.isPendingVote = false;
+
+        const player = draft.players.find(p => p.id === answer.playerId);
+        if (player && accepted) {
+          const points = answer.points || 10;
+          player.totalEarnedPoints = (player.totalEarnedPoints || 0) + points;
+        }
+      }
+    }
+
+    if (draft.voteQueue && draft.voteQueue.length > 0) {
+      const nextVote = draft.voteQueue.shift()!;
+      draft.currentVote = {
+        ...nextVote,
+        votes: { yes: 0, no: 0 },
+        voterIds: [],
+        votesDetails: {},
+        startTime: Date.now()
+      };
+    } else {
+      draft.currentVote = null;
+      draft.phase = 'results';
+      draft.nextRoundAt = Date.now() + 20000;
+    }
+  }
+
+  private resolveVoteTimeout(roomCode: string): void {
+    this.mutateRoom(roomCode, (draft) => {
+      if (draft.phase !== 'voting') return;
+      if (!draft.currentVote) return;
+
+      const timeSinceStart = Date.now() - draft.currentVote.startTime;
+      if (timeSinceStart < 30000) return;
+
+      draft.currentVote.votes.no = 999;
+      this.resolveCurrentVote(draft);
+    }, "resolveVoteTimeout");
+
+    const room = this.getRoom(roomCode);
+    if (room) {
+      this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
+    }
+  }
+
   // Router
   handleMessage(ws: WebSocket, message: WSMessage): void {
     // Mapping for simplicity - fully implementing all case switches as per original
@@ -1294,6 +1487,9 @@ class GameManager {
         } else {
           this.appealAnswer(ws, message.payload.playerId, message.payload.category, message.payload.word);
         }
+        break;
+      case 'cast_democratic_vote':
+        this.castDemocraticVote(ws, message.payload.vote);
         break;
       case 'vote_cast':
         this.castDemocraticVote(ws, message.payload);
