@@ -1452,6 +1452,24 @@ class GameManager {
     }
   }
 
+  sendReaction(ws: WebSocket, reactionType: ReactionType): void {
+    const playerInfo = this.players.get(ws);
+    if (!playerInfo) return;
+
+    const reaction = {
+      id: Math.random().toString(36).substr(2, 9),
+      type: reactionType,
+      playerId: playerInfo.playerId,
+      playerName: playerInfo.playerName,
+      timestamp: Date.now()
+    };
+
+    this.broadcastToRoom(playerInfo.roomId, {
+      type: 'reaction_received',
+      payload: { reaction }
+    });
+  }
+
   // Router
   handleMessage(ws: WebSocket, message: WSMessage): void {
     // Mapping for simplicity - fully implementing all case switches as per original
@@ -1478,6 +1496,9 @@ class GameManager {
       case 'activate_powerup':
         if (message.payload.type === 'wildcard') this.activateWildcard(ws);
         else if (message.payload.type === 'banish') this.activateBanish(ws, message.payload.targetPlayerId);
+        break;
+      case 'send_reaction':
+        this.sendReaction(ws, message.payload.reactionType);
         break;
       case 'appeal_answer':
         const pInfo = this.players.get(ws);
