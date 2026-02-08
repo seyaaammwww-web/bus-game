@@ -59,7 +59,7 @@ export function ReactionButtons() {
 
   return (
     <motion.div
-      className="flex gap-4 justify-center items-center py-2"
+      className="flex gap-3 justify-center items-center py-2"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
     >
@@ -81,7 +81,7 @@ export function ReactionButtons() {
             whileTap={{ y: 2, boxShadow: 'none' }}
             onClick={() => handleReaction(type)}
             className={`
-              relative w-12 h-12 rounded-lg
+              relative w-10 h-10 rounded-lg
               ${config.bg}
               border-2 ${config.border}
               ${config.shadow}
@@ -91,7 +91,7 @@ export function ReactionButtons() {
             `}
             data-testid={`button-reaction-${type}`}
           >
-            <Icon className={`w-7 h-7 ${config.text} drop-shadow-sm`} strokeWidth={2.5} />
+            <Icon className={`w-5 h-5 ${config.text} drop-shadow-sm`} strokeWidth={2.5} />
           </motion.button>
         );
       })}
