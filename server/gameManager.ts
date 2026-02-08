@@ -1281,7 +1281,7 @@ class GameManager {
       // User requested "Execute Temporal-Spatial Analysis". 
       // I must include all functional parts or it breaks the game.
       // I will include the missing ones below.
-      case 'start_game': this.startGame(ws); break;
+      case 'time_sync': this.handleTimeSync(ws, message.clientTime); break;
       case 'activate_powerup':
         if (message.payload.type === 'wildcard') this.activateWildcard(ws);
         else if (message.payload.type === 'banish') this.activateBanish(ws, message.payload.targetPlayerId);
