@@ -1,140 +1,342 @@
-import { WildcardService } from '../services/wildcardService';
 
-const service = WildcardService.getInstance();
+import * as fs from 'fs';
+import * as path from 'path';
 
-// HLEE-v2.0: THE MASSIVE INJECTION
-// "Street Dictionary" for Egyptian Bus Game
-const massiveDictionary = {
-    'ا': {
-        'ولد': ['أديب', 'أركان', 'أشهب', 'أصيل', 'أكرم', 'أمجد', 'أنيس', 'أوس', 'إلياس', 'إمام', 'إيهاب', 'أبانوب', 'أثناسيوس', 'إبرام', 'أخنوخ'],
-        'بنت': ['أبرار', 'آثار', 'أريج', 'أزهار', 'أسمهان', 'أشجان', 'أفكار', 'ألحان', 'أماني', 'أمنية', 'أمينة', 'أنيسة', 'إجلال', 'إخلاص', 'إرم', 'إزدهار', 'إعتدال', 'إفتخار', 'إلهام', 'امتثال', 'انتصار', 'انشراح', 'إنصاف', 'إيثار', 'إنجي'],
-        'جماد': ['أجندة', 'أرجوحة', 'أرضية', 'أسطوانة', 'أسكارف', 'أسورة', 'أستيكة', 'أسانسير', 'أقلام', 'ألوان', 'أنتريه', 'أويما', 'أباجورة', 'أبلكاش', 'أتاري', 'أجنا', 'أحبار', 'أختام', 'أدوات', 'أرصفة', 'أزرار', 'أستك'],
-        'حيوان': ['إوزة', 'أروية', 'أطوم', 'أناكوندا', 'أبخص', 'أبوسيف', 'أبومنجل', 'أبوملعقة', 'أرضة', 'أوركس', 'أفعى', 'أسد البحر'],
-        'بلد': ['أذربيجان', 'أرمينيا', 'أريتريا', 'أستونيا', 'أفريقيا الوسطى', 'ألبانيا', 'أندورا', 'أنجولا', 'أوروجواي', 'أوزبكستان', 'أوغندا', 'أوكرانيا', 'أيسلندا', 'أيرلندا', 'أبي دبي', 'أروشم', 'أزمير', 'أريحا', 'أسوان', 'أسيوط', 'أقصر', 'إسكندرية', 'إسماعيلية']
-    },
-    'ب': {
-        'ولد': ['باجس', 'باحث', 'بادئ', 'بادي', 'باز', 'باشا', 'باطن', 'باعث', 'باقر', 'باكير', 'بتال', 'بجاوي', 'بحيص', 'بخيت', 'بدران', 'بدوي', 'بدير', 'بركات', 'برهامي', 'بشير', 'بصري', 'بطرس', 'بكر', 'بلاغ', 'بليغ', 'بندر', 'بهجت', 'بهـاء', 'بياض', 'بيبرس'],
-        'بنت': ['بادية', 'بارعة', 'باسقة', 'باسلة', 'بانة', 'باهرة', 'بتول', 'بثينة', 'بدرية', 'بدوية', 'بديعة', 'برلنتي', 'بركة', 'بشيرة', 'بصيرة', 'بلقيس', 'بليغة', 'بنان', 'بنفسج', 'بهجة', 'بهية', 'بوران', 'بوسي', 'بيان', 'بيلسان'],
-        'جماد': ['برواز', 'براد', 'بانيو', 'بلكونة', 'بوابة', 'بيانو', 'بندقية', 'بنسة', 'بوتاجاز', 'بلاط', 'برطمان', 'بيبسي', 'بطارية', 'بجامة', 'بلوفر', 'بنطلون', 'برنيطة', 'بخور', 'برميل', 'بستم', 'بشكير', 'بشلة', 'بطاقة', 'بكرة', 'بلالين', 'بلسم'],
-        'حيوان': ['ببغاء', 'برغوث', 'برص', 'باشق', 'بلبل', 'بومة', 'بونسير', 'بعوضة', 'بق', 'باندا', 'بطريق', 'بجع', 'بوري', 'بلطي'],
-        'بلد': ['بابليون', 'باكستان', 'بالاو', 'بحرين', 'بربادوس', 'برتغال', 'بروناي', 'بلجيكا', 'بلغاريا', 'بليز', 'بنجلاديش', 'بنما', 'بنين', 'بوتان', 'بوتسوانا', 'بوركينا فاسو', 'بوروندي', 'بولندا', 'بوليفيا', 'بيرو', 'بيجان', 'بنها', 'بلبيس', 'بني سويف']
-    },
-    'ت': {
-        'ولد': ['تاج', 'تالد', 'تامر', 'تحسين', 'تراث', 'تركي', 'تغلب', 'تمار', 'تمام', 'تميم', 'تواب', 'توحيد', 'توفيق', 'تيسير', 'تيم', 'تيمور'],
-        'بنت': ['تالا', 'تانيا', 'تحية', 'تذكار', 'تراث', 'تغريد', 'تقوى', 'تمارة', 'تماضر', 'تهاني', 'تيسير', 'تيماء', 'تالة', 'تولين', 'تيا'],
-        'جماد': ['تابلت', 'تابوت', 'تلفزيون', 'تلفون', 'تمثال', 'تنورة', 'تكييف', 'تلاجة', 'ترابيزة', 'توكة', 'توابل', 'ترمس', 'توتة', 'تياترو', 'تيكيت', 'تليفريك', 'تليفون', 'تلغراف', 'تلسكوب', 'تميمة', 'تنك'],
-        'حيوان': ['تنين', 'تيتل', 'تفة', 'تريسييه', 'تسمان', 'تواتارا', 'ترسة', 'تونا'],
-        'بلد': ['تايوان', 'تنزانيا', 'توجو', 'تونجا', 'تونس', 'تيمور', 'تبريز', 'تكساس', 'تورينو', 'تولوز', 'تل أبيب', 'ترهونة', 'تطوان', 'تبوك']
-    },
-    'ث': {
-        'ولد': ['ثابت', 'ثائر', 'ثروت', 'ثري', 'ثعلب', 'ثقيف', 'ثماد', 'ثمان', 'ثوبان'],
-        'بنت': ['ثراء', 'ثرية', 'ثناء', 'ثنية', 'ثواب', 'ثورة', 'ثومة', 'ثويبة'],
-        'جماد': ['ثلاجة', 'ثريا', 'ثوب', 'ثلج', 'ثرموستات', 'ثقابة', 'ثقالة', 'ثلاثية', 'ثماد'],
-        'حيوان': ['ثعلب', 'ثعبان', 'ثور', 'ثيثل', 'ثهلال'],
-        'بلد': ['ثقيف', 'ثمود', 'ثربان', 'ثادق', 'ثول']
-    },
-    'ج': {
-        'ولد': ['جابر', 'جاد', 'جازم', 'جاسر', 'جاسم', 'جافي', 'جبر', 'جبرتي', 'جبريل', 'جبير', 'جدعان', 'جذيل', 'جرار', 'جرير', 'جعفر', 'جلال', 'جمال', 'جميل', 'جهاد', 'جواد', 'جودة', 'جورج'],
-        'بنت': ['جلنار', 'جليلة', 'جمالات', 'جمانة', 'جميالات', 'جميلة', 'جنات', 'جنان', 'جنفير', 'جهاد', 'جهيراء', 'جواهر', 'جورى', 'جولي', 'جيهان', 'جيجي', 'جنا'],
-        'جماد': ['جاروف', 'جاكت', 'جامع', 'جرس', 'جرادل', 'جراب', 'جركن', 'جزامة', 'جزمة', 'جلباب', 'جلابية', 'جلدة', 'جناح', 'جنزير', 'جنيه', 'جوارب', 'جوانتي', 'جيبة', 'جيتار', 'جبنة', 'جرانيت', 'جير', 'جبس'],
-        'حيوان': ['جاموسة', 'جدي', 'جمل', 'جراد', 'جعراج', 'جندب', 'جرذ', 'جشنة', 'جف', 'جل', 'جلم', 'جمبري', 'جنس', 'جهلول', 'جواد', 'جوارح'],
-        'بلد': ['جابون', 'جامبيا', 'جرينادا', 'جواتيمالا', 'جوام', 'جيانا', 'جيبوتي', 'جيرسي', 'جيزة', 'جرجا', 'جمصة', 'جناكليس']
-    },
-    'ح': {
-        'ولد': ['حاتم', 'حارث', 'حازم', 'حافظ', 'حامد', 'حبيب', 'حجاج', 'حذيفة', 'حربي', 'حسام', 'حسان', 'حسني', 'حسين', 'حفيظ', 'حلمي', 'حمادة', 'حمدي', 'حمزة', 'حمودة', 'حميد', 'حنفي', 'حيدر'],
-        'بنت': ['حبيبة', 'حرية', 'حسناء', 'حسنة', 'حصة', 'حفيظة', 'حلا', 'حليمة', 'حمدية', 'حمسة', 'حنان', 'حنين', 'حواء', 'حورية', 'حياة'],
-        'جماد': ['حزام', 'حبل', 'حلق', 'حلة', 'حصالة', 'حصيرة', 'حقنة', 'حنفية', 'حائط', 'حقيبة', 'حبر', 'حجارة', 'حديد', 'حراب', 'حرير', 'حزام', 'حصير'],
-        'حيوان': ['حرباء', 'حصان', 'حمار', 'حوت', 'حمامة', 'حدأة', 'حلزون', 'حبار', 'حسون', 'حجل', 'حريش', 'حمد', 'حنش', 'حيية'],
-        'بلد': ['حبشة', 'حجاز', 'حديدة', 'حريملاء', 'حسكة', 'حلب', 'حمص', 'حوار', 'حوطة', 'حيفا', 'حلوان']
-    },
-    'خ': {
-        'ولد': ['خالد', 'خال', 'خزاعي', 'خزيمة', 'خشبة', 'خصيب', 'خضر', 'خطاب', 'خلف', 'خليفة', 'خليل', 'خميس', 'خيري', 'خير'],
-        'بنت': ['خاتون', 'خالدة', 'خديجة', 'خزامي', 'خشوع', 'خصوبة', 'خضرة', 'خلود', 'خولة', 'خيرية', 'خيول'],
-        'جماد': ['خاتم', 'خازر', 'خاشوقة', 'خافض', 'خال', 'خام', 'خامة', 'خان', 'خاوية', 'خباية', 'خبز', 'ختاية', 'ختم', 'خدادية', 'خراب', 'خردة', 'خرطوش', 'خرطوم', 'خز', 'خزان', 'خزنة', 'خشب', 'خشبة', 'خلاط', 'خيمة'],
-        'حيوان': ['خروف', 'خرتيت', 'خلد', 'خفاش', 'خنفساء', 'خنزير', 'خيل', 'خطاف', 'خز'],
-        'بلد': ['خارتوم', 'خارجة', 'خان يونس', 'خبر', 'خراسان', 'خريبكة', 'خرطوم', 'خليل', 'خميس مشيط', 'خيبر']
-    },
-    'د': {
-        'ولد': ['دؤوب', 'دائـب', 'دآب', 'داري', 'دالي', 'داني', 'داود', 'دحيح', 'دحيم', 'درباس', 'دري', 'درويش', 'دعيج', 'دلامة', 'دليل', 'دهمان', 'دوس', 'دويدار', 'دياب', 'دينار'],
-        'بنت': ['داليا', 'داليدا', 'دانية', 'درة', 'درية', 'دعاء', 'دلال', 'دليلة', 'دنيا', 'دهب', 'دولت', 'ديانا', 'ديمة', 'دينا'],
-        'جماد': ['دباسة', 'دبوس', 'دراجة', 'دربكة', 'درج', 'درع', 'درفيل', 'دلو', 'دلة', 'دلفة', 'دمبل', 'دكة', 'دولاب', 'دبلة', 'دواء', 'دخان', 'دواية', 'دفتر', 'دبابة', 'دش', 'دف'],
-        'حيوان': ['دب', 'دجاجة', 'دراج', 'درة', 'درفيل', 'دعسوقة', 'دغناش', 'دلفين', 'دودة', 'ديك', 'دب قطبي'],
-        'بلد': ['داكار', 'دالاس', 'دانمارك', 'دبي', 'دجلة', 'دربند', 'درعية', 'درنة', 'دست', 'دشتاب', 'دعاء', 'دمام', 'دمشق', 'دمياط', 'دنقلة', 'دهشور', 'دواسر', 'دوحة', 'دومينيكان']
-    },
-    'ذ': {
-        'ولد': ['ذاكر', 'ذائد', 'ذبيان', 'ذخر', 'ذكر', 'ذكير', 'ذمار', 'ذهني', 'ذؤيب', 'ذياب'],
-        'بنت': ['ذاكرة', 'ذخيرة', 'ذروة', 'ذكاء', 'ذكريات', 'ذكرى', 'ذهب', 'ذهبية'],
-        'جماد': ['ذرة', 'ذراع', 'ذقن', 'ذكرى', 'ذهب', 'ذيل', 'ذخيرة', 'ذبلة'],
-        'حيوان': ['ذئب', 'ذبابة', 'ذعرة', 'ذريرة', 'ذيب'],
-        'بلد': ['ذهبية', 'ذي سفال', 'ذي قار', 'ذمار']
-    },
-    'ر': {
-        'ولد': ['رؤوف', 'رائد', 'رئيف', 'رابح', 'راتب', 'راجح', 'راجي', 'راسم', 'راشد', 'راضي', 'راغب', 'راف', 'رافع', 'رامز', 'رامي', 'راني', 'راهب', 'رأفت', 'رباح', 'ربيع', 'رجائي', 'رجب', 'رزق', 'رستم', 'رسلان', 'رشاد', 'رشدي', 'رشيد', 'رضا', 'رضوان', 'رعد', 'رفعت', 'رفيق', 'رمزي', 'رمضان', 'رنسيس', 'رهيب', 'رياض', 'ريان'],
-        'بنت': ['رئيفة', 'رابعة', 'رابية', 'راجية', 'رازان', 'رازية', 'راغدة', 'رافدة', 'رانيا', 'راوية', 'راية', 'رباب', 'ربى', 'رحاب', 'رحمة', 'رزان', 'رسمية', 'رشا', 'رغد', 'رغدة', 'رفاء', 'رفيدة', 'رقية', 'رنا', 'رندة', 'رنيم', 'رنين', 'رهف', 'رواسي', 'روان', 'روز', 'روزي', 'روضة', 'روعة', 'روميساء', 'رؤى', 'ريا', 'ريتاج', 'ريم', 'ريما', 'ريماس', 'ريناد', 'ريهام'],
-        'جماد': ['راديو', 'راوتر', 'راية', 'ربابة', 'رباط', 'ربع', 'رتينة', 'رحاية', 'رخام', 'رد', 'رداء', 'رسالة', 'رصاص', 'رصيف', 'رضاعة', 'رقعة', 'رف', 'رق', 'رقاقة', 'ركنة', 'رماد', 'رمح', 'رمل', 'رموت', 'رنح', 'رنق', 'رول', 'ريش', 'ريال'],
-        'حيوان': ['راكون', 'رباح', 'رتم', 'رخمة', 'رخم', 'رعاد', 'رعنا', 'ريم', 'رنة', 'روبيان'],
-        'بلد': ['رأس البر', 'رأس الخيمة', 'رأس سدر', 'رأس غارب', 'رام الله', 'رانجون', 'راوند', 'رباط', 'رحاب', 'رحمانية', 'رفح', 'رمادي', 'رماح', 'رملة', 'رمنيا', 'رهوة', 'رونية', 'رواندا', 'روسيا', 'روما', 'رومانيا', 'رياض', 'ريو']
-    },
-    'ز': {
-        'ولد': ['زاخر', 'زاكي', 'زاهي', 'زاهر', 'زايد', 'زبير', 'زجل', 'زغلول', 'زكريا', 'زكي', 'زهدي', 'زهي', 'زهير', 'زياد', 'زيد', 'زيدان', 'زين'],
-        'بنت': ['زاكية', 'زاهية', 'زبيدة', 'زليخة', 'زمردة', 'زمزم', 'زها', 'زهرة', 'زهور', 'زهيرة', 'زينب', 'زينة'],
-        'جماد': ['زاد', 'زالجة', 'زار', 'زاوية', 'زاى', 'زبدية', 'زبدة', 'زبادي', 'زجاج', 'زجاجة', 'زر', 'زرادية', 'زردية', 'زرافة', 'زريبة', 'زعيم', 'زفت', 'زقوم', 'زمزمية', 'زمارة', 'زنبيل', 'زنك', 'زنزانة', 'زهرية', 'زورق', 'زي', 'زيت', 'زينة', 'زير'],
-        'حيوان': ['زرزور', 'زرافة', 'زرق', 'زقزاق', 'زلق', 'زمار', 'زنبور', 'زواحف', 'زيان', 'زيبر'],
-        'بلد': ['زائير', 'زامبيا', 'زقازيق', 'زلفي', 'زمبابوي', 'زنجبار', 'زيورخ', 'زاحم', 'زاخو', 'زرباطية', 'زعفرانية', 'زفتى']
-    },
-    'س': {
-        'ولد': ['سائد', 'ساجد', 'ساجي', 'سارح', 'ساري', 'ساطع', 'ساعي', 'سالم', 'سام', 'سامح', 'سامر', 'سامي', 'ساهد', 'ساهر', 'سايد', 'سبع', 'سبيعي', 'سراج', 'سرحان', 'سرور', 'سري', 'سعد', 'سعدون', 'سعدي', 'سعود', 'سعيد', 'سفيان', 'سقراط', 'سلطان', 'سلمان', 'سلوان', 'سليم', 'سليمان', 'سمعان', 'سمير', 'سنان', 'سهل', 'سهم', 'سيد', 'سيف'],
-        'بنت': ['ساجدة', 'سارة', 'سالي', 'ساندي', 'ساهية', 'سبأ', 'سجى', 'سجدة', 'سحر', 'سعاد', 'سعدية', 'سكينة', 'سلامة', 'سلوى', 'سليمة', 'سما', 'سماح', 'سمارة', 'سمر', 'سمرة', 'سمسمة', 'سمية', 'سميرة', 'سناء', 'سندس', 'سنيورة', 'سهى', 'سهام', 'سهر', 'سهيلة', 'سوزان', 'سوسن', 'سولاف', 'سومة', 'سيرين', 'سيليا', 'سيمون'],
-        'جماد': ['ساعة', 'ساقية', 'ساطور', 'سبحة', 'سبت', 'سبورة', 'ستارة', 'سجادة', 'سخان', 'سرير', 'سطح', 'سطل', 'سكر', 'سكرية', 'سلاكة', 'سلة', 'سلالم', 'سلم', 'سلسلة', 'سماعة', 'سماد', 'سمسمية', 'سنارة', 'سنجة', 'سندان', 'سن', 'سهم', 'سور', 'سوط', 'سيارة', 'سيف', 'سيجارة', 'سيراميك'],
-        'حيوان': ['سحلية', 'سحلاة', 'سرطان', 'سرف', 'سعلوة', 'سلاحف', 'سلحفاة', 'سلق', 'سلوى', 'سمان', 'سمك', 'سنجاب', 'سنق', 'سنور', 'سها', 'سهب', 'سيسي', 'سبع'],
-        'بلد': ['ساحل العاج', 'سان مارينو', 'ساو تومي', 'سخا', 'سريلانكا', 'سعودية', 'سلفادور', 'سلوفاكيا', 'سلوفينيا', 'سنغافورة', 'سنيغال', 'سوازيلاند', 'سودان', 'سوريا', 'سورينام', 'سويسرا', 'سويد', 'سيشيل', 'سيراليون', 'سيناء', 'سيوة', 'سخنة', 'سوسة', 'سامراء', 'سمنود', 'سوهاج']
-    },
-    'ش': {
-        'ولد': ['شادى', 'شاذلي', 'شارح', 'شاطر', 'شافعي', 'شافي', 'شاكر', 'شامل', 'شاهين', 'شاهر', 'شباب', 'شبلي', 'شبيب', 'شداد', 'شديد', 'شراحيل', 'شرح', 'شرف', 'شريف', 'شعبان', 'شعلان', 'شعيب', 'شفيع', 'شفيق', 'شكري', 'شكيب', 'شمس', 'شهاب', 'شهدان', 'شهير', 'شوقي', 'شوكت', 'شيبوب', 'شيخ'],
-        'بنت': ['شادية', 'شارقة', 'شاكيرة', 'شامة', 'شاهندة', 'شريهان', 'شريفة', 'شرين', 'شروق', 'شعاع', 'شفيقة', 'شمس', 'شهد', 'شهيرة', 'شوق', 'شيماء', 'شيرين'],
-        'جماد': ['شاذر', 'شاش', 'شاشة', 'شاطور', 'شاكوش', 'شال', 'شامبو', 'شبشب', 'شبكة', 'شباك', 'شجرة', 'شخشيخة', 'شراب', 'شراعة', 'شريط', 'شرشوبة', 'شرفة', 'شرنقة', 'شعار', 'شعلة', 'شغ', 'شفاط', 'شفشق', 'شفرة', 'شكمان', 'شكارة', 'شماعة', 'شمسية', 'شمع', 'شمعة', 'شنطة', 'شنب', 'شهاد', 'شوكة', 'شواية', 'شوال', 'شورت', 'شي'],
-        'حيوان': ['شاذي', 'شاهين', 'شبل', 'شرغوف', 'شفنين', 'شقائق', 'شقر', 'شقي', 'شمبانزي', 'شمشول', 'شمط', 'شنقب', 'شهيم', 'شيهم', 'شي'],
-        'بلد': ['شارقة', 'شام', 'شبين', 'شرقية', 'شرم الشيخ', 'شط العرب', 'شلاتين', 'شمال سيناء', 'شبرا', 'شتوتجارت', 'شفشاون', 'شقراء', 'شنغهاي', 'شيكاغو', 'شيشان', 'شيلي']
-    },
-    'ص': {
-        'ولد': ['صابر', 'صاحب', 'صادق', 'صارم', 'صاعد', 'صافي', 'صالح', 'صبِري', 'صباح', 'صبحي', 'صخر', 'صدقي', 'صدام', 'صديق', 'صفوت', 'صفوان', 'صقر', 'صلاح', 'صهيب'],
-        'بنت': ['صابرة', 'صابرين', 'صافي', 'صافيناز', 'صافية', 'صبا', 'صباح', 'صبرية', 'صحوة', 'صدفة', 'صفا', 'صفاء', 'صفية', 'صمود', 'مودة'],
-        'جماد': ['صاروخ', 'صامولة', 'صالون', 'صباع', 'صبغة', 'صخر', 'صدار', 'صدفة', 'صرة', 'صفيحة', 'صفارة', 'صقر', 'صك', 'صليب', 'صمغ', 'صنارة', 'صندوق', 'صنج', 'صندل', 'صنوبر', 'صهريج', 'صورة', 'صولجان', 'صوف', 'صومعة', 'صينية', 'صابونة'],
-        'حيوان': ['صقر', 'صراصر', 'صرصار', 'صد', 'صرد', 'صع', 'صفارد', 'صقر', 'صل', 'صن', 'صوار', 'صي'],
-        'بلد': ['صربيا', 'صعيد', 'صغد', 'صفاقس', 'صلالة', 'صومال', 'صين', 'صبيا', 'صنعاء', 'صيدا', 'صوفيا']
-    },
-    'ط': {
-        'ولد': ['طارق', 'طالب', 'طامح', 'طاهر', 'طايع', 'طب', 'طحنون', 'طرف', 'طراد', 'طريف', 'طلال', 'طلعت', 'طليع', 'طه', 'طوبار', 'طيب'],
-        'بنت': ['طاهرة', 'طرب', 'طفيل', 'طلة', 'طموح', 'طيف', 'طيبة'],
-        'جماد': ['طاحونة', 'طاسة', 'طاقية', 'طاولة', 'طبلة', 'طبع', 'طبق', 'طحة', 'طربوش', 'طرحة', 'طرز', 'طرشي', 'طشت', 'طعام', 'طقم', 'طم', 'طمبور', 'طمي', 'طوابع', 'طوق', 'طوب', 'طائرة', 'طائرة ورق', 'طباشير', 'طبلية', 'طرد', 'طفاية'],
-        'حيوان': ['طاووس', 'طائر', 'طب', 'طلي', 'طم', 'طهر', 'طيطوى', 'طيور'],
-        'بلد': ['طاجكستان', 'طائف', 'طبرجل', 'طبرية', 'طرابلس', 'طرح', 'طريف', 'طشقند', 'طنطا', 'طنجة', 'طوكيو', 'طهران', 'طوال']
+// --- Types ---
+interface WildcardDatabase {
+    [letter: string]: {
+        [category: string]: string[];
+    };
+}
+
+const DB_PATH = path.join(process.cwd(), 'server/data/clean_wildcardDatabase.json');
+
+// --- Normalizer ---
+function normalizeArabic(text: string): string {
+    if (!text) return '';
+    let normalized = text.trim();
+    normalized = normalized.replace(/[\u064B-\u065F\u0670]/g, '');
+    normalized = normalized.replace(/[أإآٱ]/g, 'ا');
+    normalized = normalized.replace(/ة/g, 'ه');
+    normalized = normalized.replace(/ى/g, 'ي');
+    normalized = normalized.replace(/[ءؤئ]/g, 'ا');
+    normalized = normalized.replace(/[^\u0600-\u06FF\s]/g, '');
+    return normalized;
+}
+
+function isValidWord(word: string): boolean {
+    if (!word) return false;
+    if (word.length < 2 || word.length > 30) return false;
+    if (word.startsWith('قائمة')) return false;
+    if (word.startsWith('تصنيف')) return false;
+    if (word.startsWith('بوابة')) return false;
+    if (word.includes('(')) return false;
+    return true;
+}
+
+// --- Fetcher with Pagination ---
+async function fetchSparqlPaginated(baseQuery: string, label: string, category: string, database: WildcardDatabase) {
+    console.log(`\n🚀 Fetching: ${label}...`);
+
+    const BATCH_SIZE = 500;
+    let offset = 0;
+    let totalAdded = 0;
+    let hasMore = true;
+
+    while (hasMore && offset < 10000) { // Max 10k per query
+        const paginatedQuery = `${baseQuery} LIMIT ${BATCH_SIZE} OFFSET ${offset}`;
+        const url = `https://query.wikidata.org/sparql?query=${encodeURIComponent(paginatedQuery)}&format=json`;
+
+        try {
+            const res = await fetch(url, {
+                headers: {
+                    'Accept': 'application/json',
+                    'User-Agent': 'EgyptianBusGame/MassiveExpansion'
+                }
+            });
+
+            if (!res.ok) {
+                if (res.status === 429) {
+                    await new Promise(r => setTimeout(r, 5000));
+                    continue;
+                }
+                break;
+            }
+
+            const data: any = await res.json();
+            const results = data.results.bindings.map((b: any) => b.label.value);
+
+            if (results.length === 0) {
+                hasMore = false;
+            } else {
+                const added = processWords(results, category, database);
+                totalAdded += added;
+                console.log(`   Batch ${offset}: +${added} words`);
+                offset += BATCH_SIZE;
+                await new Promise(r => setTimeout(r, 500));
+            }
+
+        } catch (e: any) {
+            console.error(`   Error:`, e.message);
+            break;
+        }
     }
-};
+    console.log(`✅ ${label}: Total +${totalAdded}`);
+    return totalAdded;
+}
 
-async function massiveInjection() {
-    console.log("🌊 HLEE-v2.0: Starting Massive Vocabulary Injection Sequence...");
-    console.log("=============================================================");
+async function fetchWikipedia(categoryName: string): Promise<string[]> {
+    const results: string[] = [];
+    let continueToken: string | null = null;
+    const baseUrl = 'https://ar.wikipedia.org/w/api.php';
 
-    let addedCount = 0;
+    try {
+        do {
+            const params = new URLSearchParams({
+                action: 'query',
+                list: 'categorymembers',
+                cmtitle: categoryName,
+                format: 'json',
+                cmlimit: '500',
+                origin: '*'
+            });
+            if (continueToken) params.append('cmcontinue', continueToken);
 
-    for (const [letter, categories] of Object.entries(massiveDictionary)) {
-        for (const [category, words] of Object.entries(categories)) {
-            // Remap Plant to Inanimate dynamically
-            const targetCategory = category === 'نبات' ? 'جماد' : category;
+            const res = await fetch(`${baseUrl}?${params.toString()}`);
+            const data: any = await res.json();
 
-            for (const word of words) {
-                // service.addWord returns true if word was new, false if existed
-                const success = service.addWord(letter, targetCategory, word);
-                if (success) addedCount++;
+            if (data.query && data.query.categorymembers) {
+                const titles = data.query.categorymembers.map((m: any) => m.title);
+                results.push(...titles);
+            }
+
+            continueToken = data.continue ? data.continue.cmcontinue : null;
+            await new Promise(r => setTimeout(r, 200));
+
+        } while (continueToken && results.length < 2000);
+        return results;
+    } catch (e) {
+        return [];
+    }
+}
+
+// --- Main ---
+
+async function main() {
+    console.log('='.repeat(60));
+    console.log('🚀 MASSIVE DATABASE EXPANSION - ALL CATEGORIES');
+    console.log('='.repeat(60));
+
+    let database: WildcardDatabase = {};
+    if (fs.existsSync(DB_PATH)) {
+        database = JSON.parse(fs.readFileSync(DB_PATH, 'utf-8'));
+    }
+
+    let globalAdded = 0;
+
+    // ========== BOYS (ولد) ==========
+    console.log('\n📘 EXPANDING: BOYS (ولد)');
+    globalAdded += await fetchSparqlPaginated(
+        `SELECT DISTINCT ?label WHERE { ?item wdt:P31 wd:Q12308941. ?item rdfs:label ?label. FILTER(LANG(?label) = "ar") }`,
+        'Male Names (Wikidata)',
+        'ولد',
+        database
+    );
+
+    // ========== GIRLS (بنت) ==========
+    console.log('\n📗 EXPANDING: GIRLS (بنت)');
+    globalAdded += await fetchSparqlPaginated(
+        `SELECT DISTINCT ?label WHERE { ?item wdt:P31 wd:Q11879590. ?item rdfs:label ?label. FILTER(LANG(?label) = "ar") }`,
+        'Female Names (Wikidata)',
+        'بنت',
+        database
+    );
+
+    // ========== ANIMALS (حيوان) ==========
+    console.log('\n🦁 EXPANDING: ANIMALS (حيوان)');
+
+    // Mammals
+    globalAdded += await fetchSparqlPaginated(
+        `SELECT DISTINCT ?label WHERE { ?item wdt:P279* wd:Q7377. ?item rdfs:label ?label. FILTER(LANG(?label) = "ar") }`,
+        'Mammals',
+        'حيوان',
+        database
+    );
+
+    // Birds
+    globalAdded += await fetchSparqlPaginated(
+        `SELECT DISTINCT ?label WHERE { ?item wdt:P279* wd:Q5113. ?item rdfs:label ?label. FILTER(LANG(?label) = "ar") }`,
+        'Birds',
+        'حيوان',
+        database
+    );
+
+    // Fish
+    globalAdded += await fetchSparqlPaginated(
+        `SELECT DISTINCT ?label WHERE { ?item wdt:P279* wd:Q152. ?item rdfs:label ?label. FILTER(LANG(?label) = "ar") }`,
+        'Fish',
+        'حيوان',
+        database
+    );
+
+    // Reptiles
+    globalAdded += await fetchSparqlPaginated(
+        `SELECT DISTINCT ?label WHERE { ?item wdt:P279* wd:Q10811. ?item rdfs:label ?label. FILTER(LANG(?label) = "ar") }`,
+        'Reptiles',
+        'حيوان',
+        database
+    );
+
+    // Insects
+    globalAdded += await fetchSparqlPaginated(
+        `SELECT DISTINCT ?label WHERE { ?item wdt:P279* wd:Q1390. ?item rdfs:label ?label. FILTER(LANG(?label) = "ar") }`,
+        'Insects',
+        'حيوان',
+        database
+    );
+
+    // ========== INANIMATE (جماد) ==========
+    console.log('\n🏺 EXPANDING: INANIMATE (جماد)');
+
+    // Tools
+    globalAdded += await fetchSparqlPaginated(
+        `SELECT DISTINCT ?label WHERE { ?item wdt:P279* wd:Q39546. ?item rdfs:label ?label. FILTER(LANG(?label) = "ar") }`,
+        'Tools',
+        'جماد',
+        database
+    );
+
+    // Vehicles
+    globalAdded += await fetchSparqlPaginated(
+        `SELECT DISTINCT ?label WHERE { ?item wdt:P279* wd:Q42889. ?item rdfs:label ?label. FILTER(LANG(?label) = "ar") }`,
+        'Vehicles',
+        'جماد',
+        database
+    );
+
+    // Clothing
+    globalAdded += await fetchSparqlPaginated(
+        `SELECT DISTINCT ?label WHERE { ?item wdt:P279* wd:Q11460. ?item rdfs:label ?label. FILTER(LANG(?label) = "ar") }`,
+        'Clothing',
+        'جماد',
+        database
+    );
+
+    // Furniture
+    globalAdded += await fetchSparqlPaginated(
+        `SELECT DISTINCT ?label WHERE { ?item wdt:P279* wd:Q14745. ?item rdfs:label ?label. FILTER(LANG(?label) = "ar") }`,
+        'Furniture',
+        'جماد',
+        database
+    );
+
+    // Musical Instruments
+    globalAdded += await fetchSparqlPaginated(
+        `SELECT DISTINCT ?label WHERE { ?item wdt:P279* wd:Q34379. ?item rdfs:label ?label. FILTER(LANG(?label) = "ar") }`,
+        'Musical Instruments',
+        'جماد',
+        database
+    );
+
+    // Electronics/Devices
+    globalAdded += await fetchSparqlPaginated(
+        `SELECT DISTINCT ?label WHERE { ?item wdt:P279* wd:Q1183543. ?item rdfs:label ?label. FILTER(LANG(?label) = "ar") }`,
+        'Devices',
+        'جماد',
+        database
+    );
+
+    // ========== COUNTRIES/CITIES (بلد) ==========
+    console.log('\n🌍 EXPANDING: COUNTRIES/CITIES (بلد)');
+
+    // Countries
+    globalAdded += await fetchSparqlPaginated(
+        `SELECT DISTINCT ?label WHERE { ?item wdt:P31 wd:Q6256. ?item rdfs:label ?label. FILTER(LANG(?label) = "ar") }`,
+        'Countries',
+        'بلد',
+        database
+    );
+
+    // Cities > 10k population (MORE coverage)
+    globalAdded += await fetchSparqlPaginated(
+        `SELECT DISTINCT ?label WHERE { ?item wdt:P31/wdt:P279* wd:Q515; wdt:P1082 ?pop. FILTER(?pop > 10000). ?item rdfs:label ?label. FILTER(LANG(?label) = "ar") }`,
+        'Cities (>10k)',
+        'بلد',
+        database
+    );
+
+    // Wikipedia Categories for MORE coverage
+    console.log('\n📚 Adding Wikipedia Categories...');
+    const wikiCategories = [
+        { cat: 'تصنيف:مدن_مصر', target: 'بلد' },
+        { cat: 'تصنيف:محافظات_مصر', target: 'بلد' },
+        { cat: 'تصنيف:مدن_السعودية', target: 'بلد' },
+        { cat: 'تصنيف:مدن_المغرب', target: 'بلد' },
+        { cat: 'تصنيف:مدن_الجزائر', target: 'بلد' },
+        { cat: 'تصنيف:ثدييات', target: 'حيوان' },
+        { cat: 'تصنيف:طيور', target: 'حيوان' },
+        { cat: 'تصنيف:أسماك', target: 'حيوان' }
+    ];
+
+    for (const { cat, target } of wikiCategories) {
+        const words = await fetchWikipedia(cat);
+        const added = processWords(words, target, database);
+        console.log(`   ${cat}: +${added}`);
+        globalAdded += added;
+    }
+
+    // Final Save
+    console.log('\n💾 Saving database...');
+    for (const letter in database) {
+        for (const cat in database[letter]) {
+            database[letter][cat] = [...new Set(database[letter][cat])].sort();
+        }
+    }
+    fs.writeFileSync(DB_PATH, JSON.stringify(database, null, 2), 'utf-8');
+
+    console.log('\n' + '='.repeat(60));
+    console.log(`🎉 EXPANSION COMPLETE!`);
+    console.log(`Total New Words Added: ${globalAdded}`);
+
+    // Final Stats
+    const stats: Record<string, number> = {};
+    for (const letter in database) {
+        for (const cat in database[letter]) {
+            stats[cat] = (stats[cat] || 0) + database[letter][cat].length;
+        }
+    }
+    console.log('\n📊 FINAL DATABASE STATISTICS:');
+    Object.entries(stats).sort(([, a], [, b]) => b - a).forEach(([k, v]) => {
+        console.log(`   ${k}: ${v.toLocaleString()} words`);
+    });
+    console.log('='.repeat(60));
+}
+
+function processWords(rawWords: string[], category: string, database: WildcardDatabase): number {
+    let added = 0;
+    for (const raw of rawWords) {
+        let word = raw;
+        if (word.includes('(')) word = word.split('(')[0];
+        const parts = word.split(/[،\/,]/);
+
+        for (let p of parts) {
+            p = p.trim();
+            if (!isValidWord(p)) continue;
+
+            const firstLetter = normalizeArabic(p.charAt(0));
+            if (!database[firstLetter]) database[firstLetter] = {};
+            if (!database[firstLetter][category]) database[firstLetter][category] = [];
+
+            const list = database[firstLetter][category];
+            const normalizedItem = normalizeArabic(p);
+
+            if (!list.some(existing => normalizeArabic(existing) === normalizedItem)) {
+                list.push(p);
+                added++;
             }
         }
     }
-
-    console.log("=============================================================");
-    console.log(`✅ MASSIVE INJECTION COMPLETE.`);
-    console.log(`📊 Added ${addedCount} NEW words to the database.`);
-    console.log("=============================================================");
+    return added;
 }
 
-massiveInjection();
+main().catch(console.error);
