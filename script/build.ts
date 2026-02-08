@@ -57,8 +57,6 @@ async function buildAll() {
     },
     minify: true,
     external: externals,
-    minify: true,
-    external: externals,
     logLevel: "info",
   });
 
