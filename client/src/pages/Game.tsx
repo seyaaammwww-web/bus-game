@@ -402,42 +402,50 @@ export default function Game() {
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-[60] bg-[#0f0a1f]/98 backdrop-blur-xl flex flex-col items-center justify-center p-4 overflow-hidden"
             >
-              <div className="relative z-10 flex flex-col items-center">
+              <div className="relative z-10 flex flex-col items-center max-w-md w-full">
+
+                {/* Decorative Egyptian Border/Frame */}
+                <div className="absolute inset-0 border-[6px] border-[#fbbf24] rounded-3xl opacity-20 pointer-events-none" />
+                <div className="absolute -inset-1 border-[2px] border-[#d97706] rounded-[26px] opacity-40 pointer-events-none" />
+
                 <motion.div
-                  className="relative w-36 h-36 mb-8 flex items-center justify-center"
+                  className="relative w-40 h-40 mb-8 flex items-center justify-center"
                   initial={isMobile ? { opacity: 0.8 } : { scale: 0.8 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={isMobile ? { duration: 0.5 } : { repeat: Infinity, repeatType: "reverse", duration: 1.5 }}
                 >
-                  {!isMobile && <div className="absolute inset-0 bg-[#7c3aed]/30 rounded-full animate-ping opacity-30" />}
-                  <div className="absolute inset-4 bg-gradient-to-tr from-[#7c3aed]/40 to-[#8b5cf6]/40 rounded-full blur-md" />
+                  <div className="absolute inset-0 bg-[#fbbf24]/20 rounded-full animate-ping opacity-30" />
+                  <div className="absolute inset-4 bg-gradient-to-tr from-[#fbbf24]/30 to-[#d97706]/30 rounded-full blur-md" />
+
                   <motion.div
-                    className="relative z-10 w-24 h-24 bg-gradient-to-br from-white to-[#faf5ff] rounded-2xl shadow-[0_0_40px_rgba(139,92,246,0.4)] flex items-center justify-center border-4 border-[#4c1d95]"
-                    animate={isMobile ? {} : { rotate: [0, 5, -5, 0] }}
-                    transition={{ repeat: Infinity, duration: 2 }}
+                    className="relative z-10 w-28 h-28 bg-gradient-to-br from-[#451a03] to-[#78350f] rounded-2xl shadow-[0_0_40px_rgba(251,191,36,0.4)] flex items-center justify-center border-4 border-[#fbbf24]"
+                    animate={{ rotate: [0, 5, -5, 0] }}
+                    transition={{ repeat: Infinity, duration: 3 }}
                   >
-                    <Sparkles className="w-12 h-12 text-[#7c3aed]" />
+                    {/* Eye of Horus or Sphinx Icon (using Eye as placeholder for 'Review') */}
+                    <Eye className="w-14 h-14 text-[#fbbf24]" />
                   </motion.div>
                 </motion.div>
 
                 <motion.h2
-                  className="text-5xl font-pixel-title text-white mb-4"
+                  className="text-4xl md:text-5xl font-pixel-title text-transparent bg-clip-text bg-gradient-to-b from-[#fbbf24] to-[#d97706] mb-6 drop-shadow-sm filter"
+                  style={{ textShadow: '0px 4px 0px #451a03' }}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
-                  جاري المراجعة...
+                  جاري الحكم...
                 </motion.h2>
 
-                <div className="h-8 overflow-hidden relative w-72 text-center">
+                <div className="h-12 overflow-hidden relative w-full text-center bg-[#451a03]/50 border-2 border-[#78350f] rounded-xl flex items-center justify-center">
                   <motion.div
-                    animate={{ y: [-30, 0, -30] }}
-                    transition={{ duration: 4, repeat: Infinity, times: [0, 0.2, 1] }}
-                    className="flex flex-col gap-3 font-pixel-text text-xl"
+                    animate={{ y: [-48, 0, -48] }}
+                    transition={{ duration: 5, repeat: Infinity, times: [0, 0.15, 1] }}
+                    className="flex flex-col gap-0 font-pixel-text text-xl"
                   >
-                    <span className="text-[#e9d5ff] font-bold">نتأكد من الإجابات... 🧐</span>
-                    <span className="text-[#e9d5ff] font-bold">نحسب النقاط... 🔢</span>
-                    <span className="text-[#e9d5ff] font-bold">نبحث عن الهبد... 🤔</span>
-                    <span className="text-[#e9d5ff] font-bold">نجهز النتائج... 🏆</span>
+                    <div className="h-12 flex items-center justify-center"><span className="text-[#fbbf24]">نوزن الكلمات بميزان العدل ⚖️</span></div>
+                    <div className="h-12 flex items-center justify-center"><span className="text-[#fbbf24]">نتفحص المخطوطات القديمة 📜</span></div>
+                    <div className="h-12 flex items-center justify-center"><span className="text-[#fbbf24]">نبحث عن الحكمة في الإجابات 🧠</span></div>
+                    <div className="h-12 flex items-center justify-center"><span className="text-[#fbbf24]">نستشير الآلهة القديمة 🏛️</span></div>
                   </motion.div>
                 </div>
               </div>

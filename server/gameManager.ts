@@ -1089,7 +1089,14 @@ class GameManager {
       }
 
       if (updatedRoom.currentRound >= updatedRoom.totalRounds - 1 && !updatedRoom.refereeId) {
-        this.handleGameEnd(updatedRoom);
+        // DELAY closing the game so players can see the last round results
+        setTimeout(() => {
+          // Check if game is still in results phase to avoid double trigger or race conditions
+          const currentRoom = this.getRoom(updatedRoom.code);
+          if (currentRoom && currentRoom.phase === 'results') {
+            this.handleGameEnd(currentRoom);
+          }
+        }, 20000); // 20 seconds delay, same as next round delay
       }
     }
   }
@@ -1531,8 +1538,7 @@ class GameManager {
       const round = draft.rounds[draft.currentRound];
       // Logic from original...
       if (player && round && !player.usedPowerUps.wildcard && player.totalEarnedPoints >= 600) {
-        player.totalEarnedPoints -= 600;
-        player.score -= 600;
+        // Points are NOT deducted, only checked
         player.usedPowerUps.wildcard = true;
         round.wildcardUsedByPlayerId = player.id;
         // Note: Actual wildcard answers generation typically needs external service call.
@@ -1557,8 +1563,7 @@ class GameManager {
     this.mutateRoom(pInfo.roomId, (draft) => {
       const player = draft.players.find(p => p.id === pInfo.playerId);
       if (player && player.totalEarnedPoints >= 350) {
-        player.totalEarnedPoints -= 350;
-        player.score -= 350;
+        // Points are NOT deducted, only checked
         player.usedPowerUps.banish = true;
         const round = draft.rounds[draft.currentRound];
         round.banishedPlayerId = targetId;

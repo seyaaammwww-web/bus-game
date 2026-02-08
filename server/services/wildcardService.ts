@@ -144,9 +144,31 @@ export class WildcardService {
             const used = this.usedAnswers.get(usedKey)!;
             let availableAnswers = categoryAnswers.filter(ans => !used.has(ans));
 
+            // Advanced Filtering for Quality
+            // 1. No spaces (single words only)
+            // 2. No starting numbers
+            // 3. Reasonable length
+            // 4. No special chars meant for explanations (parentheses)
+            availableAnswers = availableAnswers.filter(a =>
+                !a.includes(' ') &&
+                !/^\d/.test(a) &&
+                a.length <= 15 &&
+                !a.includes('(')
+            );
+
             if (availableAnswers.length === 0) {
+                // Relax filter if too strict? Or just recycle?
+                // Try recycling original list first
                 used.clear();
-                availableAnswers = categoryAnswers;
+                availableAnswers = categoryAnswers.filter(a =>
+                    !a.includes(' ') &&
+                    !/^\d/.test(a)
+                );
+
+                // If still empty, fall back to anything
+                if (availableAnswers.length === 0) {
+                    availableAnswers = categoryAnswers;
+                }
             }
 
             const randomAnswer = availableAnswers[Math.floor(Math.random() * availableAnswers.length)];
