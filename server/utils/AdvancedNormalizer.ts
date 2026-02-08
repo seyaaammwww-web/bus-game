@@ -228,4 +228,25 @@ export class AdvancedNormalizer {
 
         return false;
     }
+    /**
+     * Generate a "Phonetic Skeleton" for the word based on Egyptian Arabic pronunciation.
+     * This maps sound-alike letters to a single representative character.
+     */
+    getPhoneticSkeleton(word: string): string {
+        let normalized = this.normalize(word);
+
+        // Map of substitutions for Egyptian Dialect
+        // Order matters for some overlapping cases
+        return normalized
+            .replace(/[أإآاىةه]/g, 'A') // All vowels/silent ends -> A
+            .replace(/[ي]/g, 'Y')       // Yaa -> Y
+            .replace(/[قك]/g, 'K')      // Qaf/Kaf -> K (often swapped in dialect)
+            .replace(/[ذزظ]/g, 'Z')     // Dhal/Zay/Zah -> Z
+            .replace(/[ثسص]/g, 'S')     // Tha/Seen/Sad -> S
+            .replace(/[طت]/g, 'T')      // Tah/Taa -> T
+            .replace(/[ضد]/g, 'D')      // Dad/Dal -> D
+            .replace(/[جغ]/g, 'G')      // Jeem/Ghain -> G (approximate, often Jeem is G in Egypt)
+            .replace(/\s+/g, '')        // Remove spaces for skeleton
+            .toUpperCase();
+    }
 }

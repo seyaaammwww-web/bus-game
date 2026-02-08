@@ -126,34 +126,39 @@ export class SmartToleranceEngine {
     /**
      * Advanced fuzzy matching with smart rules
      */
+    /**
+     * Advanced fuzzy matching with smart rules (Levenshtein + Phonetic)
+     */
     isFuzzyMatch(word1: string, word2: string): boolean {
         const norm1 = this.normalizer.normalize(word1);
         const norm2 = this.normalizer.normalize(word2);
 
-        // Must have similar length
-        const lengthDiff = Math.abs(norm1.length - norm2.length);
-        if (lengthDiff > 2) return false;
+        // 0. Length sanity check (must be somewhat similar)
+        if (Math.abs(norm1.length - norm2.length) > 3) return false;
 
-        // First character must match (after removing article)
-        const word1WithoutArticle = this.normalizer.removeArticle(word1);
-        const word2WithoutArticle = this.normalizer.removeArticle(word2);
+        // 1. Phonetic Skeleton Match (Sound-Alike) -- High Confidence
+        // "ثعبان" (Th3ban) vs "سعبان" (S3ban) -> S3BAN vs S3BAN
+        const skel1 = this.normalizer.getPhoneticSkeleton(word1);
+        const skel2 = this.normalizer.getPhoneticSkeleton(word2);
 
-        if (word1WithoutArticle.charAt(0) !== word2WithoutArticle.charAt(0)) {
-            return false;
+        if (skel1 === skel2) {
+            // Ensure length difference isn't wildly off (e.g. "كتب" vs "كاتب" might have same skeleton KTB-ish if vowels ignored, relying on specific mapping)
+            // Our mapping keeps long vowels as 'A', so KTB vs KATB -> KTB vs KATB (different).
+            // But "ذرة" (ZRA) vs "زرة" (ZRA) -> Match.
+            return true;
         }
 
-        // Calculate Levenshtein distance
+        // 2. Levenshtein Distance (Typo Correction) -- Medium Confidence
         const distance = this.levenshteinDistance(norm1, norm2);
+        const maxLength = Math.max(norm1.length, norm2.length);
 
-        // Allow different error tolerance based on word length
-        if (norm1.length <= 3) {
-            return distance === 0; // No errors for very short words
-        } else if (norm1.length <= 5) {
-            return distance <= 1; // 1 error for short words
-        } else if (norm1.length <= 8) {
-            return distance <= 2; // 2 errors for medium words
+        // Strictness based on length (Tuned via Project MIRROR Verification)
+        if (maxLength <= 4) {
+            return distance === 0; // Exact match only for short words (<= 4 chars)
+        } else if (maxLength <= 7) {
+            return distance <= 1; // 1 error for medium words (5-7 chars)
         } else {
-            return distance <= 3; // 3 errors for long words
+            return distance <= 2; // 2 errors for long words (> 7 chars)
         }
     }
 
