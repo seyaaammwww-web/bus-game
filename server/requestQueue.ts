@@ -9,6 +9,7 @@ interface QueuedRequest<T> {
   resolve: (value: T) => void;
   reject: (reason?: any) => void;
   timestamp: number;
+  timeout?: NodeJS.Timeout;
 }
 
 export class SmartQueue {
@@ -16,6 +17,7 @@ export class SmartQueue {
   private processing = 0;
   private maxConcurrent: number;
   private processInterval: number; // ms بين المعالجة
+  private MAX_QUEUE_SIZE = 1000; // Backpressure limit
   private metrics = {
     totalProcessed: 0,
     totalQueued: 0,
@@ -33,13 +35,23 @@ export class SmartQueue {
    * أضف مهمة للطابور
    */
   async add<T>(task: () => Promise<T>): Promise<T> {
+    // Backpressure: Reject if queue is full
+    if (this.queue.length >= this.MAX_QUEUE_SIZE) {
+      throw new Error(`Queue full (${this.MAX_QUEUE_SIZE} items). Server overloaded - please retry later.`);
+    }
+
     return new Promise((resolve, reject) => {
       const request: QueuedRequest<T> = {
         id: Math.random().toString(36),
         task,
         resolve,
         reject,
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        timeout: setTimeout(() => {
+          reject(new Error('Request timeout after 30s'));
+          const index = this.queue.indexOf(request);
+          if (index !== -1) this.queue.splice(index, 1);
+        }, 30000)
       };
 
       this.queue.push(request);
@@ -71,11 +83,14 @@ export class SmartQueue {
     }
 
     try {
+      // Clear timeout since we're processing now
+      if (request.timeout) clearTimeout(request.timeout);
+
       const waitTime = Date.now() - request.timestamp;
       this.metrics.totalProcessed++;
-      
+
       // تحديث متوسط وقت الانتظار
-      this.metrics.averageWaitTime = 
+      this.metrics.averageWaitTime =
         (this.metrics.averageWaitTime * (this.metrics.totalProcessed - 1) + waitTime) / this.metrics.totalProcessed;
 
       const result = await request.task();
@@ -84,7 +99,7 @@ export class SmartQueue {
       request.reject(error);
     } finally {
       this.processing--;
-      
+
       // معالجة الطلب التالي
       if (this.queue.length > 0) {
         setTimeout(() => this.processNext(), this.processInterval);
@@ -99,7 +114,7 @@ export class SmartQueue {
       currentQueueSize: this.queue.length,
       processingCount: this.processing,
       uptimeSeconds: Math.floor(uptime / 1000),
-      throughputPerSecond: this.metrics.totalProcessed > 0 
+      throughputPerSecond: this.metrics.totalProcessed > 0
         ? (this.metrics.totalProcessed / (uptime / 1000)).toFixed(2)
         : '0'
     };

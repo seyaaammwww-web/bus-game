@@ -1,6 +1,7 @@
 import { WildcardService } from './services/wildcardService';
 import type { Category } from '@shared/schema';
 import dotenv from "dotenv";
+import { SeededRNG } from './utils/reliability';
 
 dotenv.config();
 
@@ -19,8 +20,8 @@ export class HybridValidator {
   private static instance: HybridValidator;
 
   private cache = new Map<string, CacheEntry>();
-  private maxCacheSize = 10000;
-  private cacheTTL = 24 * 60 * 60 * 1000; // 24 hours
+  // private maxCacheSize = 10000;
+  // private cacheTTL = 24 * 60 * 60 * 1000; 
 
   private metrics = {
     totalValidations: 0,
@@ -42,11 +43,11 @@ export class HybridValidator {
   }
 
   /**
-   * Validate a single word.
+   * Validate a single word with optional seed for deterministic behavior.
    * If valid: Returns true.
    * If invalid: Logs to suggestions.json and returns false.
    */
-  async validate(letter: string, category: Category, answer: string): Promise<ValidationResult> {
+  async validate(letter: string, category: Category, answer: string, seed?: number): Promise<ValidationResult> {
     this.metrics.totalValidations++;
 
     // Quick cleaning
@@ -55,7 +56,7 @@ export class HybridValidator {
       return { isValid: false, reason: 'Too short', source: 'heuristic' };
     }
 
-    // 1. Check Local DB
+    // 1. Check Local DB (Deterministic by definition of static DB)
     const isValid = WildcardService.getInstance().validateWord(letter, category, trimmed);
 
     if (isValid) {
@@ -63,7 +64,17 @@ export class HybridValidator {
       return { isValid: true, reason: 'Found in Database', source: 'database' };
     }
 
-    // 2. Not found? LOG IT for review!
+    // 2. Not found? 
+    // If we had a probabilistic fallback, we would use seed here.
+    // For now, we just Log and Fail.
+
+    // SCOP-v3.5: If we were to use AI simulation or Fuzzing here, we'd use SeededRNG.
+    if (seed !== undefined) {
+      const rng = new SeededRNG(seed + answer.length);
+      // usage example: if (rng.next() > 0.99) ... random miracle approval?
+      // keeping it strict for now.
+    }
+
     WildcardService.getInstance().logSuggestion(letter, category, trimmed);
     this.metrics.failsLogged++;
 
@@ -76,15 +87,21 @@ export class HybridValidator {
 
   /**
    * Validate a batch of words.
+   * Accepts a shared seed for the batch (usually derived from room+round).
    */
   async validateBatch(
-    items: Array<{ playerId: string, category: Category, letter: string, answer: string }>
+    items: Array<{ playerId: string, category: Category, letter: string, answer: string }>,
+    seed?: number
   ): Promise<Map<string, ValidationResult>> {
     const results = new Map<string, ValidationResult>();
 
+    // Using the seed, we could shuffle order or effect processing, but validation should be independent.
+    // We pass the seed down to individual validate calls if needed.
+
     for (const item of items) {
       const key = `${item.playerId}:${item.category}`;
-      const result = await this.validate(item.letter, item.category, item.answer);
+      const itemSeed = seed ? seed + item.playerId.charCodeAt(0) : undefined;
+      const result = await this.validate(item.letter, item.category, item.answer, itemSeed);
       results.set(key, result);
     }
 

@@ -188,9 +188,16 @@ export class WildcardService {
             isValid = true;
         }
 
-        // 6. Update Cache
+        // 6. Update Cache with LRU eviction
         if (this.validationCache.size >= this.MAX_CACHE_SIZE) {
-            this.validationCache.clear(); // Simple eviction strategy
+            // LRU eviction: Remove oldest 25% when full
+            const entriesToRemove = Math.floor(this.MAX_CACHE_SIZE * 0.25);
+            const iterator = this.validationCache.keys();
+            for (let i = 0; i < entriesToRemove; i++) {
+                const key = iterator.next().value;
+                if (key) this.validationCache.delete(key);
+            }
+            console.log(`[Cache] Evicted ${entriesToRemove} oldest entries (LRU)`);
         }
         this.validationCache.set(cacheKey, isValid);
 

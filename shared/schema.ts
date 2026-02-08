@@ -92,6 +92,7 @@ export interface ValidatedAnswer {
   isFabricated?: boolean;
   isPendingVote?: boolean;
   voterIds?: string[]; // Track who voted to prevent double voting
+  voterSet?: Set<string>; // O(1) lookup for atomic vote checking
 }
 
 // Round state

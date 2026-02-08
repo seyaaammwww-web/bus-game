@@ -159,33 +159,36 @@ export class SmartToleranceEngine {
 
     /**
      * Calculate Levenshtein distance between two strings
+     * Optimized with single-row algorithm and early exits
      */
-    private levenshteinDistance(str1: string, str2: string): number {
+    private levenshteinDistance(str1: string, str2: string, maxDistance: number = 3): number {
         const len1 = str1.length;
         const len2 = str2.length;
 
-        // Create matrix
-        const matrix: number[][] = Array(len2 + 1)
-            .fill(null)
-            .map(() => Array(len1 + 1).fill(0));
+        // Early exit if length difference exceeds max distance
+        if (Math.abs(len1 - len2) > maxDistance) return maxDistance + 1;
 
-        // Initialize first row and column
-        for (let i = 0; i <= len1; i++) matrix[0][i] = i;
-        for (let j = 0; j <= len2; j++) matrix[j][0] = j;
+        // Use single-row optimization (O(n) space instead of O(n²))
+        let prevRow = Array(len1 + 1).fill(0).map((_, i) => i);
 
-        // Fill matrix
         for (let j = 1; j <= len2; j++) {
+            let currRow = [j];
             for (let i = 1; i <= len1; i++) {
                 const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
-                matrix[j][i] = Math.min(
-                    matrix[j - 1][i] + 1,      // deletion
-                    matrix[j][i - 1] + 1,      // insertion
-                    matrix[j - 1][i - 1] + cost // substitution
+                currRow[i] = Math.min(
+                    prevRow[i] + 1,      // deletion
+                    currRow[i - 1] + 1,  // insertion
+                    prevRow[i - 1] + cost // substitution
                 );
             }
+
+            // Early exit if all values exceed max distance
+            if (Math.min(...currRow) > maxDistance) return maxDistance + 1;
+
+            prevRow = currRow;
         }
 
-        return matrix[len2][len1];
+        return prevRow[len1];
     }
 
     /**
