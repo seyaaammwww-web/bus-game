@@ -15,7 +15,6 @@ interface PlayerCardProps {
 export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank }: PlayerCardProps) {
   return (
     <motion.div
-      layout
       className={cn(
         "aspect-square flex flex-col items-center justify-center gap-1 rounded-xl border-[3px] p-2 relative transition-all bg-white shadow-[4px_4px_0_0_rgba(0,0,0,0.1)]",
         // Ready state (Green border)
