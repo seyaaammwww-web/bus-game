@@ -949,8 +949,8 @@ class GameManager {
 
       // Wallet Update
       player.powerUps = {
-        wildcard: player.usedPowerUps.wildcard ? 0 : Math.floor((player.totalEarnedPoints || 0) / 600),
-        banish: player.usedPowerUps.banish ? 0 : Math.floor((player.totalEarnedPoints || 0) / 350),
+        wildcard: player.usedPowerUps.wildcard ? 0 : Math.floor((player.totalEarnedPoints || 0) / 200),
+        banish: player.usedPowerUps.banish ? 0 : Math.floor((player.totalEarnedPoints || 0) / 400),
         hint: 0,
         steal: 0
       };
@@ -1543,11 +1543,19 @@ class GameManager {
     this.mutateRoom(pInfo.roomId, (draft) => {
       const player = draft.players.find(p => p.id === pInfo.playerId);
       const round = draft.rounds[draft.currentRound];
+
+      // Check if any power-up already used this round
+      if (round && round.powerUpUsedInRound) {
+        throw new Error('تم استخدام مساعدة في هذه الجولة بالفعل');
+      }
+
       // Logic from original...
-      if (player && round && !player.usedPowerUps.wildcard && player.totalEarnedPoints >= 600) {
+      if (player && round && !player.usedPowerUps.wildcard && player.totalEarnedPoints >= 200) {
         // Points are NOT deducted, only checked
         player.usedPowerUps.wildcard = true;
         round.wildcardUsedByPlayerId = player.id;
+        round.powerUpUsedInRound = true; // Mark round as having power-up used
+
         // Note: Actual wildcard answers generation typically needs external service call.
         // We'll trust the validation logic to accept anything for this player.
         // But we need to Fill the submissions!
@@ -1569,11 +1577,19 @@ class GameManager {
     if (!pInfo) return;
     this.mutateRoom(pInfo.roomId, (draft) => {
       const player = draft.players.find(p => p.id === pInfo.playerId);
-      if (player && player.totalEarnedPoints >= 350) {
+      const round = draft.rounds[draft.currentRound];
+
+      // Check if any power-up already used this round
+      if (round && round.powerUpUsedInRound) {
+        throw new Error('تم استخدام مساعدة في هذه الجولة بالفعل');
+      }
+
+      if (player && player.totalEarnedPoints >= 400) {
         // Points are NOT deducted, only checked
         player.usedPowerUps.banish = true;
-        const round = draft.rounds[draft.currentRound];
         round.banishedPlayerId = targetId;
+        round.banishedByPlayerId = player.id;
+        round.powerUpUsedInRound = true; // Mark round as having power-up used
       }
     }, "activateBanish");
     const room = this.getRoom(pInfo.roomId);

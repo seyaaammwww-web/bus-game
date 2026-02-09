@@ -66,13 +66,13 @@ export function Tutorial({ onClose }: TutorialProps) {
                     <div className="bg-red-50 p-3 rounded-lg border-2 border-red-200 text-center">
                         <Skull className="w-8 h-8 text-red-500 mx-auto mb-2" />
                         <h4 className="font-bold text-red-700">الطرد (Banish)</h4>
-                        <p className="text-xs text-red-600 font-bold my-1">350 نقطة</p>
+                        <p className="text-xs text-red-600 font-bold my-1">400 نقطة</p>
                         <p className="text-[10px] text-red-500">جمد خصمك وامنعهم من الكتابة لجولة!</p>
                     </div>
                     <div className="bg-purple-50 p-3 rounded-lg border-2 border-purple-200 text-center">
                         <Sparkles className="w-8 h-8 text-purple-500 mx-auto mb-2" />
                         <h4 className="font-bold text-purple-700">الجوكر (Wildcard)</h4>
-                        <p className="text-xs text-purple-600 font-bold my-1">600 نقطة</p>
+                        <p className="text-xs text-purple-600 font-bold my-1">200 نقطة</p>
                         <p className="text-[10px] text-purple-500">الكمبيوتر هيحللك الجولة كلها صح!</p>
                     </div>
                 </div>
