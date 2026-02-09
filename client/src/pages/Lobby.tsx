@@ -256,7 +256,6 @@ export default function Lobby() {
                   </motion.div>
                 )}
               </AnimatePresence>
-*/}
 
               <AnimatePresence>
                 <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
