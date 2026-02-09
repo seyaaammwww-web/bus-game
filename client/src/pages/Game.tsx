@@ -207,7 +207,7 @@ export default function Game() {
 
   return (
     <motion.div
-      className={`min-h-screen text-white p-4 font-pixel-text relative overflow-x-hidden ${shake ? 'animate-shake' : ''}`}
+      className={`min-h-screen text-white p-4 font-pixel-text relative overflow-x-hidden md:flex md:items-center ${shake ? 'animate-shake' : ''}`}
       initial={isMobile ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 1.05 }}
@@ -250,7 +250,7 @@ export default function Game() {
         )}
       </AnimatePresence>
 
-      <div className="max-w-5xl mx-auto relative z-10 px-4">
+      <div className="max-w-5xl mx-auto relative z-10 px-4 w-full">
         {/* Mobile Header: Clean Standard Layout (Exit - Letter - Timer) */}
         <motion.div
           className="flex flex-col gap-2 mb-4 relative z-10 md:hidden"

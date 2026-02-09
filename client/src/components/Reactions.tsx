@@ -3,6 +3,7 @@ import { ThumbsUp, Clapperboard, Laugh, Flame, Heart } from 'lucide-react';
 import { useGame } from '@/lib/gameContext';
 import { type ReactionType, reactionTypes } from '@shared/schema';
 import { playReactionSound } from '@/lib/sounds';
+import { useState, useEffect } from 'react';
 
 // Use Clapperboard as a placeholder for Clap if HandMetal isn't quite right, 
 // OR just use HandMetal but style it. Let's stick to the mapped icons but style them.
@@ -47,6 +48,12 @@ const reactionConfig: Record<ReactionType, { bg: string; border: string; text: s
     text: 'text-white',
     shadow: 'shadow-[0_4px_0_0_#be185d]',
   },
+};
+
+// Detect mobile device
+const isMobile = () => {
+  if (typeof window === 'undefined') return false;
+  return window.innerWidth < 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 };
 
 export function ReactionButtons() {
@@ -101,16 +108,56 @@ export function ReactionButtons() {
 
 export function ReactionDisplay() {
   const { reactions } = useGame();
+  const [mobile, setMobile] = useState(false);
+
+  useEffect(() => {
+    setMobile(isMobile());
+    const handleResize = () => setMobile(isMobile());
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
     <div className="fixed bottom-24 left-0 right-0 pointer-events-none z-[100] flex flex-col items-center">
-      <AnimatePresence mode="popLayout">
+      <AnimatePresence>
         {reactions.map((reaction) => {
           const config = reactionConfig[reaction.type];
           const Icon = reactionIcons[reaction.type];
           // Use a deterministic offset based on reaction ID to scatter them slightly
           const randomX = (parseInt(reaction.id.slice(-2), 36) % 200) - 100;
 
+          // Mobile: simpler, faster animation
+          if (mobile) {
+            return (
+              <motion.div
+                key={reaction.id}
+                className="absolute bottom-0"
+                initial={{ opacity: 0, y: 0, x: randomX, scale: 0.8 }}
+                animate={{
+                  opacity: [0, 1, 0],
+                  y: -200,
+                  scale: 1
+                }}
+                transition={{ duration: 1.5, ease: "easeOut" }}
+              >
+                <div
+                  className={`
+                    flex items-center gap-2 px-3 py-1.5 rounded-lg
+                    ${config.bg}
+                    border-2 ${config.border}
+                    shadow-lg
+                  `}
+                >
+                  <Icon className={`w-5 h-5 ${config.text}`} strokeWidth={2.5} />
+                  <span className={`text-xs font-bold ${config.text} font-pixel-text leading-none`}>
+                    {reaction.playerName}
+                  </span>
+                </div>
+              </motion.div>
+            );
+          }
+
+          // Desktop: full animation
           return (
             <motion.div
               key={reaction.id}
@@ -123,7 +170,6 @@ export function ReactionDisplay() {
                 scale: 1
               }}
               transition={{ duration: 2, ease: "easeOut" }}
-              layout
             >
               <div
                 className={`
