@@ -155,8 +155,8 @@ export default function Lobby() {
               </motion.span>
             </div>
             <div className="space-y-3">
+              {/* 
               <div className="grid grid-cols-2 gap-3 mb-4">
-                {/* Voting Toggle */}
                 <Button
                   variant="outline"
                   onClick={() => isHost && updateSettings({ enableVoting: !room.settings?.enableVoting })}
@@ -184,7 +184,6 @@ export default function Lobby() {
                   </div>
                 </Button>
 
-                {/* Referee Selection */}
                 <Button
                   variant="outline"
                   onClick={() => isHost && setShowRefereeSelect(!showRefereeSelect)}
@@ -213,7 +212,6 @@ export default function Lobby() {
                 </Button>
               </div>
 
-              {/* Referee Selection Panel (Expandable) */}
               <AnimatePresence>
                 {showRefereeSelect && isHost && (
                   <motion.div
@@ -257,6 +255,7 @@ export default function Lobby() {
                   </motion.div>
                 )}
               </AnimatePresence>
+*/}
 
               <AnimatePresence>
                 <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
