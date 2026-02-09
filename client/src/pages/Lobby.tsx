@@ -155,62 +155,58 @@ export default function Lobby() {
               </motion.span>
             </div>
             <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="flex gap-4 mb-4 justify-center">
                 {/* Voting Toggle */}
-                <Button
-                  variant="outline"
+                <button
                   onClick={() => isHost && updateSettings({ enableVoting: !room.settings?.enableVoting })}
                   disabled={!isHost}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-2 h-auto aspect-square p-2 border-2 rounded-xl transition-all relative overflow-hidden",
+                    "w-32 h-32 flex flex-col items-center justify-center gap-2 rounded-xl border-2 transition-all bg-white relative",
                     room.settings?.enableVoting
-                      ? "bg-[#7c3aed]/5 border-[#7c3aed] shadow-[2px_2px_0_0_#4c1d95]"
-                      : "bg-white border-gray-200 opacity-60 hover:opacity-100"
+                      ? "border-[#7c3aed] bg-[#7c3aed]/5 shadow-[0_0_15px_rgba(124,58,237,0.3)]"
+                      : "border-gray-200 text-gray-400 hover:border-gray-300",
+                    !isHost && "opacity-80 cursor-default"
                   )}
                 >
                   <div className={cn(
-                    "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors",
+                    "w-12 h-12 rounded-full flex items-center justify-center border-2 text-xl",
                     room.settings?.enableVoting ? "bg-[#7c3aed] border-[#5b21b6] text-white" : "bg-gray-100 border-gray-300 text-gray-400"
                   )}>
-                    <Users className="w-5 h-5" />
+                    <Users className="w-6 h-6" />
                   </div>
-                  <div className="text-center">
-                    <p className={cn("font-bold text-xs font-pixel-text leading-tight", room.settings?.enableVoting ? "text-[#4c1d95]" : "text-gray-500")}>
-                      التحكيم
-                    </p>
-                    <p className="text-[10px] text-gray-400 mt-0.5 font-pixel-text">
-                      {room.settings?.enableVoting ? 'تـصويت' : 'ديمقراطي'}
-                    </p>
-                  </div>
-                </Button>
+                  <span className={cn("font-bold text-sm font-pixel-text", room.settings?.enableVoting ? "text-[#4c1d95]" : "text-gray-500")}>
+                    التحكيم
+                  </span>
+                  <span className="text-[10px] font-pixel-text text-gray-400">
+                    {room.settings?.enableVoting ? 'ديمقراطي' : 'معطل'}
+                  </span>
+                </button>
 
                 {/* Referee Selection */}
-                <Button
-                  variant="outline"
+                <button
                   onClick={() => isHost && setShowRefereeSelect(!showRefereeSelect)}
                   disabled={!isHost}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-2 h-auto aspect-square p-2 border-2 rounded-xl transition-all relative overflow-hidden",
+                    "w-32 h-32 flex flex-col items-center justify-center gap-2 rounded-xl border-2 transition-all bg-white relative",
                     referee
-                      ? "bg-[#7c3aed]/5 border-[#7c3aed] shadow-[2px_2px_0_0_#4c1d95]"
-                      : "bg-white border-gray-200 opacity-60 hover:opacity-100"
+                      ? "border-[#7c3aed] bg-[#7c3aed]/5 shadow-[0_0_15px_rgba(124,58,237,0.3)]"
+                      : "border-gray-200 text-gray-400 hover:border-gray-300",
+                    !isHost && "opacity-80 cursor-default"
                   )}
                 >
                   <div className={cn(
-                    "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors",
+                    "w-12 h-12 rounded-full flex items-center justify-center border-2 text-xl",
                     referee ? "bg-[#7c3aed] border-[#5b21b6] text-white" : "bg-gray-100 border-gray-300 text-gray-400"
                   )}>
-                    <Shield className="w-5 h-5" />
+                    <Shield className="w-6 h-6" />
                   </div>
-                  <div className="text-center">
-                    <p className={cn("font-bold text-xs font-pixel-text leading-tight", referee ? "text-[#4c1d95]" : "text-gray-500")}>
-                      الحكم
-                    </p>
-                    <p className="text-[10px] text-gray-400 mt-0.5 font-pixel-text truncate max-w-[80px]">
-                      {referee ? referee.name : 'اختر'}
-                    </p>
-                  </div>
-                </Button>
+                  <span className={cn("font-bold text-sm font-pixel-text", referee ? "text-[#4c1d95]" : "text-gray-500")}>
+                    الحكم
+                  </span>
+                  <span className="text-[10px] font-pixel-text text-gray-400 max-w-[80px] truncate">
+                    {referee ? referee.name : 'اختر حكم'}
+                  </span>
+                </button>
               </div>
 
               <AnimatePresence>
