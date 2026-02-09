@@ -1089,8 +1089,9 @@ class GameManager {
         }, 20000);
       }
 
-      if (updatedRoom.currentRound >= updatedRoom.totalRounds - 1 && !updatedRoom.refereeId) {
+      if (updatedRoom.currentRound >= updatedRoom.totalRounds - 1 && !updatedRoom.refereeId && !updatedRoom.settings?.enableVoting) {
         // DELAY closing the game so players can see the last round results
+        // Only auto-end if NOT in voting mode (voting mode requires manual host advance)
         setTimeout(() => {
           // Check if game is still in results phase to avoid double trigger or race conditions
           const currentRoom = this.getRoom(updatedRoom.code);
@@ -1190,7 +1191,12 @@ class GameManager {
     const roomRead = this.getRoom(pInfo.roomId);
     if (!roomRead || !roomRead.players.find(p => p.id === pInfo.playerId)?.isHost) return;
 
-    this.startNextRound(roomRead);
+    // Check if this is the last round - if so, end the game instead of starting next round
+    if (roomRead.currentRound >= roomRead.totalRounds - 1) {
+      this.handleGameEnd(roomRead);
+    } else {
+      this.startNextRound(roomRead);
+    }
   }
 
   playAgain(ws: WebSocket): void {
