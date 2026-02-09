@@ -251,7 +251,7 @@ export default function Lobby() {
                               referee?.id === player.id ? "bg-[#7c3aed] text-white hover:bg-[#6d28d9] hover:text-white border-[#5b21b6]" : "bg-white text-gray-700 border-gray-200"
                             )}
                           >
-                            <span className="w-5 h-5 bg-black/10 rounded flex items-center justify-center text-[10px]">{player.name[0]}</span>
+                            <span className="w-5 h-5 bg-black/10 rounded flex items-center justify-center text-[10px]">{player.name?.charAt(0).toUpperCase() || '?'}</span>
                             <span className="truncate">{player.name}</span>
                           </Button>
                         ))}
