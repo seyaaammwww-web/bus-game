@@ -395,7 +395,8 @@ export default function Game() {
         />
 
         <AnimatePresence>
-          {room.phase === 'ai_processing' && (
+          {/* Removed AI processing screen - direct transition to results */}
+          {false && room.phase === 'ai_processing' && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}

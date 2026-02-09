@@ -702,7 +702,8 @@ class GameManager {
           });
         }
       }
-      draft.phase = 'ai_processing';
+      // Skip ai_processing phase - go directly to results
+      // draft.phase = 'ai_processing';
     }, "endRound_Prepare");
 
     const room = this.getRoom(roomCode);
