@@ -155,66 +155,65 @@ export default function Lobby() {
               </motion.span>
             </div>
             <div className="space-y-3">
-              {/* Game Mode Selection (Voting / Referee) */}
-              {/* 
-              <div className="grid grid-cols-2 gap-3 mb-2">
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                {/* Voting Toggle */}
                 <Button
                   variant="outline"
                   onClick={() => isHost && updateSettings({ enableVoting: !room.settings?.enableVoting })}
                   disabled={!isHost}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-2 h-auto aspect-square p-2 border-[3px] rounded-xl transition-all relative overflow-hidden",
+                    "flex flex-row items-center justify-start gap-3 h-auto p-3 border-2 rounded-xl transition-all relative overflow-hidden",
                     room.settings?.enableVoting
-                      ? "bg-[#7c3aed]/5 border-[#7c3aed]"
+                      ? "bg-[#7c3aed]/5 border-[#7c3aed] shadow-[2px_2px_0_0_#4c1d95]"
                       : "bg-white border-gray-200 opacity-60 hover:opacity-100"
                   )}
                 >
                   <div className={cn(
-                    "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors",
+                    "w-10 h-10 rounded-lg flex items-center justify-center border-2 shrink-0",
                     room.settings?.enableVoting ? "bg-[#7c3aed] border-[#5b21b6] text-white" : "bg-gray-100 border-gray-300 text-gray-400"
                   )}>
                     <Users className="w-5 h-5" />
                   </div>
-                  <div className="text-center">
+                  <div className="text-right flex-1 min-w-0">
                     <p className={cn("font-bold text-xs font-pixel-text leading-tight", room.settings?.enableVoting ? "text-[#4c1d95]" : "text-gray-500")}>
                       التحكيم الديمقراطي
                     </p>
-                    <p className="text-[10px] text-gray-400 mt-0.5 font-pixel-text">
-                      {room.settings?.enableVoting ? 'مفعل' : 'معطل'}
+                    <p className="text-[10px] text-gray-400 mt-0.5 font-pixel-text truncate">
+                      {room.settings?.enableVoting ? 'اللاعبين بيصوتوا' : 'معطل'}
                     </p>
                   </div>
-                  {room.settings?.enableVoting && <div className="absolute inset-0 border-2 border-[#7c3aed] rounded-xl pointer-events-none" />}
                 </Button>
 
+                {/* Referee Selection */}
                 <Button
                   variant="outline"
                   onClick={() => isHost && setShowRefereeSelect(!showRefereeSelect)}
                   disabled={!isHost}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-2 h-auto aspect-square p-2 border-[3px] rounded-xl transition-all relative overflow-hidden",
+                    "flex flex-row items-center justify-start gap-3 h-auto p-3 border-2 rounded-xl transition-all relative overflow-hidden",
                     referee
-                      ? "bg-[#7c3aed]/5 border-[#7c3aed]"
+                      ? "bg-[#7c3aed]/5 border-[#7c3aed] shadow-[2px_2px_0_0_#4c1d95]"
                       : "bg-white border-gray-200 opacity-60 hover:opacity-100"
                   )}
                 >
                   <div className={cn(
-                    "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors",
+                    "w-10 h-10 rounded-lg flex items-center justify-center border-2 shrink-0",
                     referee ? "bg-[#7c3aed] border-[#5b21b6] text-white" : "bg-gray-100 border-gray-300 text-gray-400"
                   )}>
                     <Shield className="w-5 h-5" />
                   </div>
-                  <div className="text-center">
+                  <div className="text-right flex-1 min-w-0">
                     <p className={cn("font-bold text-xs font-pixel-text leading-tight", referee ? "text-[#4c1d95]" : "text-gray-500")}>
                       حكم المباراة
                     </p>
-                    <p className="text-[10px] text-gray-400 mt-0.5 font-pixel-text truncate max-w-[80px]">
-                      {referee ? referee.name : 'لا يوجد'}
+                    <p className="text-[10px] text-gray-400 mt-0.5 font-pixel-text truncate">
+                      {referee ? referee.name : 'اختر حكم'}
                     </p>
                   </div>
-                  {referee && <div className="absolute inset-0 border-2 border-[#7c3aed] rounded-xl pointer-events-none" />}
                 </Button>
               </div>
 
+              {/* Referee Selection Panel (Expandable) */}
               <AnimatePresence>
                 {showRefereeSelect && isHost && (
                   <motion.div
@@ -258,10 +257,9 @@ export default function Lobby() {
                   </motion.div>
                 )}
               </AnimatePresence>
-*/}
 
               <AnimatePresence>
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
                   {[...room.players]
                     .sort((a, b) => {
                       if (a.id === state.playerId) return -1;
