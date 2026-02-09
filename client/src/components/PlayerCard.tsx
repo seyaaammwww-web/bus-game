@@ -17,7 +17,7 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
     <motion.div
       layout
       className={cn(
-        "aspect-square flex flex-col items-center justify-center p-1 rounded-lg border-2 relative transition-all bg-white shadow-sm",
+        "w-20 m-1 flex flex-col items-center justify-center p-1 rounded-lg border-2 relative transition-all bg-white shadow-sm",
         // Ready state (Green border)
         player.isReady && !showScore && "border-green-500 bg-green-50/50",
         // Not ready (Gray border)
