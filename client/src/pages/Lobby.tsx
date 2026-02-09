@@ -156,8 +156,8 @@ export default function Lobby() {
             </div>
             <div className="space-y-3">
               {/* Game Mode Selection (Voting / Referee) */}
+              {/* 
               <div className="grid grid-cols-2 gap-3 mb-2">
-                {/* Voting Toggle */}
                 <Button
                   variant="outline"
                   onClick={() => isHost && updateSettings({ enableVoting: !room.settings?.enableVoting })}
@@ -186,7 +186,6 @@ export default function Lobby() {
                   {room.settings?.enableVoting && <div className="absolute inset-0 border-2 border-[#7c3aed] rounded-xl pointer-events-none" />}
                 </Button>
 
-                {/* Referee Selection */}
                 <Button
                   variant="outline"
                   onClick={() => isHost && setShowRefereeSelect(!showRefereeSelect)}
@@ -216,7 +215,6 @@ export default function Lobby() {
                 </Button>
               </div>
 
-              {/* Referee Selection Panel (Expandable) */}
               <AnimatePresence>
                 {showRefereeSelect && isHost && (
                   <motion.div
@@ -260,6 +258,7 @@ export default function Lobby() {
                   </motion.div>
                 )}
               </AnimatePresence>
+*/}
 
               <AnimatePresence>
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
