@@ -19,7 +19,8 @@ export default function Lobby() {
   const [showTutorial, setShowTutorial] = useState(false);
   const [customCats, setCustomCats] = useState(categories);
 
-  const room = state.room!;
+  if (!state.room) return null;
+  const room = state.room;
   const allReady = room.players.every(p => p.isReady);
   const canStart = isHost && allReady && room.players.length >= 1;
 
