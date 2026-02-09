@@ -155,58 +155,59 @@ export default function Lobby() {
               </motion.span>
             </div>
             <div className="space-y-3">
-              {/* 
               <div className="grid grid-cols-2 gap-3 mb-4">
+                {/* Voting Toggle */}
                 <Button
                   variant="outline"
                   onClick={() => isHost && updateSettings({ enableVoting: !room.settings?.enableVoting })}
                   disabled={!isHost}
                   className={cn(
-                    "flex flex-row items-center justify-start gap-3 h-auto p-3 border-2 rounded-xl transition-all relative overflow-hidden",
+                    "flex flex-col items-center justify-center gap-2 h-auto aspect-square p-2 border-2 rounded-xl transition-all relative overflow-hidden",
                     room.settings?.enableVoting
                       ? "bg-[#7c3aed]/5 border-[#7c3aed] shadow-[2px_2px_0_0_#4c1d95]"
                       : "bg-white border-gray-200 opacity-60 hover:opacity-100"
                   )}
                 >
                   <div className={cn(
-                    "w-10 h-10 rounded-lg flex items-center justify-center border-2 shrink-0",
+                    "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors",
                     room.settings?.enableVoting ? "bg-[#7c3aed] border-[#5b21b6] text-white" : "bg-gray-100 border-gray-300 text-gray-400"
                   )}>
                     <Users className="w-5 h-5" />
                   </div>
-                  <div className="text-right flex-1 min-w-0">
+                  <div className="text-center">
                     <p className={cn("font-bold text-xs font-pixel-text leading-tight", room.settings?.enableVoting ? "text-[#4c1d95]" : "text-gray-500")}>
-                      التحكيم الديمقراطي
+                      التحكيم
                     </p>
-                    <p className="text-[10px] text-gray-400 mt-0.5 font-pixel-text truncate">
-                      {room.settings?.enableVoting ? 'اللاعبين بيصوتوا' : 'معطل'}
+                    <p className="text-[10px] text-gray-400 mt-0.5 font-pixel-text">
+                      {room.settings?.enableVoting ? 'تـصويت' : 'ديمقراطي'}
                     </p>
                   </div>
                 </Button>
 
+                {/* Referee Selection */}
                 <Button
                   variant="outline"
                   onClick={() => isHost && setShowRefereeSelect(!showRefereeSelect)}
                   disabled={!isHost}
                   className={cn(
-                    "flex flex-row items-center justify-start gap-3 h-auto p-3 border-2 rounded-xl transition-all relative overflow-hidden",
+                    "flex flex-col items-center justify-center gap-2 h-auto aspect-square p-2 border-2 rounded-xl transition-all relative overflow-hidden",
                     referee
                       ? "bg-[#7c3aed]/5 border-[#7c3aed] shadow-[2px_2px_0_0_#4c1d95]"
                       : "bg-white border-gray-200 opacity-60 hover:opacity-100"
                   )}
                 >
                   <div className={cn(
-                    "w-10 h-10 rounded-lg flex items-center justify-center border-2 shrink-0",
+                    "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors",
                     referee ? "bg-[#7c3aed] border-[#5b21b6] text-white" : "bg-gray-100 border-gray-300 text-gray-400"
                   )}>
                     <Shield className="w-5 h-5" />
                   </div>
-                  <div className="text-right flex-1 min-w-0">
+                  <div className="text-center">
                     <p className={cn("font-bold text-xs font-pixel-text leading-tight", referee ? "text-[#4c1d95]" : "text-gray-500")}>
-                      حكم المباراة
+                      الحكم
                     </p>
-                    <p className="text-[10px] text-gray-400 mt-0.5 font-pixel-text truncate">
-                      {referee ? referee.name : 'اختر حكم'}
+                    <p className="text-[10px] text-gray-400 mt-0.5 font-pixel-text truncate max-w-[80px]">
+                      {referee ? referee.name : 'اختر'}
                     </p>
                   </div>
                 </Button>
