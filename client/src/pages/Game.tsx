@@ -453,8 +453,8 @@ export default function Game() {
                     style={{ imageRendering: 'pixelated' }}
                   />
 
-                  {/* Gavel icon */}
-                  <Gavel
+                  {/* Pyramid icon */}
+                  <Pyramid
                     className="w-16 h-16 text-amber-950 relative z-10"
                     strokeWidth={2.5}
                     style={{
