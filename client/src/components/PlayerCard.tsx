@@ -9,7 +9,7 @@ interface PlayerCardProps {
   isReferee?: boolean;
   showScore?: boolean;
   rank?: number;
-  index: number;
+  index?: number;
 }
 
 export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank }: PlayerCardProps) {
@@ -35,7 +35,7 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
         isCurrentPlayer ? "bg-[#7c3aed] border-[#5b21b6] text-white" : "bg-gray-100 border-gray-300 text-gray-600",
         player.isReady && !isCurrentPlayer && "bg-green-100 border-green-300 text-green-700"
       )}>
-        {player.name.charAt(0).toUpperCase()}
+        {player.name?.charAt(0).toUpperCase() || '?'}
       </div>
 
       {/* Name */}
