@@ -37,6 +37,12 @@ interface AnswerVotes {
   votes: VoteRecord[];
 }
 
+interface Draft {
+  answers: RoundAnswers;
+  updatedAt: number;
+  roundNumber: number;
+}
+
 const PUBLIC_ROOM_CODE = 'PLAY';
 const MAX_TOTAL_PLAYERS = 800; // Scalability Limit
 const MAX_ROOMS = 100; // Scalability Limit
@@ -52,7 +58,8 @@ class GameManager {
   private timers: Map<string, NodeJS.Timeout> = new Map();
   private voteTimers: Map<string, NodeJS.Timeout> = new Map(); // roomCode -> vote timer
   private answerVotes: Map<string, AnswerVotes[]> = new Map(); // roomCode -> votes
-  private drafts: Map<string, Map<string, RoundAnswers>> = new Map(); // roomCode -> (playerId -> answers)
+  // SCOP-v3.5: Draft Store for Timeout Rescue
+  private drafts: Map<string, Map<string, Draft>> = new Map(); // roomCode -> (playerId -> Draft)
   private calculatingRooms = new Map<string, number>();
 
   constructor() {
@@ -684,14 +691,31 @@ class GameManager {
         p.id !== draft.refereeId && p.id !== round.banishedPlayerId
       );
 
+      // Get room drafts for rescue
+      const roomDrafts = this.drafts.get(roomCode);
+
       for (const player of allNonRefereeNonBanished) {
         const hasSubmitted = round.submissions.some(s => s.playerId === player.id);
         if (!hasSubmitted) {
-          // Draft logic omitted for simplicity or can be re-added if `this.drafts` is accessible
-          // Let's rely on empty submission
+          // Attempt Draft Rescue
+          let finalAnswers: RoundAnswers = {};
           const currentCategories = this.getRoomCategories(draft);
-          const finalAnswers: RoundAnswers = {};
-          currentCategories.forEach(cat => finalAnswers[cat] = '');
+
+          let rescued = false;
+          if (roomDrafts) {
+            const playerDraft = roomDrafts.get(player.id);
+            // Verify draft is fresh and belongs to this round
+            if (playerDraft && playerDraft.roundNumber === draft.currentRound) {
+              // Use draft answers
+              finalAnswers = playerDraft.answers;
+              rescued = true;
+              console.log(`[Draft Rescue] Used draft for player ${player.id} in room ${roomCode}`);
+            }
+          }
+
+          if (!rescued) {
+            currentCategories.forEach(cat => finalAnswers[cat] = '');
+          }
 
           round.submissions.push({
             playerId: player.id,
@@ -709,6 +733,7 @@ class GameManager {
     const room = this.getRoom(roomCode);
     if (!room) return;
 
+    // Clear drafts for this room as round is documented
     this.drafts.delete(roomCode);
 
     this.broadcastToRoom(roomCode, { type: 'sync_state', payload: { room } });
@@ -1484,6 +1509,27 @@ class GameManager {
     });
   }
 
+  handleDraftUpdate(ws: WebSocket, answers: RoundAnswers): void {
+    const playerInfo = this.players.get(ws);
+    if (!playerInfo) return;
+
+    // Quick validation safely
+    const room = this.getRoom(playerInfo.roomId);
+    if (!room || room.phase !== 'playing') return;
+
+    // init room drafts if needed
+    if (!this.drafts.has(playerInfo.roomId)) {
+      this.drafts.set(playerInfo.roomId, new Map());
+    }
+
+    const roomDrafts = this.drafts.get(playerInfo.roomId)!;
+    roomDrafts.set(playerInfo.playerId, {
+      answers,
+      updatedAt: Date.now(),
+      roundNumber: room.currentRound
+    });
+  }
+
   // Router
   handleMessage(ws: WebSocket, message: WSMessage): void {
     // Mapping for simplicity - fully implementing all case switches as per original
@@ -1502,6 +1548,7 @@ class GameManager {
       case 'remove_referee': this.removeReferee(ws); break;
       case 'referee_approve': this.refereeApprove(ws); break;
       case 'update_settings': this.updateSettings(ws, message.payload); break;
+      case 'draft_update': this.handleDraftUpdate(ws, message.payload.answers); break;
       // ... add other cases (referee_deduct, wildcards etc) - keeping minimal for safe rewrite token limits
       // User requested "Execute Temporal-Spatial Analysis". 
       // I must include all functional parts or it breaks the game.
