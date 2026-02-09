@@ -154,146 +154,142 @@ export default function Lobby() {
               </motion.span>
             </div>
             <div className="space-y-3">
-              {/* Voting Toggle (New) */}
-              {isHost ? (
-                <div className="flex items-center justify-between p-3 bg-white/50 rounded-lg border-2 border-[#4c1d95]/20">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-[#7c3aed] rounded-lg flex items-center justify-center text-white">
-                      <Users className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-[#4c1d95] font-pixel-text text-sm">التحكيم الديمقراطي</p>
-                      <p className="text-[10px] text-[#4c1d95]/70 font-pixel-text">
-                        {referee ? <span className="text-red-500 font-bold">⚠️ سيلغي الحكم الحالي</span> : "اللاعبين يصوتوا على الإجابات"}
-                      </p>
-                    </div>
+              {/* Game Mode Selection (Voting / Referee) */}
+              <div className="grid grid-cols-2 gap-3 mb-2">
+                {/* Voting Toggle */}
+                <Button
+                  variant="outline"
+                  onClick={() => isHost && updateSettings({ enableVoting: !room.settings?.enableVoting })}
+                  disabled={!isHost}
+                  className={cn(
+                    "flex flex-col items-center justify-center gap-2 h-auto aspect-square p-2 border-[3px] rounded-xl transition-all relative overflow-hidden",
+                    room.settings?.enableVoting
+                      ? "bg-[#7c3aed]/5 border-[#7c3aed]"
+                      : "bg-white border-gray-200 opacity-60 hover:opacity-100"
+                  )}
+                >
+                  <div className={cn(
+                    "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors",
+                    room.settings?.enableVoting ? "bg-[#7c3aed] border-[#5b21b6] text-white" : "bg-gray-100 border-gray-300 text-gray-400"
+                  )}>
+                    <Users className="w-5 h-5" />
                   </div>
-                  <Button
-                    size="sm"
-                    variant={room.settings?.enableVoting ? "default" : "outline"}
-                    onClick={() => updateSettings({ enableVoting: !room.settings?.enableVoting })}
-                    className={`h-8 font-bold font-pixel-text ${room.settings?.enableVoting ? 'bg-[#7c3aed]' : 'text-[#4c1d95]'}`}
+                  <div className="text-center">
+                    <p className={cn("font-bold text-xs font-pixel-text leading-tight", room.settings?.enableVoting ? "text-[#4c1d95]" : "text-gray-500")}>
+                      التحكيم الديمقراطي
+                    </p>
+                    <p className="text-[10px] text-gray-400 mt-0.5 font-pixel-text">
+                      {room.settings?.enableVoting ? 'مفعل' : 'معطل'}
+                    </p>
+                  </div>
+                  {room.settings?.enableVoting && <div className="absolute inset-0 border-2 border-[#7c3aed] rounded-xl pointer-events-none" />}
+                </Button>
+
+                {/* Referee Selection */}
+                <Button
+                  variant="outline"
+                  onClick={() => isHost && setShowRefereeSelect(!showRefereeSelect)}
+                  disabled={!isHost}
+                  className={cn(
+                    "flex flex-col items-center justify-center gap-2 h-auto aspect-square p-2 border-[3px] rounded-xl transition-all relative overflow-hidden",
+                    referee
+                      ? "bg-[#7c3aed]/5 border-[#7c3aed]"
+                      : "bg-white border-gray-200 opacity-60 hover:opacity-100"
+                  )}
+                >
+                  <div className={cn(
+                    "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors",
+                    referee ? "bg-[#7c3aed] border-[#5b21b6] text-white" : "bg-gray-100 border-gray-300 text-gray-400"
+                  )}>
+                    <Shield className="w-5 h-5" />
+                  </div>
+                  <div className="text-center">
+                    <p className={cn("font-bold text-xs font-pixel-text leading-tight", referee ? "text-[#4c1d95]" : "text-gray-500")}>
+                      حكم المباراة
+                    </p>
+                    <p className="text-[10px] text-gray-400 mt-0.5 font-pixel-text truncate max-w-[80px]">
+                      {referee ? referee.name : 'لا يوجد'}
+                    </p>
+                  </div>
+                  {referee && <div className="absolute inset-0 border-2 border-[#7c3aed] rounded-xl pointer-events-none" />}
+                </Button>
+              </div>
+
+              {/* Referee Selection Panel (Expandable) */}
+              <AnimatePresence>
+                {showRefereeSelect && isHost && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden mb-4 bg-white/50 rounded-lg border-2 border-[#4c1d95]/20"
                   >
-                    {room.settings?.enableVoting ? 'مفعل ✅' : 'معطل ❌'}
-                  </Button>
-                </div>
-              ) : (
-                room.settings?.enableVoting && (
-                  <div className="flex items-center gap-2 p-2 bg-[#7c3aed]/10 rounded-lg border border-[#7c3aed]/30 justify-center mb-2">
-                    <Users className="w-4 h-4 text-[#7c3aed]" />
-                    <span className="text-xs font-bold text-[#4c1d95] font-pixel-text">نظام التحكيم الديمقراطي مفعل</span>
-                  </div>
-                )
-              )}
+                    <div className="p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-xs font-bold text-[#4c1d95] font-pixel-text">اختر الحكم:</p>
+                        {referee && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={removeReferee}
+                            className="h-6 text-red-500 text-[10px] hover:bg-red-50 hover:text-red-700 font-bold"
+                          >
+                            إزالة الحكم <X className="w-3 h-3 ml-1" />
+                          </Button>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
+                        {room.players.map((player) => (
+                          <Button
+                            key={player.id}
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleSetReferee(player.id)}
+                            className={cn(
+                              "justify-start gap-2 h-9 border font-pixel-text font-bold text-xs",
+                              referee?.id === player.id ? "bg-[#7c3aed] text-white hover:bg-[#6d28d9] hover:text-white border-[#5b21b6]" : "bg-white text-gray-700 border-gray-200"
+                            )}
+                          >
+                            <span className="w-5 h-5 bg-black/10 rounded flex items-center justify-center text-[10px]">{player.name[0]}</span>
+                            <span className="truncate">{player.name}</span>
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               <AnimatePresence>
-                {[...room.players]
-                  .sort((a, b) => {
-                    if (a.id === state.playerId) return -1;
-                    if (b.id === state.playerId) return 1;
-                    return 0;
-                  })
-                  .map((player, index) => (
-                    <motion.div
-                      key={player.id}
-                      initial={{ x: 50, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      exit={{ x: -50, opacity: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                    >
-                      <PlayerCard
-                        player={player}
-                        isCurrentPlayer={player.id === state.playerId}
-                        isReferee={player.id === room.refereeId}
-                        index={index}
-                      />
-                    </motion.div>
-                  ))}
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                  {[...room.players]
+                    .sort((a, b) => {
+                      if (a.id === state.playerId) return -1;
+                      if (b.id === state.playerId) return 1;
+                      return 0;
+                    })
+                    .map((player, index) => (
+                      <motion.div
+                        key={player.id}
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.8, opacity: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                      >
+                        <PlayerCard
+                          player={player}
+                          isCurrentPlayer={player.id === state.playerId}
+                          isReferee={player.id === room.refereeId}
+                          index={index}
+                        />
+                      </motion.div>
+                    ))}
+                </div>
               </AnimatePresence>
             </div>
           </RetroCard>
         </motion.div>
 
-        {isHost && room.players.length >= 1 && (
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.25 }}
-            className="mb-4"
-          >
-            <RetroCard className="border-[3px] border-dashed">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-[#7c3aed]/20 flex items-center justify-center border-2 border-[#4c1d95]">
-                    <Shield className="w-6 h-6 text-[#7c3aed]" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-lg text-[#4c1d95] font-pixel-text">الحكم (اختياري)</p>
-                    <p className="text-base text-[#7c3aed] font-bold font-pixel-text">
-                      {referee ? referee.name : 'اختر حكم للمباراة'}
-                    </p>
-                  </div>
-                </div>
-                {referee ? (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeReferee()}
-                    className="text-[#7c3aed] hover:bg-red-100 hover:text-red-900"
-                    data-testid="button-remove-referee"
-                  >
-                    <X className="w-5 h-5" />
-                  </Button>
-                ) : (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowRefereeSelect(true)}
-                    className="h-10 border-2 border-[#4c1d95] text-[#4c1d95] font-pixel-text font-bold text-base"
-                    data-testid="button-choose-referee"
-                  >
-                    {room.settings?.enableVoting ? <span className="text-xs text-red-500 ml-2">(سيلغي التصويت)</span> : 'اختر حكم'}
-                  </Button>
-                )}
-              </div>
-
-              <AnimatePresence>
-                {showRefereeSelect && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="mt-4 pt-4 border-t-2 border-[#4c1d95]/20 overflow-hidden"
-                  >
-                    <p className="text-base text-[#4c1d95] mb-3 font-pixel-text font-bold">اختر واحد من اللاعبين:</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {room.players.map((player) => (
-                        <Button
-                          key={player.id}
-                          variant="outline"
-                          className="justify-start gap-2 h-12 border-2 border-[#4c1d95] text-[#4c1d95] font-pixel-text font-bold"
-                          onClick={() => handleSetReferee(player.id)}
-                          data-testid={`button-select-referee-${player.id}`}
-                        >
-                          {player.isHost && <Crown className="w-4 h-4 text-orange-500" />}
-                          <span className="truncate text-base">{player.name}</span>
-                        </Button>
-                      ))}
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-full mt-3 text-[#7c3aed] hover:bg-[#7c3aed]/10 font-pixel-text font-bold text-base"
-                      onClick={() => setShowRefereeSelect(false)}
-                    >
-                      إلغاء
-                    </Button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </RetroCard>
-          </motion.div>
-        )}
 
         <motion.div
           className="space-y-3"
