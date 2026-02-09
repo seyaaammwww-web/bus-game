@@ -15,7 +15,7 @@ import { PowerUpMenu } from '@/components/PowerUpMenu';
 import { Confetti } from '@/components/Confetti';
 import { useGame } from '@/lib/gameContext';
 import { categories, type Category, type RoundAnswers } from '@shared/schema';
-import { AlertTriangle, Send, User, Users, Globe, PawPrint, Box, LogOut, Zap, Eye, Trophy, Flame, Sparkles, Crown, Skull, Pyramid } from 'lucide-react';
+import { AlertTriangle, Send, User, Users, Globe, PawPrint, Box, LogOut, Zap, Eye, Trophy, Flame, Sparkles, Crown, Skull, Pyramid, Gavel } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { playCountdownSound, playCountdownFinalSound, playRoundStart, playBusSound, playFreezeSound, playWildcardSound, playBanishSound, playSubmitSound, playClickSound, playRushActivateSound, playBonusSound, playTypeSound } from '@/lib/sounds';
@@ -400,39 +400,87 @@ export default function Game() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[60] bg-[#0f0a1f] flex flex-col items-center justify-center p-4 overflow-hidden"
+              className="fixed inset-0 z-[60] flex items-center justify-center overflow-hidden"
             >
-              <div className="relative z-10 flex flex-col items-center max-w-md w-full p-8 border-[4px] border-[#fbbf24] bg-[#1a0b2e] rounded-xl shadow-2xl">
-
-                {/* Static decorative corners */}
-                <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-[#fbbf24] -mt-1 -ml-1"></div>
-                <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-[#fbbf24] -mt-1 -mr-1"></div>
-                <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-[#fbbf24] -mb-1 -ml-1"></div>
-                <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-[#fbbf24] -mb-1 -mr-1"></div>
-
-                <div className="mb-6 relative">
-                  <div className="absolute inset-0 bg-[#fbbf24]/20 rounded-full blur-xl"></div>
-                  <Eye className="w-20 h-20 text-[#fbbf24] relative z-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" />
+              {/* Centered spinning 3D 8-bit gavel icon */}
+              <motion.div
+                className="relative"
+                animate={{
+                  rotate: 360
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "linear"
+                }}
+              >
+                {/* 3D layered effect - shadow layers */}
+                <div className="absolute inset-0 translate-x-2 translate-y-2 opacity-30">
+                  <div className="w-32 h-32 bg-gradient-to-br from-amber-900 to-amber-950 rounded-2xl"
+                    style={{
+                      clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)',
+                      imageRendering: 'pixelated'
+                    }}
+                  />
+                </div>
+                <div className="absolute inset-0 translate-x-1 translate-y-1 opacity-50">
+                  <div className="w-32 h-32 bg-gradient-to-br from-amber-800 to-amber-900 rounded-2xl"
+                    style={{
+                      clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)',
+                      imageRendering: 'pixelated'
+                    }}
+                  />
                 </div>
 
-                <h2
-                  className="text-4xl md:text-5xl font-pixel-title text-[#fbbf24] mb-8 text-center"
-                  style={{ textShadow: '2px 2px 0px #451a03' }}
+                {/* Main icon container with 3D effect */}
+                <motion.div
+                  className="relative w-32 h-32 bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 rounded-2xl flex items-center justify-center shadow-2xl border-4 border-amber-300"
+                  style={{
+                    imageRendering: 'pixelated',
+                    boxShadow: '0 8px 32px rgba(251, 191, 36, 0.4), inset 0 2px 8px rgba(255, 255, 255, 0.3), inset 0 -2px 8px rgba(0, 0, 0, 0.3)'
+                  }}
+                  animate={{
+                    scale: [1, 1.05, 1]
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
                 >
-                  جاري الحكم...
-                </h2>
+                  {/* Pixel art style highlights */}
+                  <div className="absolute top-2 left-2 w-8 h-8 bg-amber-200 opacity-40 rounded"
+                    style={{ imageRendering: 'pixelated' }}
+                  />
 
-                <div className="w-full bg-[#2a1205] border-2 border-[#78350f] rounded-lg p-4 text-center">
-                  <motion.div
-                    key={Math.floor(Date.now() / 3000)} // Simple key change could work, or just use a simple fade
-                    animate={{ opacity: [0, 1, 1, 0] }}
-                    transition={{ duration: 4, repeat: Infinity, times: [0, 0.1, 0.9, 1] }}
-                    className="font-pixel-text text-xl text-[#fbbf24]"
-                  >
-                    <span className="block">نوزن الكلمات بميزان العدل ⚖️</span>
-                  </motion.div>
-                </div>
-              </div>
+                  {/* Gavel icon */}
+                  <Gavel
+                    className="w-16 h-16 text-amber-950 relative z-10"
+                    strokeWidth={2.5}
+                    style={{
+                      filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))'
+                    }}
+                  />
+                </motion.div>
+
+                {/* Glowing pulse effect */}
+                <motion.div
+                  className="absolute inset-0 rounded-2xl"
+                  style={{
+                    background: 'radial-gradient(circle, rgba(251, 191, 36, 0.3) 0%, transparent 70%)',
+                    filter: 'blur(20px)'
+                  }}
+                  animate={{
+                    opacity: [0.5, 0.8, 0.5],
+                    scale: [1, 1.2, 1]
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                />
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
