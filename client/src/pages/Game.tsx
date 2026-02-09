@@ -196,27 +196,12 @@ export default function Game() {
     }
   };
 
-  // 1. Time's Up Auto-submit
+  // Auto-submit when time runs out
   useEffect(() => {
     if (state.timeLeft <= 1 && !hasSubmitted) {
       handleSubmit();
     }
   }, [state.timeLeft, hasSubmitted]);
-
-  // 2. Unmount/Phase Change Auto-submit (ONLY on unmount, never re-run during game)
-  useEffect(() => {
-    return () => {
-      // Check REF not state, to avoid closure staleness
-      // Only submit if we have SOME answers and haven't submitted yet
-      // AND checking if the reason is NOT just a re-render is tricky in React Strict Mode, 
-      // but in production 'return' with [] deps usually means unmount.
-      if (answersRef.current && Object.values(answersRef.current).some(a => a.trim().length > 0) && !hasSubmittedRef.current) {
-        console.log("Auto-submitting on unmount/round-end");
-        submitAnswers(answersRef.current);
-        hasSubmittedRef.current = true;
-      }
-    };
-  }, []); // EMPTY DEPS = Run only on mount/unmount
 
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
 
