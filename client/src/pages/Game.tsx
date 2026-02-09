@@ -400,52 +400,36 @@ export default function Game() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[60] bg-[#0f0a1f]/98 backdrop-blur-xl flex flex-col items-center justify-center p-4 overflow-hidden"
+              className="fixed inset-0 z-[60] bg-[#0f0a1f] flex flex-col items-center justify-center p-4 overflow-hidden"
             >
-              <div className="relative z-10 flex flex-col items-center max-w-md w-full">
+              <div className="relative z-10 flex flex-col items-center max-w-md w-full p-8 border-[4px] border-[#fbbf24] bg-[#1a0b2e] rounded-xl shadow-2xl">
 
-                {/* Decorative Egyptian Border/Frame */}
-                <div className="absolute inset-0 border-[6px] border-[#fbbf24] rounded-3xl opacity-20 pointer-events-none" />
-                <div className="absolute -inset-1 border-[2px] border-[#d97706] rounded-[26px] opacity-40 pointer-events-none" />
+                {/* Static decorative corners */}
+                <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-[#fbbf24] -mt-1 -ml-1"></div>
+                <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-[#fbbf24] -mt-1 -mr-1"></div>
+                <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-[#fbbf24] -mb-1 -ml-1"></div>
+                <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-[#fbbf24] -mb-1 -mr-1"></div>
 
-                <motion.div
-                  className="relative w-40 h-40 mb-8 flex items-center justify-center"
-                  initial={isMobile ? { opacity: 0.8 } : { scale: 0.8 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={isMobile ? { duration: 0.5 } : { repeat: Infinity, repeatType: "reverse", duration: 1.5 }}
-                >
-                  <div className="absolute inset-0 bg-[#fbbf24]/20 rounded-full animate-ping opacity-30" />
-                  <div className="absolute inset-4 bg-gradient-to-tr from-[#fbbf24]/30 to-[#d97706]/30 rounded-full blur-md" />
+                <div className="mb-6 relative">
+                  <div className="absolute inset-0 bg-[#fbbf24]/20 rounded-full blur-xl"></div>
+                  <Eye className="w-20 h-20 text-[#fbbf24] relative z-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" />
+                </div>
 
-                  <motion.div
-                    className="relative z-10 w-28 h-28 bg-gradient-to-br from-[#451a03] to-[#78350f] rounded-2xl shadow-[0_0_40px_rgba(251,191,36,0.4)] flex items-center justify-center border-4 border-[#fbbf24]"
-                    animate={{ rotate: [0, 5, -5, 0] }}
-                    transition={{ repeat: Infinity, duration: 3 }}
-                  >
-                    {/* Eye of Horus or Sphinx Icon (using Eye as placeholder for 'Review') */}
-                    <Eye className="w-14 h-14 text-[#fbbf24]" />
-                  </motion.div>
-                </motion.div>
-
-                <motion.h2
-                  className="text-4xl md:text-5xl font-pixel-title text-transparent bg-clip-text bg-gradient-to-b from-[#fbbf24] to-[#d97706] mb-6 drop-shadow-sm filter"
-                  style={{ textShadow: '0px 4px 0px #451a03' }}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
+                <h2
+                  className="text-4xl md:text-5xl font-pixel-title text-[#fbbf24] mb-8 text-center"
+                  style={{ textShadow: '2px 2px 0px #451a03' }}
                 >
                   جاري الحكم...
-                </motion.h2>
+                </h2>
 
-                <div className="h-12 overflow-hidden relative w-full text-center bg-[#451a03]/50 border-2 border-[#78350f] rounded-xl flex items-center justify-center">
+                <div className="w-full bg-[#2a1205] border-2 border-[#78350f] rounded-lg p-4 text-center">
                   <motion.div
-                    animate={{ y: [-48, 0, -48] }}
-                    transition={{ duration: 5, repeat: Infinity, times: [0, 0.15, 1] }}
-                    className="flex flex-col gap-0 font-pixel-text text-xl"
+                    key={Math.floor(Date.now() / 3000)} // Simple key change could work, or just use a simple fade
+                    animate={{ opacity: [0, 1, 1, 0] }}
+                    transition={{ duration: 4, repeat: Infinity, times: [0, 0.1, 0.9, 1] }}
+                    className="font-pixel-text text-xl text-[#fbbf24]"
                   >
-                    <div className="h-12 flex items-center justify-center"><span className="text-[#fbbf24]">نوزن الكلمات بميزان العدل ⚖️</span></div>
-                    <div className="h-12 flex items-center justify-center"><span className="text-[#fbbf24]">نتفحص المخطوطات القديمة 📜</span></div>
-                    <div className="h-12 flex items-center justify-center"><span className="text-[#fbbf24]">نبحث عن الحكمة في الإجابات 🧠</span></div>
-                    <div className="h-12 flex items-center justify-center"><span className="text-[#fbbf24]">نستشير الآلهة القديمة 🏛️</span></div>
+                    <span className="block">نوزن الكلمات بميزان العدل ⚖️</span>
                   </motion.div>
                 </div>
               </div>
