@@ -99,21 +99,7 @@ export function Timer({ timeLeft, isRush }: TimerProps) {
       </motion.div>
 
       {/* Rush mode indicator */}
-      {isRush && (
-        <motion.div
-          initial={{ scale: 0, rotate: -180 }}
-          animate={{ scale: 1, rotate: 0 }}
-          className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-4 py-2 rounded-full text-sm font-black flex items-center gap-2 shadow-lg"
-        >
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-          >
-            <Zap className="w-4 h-4" />
-          </motion.div>
-          RAAAASH!
-        </motion.div>
-      )}
+
     </motion.div>
   );
 }
