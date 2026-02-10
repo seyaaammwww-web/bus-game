@@ -6,7 +6,7 @@ import { RetroCard } from '@/components/ui/RetroCard';
 import type { ValidatedAnswer } from '@shared/schema';
 
 export function RefereeReviewOverlay() {
-    const { state, sendMessage, currentPlayer } = useGame();
+    const { state, refereeApprove, currentPlayer } = useGame();
     const room = state.room;
 
     if (!room || room.phase !== 'referee_review') return null;
@@ -27,7 +27,7 @@ export function RefereeReviewOverlay() {
     }, {} as Record<string, ValidatedAnswer[]>);
 
     const handleApprove = () => {
-        sendMessage({ type: 'referee_approve', payload: {} });
+        refereeApprove();
     };
 
     return (
@@ -79,8 +79,8 @@ export function RefereeReviewOverlay() {
                                             <div
                                                 key={idx}
                                                 className={`p-2 rounded-lg border-2 ${answer.isValid
-                                                        ? 'bg-green-50 border-green-500'
-                                                        : 'bg-red-50 border-red-500'
+                                                    ? 'bg-green-50 border-green-500'
+                                                    : 'bg-red-50 border-red-500'
                                                     }`}
                                             >
                                                 <div className="flex items-center justify-between">
@@ -89,7 +89,7 @@ export function RefereeReviewOverlay() {
                                                             {answer.category}
                                                         </p>
                                                         <p className="text-lg font-bold text-[#4c1d95] font-pixel-text">
-                                                            {answer.word || '(فارغ)'}
+                                                            {answer.answer || '(فارغ)'}
                                                         </p>
                                                     </div>
                                                     <div className="flex items-center gap-1">
@@ -105,9 +105,9 @@ export function RefereeReviewOverlay() {
                                                         {answer.reason}
                                                     </p>
                                                 )}
-                                                {answer.points !== undefined && (
+                                                {answer.score !== undefined && (
                                                     <p className="text-xs font-bold text-[#7c3aed] mt-1">
-                                                        {answer.points} نقطة
+                                                        {answer.score} نقطة
                                                     </p>
                                                 )}
                                             </div>

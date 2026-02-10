@@ -21,7 +21,7 @@ export class CorruptionProofBuffer<T> {
      * Calculate SHA-256 checksum of the state
      */
     private calculateChecksum(data: T): string {
-        const json = JSON.stringify(data, Object.keys(data).sort()); // Sort keys for deterministic output
+        const json = JSON.stringify(data, Object.keys(data as object).sort()); // Sort keys for deterministic output
         return createHash('sha256').update(json).digest('hex');
     }
 

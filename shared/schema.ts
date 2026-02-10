@@ -87,6 +87,7 @@ export interface ValidatedAnswer {
   isValid: boolean;
   isUnique: boolean;
   score: number;
+  points?: number; // Alias for score to support legacy components
   votes: { accepted: number; rejected: number };
   reason?: string;
   isFabricated?: boolean;
@@ -228,8 +229,10 @@ export type WSMessageType =
   // Voting System Specific
   | 'request_vote'
   | 'vote_cast'
+  | 'cast_democratic_vote'
   | 'vote_session_start' // Individual word vote start
-  | 'vote_session_result';
+  | 'vote_session_result'
+  | 'ping';
 
 export interface WSMessage {
   type: WSMessageType;

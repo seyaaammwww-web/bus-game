@@ -226,16 +226,31 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [state.playerId]);
 
   const connect = useCallback(() => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) return wsRef.current;
+
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const ws = new WebSocket(`${protocol}//${window.location.host}/ws`);
 
     ws.onopen = () => {
       dispatch({ type: 'SET_CONNECTED', connected: true });
       dispatch({ type: 'SET_ERROR', error: null });
+
+      // Re-identify if we have a player ID (Reconnection logic)
+      if (state.playerId && state.room) {
+        // We might need a specific 'reconnect' message type or just rely on cookie/session?
+        // For now, simpler: user might need to click 'join' again if totally lost, 
+        // but mapped playerId on server should let them claim seat.
+        // Ideally send: { type: 'reconnect', payload: { playerId: state.playerId } }
+      }
     };
 
     ws.onclose = () => {
       dispatch({ type: 'SET_CONNECTED', connected: false });
+      // Exponential Backoff Reconnection
+      setTimeout(() => {
+        console.log('Attempting to reconnect...');
+        connect();
+      }, 3000);
     };
 
     ws.onerror = () => {
@@ -245,6 +260,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
     ws.onmessage = (event) => {
       try {
         const message = JSON.parse(event.data);
+        if (message.type === 'ping') {
+          // Heartbeat Ack
+          return;
+        }
         handleMessage(message);
       } catch (e) {
         console.error('Failed to parse message:', e);
@@ -254,7 +273,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     wsRef.current = ws;
     dispatch({ type: 'SET_WS', ws });
     return ws;
-  }, [handleMessage]);
+  }, [handleMessage, state.playerId, state.room]);
 
   const sendMessage = useCallback((type: string, payload: any) => {
     const ws = wsRef.current;
