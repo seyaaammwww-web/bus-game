@@ -112,6 +112,7 @@ export interface Round {
   wildcardAnswers?: Record<string, string>; // Generated answers for wildcard user
   banishedPlayerId?: string | null;
   banishedByPlayerId?: string | null;
+  resultsCommitted?: boolean;
 }
 
 // Referee deduction

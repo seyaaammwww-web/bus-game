@@ -347,11 +347,11 @@ export default function Results() {
                         🕐 الوقت متوقف للمراجعة
                       </p>
                       <Button
-                        onClick={() => refereeApprove()}
+                        onClick={() => room.phase === 'results' ? nextRound() : refereeApprove()}
                         size="lg"
                         className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
                       >
-                        ✅ اعتماد النتيجة وبدء الجولة
+                        {room.phase === 'results' ? '➡️ بدء الجولة التالية' : '✅ اعتماد النتيجة وبدء الجولة'}
                       </Button>
                     </div>
                   ) : room.settings?.enableVoting && isHost ? (

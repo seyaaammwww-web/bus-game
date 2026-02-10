@@ -305,6 +305,8 @@ export class RoundManager {
 
     commitRoundResults(draft: GameRoom) {
         const round = draft.rounds[draft.currentRound];
+        if (round.resultsCommitted) return;
+
         const currentCategories = draft.settings?.customCategories?.length
             ? draft.settings.customCategories
             : categories;
@@ -338,5 +340,7 @@ export class RoundManager {
                 steal: 0 // Not implemented fully yet
             };
         }
+
+        round.resultsCommitted = true;
     }
 }

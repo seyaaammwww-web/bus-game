@@ -411,6 +411,8 @@ export class GameManager {
         }
         // If we are coming from Voting or Referee Review, or Playing (no referee), go to Results
         else {
+          if (round.resultsCommitted) return; // Prevent re-entry
+
           draft.phase = 'results';
           this.roundManager.commitRoundResults(draft);
 
