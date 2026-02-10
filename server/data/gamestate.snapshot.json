@@ -1,0 +1,136 @@
+{
+  "timestamp": 1770742421670,
+  "rooms": [
+    {
+      "id": "7afcc131-24cd-4c87-ae6c-effacc51eb42",
+      "code": "X5JW",
+      "hostId": "2c2f37c5-363f-4644-b753-d46bb3224c1b",
+      "players": [
+        {
+          "id": "2c2f37c5-363f-4644-b753-d46bb3224c1b",
+          "name": "Host",
+          "score": 0,
+          "isHost": true,
+          "isReady": true,
+          "busStreak": 0,
+          "powerUps": {
+            "hint": 0,
+            "steal": 0,
+            "wildcard": 0,
+            "banish": 0
+          },
+          "usedPowerUps": {
+            "hint": false,
+            "steal": false,
+            "wildcard": false,
+            "banish": false
+          },
+          "totalEarnedPoints": 0,
+          "isReferee": true
+        },
+        {
+          "id": "151aaf7c-027d-4b1a-9397-a9a2a1336bef",
+          "name": "Player1",
+          "score": 0,
+          "isHost": false,
+          "isReady": true,
+          "busStreak": 0,
+          "powerUps": {
+            "wildcard": 0,
+            "banish": 0,
+            "hint": 0,
+            "steal": 0
+          },
+          "usedPowerUps": {
+            "hint": false,
+            "steal": false,
+            "wildcard": false,
+            "banish": false
+          },
+          "totalEarnedPoints": 0,
+          "isReferee": false
+        }
+      ],
+      "rounds": [
+        {
+          "number": 1,
+          "letter": "ج",
+          "startTime": 1770728454544,
+          "endTime": 1770728499544,
+          "isRush": false,
+          "submissions": [
+            {
+              "playerId": "151aaf7c-027d-4b1a-9397-a9a2a1336bef",
+              "playerName": "Player1",
+              "answers": {
+                "ولد": "Ahmad",
+                "بنت": "Amira"
+              },
+              "submittedAt": 1770728454546,
+              "busComplete": false
+            }
+          ],
+          "validatedAnswers": [
+            {
+              "playerId": "151aaf7c-027d-4b1a-9397-a9a2a1336bef",
+              "playerName": "Player1",
+              "category": "ولد",
+              "answer": "Ahmad",
+              "isValid": false,
+              "isPendingVote": false,
+              "isUnique": false,
+              "score": 0,
+              "votes": {
+                "accepted": 0,
+                "rejected": 0
+              },
+              "reason": "حرف خطأ",
+              "isFabricated": false
+            },
+            {
+              "playerId": "151aaf7c-027d-4b1a-9397-a9a2a1336bef",
+              "playerName": "Player1",
+              "category": "بنت",
+              "answer": "Amira",
+              "isValid": false,
+              "isPendingVote": false,
+              "isUnique": false,
+              "score": 0,
+              "votes": {
+                "accepted": 0,
+                "rejected": 0
+              },
+              "reason": "حرف خطأ",
+              "isFabricated": false
+            }
+          ],
+          "votingComplete": false,
+          "powerUpUsedInRound": false
+        }
+      ],
+      "currentRound": 0,
+      "totalRounds": 3,
+      "phase": "referee_review",
+      "letters": [
+        "ج",
+        "أ",
+        "ص",
+        "ح",
+        "ب",
+        "ط",
+        "هـ",
+        "ل",
+        "ث",
+        "ظ"
+      ],
+      "createdAt": 1770728454539,
+      "voteQueue": [],
+      "currentVote": null,
+      "settings": {
+        "enableVoting": false,
+        "customCategories": []
+      },
+      "refereeId": "2c2f37c5-363f-4644-b753-d46bb3224c1b"
+    }
+  ]
+}

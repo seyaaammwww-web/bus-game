@@ -30,6 +30,8 @@ function GameRouter() {
       }
       return <Game />;
     case 'results':
+    case 'voting':
+    case 'referee_review':
     case 'final':
       return <Results />;
     default:

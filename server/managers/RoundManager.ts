@@ -1,6 +1,7 @@
 
 import { CorruptionProofBuffer, stringToSeed } from '../utils/reliability';
 import { GameRoom, Round, PlayerSubmission, RoundAnswers, Category, ValidatedAnswer } from '../../shared/schema';
+import { randomUUID } from 'crypto';
 import { HybridValidator } from '../hybridValidator';
 import { categories } from '../../shared/schema';
 
@@ -95,6 +96,8 @@ export class RoundManager {
             const round = draft.rounds[draft.currentRound];
             if (!round) return;
 
+            if (round.banishedPlayerId === playerId) return;
+
             const player = draft.players.find(p => p.id === playerId);
             if (!player) return;
 
@@ -163,6 +166,8 @@ export class RoundManager {
 
         for (const category of currentCategories) {
             for (const submission of round.submissions) {
+                if (submission.playerId === round.banishedPlayerId) continue;
+
                 const answer = submission.answers[category];
                 if (answer && answer.trim()) {
                     allAnswers.push({ playerId: submission.playerId, category, answer });
@@ -240,8 +245,31 @@ export class RoundManager {
                 if (!draft.settings) draft.settings = {};
                 draft.settings.enableVoting = true;
                 draft.phase = 'voting';
+
+                // Populate Vote Queue
+                draft.voteQueue = dRound.validatedAnswers
+                    .filter(a => a.isPendingVote)
+                    .map(a => ({
+                        requestId: randomUUID(),
+                        requesterId: a.playerId,
+                        requesterName: a.playerName,
+                        category: a.category,
+                        word: a.answer
+                    }));
+
+                // Start first vote
+                if (draft.voteQueue.length > 0) {
+                    const next = draft.voteQueue.shift()!;
+                    draft.currentVote = {
+                        ...next,
+                        votes: { yes: 0, no: 0 },
+                        voterIds: [],
+                        votesDetails: {},
+                        startTime: Date.now()
+                    };
+                }
             } else {
-                this.finalizeScoresOnDraft(draft);
+                this.calculateAnswerScores(draft);
             }
 
         }, "calculateScores");
@@ -253,11 +281,8 @@ export class RoundManager {
         }
     }
 
-    finalizeScoresOnDraft(draft: GameRoom) {
+    calculateAnswerScores(draft: GameRoom) {
         const round = draft.rounds[draft.currentRound];
-        const currentCategories = draft.settings?.customCategories?.length
-            ? draft.settings.customCategories
-            : categories;
 
         const answerCounts = new Map<string, number>();
 
@@ -276,12 +301,22 @@ export class RoundManager {
                 ans.score = 0;
             }
         }
+    }
+
+    commitRoundResults(draft: GameRoom) {
+        const round = draft.rounds[draft.currentRound];
+        const currentCategories = draft.settings?.customCategories?.length
+            ? draft.settings.customCategories
+            : categories;
+
+        // Ensure scores are fresh before committing
+        this.calculateAnswerScores(draft);
 
         for (const player of draft.players) {
             if (player.id === draft.refereeId) continue;
 
             const playerAnswers = round.validatedAnswers.filter(a => a.playerId === player.id);
-            const roundScore = playerAnswers.reduce((sum, a) => sum + a.score, 0);
+            const roundScore = playerAnswers.reduce((sum, a) => sum + (a.score || 0), 0);
 
             player.score += roundScore;
             player.totalEarnedPoints = (player.totalEarnedPoints || 0) + roundScore;

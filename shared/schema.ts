@@ -232,6 +232,7 @@ export type WSMessageType =
   | 'cast_democratic_vote'
   | 'vote_session_start' // Individual word vote start
   | 'vote_session_result'
+  | 'referee_toggle_validity'
   | 'ping';
 
 export interface WSMessage {

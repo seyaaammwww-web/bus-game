@@ -12,6 +12,7 @@ import { BanishPowerUp } from '@/components/BanishPowerUp';
 import { BanishOverlay } from '@/components/BanishOverlay';
 import { BanishNotification } from '@/components/BanishNotification';
 import { PowerUpMenu } from '@/components/PowerUpMenu';
+import { VotingOverlay } from '@/components/VotingOverlay';
 import { Confetti } from '@/components/Confetti';
 import { useGame } from '@/lib/gameContext';
 import { categories, type Category, type RoundAnswers } from '@shared/schema';
@@ -378,6 +379,8 @@ export default function Game() {
           banishedBy={banishedBy || undefined}
           isBanished={isBanished}
         />
+
+        <VotingOverlay />
 
         <AnimatePresence>
           {/* Removed AI processing screen - direct transition to results */}

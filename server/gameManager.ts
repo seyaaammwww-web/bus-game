@@ -58,7 +58,50 @@ export class GameManager {
   // Connection Handling
   // ==========================================
 
+  private startVoteTimer(roomCode: string) {
+    this.roundManager.setRoundTimer(roomCode, () => {
+      this.handleVoteTimeout(roomCode);
+    }, 15000); // 15 seconds per vote
+  }
+
+  private handleVoteTimeout(roomCode: string) {
+    const buffer = this.roomManager.getRoomBuffer(roomCode);
+    if (!buffer) return;
+
+    let nextVoteReady = false;
+
+    buffer.transact(draft => {
+      if (draft.phase !== 'voting' || !draft.currentVote) return;
+
+      // Timeout = Resolve based on current majority or Reject if 0 votes?
+      // Let's say: If Yes >= No, accept. (Unless 0-0 => Reject).
+      const { yes, no } = draft.currentVote.votes;
+      if (yes === 0 && no === 0) {
+        // Auto-reject if nobody voted? Or Auto-accept if nobody complained?
+        // Usually if it's "Review", it means it's suspicious. Auto-reject?
+        // But if it's "Request Check", maybe auto-reject.
+        // Let's go with: Tie goes to requester? No, tie goes to NO.
+      }
+
+      // Force resolution
+      this.resolveCurrentVoteInDraft(draft);
+      if (draft.currentVote) nextVoteReady = true;
+
+    }, "handleVoteTimeout");
+
+    const room = buffer.get();
+    this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
+
+    if (nextVoteReady) {
+      this.startVoteTimer(roomCode);
+    } else if (room.phase === 'results') {
+      // Timer naturally cleared or we can start results timer
+      // finishRoundPhase handles auto-start timer if needed
+    }
+  }
+
   handleMessage(ws: WebSocket, message: WSMessage): void {
+    console.log(`[GameManager] Received: ${message.type}`, message.payload);
     try {
       switch (message.type) {
         case 'create_room': this.createRoom(ws, message.payload.playerName); break;
@@ -83,6 +126,7 @@ export class GameManager {
         case 'cast_democratic_vote':
           this.castDemocraticVote(ws, message.payload.vote || message.payload);
           break;
+        case 'referee_toggle_validity': this.refereeToggleValidity(ws, message.payload); break;
       }
     } catch (e: any) {
       console.error(`[GameManager] Error handling ${message.type}:`, e);
@@ -314,13 +358,10 @@ export class GameManager {
       });
 
       // Vote Timeout
-      this.roundManager.setRoundTimer(r.code, () => {
-        // Resolve voting logic... refactoring this fully needs moving voting logic to RoundManager too
-        // For now, let's implement a simple auto-accept/reject inside RM or here
-        this.resolveAllPendingVotes(r.code);
-      }, 30000);
-
+      // Vote Timeout - Start Per Vote Timer
+      this.startVoteTimer(r.code);
     }, () => {
+
       // On Round Finish directly
       const r = buffer.get();
       this.finishRoundPhase(r.code);
@@ -346,7 +387,7 @@ export class GameManager {
       });
 
       if (changed) {
-        this.roundManager.finalizeScoresOnDraft(draft);
+        this.roundManager.calculateAnswerScores(draft);
       }
     }, "resolveAllVotes");
 
@@ -354,42 +395,55 @@ export class GameManager {
   }
 
   private finishRoundPhase(roomCode: string) {
-    const buffer = this.roomManager.getRoomBuffer(roomCode);
-    if (!buffer) return;
+    try {
+      const buffer = this.roomManager.getRoomBuffer(roomCode);
+      if (!buffer) return;
 
-    let autoStart = false;
-    buffer.transact(draft => {
-      const round = draft.rounds[draft.currentRound];
-      round.powerUpUsedInRound = false;
+      let autoStart = false;
+      buffer.transact(draft => {
+        const round = draft.rounds[draft.currentRound];
+        if (round) round.powerUpUsedInRound = false;
 
-      if (draft.refereeId) {
-        draft.phase = 'referee_review';
-      } else if (draft.settings?.enableVoting) {
-        draft.phase = 'results';
-      } else {
-        draft.phase = 'results';
-        draft.nextRoundAt = Date.now() + 20000;
-        autoStart = true;
+        // Logic to determine next phase
+        // If we are currently playing, check for Referee
+        if (draft.phase === 'playing' && draft.refereeId) {
+          draft.phase = 'referee_review';
+        }
+        // If we are coming from Voting or Referee Review, or Playing (no referee), go to Results
+        else {
+          draft.phase = 'results';
+          this.roundManager.commitRoundResults(draft);
+
+          // Auto-start logic only if not manual (no referee, maybe no voting)
+          if (!draft.refereeId && !draft.settings?.enableVoting) {
+            draft.nextRoundAt = Date.now() + 20000;
+            autoStart = true;
+          }
+        }
+      }, "finishRoundPhase");
+
+      const room = buffer.get();
+      this.broadcastToRoom(room.code, { type: 'round_results', payload: { room } });
+
+      if (autoStart && room.currentRound < room.totalRounds - 1) {
+        setTimeout(() => {
+          const check = buffer.get();
+          if (check.phase === 'results' && check.currentRound === room.currentRound) {
+            this.nextRoundByRoomCode(room.code);
+          }
+        }, 20000);
+      } else if (room.currentRound >= room.totalRounds - 1) {
+        setTimeout(() => {
+          const check = buffer.get();
+          if (check.phase === 'results') {
+            this.handleGameEnd(check.code);
+          }
+        }, 20000);
       }
-    }, "finishRoundPhase");
-
-    const room = buffer.get();
-    this.broadcastToRoom(room.code, { type: 'round_results', payload: { room } });
-
-    if (autoStart && room.currentRound < room.totalRounds - 1) {
-      setTimeout(() => {
-        const check = buffer.get();
-        if (check.phase === 'results' && check.currentRound === room.currentRound) {
-          this.nextRoundByRoomCode(room.code);
-        }
-      }, 20000);
-    } else if (room.currentRound >= room.totalRounds - 1) {
-      setTimeout(() => {
-        const check = buffer.get();
-        if (check.phase === 'results') {
-          this.handleGameEnd(check.code);
-        }
-      }, 20000);
+    } catch (e: any) {
+      console.error(`[FinishRoundPhase] Error in room ${roomCode}:`, e);
+      // Attempt to broadcast error or safe state?
+      // For now just logging prevents the process from crashing if uncaught.
     }
   }
 
@@ -460,14 +514,22 @@ export class GameManager {
     if (!buffer) return;
 
     buffer.transact(draft => {
-      if (draft.players.find(pl => pl.id === p.playerId)?.isHost && draft.phase === 'lobby') {
+      const isHost = draft.players.find(pl => pl.id === p.playerId)?.isHost;
+      if (!isHost) return;
+
+      if (draft.phase === 'lobby') {
         if (settings.customCategories) draft.settings = { ...draft.settings, customCategories: settings.customCategories };
-        if (settings.enableVoting !== undefined) {
-          if (!draft.settings) draft.settings = {};
-          draft.settings.enableVoting = settings.enableVoting;
-          if (settings.enableVoting && draft.refereeId) {
-            draft.refereeId = undefined;
-            draft.players.forEach(pl => pl.isReferee = false);
+      }
+
+      if (settings.enableVoting !== undefined) {
+        if (!draft.settings) draft.settings = {};
+        draft.settings.enableVoting = settings.enableVoting;
+
+        if (settings.enableVoting && draft.refereeId) {
+          draft.refereeId = undefined;
+          draft.players.forEach(pl => pl.isReferee = false);
+          if (draft.phase === 'referee_review') {
+            draft.phase = 'results';
           }
         }
       }
@@ -491,7 +553,14 @@ export class GameManager {
       draft.players.forEach(pl => pl.isReferee = false);
       target.isReferee = true;
       draft.refereeId = targetId;
-      if (draft.settings) draft.settings.enableVoting = false;
+
+      // Clear voting state to avoid conflicts
+      draft.voteQueue = [];
+      draft.currentVote = null;
+      if (!draft.settings) draft.settings = {};
+      draft.settings.enableVoting = false;
+
+      console.log(`[SetReferee] Referee set to ${target.name} (${targetId}), Voting Disabled`);
     }, "setReferee");
 
     const room = buffer.get();
@@ -555,6 +624,10 @@ export class GameManager {
 
     const room = buffer.get();
     this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
+
+    if (room.phase === 'voting' && room.currentVote) {
+      this.startVoteTimer(room.code);
+    }
   }
 
   vote(ws: WebSocket, targetId: string, category: Category, accepted: boolean) {
@@ -585,26 +658,43 @@ export class GameManager {
     if (!buffer) return;
 
     buffer.transact(draft => {
-      if (!draft.settings?.enableVoting) return;
+      if (!draft.settings?.enableVoting) {
+        console.log('[RequestVote] Voting disabled in settings');
+        return;
+      }
+
+      const player = draft.players.find(pl => pl.id === p.playerId);
+
       // Add to vote queue
       if (!draft.voteQueue) draft.voteQueue = [];
       draft.voteQueue.push({
         requestId: crypto.randomUUID(),
         requesterId: p.playerId,
-        requesterName: '', // fetch name
+        requesterName: player?.name || 'Unknown',
         category: payload.category,
         word: payload.word
       });
+
+      console.log(`[RequestVote] Queue length: ${draft.voteQueue.length}, CurrentVote: ${!!draft.currentVote}`);
 
       if (!draft.currentVote && draft.voteQueue.length > 0) {
         const next = draft.voteQueue.shift()!;
         draft.currentVote = { ...next, votes: { yes: 0, no: 0 }, voterIds: [], votesDetails: {}, startTime: Date.now() };
         draft.phase = 'voting';
+        console.log('[RequestVote] Started voting phase');
       }
     }, "requestVote");
 
     const room = buffer.get();
     this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
+
+    if (room.phase === 'voting' && room.currentVote) {
+      // Only start timer if this is a newly created vote session
+      const elapsed = Date.now() - room.currentVote.startTime;
+      if (elapsed < 1000) {
+        this.startVoteTimer(room.code);
+      }
+    }
   }
 
   castDemocraticVote(ws: WebSocket, vote: 'yes' | 'no') {
@@ -628,6 +718,46 @@ export class GameManager {
         this.resolveCurrentVoteInDraft(draft);
       }
     }, "castVote");
+
+    const room = buffer.get();
+    this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
+
+    if (room.phase === 'voting' && room.currentVote) {
+      // Check if we moved to NEXT vote (new session started by resolution)
+      const elapsed = Date.now() - room.currentVote.startTime;
+      if (elapsed < 1000) {
+        this.startVoteTimer(room.code);
+      }
+    }
+  }
+
+  refereeToggleValidity(ws: WebSocket, payload: any) {
+    const p = this.playerManager.getPlayer(ws);
+    if (!p) return;
+    const buffer = this.roomManager.getRoomBuffer(p.roomId);
+    if (!buffer) return;
+
+    buffer.transact(draft => {
+      // Security check: Must be Referee (or Host as fallback if no referee set explicitly, but mostly Referee)
+      // console.log(`[RefereeToggle] Req from ${p.playerId}, Referee: ${draft.refereeId}, IsHost: ${draft.players.find(pl => pl.id === p.playerId)?.isHost}`);
+      if (draft.refereeId !== p.playerId && !draft.players.find(pl => pl.id === p.playerId)?.isHost) {
+        console.log('[RefereeToggle] Denied: Not referee or host');
+        return;
+      }
+
+      const round = draft.rounds[draft.currentRound];
+      const ans = round.validatedAnswers.find((a: any) => a.playerId === payload.playerId && a.category === payload.category);
+
+      if (ans) {
+        console.log(`[RefereeToggle] Toggling ${ans.category} for ${ans.playerName} from ${ans.isValid} to ${!ans.isValid}`);
+        ans.isValid = !ans.isValid;
+        ans.reason = ans.isValid ? 'تم القبول من الحكم' : 'تم الرفض من الحكم';
+        // Recalculate answer scores (unique etc) immediately for UI feedback
+        this.roundManager.calculateAnswerScores(draft);
+      } else {
+        console.log(`[RefereeToggle] Answer not found for ${payload.playerId} / ${payload.category}`);
+      }
+    }, "refereeToggleValidity");
 
     const room = buffer.get();
     this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
@@ -680,6 +810,7 @@ export class GameManager {
 
   // Helpers
   private send(ws: WebSocket, message: WSMessage) {
+    if (message.type !== 'ping') console.log(`[GameManager] Sending: ${message.type}`, message.payload ? Object.keys(message.payload) : 'no payload');
     if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(message));
   }
 

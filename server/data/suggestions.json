@@ -1,1 +1,839 @@
-[]
+[
+  {
+    "word": "هـكلمة",
+    "normalized": "هـكلمه",
+    "letter": "هـ",
+    "category": "ولد",
+    "count": 1,
+    "firstSeen": "2026-02-10T00:46:20.170Z",
+    "lastSeen": "2026-02-10T00:46:20.170Z"
+  },
+  {
+    "word": "ذكلمة",
+    "normalized": "ذكلمه",
+    "letter": "ذ",
+    "category": "ولد",
+    "count": 1,
+    "firstSeen": "2026-02-10T00:52:29.746Z",
+    "lastSeen": "2026-02-10T00:52:29.746Z"
+  },
+  {
+    "word": "ضtest",
+    "normalized": "ض",
+    "letter": "ض",
+    "category": "ولد",
+    "count": 2,
+    "firstSeen": "2026-02-10T00:57:41.696Z",
+    "lastSeen": "2026-02-10T00:57:41.696Z"
+  },
+  {
+    "word": "ضtest",
+    "normalized": "ض",
+    "letter": "ض",
+    "category": "بنت",
+    "count": 2,
+    "firstSeen": "2026-02-10T00:57:41.697Z",
+    "lastSeen": "2026-02-10T00:57:41.698Z"
+  },
+  {
+    "word": "ضtest",
+    "normalized": "ض",
+    "letter": "ض",
+    "category": "بلد",
+    "count": 2,
+    "firstSeen": "2026-02-10T00:57:41.698Z",
+    "lastSeen": "2026-02-10T00:57:41.699Z"
+  },
+  {
+    "word": "ضtest",
+    "normalized": "ض",
+    "letter": "ض",
+    "category": "حيوان",
+    "count": 2,
+    "firstSeen": "2026-02-10T00:57:41.699Z",
+    "lastSeen": "2026-02-10T00:57:41.700Z"
+  },
+  {
+    "word": "ضtest",
+    "normalized": "ض",
+    "letter": "ض",
+    "category": "جماد",
+    "count": 2,
+    "firstSeen": "2026-02-10T00:57:41.701Z",
+    "lastSeen": "2026-02-10T00:57:41.702Z"
+  },
+  {
+    "word": "وtest",
+    "normalized": "و",
+    "letter": "و",
+    "category": "ولد",
+    "count": 6,
+    "firstSeen": "2026-02-10T00:58:59.178Z",
+    "lastSeen": "2026-02-10T01:08:28.761Z"
+  },
+  {
+    "word": "وtest",
+    "normalized": "و",
+    "letter": "و",
+    "category": "بنت",
+    "count": 6,
+    "firstSeen": "2026-02-10T00:58:59.180Z",
+    "lastSeen": "2026-02-10T01:08:28.766Z"
+  },
+  {
+    "word": "وtest",
+    "normalized": "و",
+    "letter": "و",
+    "category": "بلد",
+    "count": 6,
+    "firstSeen": "2026-02-10T00:58:59.182Z",
+    "lastSeen": "2026-02-10T01:08:28.773Z"
+  },
+  {
+    "word": "وtest",
+    "normalized": "و",
+    "letter": "و",
+    "category": "حيوان",
+    "count": 6,
+    "firstSeen": "2026-02-10T00:58:59.184Z",
+    "lastSeen": "2026-02-10T01:08:28.780Z"
+  },
+  {
+    "word": "وtest",
+    "normalized": "و",
+    "letter": "و",
+    "category": "جماد",
+    "count": 6,
+    "firstSeen": "2026-02-10T00:58:59.186Z",
+    "lastSeen": "2026-02-10T01:08:28.783Z"
+  },
+  {
+    "word": "أtest",
+    "normalized": "ا",
+    "letter": "أ",
+    "category": "ولد",
+    "count": 4,
+    "firstSeen": "2026-02-10T00:59:29.986Z",
+    "lastSeen": "2026-02-10T01:05:36.062Z"
+  },
+  {
+    "word": "أtest",
+    "normalized": "ا",
+    "letter": "أ",
+    "category": "بنت",
+    "count": 4,
+    "firstSeen": "2026-02-10T00:59:29.990Z",
+    "lastSeen": "2026-02-10T01:05:36.066Z"
+  },
+  {
+    "word": "أtest",
+    "normalized": "ا",
+    "letter": "أ",
+    "category": "بلد",
+    "count": 4,
+    "firstSeen": "2026-02-10T00:59:29.992Z",
+    "lastSeen": "2026-02-10T01:05:36.068Z"
+  },
+  {
+    "word": "أtest",
+    "normalized": "ا",
+    "letter": "أ",
+    "category": "حيوان",
+    "count": 4,
+    "firstSeen": "2026-02-10T00:59:29.995Z",
+    "lastSeen": "2026-02-10T01:05:36.071Z"
+  },
+  {
+    "word": "أtest",
+    "normalized": "ا",
+    "letter": "أ",
+    "category": "جماد",
+    "count": 4,
+    "firstSeen": "2026-02-10T00:59:29.997Z",
+    "lastSeen": "2026-02-10T01:05:36.079Z"
+  },
+  {
+    "word": "ظtest",
+    "normalized": "ظ",
+    "letter": "ظ",
+    "category": "ولد",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:00:20.025Z",
+    "lastSeen": "2026-02-10T01:00:20.026Z"
+  },
+  {
+    "word": "ظtest",
+    "normalized": "ظ",
+    "letter": "ظ",
+    "category": "بنت",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:00:20.027Z",
+    "lastSeen": "2026-02-10T01:00:20.028Z"
+  },
+  {
+    "word": "ظtest",
+    "normalized": "ظ",
+    "letter": "ظ",
+    "category": "بلد",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:00:20.029Z",
+    "lastSeen": "2026-02-10T01:00:20.030Z"
+  },
+  {
+    "word": "ظtest",
+    "normalized": "ظ",
+    "letter": "ظ",
+    "category": "حيوان",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:00:20.031Z",
+    "lastSeen": "2026-02-10T01:00:20.033Z"
+  },
+  {
+    "word": "ظtest",
+    "normalized": "ظ",
+    "letter": "ظ",
+    "category": "جماد",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:00:20.035Z",
+    "lastSeen": "2026-02-10T01:00:20.036Z"
+  },
+  {
+    "word": "تtest",
+    "normalized": "ت",
+    "letter": "ت",
+    "category": "ولد",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:00:59.239Z",
+    "lastSeen": "2026-02-10T01:00:59.240Z"
+  },
+  {
+    "word": "تtest",
+    "normalized": "ت",
+    "letter": "ت",
+    "category": "بنت",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:00:59.241Z",
+    "lastSeen": "2026-02-10T01:00:59.243Z"
+  },
+  {
+    "word": "تtest",
+    "normalized": "ت",
+    "letter": "ت",
+    "category": "بلد",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:00:59.244Z",
+    "lastSeen": "2026-02-10T01:00:59.246Z"
+  },
+  {
+    "word": "تtest",
+    "normalized": "ت",
+    "letter": "ت",
+    "category": "حيوان",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:00:59.248Z",
+    "lastSeen": "2026-02-10T01:00:59.249Z"
+  },
+  {
+    "word": "تtest",
+    "normalized": "ت",
+    "letter": "ت",
+    "category": "جماد",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:00:59.251Z",
+    "lastSeen": "2026-02-10T01:00:59.252Z"
+  },
+  {
+    "word": "سtest",
+    "normalized": "س",
+    "letter": "س",
+    "category": "ولد",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:02:50.612Z",
+    "lastSeen": "2026-02-10T01:02:50.613Z"
+  },
+  {
+    "word": "سtest",
+    "normalized": "س",
+    "letter": "س",
+    "category": "بنت",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:02:50.615Z",
+    "lastSeen": "2026-02-10T01:02:50.616Z"
+  },
+  {
+    "word": "سtest",
+    "normalized": "س",
+    "letter": "س",
+    "category": "بلد",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:02:50.617Z",
+    "lastSeen": "2026-02-10T01:02:50.618Z"
+  },
+  {
+    "word": "سtest",
+    "normalized": "س",
+    "letter": "س",
+    "category": "حيوان",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:02:50.619Z",
+    "lastSeen": "2026-02-10T01:02:50.620Z"
+  },
+  {
+    "word": "سtest",
+    "normalized": "س",
+    "letter": "س",
+    "category": "جماد",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:02:50.621Z",
+    "lastSeen": "2026-02-10T01:02:50.623Z"
+  },
+  {
+    "word": "زtest",
+    "normalized": "ز",
+    "letter": "ز",
+    "category": "ولد",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:06:06.610Z",
+    "lastSeen": "2026-02-10T01:06:06.612Z"
+  },
+  {
+    "word": "زtest",
+    "normalized": "ز",
+    "letter": "ز",
+    "category": "بنت",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:06:06.614Z",
+    "lastSeen": "2026-02-10T01:06:06.616Z"
+  },
+  {
+    "word": "زtest",
+    "normalized": "ز",
+    "letter": "ز",
+    "category": "بلد",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:06:06.618Z",
+    "lastSeen": "2026-02-10T01:06:06.622Z"
+  },
+  {
+    "word": "زtest",
+    "normalized": "ز",
+    "letter": "ز",
+    "category": "حيوان",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:06:06.625Z",
+    "lastSeen": "2026-02-10T01:06:06.627Z"
+  },
+  {
+    "word": "زtest",
+    "normalized": "ز",
+    "letter": "ز",
+    "category": "جماد",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:06:06.629Z",
+    "lastSeen": "2026-02-10T01:06:06.630Z"
+  },
+  {
+    "word": "حtest",
+    "normalized": "ح",
+    "letter": "ح",
+    "category": "ولد",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:10:00.497Z",
+    "lastSeen": "2026-02-10T01:10:00.499Z"
+  },
+  {
+    "word": "حtest",
+    "normalized": "ح",
+    "letter": "ح",
+    "category": "بنت",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:10:00.502Z",
+    "lastSeen": "2026-02-10T01:10:00.504Z"
+  },
+  {
+    "word": "حtest",
+    "normalized": "ح",
+    "letter": "ح",
+    "category": "بلد",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:10:00.511Z",
+    "lastSeen": "2026-02-10T01:10:00.513Z"
+  },
+  {
+    "word": "حtest",
+    "normalized": "ح",
+    "letter": "ح",
+    "category": "حيوان",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:10:00.515Z",
+    "lastSeen": "2026-02-10T01:10:00.516Z"
+  },
+  {
+    "word": "حtest",
+    "normalized": "ح",
+    "letter": "ح",
+    "category": "جماد",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:10:00.518Z",
+    "lastSeen": "2026-02-10T01:10:00.521Z"
+  },
+  {
+    "word": "رtest",
+    "normalized": "ر",
+    "letter": "ر",
+    "category": "ولد",
+    "count": 4,
+    "firstSeen": "2026-02-10T01:12:37.662Z",
+    "lastSeen": "2026-02-10T01:15:27.692Z"
+  },
+  {
+    "word": "رtest",
+    "normalized": "ر",
+    "letter": "ر",
+    "category": "بنت",
+    "count": 4,
+    "firstSeen": "2026-02-10T01:12:37.665Z",
+    "lastSeen": "2026-02-10T01:15:27.694Z"
+  },
+  {
+    "word": "رtest",
+    "normalized": "ر",
+    "letter": "ر",
+    "category": "بلد",
+    "count": 4,
+    "firstSeen": "2026-02-10T01:12:37.668Z",
+    "lastSeen": "2026-02-10T01:15:27.695Z"
+  },
+  {
+    "word": "رtest",
+    "normalized": "ر",
+    "letter": "ر",
+    "category": "حيوان",
+    "count": 4,
+    "firstSeen": "2026-02-10T01:12:37.675Z",
+    "lastSeen": "2026-02-10T01:15:27.697Z"
+  },
+  {
+    "word": "رtest",
+    "normalized": "ر",
+    "letter": "ر",
+    "category": "جماد",
+    "count": 4,
+    "firstSeen": "2026-02-10T01:12:37.679Z",
+    "lastSeen": "2026-02-10T01:15:27.699Z"
+  },
+  {
+    "word": "هـtest",
+    "normalized": "هـ",
+    "letter": "هـ",
+    "category": "ولد",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:17:14.625Z",
+    "lastSeen": "2026-02-10T01:17:14.627Z"
+  },
+  {
+    "word": "هـtest",
+    "normalized": "هـ",
+    "letter": "هـ",
+    "category": "بنت",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:17:14.629Z",
+    "lastSeen": "2026-02-10T01:17:14.631Z"
+  },
+  {
+    "word": "هـtest",
+    "normalized": "هـ",
+    "letter": "هـ",
+    "category": "بلد",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:17:14.632Z",
+    "lastSeen": "2026-02-10T01:17:14.633Z"
+  },
+  {
+    "word": "هـtest",
+    "normalized": "هـ",
+    "letter": "هـ",
+    "category": "حيوان",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:17:14.634Z",
+    "lastSeen": "2026-02-10T01:17:14.635Z"
+  },
+  {
+    "word": "هـtest",
+    "normalized": "هـ",
+    "letter": "هـ",
+    "category": "جماد",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:17:14.639Z",
+    "lastSeen": "2026-02-10T01:17:14.642Z"
+  },
+  {
+    "word": "صtestst",
+    "normalized": "ص",
+    "letter": "ص",
+    "category": "ولد",
+    "count": 1,
+    "firstSeen": "2026-02-10T01:32:14.491Z",
+    "lastSeen": "2026-02-10T01:32:14.491Z"
+  },
+  {
+    "word": "صtest",
+    "normalized": "ص",
+    "letter": "ص",
+    "category": "بنت",
+    "count": 1,
+    "firstSeen": "2026-02-10T01:32:14.493Z",
+    "lastSeen": "2026-02-10T01:32:14.493Z"
+  },
+  {
+    "word": "صte",
+    "normalized": "ص",
+    "letter": "ص",
+    "category": "بلد",
+    "count": 1,
+    "firstSeen": "2026-02-10T01:32:14.494Z",
+    "lastSeen": "2026-02-10T01:32:14.495Z"
+  },
+  {
+    "word": "صtest",
+    "normalized": "ص",
+    "letter": "ص",
+    "category": "حيوان",
+    "count": 1,
+    "firstSeen": "2026-02-10T01:32:14.508Z",
+    "lastSeen": "2026-02-10T01:32:14.508Z"
+  },
+  {
+    "word": "صtest",
+    "normalized": "ص",
+    "letter": "ص",
+    "category": "جماد",
+    "count": 1,
+    "firstSeen": "2026-02-10T01:32:14.526Z",
+    "lastSeen": "2026-02-10T01:32:14.526Z"
+  },
+  {
+    "word": "test1",
+    "normalized": "",
+    "letter": "ذ",
+    "category": "ولد",
+    "count": 4,
+    "firstSeen": "2026-02-10T01:50:58.343Z",
+    "lastSeen": "2026-02-10T14:30:07.135Z"
+  },
+  {
+    "word": "test2",
+    "normalized": "",
+    "letter": "ذ",
+    "category": "بنت",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:50:58.348Z",
+    "lastSeen": "2026-02-10T01:50:58.352Z"
+  },
+  {
+    "word": "test3",
+    "normalized": "",
+    "letter": "ذ",
+    "category": "بلد",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:50:58.354Z",
+    "lastSeen": "2026-02-10T01:50:58.357Z"
+  },
+  {
+    "word": "test4",
+    "normalized": "",
+    "letter": "ذ",
+    "category": "حيوان",
+    "count": 2,
+    "firstSeen": "2026-02-10T01:50:58.358Z",
+    "lastSeen": "2026-02-10T01:50:58.360Z"
+  },
+  {
+    "word": "test5",
+    "normalized": "",
+    "letter": "ذ",
+    "category": "جماد",
+    "count": 1,
+    "firstSeen": "2026-02-10T01:50:58.361Z",
+    "lastSeen": "2026-02-10T01:50:58.361Z"
+  },
+  {
+    "word": "خزعبلات",
+    "normalized": "خزعبلات",
+    "letter": "ص",
+    "category": "ولد",
+    "count": 1,
+    "firstSeen": "2026-02-10T01:51:15.327Z",
+    "lastSeen": "2026-02-10T01:51:15.327Z"
+  },
+  {
+    "word": "خزعبلات",
+    "normalized": "خزعبلات",
+    "letter": "ص",
+    "category": "بنت",
+    "count": 1,
+    "firstSeen": "2026-02-10T01:51:15.375Z",
+    "lastSeen": "2026-02-10T01:51:15.375Z"
+  },
+  {
+    "word": "خزعبلات",
+    "normalized": "خزعبلات",
+    "letter": "ص",
+    "category": "بلد",
+    "count": 1,
+    "firstSeen": "2026-02-10T01:51:15.457Z",
+    "lastSeen": "2026-02-10T01:51:15.457Z"
+  },
+  {
+    "word": "خزعبلات",
+    "normalized": "خزعبلات",
+    "letter": "ص",
+    "category": "حيوان",
+    "count": 1,
+    "firstSeen": "2026-02-10T01:51:15.504Z",
+    "lastSeen": "2026-02-10T01:51:15.504Z"
+  },
+  {
+    "word": "خزعبلات",
+    "normalized": "خزعبلات",
+    "letter": "ص",
+    "category": "جماد",
+    "count": 1,
+    "firstSeen": "2026-02-10T01:51:16.174Z",
+    "lastSeen": "2026-02-10T01:51:16.174Z"
+  },
+  {
+    "word": "بحمدكا",
+    "normalized": "بحمدكا",
+    "letter": "ب",
+    "category": "ولد",
+    "count": 1,
+    "firstSeen": "2026-02-10T01:56:23.233Z",
+    "lastSeen": "2026-02-10T01:56:23.233Z"
+  },
+  {
+    "word": "بليا",
+    "normalized": "بليا",
+    "letter": "ب",
+    "category": "بنت",
+    "count": 1,
+    "firstSeen": "2026-02-10T01:56:23.381Z",
+    "lastSeen": "2026-02-10T01:56:23.381Z"
+  },
+  {
+    "word": "بمري",
+    "normalized": "بمري",
+    "letter": "ب",
+    "category": "بلد",
+    "count": 1,
+    "firstSeen": "2026-02-10T01:56:24.624Z",
+    "lastSeen": "2026-02-10T01:56:24.624Z"
+  },
+  {
+    "word": "بسد",
+    "normalized": "بسد",
+    "letter": "ب",
+    "category": "حيوان",
+    "count": 1,
+    "firstSeen": "2026-02-10T01:56:26.883Z",
+    "lastSeen": "2026-02-10T01:56:26.883Z"
+  },
+  {
+    "word": "بلوان",
+    "normalized": "بلوان",
+    "letter": "ب",
+    "category": "جماد",
+    "count": 1,
+    "firstSeen": "2026-02-10T01:56:29.103Z",
+    "lastSeen": "2026-02-10T01:56:29.103Z"
+  },
+  {
+    "word": "Ahmad",
+    "normalized": "",
+    "letter": "ج",
+    "category": "ولد",
+    "count": 1,
+    "firstSeen": "2026-02-10T13:00:54.560Z",
+    "lastSeen": "2026-02-10T13:00:54.561Z"
+  },
+  {
+    "word": "Amira",
+    "normalized": "",
+    "letter": "ج",
+    "category": "بنت",
+    "count": 1,
+    "firstSeen": "2026-02-10T13:00:54.561Z",
+    "lastSeen": "2026-02-10T13:00:54.561Z"
+  },
+  {
+    "word": "Ahmad",
+    "normalized": "",
+    "letter": "ز",
+    "category": "ولد",
+    "count": 1,
+    "firstSeen": "2026-02-10T13:20:48.923Z",
+    "lastSeen": "2026-02-10T13:20:48.923Z"
+  },
+  {
+    "word": "Amira",
+    "normalized": "",
+    "letter": "ز",
+    "category": "بنت",
+    "count": 1,
+    "firstSeen": "2026-02-10T13:20:48.923Z",
+    "lastSeen": "2026-02-10T13:20:48.923Z"
+  },
+  {
+    "word": "Ahmad",
+    "normalized": "",
+    "letter": "و",
+    "category": "ولد",
+    "count": 1,
+    "firstSeen": "2026-02-10T13:22:12.169Z",
+    "lastSeen": "2026-02-10T13:22:12.169Z"
+  },
+  {
+    "word": "Amira",
+    "normalized": "",
+    "letter": "و",
+    "category": "بنت",
+    "count": 1,
+    "firstSeen": "2026-02-10T13:22:12.170Z",
+    "lastSeen": "2026-02-10T13:22:12.170Z"
+  },
+  {
+    "word": "Ahmad",
+    "normalized": "",
+    "letter": "ح",
+    "category": "ولد",
+    "count": 1,
+    "firstSeen": "2026-02-10T13:23:28.952Z",
+    "lastSeen": "2026-02-10T13:23:28.953Z"
+  },
+  {
+    "word": "Amira",
+    "normalized": "",
+    "letter": "ح",
+    "category": "بنت",
+    "count": 1,
+    "firstSeen": "2026-02-10T13:23:28.953Z",
+    "lastSeen": "2026-02-10T13:23:28.953Z"
+  },
+  {
+    "word": "Ahmad",
+    "normalized": "",
+    "letter": "ث",
+    "category": "ولد",
+    "count": 1,
+    "firstSeen": "2026-02-10T13:24:33.139Z",
+    "lastSeen": "2026-02-10T13:24:33.139Z"
+  },
+  {
+    "word": "Amira",
+    "normalized": "",
+    "letter": "ث",
+    "category": "بنت",
+    "count": 1,
+    "firstSeen": "2026-02-10T13:24:33.140Z",
+    "lastSeen": "2026-02-10T13:24:33.140Z"
+  },
+  {
+    "word": "Ahmad",
+    "normalized": "",
+    "letter": "ش",
+    "category": "ولد",
+    "count": 1,
+    "firstSeen": "2026-02-10T13:25:45.607Z",
+    "lastSeen": "2026-02-10T13:25:45.607Z"
+  },
+  {
+    "word": "Amira",
+    "normalized": "",
+    "letter": "ش",
+    "category": "بنت",
+    "count": 1,
+    "firstSeen": "2026-02-10T13:25:45.608Z",
+    "lastSeen": "2026-02-10T13:25:45.608Z"
+  },
+  {
+    "word": "Ahmad",
+    "normalized": "",
+    "letter": "ك",
+    "category": "ولد",
+    "count": 1,
+    "firstSeen": "2026-02-10T13:26:57.317Z",
+    "lastSeen": "2026-02-10T13:26:57.317Z"
+  },
+  {
+    "word": "Amira",
+    "normalized": "",
+    "letter": "ك",
+    "category": "بنت",
+    "count": 1,
+    "firstSeen": "2026-02-10T13:26:57.318Z",
+    "lastSeen": "2026-02-10T13:26:57.318Z"
+  },
+  {
+    "word": "Ahmad",
+    "normalized": "",
+    "letter": "ق",
+    "category": "ولد",
+    "count": 1,
+    "firstSeen": "2026-02-10T13:28:32.113Z",
+    "lastSeen": "2026-02-10T13:28:32.113Z"
+  },
+  {
+    "word": "Amira",
+    "normalized": "",
+    "letter": "ق",
+    "category": "بنت",
+    "count": 1,
+    "firstSeen": "2026-02-10T13:28:32.114Z",
+    "lastSeen": "2026-02-10T13:28:32.114Z"
+  },
+  {
+    "word": "Ahmad",
+    "normalized": "",
+    "letter": "أ",
+    "category": "ولد",
+    "count": 1,
+    "firstSeen": "2026-02-10T13:29:34.657Z",
+    "lastSeen": "2026-02-10T13:29:34.657Z"
+  },
+  {
+    "word": "Amira",
+    "normalized": "",
+    "letter": "أ",
+    "category": "بنت",
+    "count": 1,
+    "firstSeen": "2026-02-10T13:29:34.658Z",
+    "lastSeen": "2026-02-10T13:29:34.658Z"
+  },
+  {
+    "word": "Mahmoud",
+    "normalized": "",
+    "letter": "خ",
+    "category": "ولد",
+    "count": 1,
+    "firstSeen": "2026-02-10T14:30:07.139Z",
+    "lastSeen": "2026-02-10T14:30:07.139Z"
+  },
+  {
+    "word": "Ahmad",
+    "normalized": "",
+    "letter": "ص",
+    "category": "ولد",
+    "count": 1,
+    "firstSeen": "2026-02-10T14:34:10.748Z",
+    "lastSeen": "2026-02-10T14:34:10.748Z"
+  },
+  {
+    "word": "Ahmad",
+    "normalized": "",
+    "letter": "ظ",
+    "category": "ولد",
+    "count": 1,
+    "firstSeen": "2026-02-10T14:36:58.758Z",
+    "lastSeen": "2026-02-10T14:36:58.758Z"
+  }
+]

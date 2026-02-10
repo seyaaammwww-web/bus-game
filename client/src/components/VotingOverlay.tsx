@@ -1,9 +1,9 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { ThumbsUp, ThumbsDown, Users, Gavel, Loader2, Crown } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { useGame } from '@/lib/gameContext';
 import { RetroCard } from '@/components/ui/RetroCard';
 import { PixelAvatar } from '@/components/ui/PixelAvatar';
+import { Timer } from '@/components/Timer';
 import { useEffect, useState } from 'react';
 import { playCountdownSound } from '@/lib/sounds';
 
@@ -12,6 +12,23 @@ export function VotingOverlay() {
     const room = state.room;
     const currentVote = room?.currentVote;
     const voteQueue = room?.voteQueue || [];
+
+    const [timeLeft, setTimeLeft] = useState(15);
+
+    useEffect(() => {
+        if (!currentVote) return;
+
+        // Initial set
+        const updateTimer = () => {
+            const elapsed = Date.now() - currentVote.startTime;
+            const remaining = Math.max(0, Math.ceil((15000 - elapsed) / 1000));
+            setTimeLeft(remaining);
+        };
+
+        updateTimer();
+        const interval = setInterval(updateTimer, 1000);
+        return () => clearInterval(interval);
+    }, [currentVote]); // Re-run when currentVote changes (new vote)
 
     const [hasVoted, setHasVoted] = useState(false);
 
@@ -67,6 +84,11 @@ export function VotingOverlay() {
                             )}
                         </div>
 
+                        {/* Timer */}
+                        <div className="flex justify-center mb-6">
+                            <Timer timeLeft={timeLeft} isRush={timeLeft <= 5} />
+                        </div>
+
                         {/* Content to Vote On */}
                         <div className="bg-[#FFFDD1] p-4 rounded-xl border-2 border-[#4c1d95] mb-6 text-center shadow-inner">
                             <div className="flex items-center justify-center gap-2 mb-2 text-[#4c1d95]/70 text-sm font-bold font-pixel-text">
@@ -104,20 +126,20 @@ export function VotingOverlay() {
                             </div>
                         ) : (
                             <div className="grid grid-cols-2 gap-4">
-                                <Button
+                                <button
                                     onClick={() => castDemocraticVote('no')}
-                                    className="h-16 bg-red-500 hover:bg-red-600 text-white font-bold font-pixel-title text-lg border-b-4 border-red-700 active:border-b-0 active:translate-y-1"
+                                    className="h-16 bg-red-500 hover:bg-red-600 text-white font-bold font-pixel-title text-lg border-b-4 border-red-700 active:border-b-0 active:translate-y-1 rounded-md inline-flex items-center justify-center gap-2 transition-all"
                                 >
                                     <ThumbsDown className="w-6 h-6 mr-2" />
                                     رفض
-                                </Button>
-                                <Button
+                                </button>
+                                <button
                                     onClick={() => castDemocraticVote('yes')}
-                                    className="h-16 bg-green-500 hover:bg-green-600 text-white font-bold font-pixel-title text-lg border-b-4 border-green-700 active:border-b-0 active:translate-y-1"
+                                    className="h-16 bg-green-500 hover:bg-green-600 text-white font-bold font-pixel-title text-lg border-b-4 border-green-700 active:border-b-0 active:translate-y-1 rounded-md inline-flex items-center justify-center gap-2 transition-all"
                                 >
                                     <ThumbsUp className="w-6 h-6 mr-2" />
                                     موافقة
-                                </Button>
+                                </button>
                             </div>
                         )}
 

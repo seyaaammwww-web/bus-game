@@ -31,14 +31,14 @@ export class RoomManager {
             players: [player],
             rounds: [],
             currentRound: 0,
-            totalRounds: 10,
+            totalRounds: 3, // Reduced for testing
             phase: 'lobby',
             letters: getRandomLetters(10),
             createdAt: Date.now(),
             voteQueue: [],
             currentVote: null,
             settings: {
-                enableVoting: false,
+                enableVoting: true,
                 customCategories: []
             }
         };

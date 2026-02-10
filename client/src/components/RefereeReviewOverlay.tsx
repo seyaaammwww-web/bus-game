@@ -6,7 +6,7 @@ import { RetroCard } from '@/components/ui/RetroCard';
 import type { ValidatedAnswer } from '@shared/schema';
 
 export function RefereeReviewOverlay() {
-    const { state, refereeApprove, currentPlayer } = useGame();
+    const { state, refereeApprove, currentPlayer, refereeToggleValidity } = useGame();
     const room = state.room;
 
     if (!room || room.phase !== 'referee_review') return null;
@@ -78,12 +78,14 @@ export function RefereeReviewOverlay() {
                                         {answers.map((answer, idx) => (
                                             <div
                                                 key={idx}
-                                                className={`p-2 rounded-lg border-2 ${answer.isValid
-                                                    ? 'bg-green-50 border-green-500'
-                                                    : 'bg-red-50 border-red-500'
+                                                onClick={() => refereeToggleValidity(player.id, answer.category)}
+                                                className={`p-2 rounded-lg border-2 cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] ${answer.isValid
+                                                    ? 'bg-green-50 border-green-500 hover:bg-green-100'
+                                                    : 'bg-red-50 border-red-500 hover:bg-red-100'
                                                     }`}
+                                                title="اضغط لتغيير الحالة"
                                             >
-                                                <div className="flex items-center justify-between">
+                                                <div className="flex items-center justify-between pointer-events-none">
                                                     <div className="flex-1">
                                                         <p className="text-xs text-gray-600 font-bold">
                                                             {answer.category}
@@ -101,12 +103,12 @@ export function RefereeReviewOverlay() {
                                                     </div>
                                                 </div>
                                                 {answer.reason && (
-                                                    <p className="text-xs text-gray-500 mt-1">
+                                                    <p className="text-xs text-gray-500 mt-1 pointer-events-none">
                                                         {answer.reason}
                                                     </p>
                                                 )}
                                                 {answer.score !== undefined && (
-                                                    <p className="text-xs font-bold text-[#7c3aed] mt-1">
+                                                    <p className="text-xs font-bold text-[#7c3aed] mt-1 pointer-events-none">
                                                         {answer.score} نقطة
                                                     </p>
                                                 )}

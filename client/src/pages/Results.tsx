@@ -364,6 +364,7 @@ export default function Results() {
                         onClick={() => nextRound()}
                         size="lg"
                         className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
+                        data-testid="button-next-round"
                       >
                         ➡️ الاستمرار للجولة التالية
                       </Button>

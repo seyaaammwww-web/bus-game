@@ -63,12 +63,38 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return { ...state, room: { ...state.room, rounds } };
     case 'UPDATE_VOTE_STATE':
       if (!state.room) return state;
+
+      let newCurrentVote = state.room.currentVote;
+      let newVoteQueue = state.room.voteQueue;
+
+      // Handle vote_update (partial stats)
+      if (action.payload.yes !== undefined && state.room.currentVote) {
+        newCurrentVote = {
+          ...state.room.currentVote,
+          votes: {
+            yes: action.payload.yes,
+            no: action.payload.no
+          },
+          voterIds: state.room.currentVote.voterIds // We might not get full IDs list in partial update, stick to local or assume sync
+        };
+      }
+      // Handle vote_session_start (payload is the vote object itself, or contains it)
+      else if (action.payload.requestId) {
+        newCurrentVote = action.payload;
+      }
+      // Handle wrapped payloads
+      else {
+        if (action.payload.vote) newCurrentVote = action.payload.vote;
+        if (action.payload.currentVote) newCurrentVote = action.payload.currentVote;
+        if (action.payload.queue) newVoteQueue = action.payload.queue;
+      }
+
       return {
         ...state,
         room: {
           ...state.room,
-          currentVote: action.payload.vote || action.payload.currentVote || state.room.currentVote,
-          voteQueue: action.payload.queue || state.room.voteQueue
+          currentVote: newCurrentVote,
+          voteQueue: newVoteQueue
         }
       };
     case 'RESET':
@@ -114,6 +140,7 @@ interface GameContextType {
   banishOverlay: boolean;
   setBanishOverlay: (show: boolean) => void;
   appealAnswer: (playerId: string, category: string, word: string) => void;
+  refereeToggleValidity: (playerId: string, category: Category) => void;
 }
 
 const GameContext = createContext<GameContextType | null>(null);
@@ -201,11 +228,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
         // This player is banished from the round
         setIsBanished(true);
         setBanishedBy(message.payload.banishedBy);
-        // Show notification for 5 seconds then hide
-        setTimeout(() => {
-          setIsBanished(false);
-          setBanishedBy(null);
-        }, 5000);
         break;
       case 'referee_review_start':
         // Clear all power-up states when entering referee review
@@ -340,6 +362,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
     sendMessage('referee_toggle_unique', { playerId, category });
   }, [sendMessage]);
 
+  const refereeToggleValidity = useCallback((playerId: string, category: Category) => {
+    sendMessage('referee_toggle_validity', { playerId, category });
+  }, [sendMessage]);
+
   const refereeApprove = useCallback(() => {
     sendMessage('referee_approve', {});
   }, [sendMessage]);
@@ -464,6 +490,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       setBanishOverlay,
       appealAnswer,
       sendDraftUpdate,
+      refereeToggleValidity,
     }}>
       {children}
     </GameContext.Provider>
