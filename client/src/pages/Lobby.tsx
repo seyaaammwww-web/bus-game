@@ -16,6 +16,13 @@ export default function Lobby() {
   const [copied, setCopied] = useState(false);
   const [showRefereeSelect, setShowRefereeSelect] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
+  const [optimisticVoting, setOptimisticVoting] = useState(false);
+
+  useEffect(() => {
+    if (state.room?.settings?.enableVoting !== undefined) {
+      setOptimisticVoting(state.room.settings.enableVoting);
+    }
+  }, [state.room?.settings?.enableVoting]);
 
   const room = state.room!;
   const allReady = room.players.every(p => p.isReady);
@@ -88,7 +95,7 @@ export default function Lobby() {
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.1 }}
+          transition={{ delay: 0 }}
           className="mb-5"
         >
           <div className="bg-gradient-to-br from-white to-[#faf5ff] rounded-2xl border-[3px] border-[#4c1d95] p-4 shadow-[0_8px_0_0_#2e1065,_0_0_30px_rgba(139,92,246,0.3)]">
@@ -111,7 +118,7 @@ export default function Lobby() {
                     className="flex-1 max-w-12 h-14 flex items-center justify-center text-2xl md:text-3xl font-bold bg-gradient-to-b from-[#4c1d95] to-[#2e1065] text-white rounded-lg shadow-[0_4px_0_0_#1e1b4b,_inset_0_1px_0_rgba(255,255,255,0.2)] border border-[#7c3aed]/50 font-pixel-title"
                     initial={isMobileView ? { opacity: 0 } : { rotateY: 90 }}
                     animate={isMobileView ? { opacity: 1 } : { rotateY: 0 }}
-                    transition={{ delay: 0.2 + i * 0.08 }}
+                    transition={{ delay: 0.05 + i * 0.05 }}
                   >
                     {char}
                   </motion.span>
@@ -140,7 +147,7 @@ export default function Lobby() {
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.1 }}
           className="mb-5"
         >
           <RetroCard className="!p-4">
@@ -178,7 +185,7 @@ export default function Lobby() {
                       initial={{ x: 30, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
                       exit={{ x: -30, opacity: 0 }}
-                      transition={{ delay: index * 0.03 }}
+                      transition={{ delay: index * 0.02 }}
                     >
                       <PlayerCard
                         player={player}
@@ -209,16 +216,17 @@ export default function Lobby() {
                   </div>
                   <button
                     onClick={() => {
-                      const newValue = !room.settings?.enableVoting;
-                      console.log('[Lobby] Toggling voting to:', newValue);
+                      const newValue = !optimisticVoting;
+                      setOptimisticVoting(newValue);
+                      console.log('[Lobby] Toggling voting to (optimistic):', newValue);
                       updateSettings({ enableVoting: newValue });
                     }}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold font-pixel-text transition-all ${room.settings?.enableVoting
-                      ? 'bg-[#7c3aed] text-white shadow-md'
-                      : 'bg-white text-[#4c1d95] border-2 border-[#4c1d95]/30'
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold font-pixel-text transition-all ${optimisticVoting
+                        ? 'bg-[#7c3aed] text-white shadow-md'
+                        : 'bg-white text-[#4c1d95] border-2 border-[#4c1d95]/30'
                       }`}
                   >
-                    {room.settings?.enableVoting ? 'مفعل ✅' : 'معطل'}
+                    {optimisticVoting ? 'مفعل ✅' : 'معطل'}
                   </button>
                 </div>
 
@@ -311,7 +319,7 @@ export default function Lobby() {
           className="space-y-3"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.3 }}
+          transition={{ delay: 0.15 }}
         >
           {/* Ready Button */}
           {!currentPlayer?.isReady && (
