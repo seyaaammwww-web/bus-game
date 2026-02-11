@@ -20,13 +20,13 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
   return (
     <motion.div
       className={cn(
-        "flex items-center gap-3 rounded-lg border-2 relative transition-all overflow-visible",
+        "flex items-center gap-3 rounded-lg border-2 relative overflow-visible",
         isCurrentPlayer
           ? "bg-[#f5f3ff] border-[#7c3aed] shadow-[4px_4px_0_0_#4c1d95]"
           : "bg-white border-gray-900 shadow-[4px_4px_0_0_rgba(0,0,0,0.2)]"
       )}
       whileHover={{ y: -4 }}
-      transition={{ type: "spring", stiffness: 400, damping: 20 }}
+      transition={{ type: "spring", stiffness: 500, damping: 30 }}
     >
       {/* Rank Badge */}
       {rank !== undefined && rank < 3 && (

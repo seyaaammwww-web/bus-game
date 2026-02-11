@@ -178,7 +178,7 @@ export default function Lobby() {
                       initial={{ x: 30, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
                       exit={{ x: -30, opacity: 0 }}
-                      transition={{ delay: index * 0.05 }}
+                      transition={{ delay: index * 0.03 }}
                     >
                       <PlayerCard
                         player={player}
@@ -214,8 +214,8 @@ export default function Lobby() {
                       updateSettings({ enableVoting: newValue });
                     }}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold font-pixel-text transition-all ${room.settings?.enableVoting
-                        ? 'bg-[#7c3aed] text-white shadow-md'
-                        : 'bg-white text-[#4c1d95] border-2 border-[#4c1d95]/30'
+                      ? 'bg-[#7c3aed] text-white shadow-md'
+                      : 'bg-white text-[#4c1d95] border-2 border-[#4c1d95]/30'
                       }`}
                   >
                     {room.settings?.enableVoting ? 'مفعل ✅' : 'معطل'}
