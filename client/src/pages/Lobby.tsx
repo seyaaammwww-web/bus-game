@@ -121,8 +121,8 @@ export default function Lobby() {
               <motion.button
                 onClick={copyCode}
                 className={`w-14 h-14 rounded-xl flex items-center justify-center transition-all border-[3px] shadow-[0_4px_0_0_#2e1065] active:shadow-none active:translate-y-1 ${copied
-                    ? 'bg-[#4c1d95] border-[#2e1065] text-white'
-                    : 'bg-white border-[#4c1d95] text-[#4c1d95] hover:bg-[#4c1d95] hover:text-white'
+                  ? 'bg-[#4c1d95] border-[#2e1065] text-white'
+                  : 'bg-white border-[#4c1d95] text-[#4c1d95] hover:bg-[#4c1d95] hover:text-white'
                   }`}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -208,7 +208,11 @@ export default function Lobby() {
                     </div>
                   </div>
                   <button
-                    onClick={() => updateSettings({ enableVoting: !room.settings?.enableVoting })}
+                    onClick={() => {
+                      const newValue = !room.settings?.enableVoting;
+                      console.log('[Lobby] Toggling voting to:', newValue);
+                      updateSettings({ enableVoting: newValue });
+                    }}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold font-pixel-text transition-all ${room.settings?.enableVoting
                         ? 'bg-[#7c3aed] text-white shadow-md'
                         : 'bg-white text-[#4c1d95] border-2 border-[#4c1d95]/30'
@@ -220,14 +224,14 @@ export default function Lobby() {
 
                 {/* Referee Selection - Merged Below */}
                 <div className={`p-3 rounded-xl border-2 transition-all ${referee
-                    ? 'bg-[#7c3aed]/10 border-[#7c3aed]/30'
-                    : 'bg-white/50 border-[#4c1d95]/20 border-dashed'
+                  ? 'bg-[#7c3aed]/10 border-[#7c3aed]/30'
+                  : 'bg-white/50 border-[#4c1d95]/20 border-dashed'
                   }`}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className={`w-9 h-9 rounded-lg flex items-center justify-center border-2 transition-colors ${referee
-                          ? 'bg-[#7c3aed] border-[#4c1d95]'
-                          : 'bg-[#7c3aed]/20 border-[#4c1d95]/30'
+                        ? 'bg-[#7c3aed] border-[#4c1d95]'
+                        : 'bg-[#7c3aed]/20 border-[#4c1d95]/30'
                         }`}>
                         <Shield className={`w-4 h-4 ${referee ? 'text-white' : 'text-[#7c3aed]'}`} />
                       </div>
@@ -348,8 +352,8 @@ export default function Lobby() {
               onClick={startGame}
               disabled={!canStart}
               className={`w-full py-4 rounded-xl font-pixel-title text-lg font-bold shadow-[0_6px_0_0] active:shadow-none active:translate-y-1.5 transition-all flex items-center justify-center gap-2 ${canStart
-                  ? 'bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] text-white shadow-[#4c1d95] hover:from-[#8b5cf6] hover:to-[#7c3aed]'
-                  : 'bg-[#4c1d95]/30 text-white/50 shadow-[#2e1065] cursor-not-allowed'
+                ? 'bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] text-white shadow-[#4c1d95] hover:from-[#8b5cf6] hover:to-[#7c3aed]'
+                : 'bg-[#4c1d95]/30 text-white/50 shadow-[#2e1065] cursor-not-allowed'
                 }`}
               whileHover={canStart ? { scale: 1.02 } : {}}
               whileTap={canStart ? { scale: 0.98 } : {}}
