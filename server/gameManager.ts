@@ -778,6 +778,9 @@ export class GameManager {
     if (ans) {
       ans.isValid = accepted;
       ans.isPendingVote = false;
+
+      // Fix: Recalculate scores immediately so the UI shows points (10 or 20) instead of 0
+      this.roundManager.calculateAnswerScores(draft);
     }
     draft.currentVote = null;
     if (draft.voteQueue.length > 0) {
