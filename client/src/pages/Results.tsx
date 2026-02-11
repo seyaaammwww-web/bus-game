@@ -349,7 +349,7 @@ export default function Results() {
                       <Button
                         onClick={() => room.phase === 'results' ? nextRound() : refereeApprove()}
                         size="lg"
-                        className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
+                        className="w-full h-14 text-lg font-bold bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] hover:from-[#6d28d9] hover:to-[#5b21b6] shadow-[4px_4px_0_0_#2e1065] border-[3px] border-[#4c1d95] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
                       >
                         {room.phase === 'results' ? '➡️ بدء الجولة التالية' : '✅ اعتماد النتيجة وبدء الجولة'}
                       </Button>
@@ -363,7 +363,7 @@ export default function Results() {
                       <Button
                         onClick={() => nextRound()}
                         size="lg"
-                        className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
+                        className="w-full h-14 text-lg font-bold bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] hover:from-[#6d28d9] hover:to-[#5b21b6] shadow-[4px_4px_0_0_#2e1065] border-[3px] border-[#4c1d95] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
                         data-testid="button-next-round"
                       >
                         ➡️ الاستمرار للجولة التالية

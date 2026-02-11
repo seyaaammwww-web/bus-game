@@ -108,8 +108,8 @@ export function ResultsTable({
                                     // Status Color Logic
                                     let statusClass = "bg-gray-50/50";
                                     if (answer) {
-                                        if (isValid) statusClass = score > 10 ? "bg-green-50" : "bg-green-50/30";
-                                        else statusClass = "bg-red-50";
+                                        if (isValid) statusClass = score > 10 ? "bg-[#7c3aed]/10 border-[#7c3aed]/30" : "bg-[#7c3aed]/5 border-[#7c3aed]/20";
+                                        else statusClass = "bg-red-50 border-red-100";
                                     }
 
                                     return (
@@ -135,8 +135,8 @@ export function ResultsTable({
                                             <div className="flex-1 text-center md:w-full">
                                                 {answer ? (
                                                     <span className={cn(
-                                                        "font-bold text-sm md:text-base break-words block",
-                                                        isValid ? "text-[#15803d]" : "text-[#b91c1c] line-through decoration-2 decoration-red-300"
+                                                        "font-bold text-sm md:text-base break-words block font-pixel-text",
+                                                        isValid ? "text-[#4c1d95]" : "text-[#b91c1c] line-through decoration-2 decoration-red-300"
                                                     )}>
                                                         {answer}
                                                     </span>
@@ -152,8 +152,8 @@ export function ResultsTable({
                                                         <span className={cn(
                                                             "text-[10px] px-1.5 py-0.5 rounded border shadow-sm font-bold font-pixel-text",
                                                             score > 10
-                                                                ? "bg-yellow-100 text-yellow-700 border-yellow-200"
-                                                                : "bg-green-100 text-green-700 border-green-200"
+                                                                ? "bg-[#7c3aed] text-white border-[#5b21b6]"
+                                                                : "bg-[#ddd6fe] text-[#5b21b6] border-[#8b5cf6]"
                                                         )}>
                                                             {score}
                                                         </span>
