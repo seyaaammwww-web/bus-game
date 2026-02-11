@@ -16,18 +16,12 @@ export default function Lobby() {
   const [copied, setCopied] = useState(false);
   const [showRefereeSelect, setShowRefereeSelect] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
-  const [optimisticVoting, setOptimisticVoting] = useState(false);
-
-  useEffect(() => {
-    if (state.room?.settings?.enableVoting !== undefined) {
-      setOptimisticVoting(state.room.settings.enableVoting);
-    }
-  }, [state.room?.settings?.enableVoting]);
 
   const room = state.room!;
   const allReady = room.players.every(p => p.isReady);
   const canStart = isHost && allReady && room.players.length >= 1;
   const readyCount = room.players.filter(p => p.isReady).length;
+  const isVotingEnabled = room.settings?.enableVoting || false;
 
   const copyCode = async () => {
     await navigator.clipboard.writeText(room.code);
@@ -216,17 +210,17 @@ export default function Lobby() {
                   </div>
                   <button
                     onClick={() => {
-                      const newValue = !optimisticVoting;
-                      setOptimisticVoting(newValue);
-                      console.log('[Lobby] Toggling voting to (optimistic):', newValue);
+                      const newValue = !isVotingEnabled;
+                      console.log('[Lobby] Toggling voting to:', newValue);
                       updateSettings({ enableVoting: newValue });
                     }}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold font-pixel-text transition-all ${optimisticVoting
-                        ? 'bg-[#7c3aed] text-white shadow-md'
-                        : 'bg-white text-[#4c1d95] border-2 border-[#4c1d95]/30'
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold font-pixel-text transition-all flex items-center gap-1 ${isVotingEnabled
+                      ? 'bg-[#7c3aed] text-white shadow-md'
+                      : 'bg-white text-[#4c1d95] border-2 border-[#4c1d95]/30'
                       }`}
                   >
-                    {optimisticVoting ? 'مفعل ✅' : 'معطل'}
+                    {isVotingEnabled && <Check className="w-3 h-3" />}
+                    {isVotingEnabled ? 'مفعل' : 'معطل'}
                   </button>
                 </div>
 
