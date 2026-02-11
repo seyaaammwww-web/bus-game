@@ -1,5 +1,5 @@
 {
-  "timestamp": 1770743742012,
+  "timestamp": 1770754972065,
   "rooms": [
     {
       "id": "7afcc131-24cd-4c87-ae6c-effacc51eb42",
@@ -131,6 +131,35 @@
         "customCategories": []
       },
       "refereeId": "2c2f37c5-363f-4644-b753-d46bb3224c1b"
+    },
+    {
+      "id": "4f2f21b0-db9f-4e2d-ae5f-8605f66e2539",
+      "code": "4L9P",
+      "hostId": "d893b3b8-cede-4229-a284-ce97fbec595c",
+      "players": [],
+      "rounds": [],
+      "currentRound": 0,
+      "totalRounds": 3,
+      "phase": "lobby",
+      "letters": [
+        "ق",
+        "ر",
+        "ص",
+        "أ",
+        "ز",
+        "ع",
+        "هـ",
+        "ك",
+        "ظ",
+        "خ"
+      ],
+      "createdAt": 1770751939370,
+      "voteQueue": [],
+      "currentVote": null,
+      "settings": {
+        "enableVoting": true,
+        "customCategories": []
+      }
     }
   ]
 }
