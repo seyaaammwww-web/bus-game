@@ -128,11 +128,18 @@ export default function Results() {
     };
   }, [isFinal, room.rounds, room.players]);
 
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 1024);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   return (
     <div className="min-h-screen p-4 overflow-hidden relative text-white font-pixel-text">
-      <Confetti active={isFinal} count={isMobile ? 1 : 3} />
+      <Confetti active={isFinal} count={isMobile ? 30 : 80} />
       <VotingOverlay />
       <RefereeReviewOverlay />
 
@@ -331,21 +338,21 @@ export default function Results() {
                 {/* Glowing Overlay */}
                 <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_20px_rgba(124,58,237,0.3)] z-10" />
 
-                {/* Live Ticker */}
-                <motion.div
-                  className="absolute top-1/2 -translate-y-1/2 flex gap-8 whitespace-nowrap items-center px-4"
-                  animate={{ x: ["0%", "-50%"] }}
-                  transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
-                >
-                  {[...sortedPlayers, ...sortedPlayers].map((p, i) => (
-                    <div key={`${p.id}-${i}`} className="flex items-center gap-2 text-white font-pixel-text">
-                      <PixelAvatar src={p.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${p.id}&backgroundColor=transparent`} size="sm" className="w-6 h-6" />
-                      <span className="font-bold text-[#fbbf24]">{p.name}</span>
-                      <span className="text-[#e9d5ff]">{p.score} نقطة</span>
-                      <Star className="w-3 h-3 text-[#7c3aed] ml-4" />
-                    </div>
-                  ))}
-                </motion.div>
+                <div className="overflow-hidden h-10 mt-2">
+                  {/* Live Ticker */}
+                  <motion.div
+                    className="flex whitespace-nowrap gap-8 text-sm text-white"
+                    animate={{ x: [0, -50 * sortedPlayers.length] }}
+                    transition={{ duration: 12, repeat: Infinity, ease: 'linear' }}
+                  >
+                    {[...sortedPlayers, ...sortedPlayers].map((p, i) => (
+                      <span key={`${p.id}-${i}`} className="font-pixel-text text-[#fbbf24]">
+                        {p.name} • {p.score} نقطة
+                        <Star className="inline w-3 h-3 text-[#7c3aed] ml-4 mr-1" />
+                      </span>
+                    ))}
+                  </motion.div>
+                </div>
               </div>
             </div>
           </motion.div>

@@ -15,11 +15,13 @@ import { BusHUD } from "@/components/BusHUD";
 import { SoundProvider } from "@/lib/soundManager";
 
 function GameRouter() {
-  const { state, isReferee } = useGame();
+  const { state } = useGame();
 
   if (!state.room) {
     return <Home />;
   }
+
+  const { isReferee } = useGame();
 
   switch (state.room.phase) {
     case 'lobby':

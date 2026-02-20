@@ -1,5 +1,4 @@
-```
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Timer } from '@/components/Timer';
 import { LetterDisplay } from '@/components/LetterDisplay';
@@ -81,7 +80,7 @@ export default function Game() {
     const timer = setTimeout(() => {
       // Only send if there's at least one non-empty answer
       const hasContent = Object.values(answers).some(a => a && a.trim().length > 0);
-      if (hasContent) {
+      if (hasContent && !hasSubmitted) {
         sendDraftUpdate(answers);
       }
     }, 500); // 500ms debounce for better reliability
@@ -173,6 +172,10 @@ export default function Game() {
       playClick();
       handleSubmit();
       triggerBusComplete();
+
+      if (isMobile) {
+        Object.values(inputRefs.current).forEach(input => input?.blur());
+      }
     }
   };
 
@@ -188,7 +191,7 @@ export default function Game() {
     hasSubmittedRef.current = hasSubmitted;
   }, [hasSubmitted]);
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     if (!hasSubmittedRef.current) {
       if (typeof window !== 'undefined' && window.innerWidth < 1024) {
         playSubmit();
@@ -200,7 +203,7 @@ export default function Game() {
       setHasSubmitted(true);
       hasSubmittedRef.current = true;
     }
-  };
+  }, [submitAnswers]);
 
   // Auto-submit when time runs out
   useEffect(() => {
@@ -213,7 +216,7 @@ export default function Game() {
 
   return (
     <motion.div
-      className={`min - h - screen text - white p - 4 font - pixel - text relative overflow - x - hidden md:flex md: items - center ${ shake ? 'animate-shake' : '' } `}
+      className={`min - h - screen text - white p - 4 font - pixel - text relative overflow - x - hidden md:flex md: items - center ${shake ? 'animate-shake' : ''} `}
       initial={isMobile ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 1.05 }}
@@ -409,8 +412,8 @@ export default function Game() {
                     key={i}
                     className="absolute w-2 h-2 bg-amber-400 rounded-full"
                     style={{
-                      left: `${ Math.random() * 100 }% `,
-                      top: `${ Math.random() * 100 }% `,
+                      left: `${Math.random() * 100}% `,
+                      top: `${Math.random() * 100}% `,
                       boxShadow: '0 0 8px rgba(251, 191, 36, 0.8)',
                     }}
                     initial={{
@@ -539,7 +542,7 @@ export default function Game() {
                     "bg-white border-2 border-[#4c1d95] shadow-[3px_3px_0px_0px_#2e1065] rounded-xl overflow-hidden hover:-translate-y-1 hover:shadow-[5px_5px_0px_0px_#2e1065] transition-all duration-200 group-focus-within:scale-[1.03] group-focus-within:shadow-[0_0_20px_rgba(124,58,237,0.4)] relative",
                     isLastOdd && "w-[calc(50%-6px)] md:w-full"
                   )}>
-                    <div className={`${ categoryColors[category] } py - 1.5 px - 2 border - b - 2 border - [#4c1d95] flex items - center justify - center gap - 1.5 relative`}>
+                    <div className={`${categoryColors[category]} py - 1.5 px - 2 border - b - 2 border - [#4c1d95] flex items - center justify - center gap - 1.5 relative`}>
                       <Icon className="w-3.5 h-3.5 text-white" />
                       <span className="font-bold text-white font-pixel-text text-xs md:text-sm whitespace-nowrap">{category}</span>
 
@@ -555,7 +558,7 @@ export default function Game() {
                             {/* Tiny Confetti Burst */}
                             {[...Array(6)].map((_, j) => (
                               <motion.div
-                                key={`burst - ${ j } `}
+                                key={`burst - ${j} `}
                                 className="absolute w-1 h-1 rounded-full pointer-events-none"
                                 style={{ backgroundColor: ['#ef4444', '#3b82f6', '#fbbf24', '#10b981'][j % 4], top: '50%', left: '50%' }}
                                 initial={{ x: 0, y: 0, opacity: 1, scale: 0 }}
@@ -588,8 +591,8 @@ export default function Game() {
                             }, 300);
                           }
                         }}
-                        className={`text - center text - sm md: text - lg h - 9 md: h - 12 border - 2 border - [#e5e7eb] focus: border - [#7c3aed] focus: ring - 0 focus: shadow - [0_0_0_2px_rgba(124, 58, 237, 0.1)] transition - all font - pixel - text font - bold bg - white text - [#4c1d95] placeholder: text - gray - 300 rounded - lg ${ hasSubmitted || isBanished ? 'opacity-60 grayscale' : '' } `}
-                        data-testid={`input - ${ category } `}
+                        className={`text - center text - sm md: text - lg h - 9 md: h - 12 border - 2 border - [#e5e7eb] focus: border - [#7c3aed] focus: ring - 0 focus: shadow - [0_0_0_2px_rgba(124, 58, 237, 0.1)] transition - all font - pixel - text font - bold bg - white text - [#4c1d95] placeholder: text - gray - 300 rounded - lg ${hasSubmitted || isBanished ? 'opacity-60 grayscale' : ''} `}
+                        data-testid={`input - ${category} `}
                       />
                     </div>
                   </div>
@@ -625,9 +628,9 @@ export default function Game() {
                 <div className="absolute inset-0 z-0 opacity-15 pointer-events-none overflow-hidden bg-[#faf5ff]">
                   {[...Array(12)].map((_, i) => (
                     <motion.div
-                      key={`rush - ${ i } `}
+                      key={`rush - ${i} `}
                       className="absolute h-1 bg-[#4c1d95] rounded-full"
-                      style={{ top: `${ Math.random() * 100 }% `, width: `${ 20 + Math.random() * 80 } px` }}
+                      style={{ top: `${Math.random() * 100}% `, width: `${20 + Math.random() * 80} px` }}
                       initial={{ right: '-20%' }}
                       animate={{ right: '120%' }}
                       transition={{ duration: 0.2 + Math.random() * 0.4, repeat: Infinity, ease: 'linear' }}
