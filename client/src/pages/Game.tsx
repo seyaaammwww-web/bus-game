@@ -6,7 +6,6 @@ import { BusCompleteButton } from '@/components/BusCompleteButton';
 import { ReactionButtons, ReactionDisplay } from '@/components/Reactions';
 import { RetroCard } from '@/components/ui/RetroCard';
 import { PixelReveal } from '@/components/ui/PixelReveal';
-import { MobileAIProcessingScreen } from '@/components/MobileAIProcessingScreen';
 import { WildcardOverlay } from '@/components/WildcardOverlay';
 import { WildcardNotification } from '@/components/WildcardNotification';
 import { BanishOverlay } from '@/components/BanishOverlay';

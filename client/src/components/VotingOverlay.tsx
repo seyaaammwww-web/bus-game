@@ -5,7 +5,6 @@ import { RetroCard } from '@/components/ui/RetroCard';
 import { PixelAvatar } from '@/components/ui/PixelAvatar';
 import { Timer } from '@/components/Timer';
 import { useEffect, useState } from 'react';
-import { playCountdownSound } from '@/lib/sounds';
 
 export function VotingOverlay() {
     const { state, castDemocraticVote, currentPlayer } = useGame();

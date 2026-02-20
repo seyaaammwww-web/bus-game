@@ -3,7 +3,7 @@ import { Lock, Zap, Skull, Crown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { RetroCard } from './ui/RetroCard';
 import { toast } from '@/hooks/use-toast';
-import { playClickSound, playErrorSound } from '@/lib/sounds';
+import { playClick, playWrong } from '@/lib/sounds';
 
 // --- Constants & Config ---
 const TEXTS = {
@@ -66,7 +66,7 @@ export function PowerUpCard({
         if (isUsed || isDisabled) return;
 
         if (isLocked) {
-            playErrorSound();
+            playWrong();
             // Trigger Shake Animation
             controls.start({
                 x: [0, -5, 5, -5, 5, 0],
@@ -83,7 +83,7 @@ export function PowerUpCard({
         }
 
         // Success
-        playClickSound();
+        playClick();
         onActivate();
     };
 

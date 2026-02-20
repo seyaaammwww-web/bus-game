@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RetroCard } from '@/components/ui/RetroCard';
 import { useGame } from '@/lib/gameContext';
-import { resumeAudioContext, playClick } from '@/lib/sounds';
+import { playClick } from '@/lib/sounds';
 import { Tutorial } from '@/components/Tutorial';
 import { HelpCircle } from 'lucide-react';
 import { RetroQuote } from '@/components/ui/RetroQuote';
@@ -26,7 +26,6 @@ export default function Home() {
 
   useEffect(() => {
     const handleInteraction = () => {
-      resumeAudioContext();
       window.removeEventListener('click', handleInteraction);
     };
     window.addEventListener('click', handleInteraction);

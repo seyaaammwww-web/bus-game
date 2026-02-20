@@ -3,7 +3,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Check, X, Shield, Users, Trophy } from 'lucide-react';
 import { PixelAvatar } from '@/components/ui/PixelAvatar';
-import Confetti from '@/components/ui/Confetti';
+import { Confetti } from '@/components/Confetti';
 import { cn } from '@/lib/utils';
 import { categories, type Category } from '@shared/schema';
 import { useIsMobile } from '@/hooks/useIsMobile';

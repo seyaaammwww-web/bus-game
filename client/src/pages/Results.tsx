@@ -5,26 +5,26 @@ import { Button } from '@/components/ui/button';
 import { Confetti } from '@/components/Confetti';
 import { useGame } from '@/lib/gameContext';
 import { categories, type Category } from '@shared/schema';
-import { playSuccessSound, playCountdownSound, playBonusSound, playWinnerFanfare, playCountdownTick } from '@/lib/sounds';
+import { playCorrect, playBonus, playWinnerFanfare, playCountdownTick } from '@/lib/sounds';
 import { RetroCard } from '@/components/ui/RetroCard';
 import { PixelAvatar } from '@/components/ui/PixelAvatar';
 import { PixelReveal } from '@/components/ui/PixelReveal';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { RetroQuote } from '@/components/ui/RetroQuote';
+import { LetterDisplay } from '@/components/LetterDisplay';
+import { VotingOverlay } from '@/components/VotingOverlay';
+import { RefereeReviewOverlay } from '@/components/RefereeReviewOverlay';
+import { GameStats } from '@/components/results/GameStats';
+import { AppealDialog } from '@/components/results/AppealDialog';
+import { ResultsTable } from '@/components/results/ResultsTable';
 
 const categoryIcons: Record<Category, any> = {
-  import { GameStats } from '@/components/results/GameStats';
-  import { AppealDialog } from '@/components/results/AppealDialog';
-  import { ResultsTable } from '@/components/results/ResultsTable';
-  import { PixelReveal } from '@/components/ui/PixelReveal';
-
-
-  const categoryIcons: Record<Category, any> = {
-    'ولد': User,
-    'بنت': Users,
-    'بلد': Globe,
-    'حيوان': PawPrint,
-    'جماد': Box,
-  };
+  'ولد': User,
+  'بنت': Users,
+  'بلد': Globe,
+  'حيوان': PawPrint,
+  'جماد': Box,
+};
 
 const categoryColors: Record<Category, string> = {
   'ولد': 'category-boy',
@@ -56,10 +56,10 @@ export default function Results() {
 
   useEffect(() => {
     if (isFinal) {
-      playSuccessSound();
+      playCorrect();
       const bonusRecipients = Object.values(room.players || {}).filter((p: any) => (p.busStreak || 0) >= 3);
       if (bonusRecipients.length > 0) {
-        setTimeout(() => playBonusSound(), 1500);
+        setTimeout(() => playBonus(), 1500);
       }
     }
   }, [isFinal]);
@@ -77,7 +77,7 @@ export default function Results() {
           return 0;
         }
         if (prev <= 4) playCountdownTick(); // Tick sounds for last 3 seconds
-        else playCountdownSound();
+        else playCountdownTick();
         return prev - 1;
       });
     }, 1000);

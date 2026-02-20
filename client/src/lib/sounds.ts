@@ -57,6 +57,7 @@ export const playBusStreak = () => playWithVariation('busStreak', 1);
 export const playWildcard = () => playWithVariation('wildcard', 1);
 export const playBanish = () => playWithVariation('banish', 0.95);
 export const playCorrect = () => playWithVariation('correct', 0.85);
+export const playWrong = () => playWithVariation('wrong', 0.85);
 export const playUnique = () => playWithVariation('unique', 1);
 export const playWinnerFanfare = () => playWithVariation('winnerFanfare', 0.95);
 export const playBonus = () => playWithVariation('bonus', 1);

@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ThumbsUp, Clapperboard, Laugh, Flame, Heart } from 'lucide-react';
 import { useGame } from '@/lib/gameContext';
 import { type ReactionType, reactionTypes } from '@shared/schema';
-import { playReactionSound } from '@/lib/sounds';
+import { playClick } from '@/lib/sounds';
 import { useState, useEffect } from 'react';
 
 // Use Clapperboard as a placeholder for Clap if HandMetal isn't quite right, 
@@ -60,7 +60,7 @@ export function ReactionButtons() {
   const { sendReaction } = useGame();
 
   const handleReaction = (type: ReactionType) => {
-    playReactionSound();
+    playClick();
     sendReaction(type);
   };
 
