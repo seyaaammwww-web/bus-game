@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Confetti } from '@/components/Confetti';
 import { useGame } from '@/lib/gameContext';
 import { categories, type Category } from '@shared/schema';
-import { playSuccessSound, playCountdownSound, playBonusSound } from '@/lib/sounds';
+import { playSuccessSound, playCountdownSound, playBonusSound, playWinnerFanfare, playCountdownTick } from '@/lib/sounds';
 import { RetroCard } from '@/components/ui/RetroCard';
 import { PixelAvatar } from '@/components/ui/PixelAvatar';
 import { RetroQuote } from '@/components/ui/RetroQuote';
@@ -45,6 +45,13 @@ export default function Results() {
   const room = state.room!;
   const isFinal = room.phase === 'final';
   const sortedPlayers = [...room.players].sort((a, b) => b.score - a.score);
+  useEffect(() => {
+    if (isFinal && !state.error && room?.players.length) {
+      setTimeout(() => {
+        playWinnerFanfare();
+      }, 500);
+    }
+  }, [isFinal, state.error, room?.players.length]);
   const winner = sortedPlayers[0];
 
   useEffect(() => {
@@ -65,11 +72,13 @@ export default function Results() {
     }
     const timer = setInterval(() => {
       setCountdown(prev => {
-        if (prev > 1) {
-          playCountdownSound();
-          return prev - 1;
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
         }
-        return prev;
+        if (prev <= 4) playCountdownTick(); // Tick sounds for last 3 seconds
+        else playCountdownSound();
+        return prev - 1;
       });
     }, 1000);
     return () => clearInterval(timer);
@@ -313,6 +322,31 @@ export default function Results() {
                 onRefereeDeduct={(pid, cat) => refereeDeduct(pid, cat, 'رفض الحكم')}
                 onAppeal={(pid, cat, ans) => setAppealDialog({ playerId: pid, category: cat, word: ans })}
               />
+
+              {/* Scoreboard TV with Scanline & Live Ticker */}
+              <div className="relative h-14 bg-[#1a0533] mt-6 overflow-hidden rounded-xl border-2 border-[#4c1d95] shadow-inner">
+                {/* Scanline Effect */}
+                <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.25)_50%)] bg-[length:100%_4px] z-10" />
+
+                {/* Glowing Overlay */}
+                <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_20px_rgba(124,58,237,0.3)] z-10" />
+
+                {/* Live Ticker */}
+                <motion.div
+                  className="absolute top-1/2 -translate-y-1/2 flex gap-8 whitespace-nowrap items-center px-4"
+                  animate={{ x: ["0%", "-50%"] }}
+                  transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
+                >
+                  {[...sortedPlayers, ...sortedPlayers].map((p, i) => (
+                    <div key={`${p.id}-${i}`} className="flex items-center gap-2 text-white font-pixel-text">
+                      <PixelAvatar src={p.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${p.id}&backgroundColor=transparent`} size="sm" className="w-6 h-6" />
+                      <span className="font-bold text-[#fbbf24]">{p.name}</span>
+                      <span className="text-[#e9d5ff]">{p.score} نقطة</span>
+                      <Star className="w-3 h-3 text-[#7c3aed] ml-4" />
+                    </div>
+                  ))}
+                </motion.div>
+              </div>
             </div>
           </motion.div>
         )}

@@ -11,6 +11,8 @@ import RefereeWaiting from "@/pages/RefereeWaiting";
 import Results from "@/pages/Results";
 
 import WorkOSBackground from "@/components/WorkOSBackground";
+import { BusHUD } from "@/components/BusHUD";
+import { SoundProvider } from "@/lib/soundManager";
 
 function GameRouter() {
   const { state, isReferee } = useGame();
@@ -59,10 +61,13 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <GameProvider>
-          <BackgroundManager />
-          <GameRouter />
-        </GameProvider>
+        <SoundProvider>
+          <GameProvider>
+            <BackgroundManager />
+            <BusHUD />
+            <GameRouter />
+          </GameProvider>
+        </SoundProvider>
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>

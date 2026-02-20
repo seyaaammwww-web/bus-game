@@ -1,14 +1,15 @@
+```
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Timer } from '@/components/Timer';
 import { LetterDisplay } from '@/components/LetterDisplay';
 import { BusCompleteButton } from '@/components/BusCompleteButton';
 import { ReactionButtons, ReactionDisplay } from '@/components/Reactions';
-import { PowerUpCard } from '@/components/PowerUpCard';
-import { WildcardPowerUp } from '@/components/WildcardPowerUp';
+import { RetroCard } from '@/components/ui/RetroCard';
+import { PixelReveal } from '@/components/ui/PixelReveal';
+import { MobileAIProcessingScreen } from '@/components/MobileAIProcessingScreen';
 import { WildcardOverlay } from '@/components/WildcardOverlay';
 import { WildcardNotification } from '@/components/WildcardNotification';
-import { BanishPowerUp } from '@/components/BanishPowerUp';
 import { BanishOverlay } from '@/components/BanishOverlay';
 import { BanishNotification } from '@/components/BanishNotification';
 import { PowerUpMenu } from '@/components/PowerUpMenu';
@@ -19,8 +20,7 @@ import { categories, type Category, type RoundAnswers } from '@shared/schema';
 import { AlertTriangle, Send, User, Users, Globe, PawPrint, Box, LogOut, Zap, Eye, Trophy, Flame, Sparkles, Crown, Skull, Pyramid, Gavel } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { playCountdownSound, playCountdownFinalSound, playRoundStart, playBusSound, playFreezeSound, playWildcardSound, playBanishSound, playSubmitSound, playClickSound, playRushActivateSound, playBonusSound, playTypeSound } from '@/lib/sounds';
-import { RetroCard } from '@/components/ui/RetroCard';
+import { playClick, playSubmit, playBusComplete, playWildcard, playBanish } from '@/lib/sounds';
 import { cn } from '@/lib/utils';
 
 const categoryIcons: Record<Category, any> = {
@@ -109,14 +109,14 @@ export default function Game() {
 
   useEffect(() => {
     if (showCountdown && countdown > 0) {
-      playCountdownSound();
+      // playCountdownSound(); // Removed
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
       return () => clearTimeout(timer);
     } else if (countdown === 0) {
-      playCountdownFinalSound();
+      // playCountdownFinalSound(); // Removed
       setTimeout(() => {
         setShowCountdown(false);
-        playRoundStart();
+        // playRoundStart(); // Removed
         inputRefs.current[currentCategories[0]]?.focus();
       }, 500);
     }
@@ -125,8 +125,8 @@ export default function Game() {
   useEffect(() => {
     if (state.isRush) {
       setShake(true);
-      playRushActivateSound();
-      playBusSound();
+      // playRushActivateSound(); // Removed
+      // playBusSound(); // Removed
       setTimeout(() => setShake(false), 500);
     }
   }, [state.isRush]);
@@ -170,7 +170,7 @@ export default function Game() {
     if (!hasSubmitted) {
       if (!allFilled) return;
 
-      playClickSound();
+      playClick();
       handleSubmit();
       triggerBusComplete();
     }
@@ -190,7 +190,12 @@ export default function Game() {
 
   const handleSubmit = () => {
     if (!hasSubmittedRef.current) {
-      playSubmitSound();
+      if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+        playSubmit();
+        setTimeout(playBusComplete, 300); // Play bus horn shortly after submit on mobile
+      } else {
+        playSubmit();
+      }
       submitAnswers(answersRef.current);
       setHasSubmitted(true);
       hasSubmittedRef.current = true;
@@ -208,7 +213,7 @@ export default function Game() {
 
   return (
     <motion.div
-      className={`min-h-screen text-white p-4 font-pixel-text relative overflow-x-hidden md:flex md:items-center ${shake ? 'animate-shake' : ''}`}
+      className={`min - h - screen text - white p - 4 font - pixel - text relative overflow - x - hidden md:flex md: items - center ${ shake ? 'animate-shake' : '' } `}
       initial={isMobile ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 1.05 }}
@@ -369,6 +374,7 @@ export default function Game() {
           onClose={() => setBanishOverlay(false)}
           players={room.players.filter(p => p.id !== currentPlayer?.id)}
           onSelectPlayer={(playerId) => {
+            playBanish(); // Added playBanish sound
             activatePowerUp('banish', playerId);
             setBanishOverlay(false);
           }}
@@ -403,8 +409,8 @@ export default function Game() {
                     key={i}
                     className="absolute w-2 h-2 bg-amber-400 rounded-full"
                     style={{
-                      left: `${Math.random() * 100}%`,
-                      top: `${Math.random() * 100}%`,
+                      left: `${ Math.random() * 100 }% `,
+                      top: `${ Math.random() * 100 }% `,
                       boxShadow: '0 0 8px rgba(251, 191, 36, 0.8)',
                     }}
                     initial={{
@@ -530,12 +536,41 @@ export default function Game() {
                   className={cn("relative group", isLastOdd && "col-span-2 flex justify-center")}
                 >
                   <div className={cn(
-                    "bg-white border-2 border-[#4c1d95] shadow-[3px_3px_0px_0px_#2e1065] rounded-xl overflow-hidden hover:-translate-y-1 hover:shadow-[5px_5px_0px_0px_#2e1065] transition-all duration-200",
+                    "bg-white border-2 border-[#4c1d95] shadow-[3px_3px_0px_0px_#2e1065] rounded-xl overflow-hidden hover:-translate-y-1 hover:shadow-[5px_5px_0px_0px_#2e1065] transition-all duration-200 group-focus-within:scale-[1.03] group-focus-within:shadow-[0_0_20px_rgba(124,58,237,0.4)] relative",
                     isLastOdd && "w-[calc(50%-6px)] md:w-full"
                   )}>
-                    <div className={`${categoryColors[category]} py-1.5 px-2 border-b-2 border-[#4c1d95] flex items-center justify-center gap-1.5`}>
+                    <div className={`${ categoryColors[category] } py - 1.5 px - 2 border - b - 2 border - [#4c1d95] flex items - center justify - center gap - 1.5 relative`}>
                       <Icon className="w-3.5 h-3.5 text-white" />
                       <span className="font-bold text-white font-pixel-text text-xs md:text-sm whitespace-nowrap">{category}</span>
+
+                      <AnimatePresence>
+                        {answers[category]?.trim().length > 0 && (
+                          <motion.div
+                            initial={{ scale: 0, rotate: -20 }}
+                            animate={{ scale: 1, rotate: 8 }}
+                            exit={{ scale: 0, opacity: 0 }}
+                            className="absolute -top-3 -right-2 md:-right-4 bg-[#10b981] text-white text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg border-[2px] border-white z-20 flex items-center justify-center font-pixel-text"
+                          >
+                            ✓ تم
+                            {/* Tiny Confetti Burst */}
+                            {[...Array(6)].map((_, j) => (
+                              <motion.div
+                                key={`burst - ${ j } `}
+                                className="absolute w-1 h-1 rounded-full pointer-events-none"
+                                style={{ backgroundColor: ['#ef4444', '#3b82f6', '#fbbf24', '#10b981'][j % 4], top: '50%', left: '50%' }}
+                                initial={{ x: 0, y: 0, opacity: 1, scale: 0 }}
+                                animate={{
+                                  x: (Math.random() - 0.5) * 40,
+                                  y: (Math.random() - 0.5) * 40,
+                                  opacity: 0,
+                                  scale: 1.5
+                                }}
+                                transition={{ duration: 0.6, ease: "easeOut" }}
+                              />
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                     <div className="p-2 bg-gradient-to-b from-white to-gray-50">
                       <Input
@@ -553,8 +588,8 @@ export default function Game() {
                             }, 300);
                           }
                         }}
-                        className={`text-center text-sm md:text-lg h-9 md:h-12 border-2 border-[#e5e7eb] focus:border-[#7c3aed] focus:ring-0 focus:shadow-[0_0_0_2px_rgba(124,58,237,0.1)] transition-all font-pixel-text font-bold bg-white text-[#4c1d95] placeholder:text-gray-300 rounded-lg ${hasSubmitted || isBanished ? 'opacity-60 grayscale' : ''}`}
-                        data-testid={`input-${category}`}
+                        className={`text - center text - sm md: text - lg h - 9 md: h - 12 border - 2 border - [#e5e7eb] focus: border - [#7c3aed] focus: ring - 0 focus: shadow - [0_0_0_2px_rgba(124, 58, 237, 0.1)] transition - all font - pixel - text font - bold bg - white text - [#4c1d95] placeholder: text - gray - 300 rounded - lg ${ hasSubmitted || isBanished ? 'opacity-60 grayscale' : '' } `}
+                        data-testid={`input - ${ category } `}
                       />
                     </div>
                   </div>
@@ -583,16 +618,32 @@ export default function Game() {
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="text-center p-8 mt-6 bg-gradient-to-b from-white to-[#faf5ff] rounded-2xl border-[3px] border-[#4c1d95] shadow-[4px_4px_0_0_#2e1065,_0_0_20px_rgba(139,92,246,0.2)]"
+              className="text-center p-8 mt-6 bg-gradient-to-b from-white to-[#faf5ff] rounded-2xl border-[3px] border-[#4c1d95] shadow-[4px_4px_0_0_#2e1065,_0_0_20px_rgba(139,92,246,0.2)] relative overflow-hidden"
             >
+              {/* Road Rush Background Animation (Mobile Bonus) */}
+              {isMobile && (
+                <div className="absolute inset-0 z-0 opacity-15 pointer-events-none overflow-hidden bg-[#faf5ff]">
+                  {[...Array(12)].map((_, i) => (
+                    <motion.div
+                      key={`rush - ${ i } `}
+                      className="absolute h-1 bg-[#4c1d95] rounded-full"
+                      style={{ top: `${ Math.random() * 100 }% `, width: `${ 20 + Math.random() * 80 } px` }}
+                      initial={{ right: '-20%' }}
+                      animate={{ right: '120%' }}
+                      transition={{ duration: 0.2 + Math.random() * 0.4, repeat: Infinity, ease: 'linear' }}
+                    />
+                  ))}
+                </div>
+              )}
+
               <motion.div
-                className="w-16 h-16 bg-gradient-to-br from-[#7c3aed] to-[#4c1d95] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg"
+                className="relative z-10 w-16 h-16 bg-gradient-to-br from-[#7c3aed] to-[#4c1d95] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg"
                 animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
                 transition={{ repeat: Infinity, duration: 1.5 }}
               >
-                <Send className="w-8 h-8 text-white" />
+                <Send className="w-8 h-8 text-white relative z-10" />
               </motion.div>
-              <p className="font-pixel-title text-2xl text-[#4c1d95] mb-2">تم الإرسال!</p>
+              <p className="font-pixel-title text-2xl text-[#4c1d95] mb-2 relative z-10">تم الإرسال!</p>
               <motion.p className="text-lg text-[#7c3aed] font-bold font-pixel-text"
                 animate={{ opacity: [0.8, 1, 0.8] }}
                 transition={{ repeat: Infinity, duration: 2 }}

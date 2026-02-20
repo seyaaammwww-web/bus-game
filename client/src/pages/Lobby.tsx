@@ -1,4 +1,4 @@
-import { Copy, Check, Play, Users, Shield, Crown, Sparkles, X, LogOut, HelpCircle, Gamepad2 } from 'lucide-react';
+import { Copy, Check, Play, Users, Shield, Crown, Sparkles, X, LogOut, HelpCircle, Gamepad2, Volume2, VolumeX } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -6,6 +6,8 @@ import { PlayerCard } from '@/components/PlayerCard';
 import { useGame } from '@/lib/gameContext';
 import { RetroCard } from '@/components/ui/RetroCard';
 import { Tutorial } from '@/components/Tutorial';
+import { useGameSound } from '@/lib/soundManager';
+import { playReady, playRoundStart } from '@/lib/sounds';
 
 // ============================================
 // 🎮 LOBBY PAGE - Perfect Purple Theme
@@ -16,6 +18,7 @@ export default function Lobby() {
   const [copied, setCopied] = useState(false);
   const [showRefereeSelect, setShowRefereeSelect] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
+  const { isMuted, toggleMute } = useGameSound();
 
   const room = state.room!;
   const allReady = room.players.every(p => p.isReady);
@@ -59,6 +62,15 @@ export default function Lobby() {
           </div>
 
           <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleMute}
+              className="w-10 h-10 text-[#fbbf24] hover:text-[#f59e0b] hover:bg-white/10 rounded-xl"
+              title={isMuted ? "تشغيل الصوت" : "كتم الصوت"}
+            >
+              {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+            </Button>
             <Button
               variant="ghost"
               size="icon"
@@ -192,118 +204,168 @@ export default function Lobby() {
               </AnimatePresence>
             </div>
 
-            {/* ============================================
-                ⚖️ REFEREE SECTION - Integrated
-                ============================================ */}
-            {isHost && (
-              <div className="pt-3 border-t-2 border-[#4c1d95]/10">
-                {/* Voting Toggle */}
-                <div className="flex items-center justify-between p-3 mb-3 bg-[#faf5ff] rounded-xl border border-[#4c1d95]/20">
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-[#7c3aed]" />
+          </RetroCard>
+        </motion.div>
+
+        {/* ============================================
+            ⚙️ CONTROL PANEL (Referee, Voting, Ready Meter)
+            ============================================ */}
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.12 }}
+          className={`mb-5 p-5 bg-gradient-to-b from-[#2e1065] to-[#1a0533] rounded-2xl border-[4px] shadow-[0_0_30px_rgba(251,191,36,0.2)] transition-all duration-300 relative overflow-hidden ${isVotingEnabled ? 'border-orange-500 !shadow-[0_0_30px_rgba(249,115,22,0.4)]' : 'border-[#fbbf24]'
+            }`}
+        >
+          {isVotingEnabled && (
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-orange-500 to-transparent opacity-50 blur-sm" />
+          )}
+
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <Shield className={`w-6 h-6 ${isVotingEnabled ? 'text-orange-500' : 'text-[#fbbf24]'}`} />
+              <span className={`font-pixel-title text-xl ${isVotingEnabled ? 'text-orange-500' : 'text-[#fbbf24]'}`}>
+                لوحة التحكم
+              </span>
+            </div>
+          </div>
+
+          <div className="mb-5">
+            <div className="flex justify-between text-xs mb-1 font-pixel-text">
+              <span className="text-[#fbbf24]">اللاعبين الجاهزين</span>
+              <span className="text-white">{readyCount} / {room.players.length}</span>
+            </div>
+            {/* Ready Meter */}
+            <div className="h-3 bg-[#4c1d95] rounded-full overflow-hidden shadow-inner">
+              <motion.div
+                className="h-full bg-gradient-to-r from-[#fbbf24] to-[#f59e0b]"
+                initial={{ width: 0 }}
+                animate={{ width: `${(readyCount / room.players.length) * 100}%` }}
+              />
+            </div>
+          </div>
+
+          {isHost ? (
+            <div className="space-y-3">
+              {/* Voting Toggle */}
+              <div
+                className={`flex items-center justify-between p-3 rounded-xl border ${isVotingEnabled ? 'bg-orange-500/10 border-orange-500/30' : 'bg-white/5 border-white/10'
+                  } group cursor-pointer transition-colors`}
+                onClick={() => updateSettings({ enableVoting: !isVotingEnabled })}
+                title="التحكيم الديمقراطي = كل اللاعبين يصوتون على الإجابات"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <Users className={`w-5 h-5 ${isVotingEnabled ? 'text-orange-500' : 'text-white/50'}`} />
+                    {isVotingEnabled && (
+                      <motion.div
+                        className="absolute -top-1 -right-1 w-2 h-2 bg-orange-500 rounded-full"
+                        animate={{ y: [-1, 1, -1] }}
+                        transition={{ repeat: Infinity, duration: 0.5 }}
+                      />
+                    )}
+                  </div>
+                  <div>
+                    <p className={`font-bold font-pixel-text text-sm ${isVotingEnabled ? 'text-orange-400' : 'text-white'}`}>التحكيم الديمقراطي</p>
+                    <p className="text-[10px] text-white/50 font-pixel-text hidden md:block">كل اللاعبين يصوتون على الإجابات</p>
+                  </div>
+                </div>
+                <div
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold font-pixel-text transition-all flex items-center gap-1 ${isVotingEnabled
+                    ? 'bg-orange-500 text-white shadow-md'
+                    : 'bg-transparent text-white/50 border-2 border-white/20'
+                    }`}
+                >
+                  {isVotingEnabled && <Check className="w-3 h-3" />}
+                  {isVotingEnabled ? 'مفعل' : 'معطل'}
+                </div>
+              </div>
+
+              {/* Referee Selection */}
+              <div className={`p-3 rounded-xl border transition-all ${referee
+                ? 'bg-[#fbbf24]/10 border-[#fbbf24]/30'
+                : 'bg-white/5 border-white/10'
+                }`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center border transition-colors ${referee
+                      ? 'bg-[#fbbf24] border-[#d97706]'
+                      : 'bg-white/10 border-white/20'
+                      }`}>
+                      <Shield className={`w-4 h-4 ${referee ? 'text-[#2e1065]' : 'text-white/50'}`} />
+                    </div>
                     <div>
-                      <p className="font-bold text-[#4c1d95] font-pixel-text text-sm">التحكيم الديمقراطي</p>
-                      <p className="text-[10px] text-[#4c1d95]/60 font-pixel-text">
-                        {referee ? 'سيلغي الحكم الحالي' : 'اللاعبين يصوتون على الإجابات'}
+                      <p className="font-bold text-white font-pixel-text text-sm">حكم وحيد</p>
+                      <p className={`text-[10px] md:text-xs font-pixel-text ${referee ? 'text-[#fbbf24]' : 'text-white/50'}`}>
+                        {referee ? referee.name : 'اختياري - اختر لاعب لإلغاء التصويت'}
                       </p>
                     </div>
                   </div>
-                  <button
-                    onClick={() => {
-                      const newValue = !isVotingEnabled;
-                      console.log('[Lobby] Toggling voting to:', newValue);
-                      updateSettings({ enableVoting: newValue });
-                    }}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold font-pixel-text transition-all flex items-center gap-1 ${isVotingEnabled
-                      ? 'bg-[#7c3aed] text-white shadow-md'
-                      : 'bg-white text-[#4c1d95] border-2 border-[#4c1d95]/30'
-                      }`}
-                  >
-                    {isVotingEnabled && <Check className="w-3 h-3" />}
-                    {isVotingEnabled ? 'مفعل' : 'معطل'}
-                  </button>
+
+                  {referee ? (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); removeReferee(); }}
+                      className="w-8 h-8 flex items-center justify-center rounded-lg text-[#fbbf24] hover:bg-[#fbbf24] hover:text-[#2e1065] transition-colors"
+                      data-testid="button-remove-referee"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setShowRefereeSelect(!showRefereeSelect); }}
+                      className="px-3 py-1.5 bg-white/10 border border-white/20 text-white rounded-lg text-xs font-bold font-pixel-text hover:bg-white/20 transition-colors"
+                      data-testid="button-choose-referee"
+                    >
+                      اختر
+                    </button>
+                  )}
                 </div>
 
-                {/* Referee Selection - Merged Below */}
-                <div className={`p-3 rounded-xl border-2 transition-all ${referee
-                  ? 'bg-[#7c3aed]/10 border-[#7c3aed]/30'
-                  : 'bg-white/50 border-[#4c1d95]/20 border-dashed'
-                  }`}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center border-2 transition-colors ${referee
-                        ? 'bg-[#7c3aed] border-[#4c1d95]'
-                        : 'bg-[#7c3aed]/20 border-[#4c1d95]/30'
-                        }`}>
-                        <Shield className={`w-4 h-4 ${referee ? 'text-white' : 'text-[#7c3aed]'}`} />
+                {/* Referee Dropdown */}
+                <AnimatePresence>
+                  {showRefereeSelect && !referee && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="mt-3 pt-3 border-t border-white/10 overflow-hidden"
+                    >
+                      <div className="grid grid-cols-2 gap-2">
+                        {room.players.map((player) => (
+                          <button
+                            key={player.id}
+                            onClick={() => handleSetReferee(player.id)}
+                            className="flex items-center gap-2 p-2 bg-white/5 border border-white/10 rounded-lg text-white font-pixel-text text-sm hover:border-white/30 hover:bg-white/10 transition-colors"
+                            data-testid={`button-select-referee-${player.id}`}
+                          >
+                            {player.isHost && <Crown className="w-4 h-4 text-[#fbbf24] flex-shrink-0" />}
+                            <span className="truncate">{player.name}</span>
+                          </button>
+                        ))}
                       </div>
-                      <div>
-                        <p className="font-bold text-[#4c1d95] font-pixel-text text-sm">الحكم</p>
-                        <p className="text-xs text-[#7c3aed] font-pixel-text">
-                          {referee ? referee.name : 'اختياري - اختر حكم'}
-                        </p>
-                      </div>
-                    </div>
-
-                    {referee ? (
-                      <button
-                        onClick={() => removeReferee()}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg text-[#7c3aed] hover:bg-[#4c1d95] hover:text-white transition-colors"
-                        data-testid="button-remove-referee"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => setShowRefereeSelect(!showRefereeSelect)}
-                        className="px-3 py-1.5 bg-white border-2 border-[#4c1d95] text-[#4c1d95] rounded-lg text-xs font-bold font-pixel-text hover:bg-[#4c1d95] hover:text-white transition-colors"
-                        data-testid="button-choose-referee"
-                      >
-                        اختر
-                      </button>
-                    )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Voting Indicator (Non-Host) */}
+              {room.settings?.enableVoting && (
+                <div className="flex items-center justify-center gap-2 p-3 bg-orange-500/10 rounded-xl border border-orange-500/30">
+                  <div className="relative">
+                    <Users className="w-5 h-5 text-orange-500" />
+                    <motion.div
+                      className="absolute -top-1 -right-1 w-2 h-2 bg-orange-500 rounded-full"
+                      animate={{ y: [-1, 1, -1] }}
+                      transition={{ repeat: Infinity, duration: 0.5 }}
+                    />
                   </div>
-
-                  {/* Referee Dropdown */}
-                  <AnimatePresence>
-                    {showRefereeSelect && !referee && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="mt-3 pt-3 border-t border-[#4c1d95]/20 overflow-hidden"
-                      >
-                        <p className="text-xs text-[#4c1d95] mb-2 font-pixel-text font-bold">اختر من اللاعبين:</p>
-                        <div className="grid grid-cols-2 gap-2">
-                          {room.players.map((player) => (
-                            <button
-                              key={player.id}
-                              onClick={() => handleSetReferee(player.id)}
-                              className="flex items-center gap-2 p-2 bg-white border-2 border-[#4c1d95]/30 rounded-lg text-[#4c1d95] font-pixel-text text-sm hover:border-[#4c1d95] hover:bg-[#4c1d95]/5 transition-colors"
-                              data-testid={`button-select-referee-${player.id}`}
-                            >
-                              {player.isHost && <Crown className="w-4 h-4 text-[#7c3aed] flex-shrink-0" />}
-                              <span className="truncate">{player.name}</span>
-                            </button>
-                          ))}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  <span className="text-sm font-bold text-orange-400 font-pixel-text" title="التحكيم الديمقراطي = كل اللاعبين يصوتون على الإجابات">نظام التحكيم الديمقراطي مفعل</span>
                 </div>
-              </div>
-            )}
-
-            {/* Voting Indicator (Non-Host) */}
-            {!isHost && room.settings?.enableVoting && (
-              <div className="mt-3 pt-3 border-t-2 border-[#4c1d95]/10">
-                <div className="flex items-center justify-center gap-2 p-2 bg-[#7c3aed]/10 rounded-xl border border-[#7c3aed]/30">
-                  <Users className="w-4 h-4 text-[#7c3aed]" />
-                  <span className="text-xs font-bold text-[#4c1d95] font-pixel-text">نظام التحكيم الديمقراطي مفعل</span>
-                </div>
-              </div>
-            )}
-          </RetroCard>
+              )}
+            </>
+          )}
         </motion.div>
 
         {/* ============================================
@@ -318,7 +380,7 @@ export default function Lobby() {
           {/* Ready Button */}
           {!currentPlayer?.isReady && (
             <motion.button
-              onClick={setReady}
+              onClick={() => { playReady(); setReady(); }}
               className="w-full py-4 bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] text-white rounded-xl font-pixel-title text-lg font-bold shadow-[0_6px_0_0_#4c1d95,_0_0_20px_rgba(139,92,246,0.4)] active:shadow-none active:translate-y-1.5 transition-all flex items-center justify-center gap-2"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -351,7 +413,7 @@ export default function Lobby() {
           {/* Start Game Button */}
           {isHost && (
             <motion.button
-              onClick={startGame}
+              onClick={() => { playRoundStart(); startGame(); }}
               disabled={!canStart}
               className={`w-full py-4 rounded-xl font-pixel-title text-lg font-bold shadow-[0_6px_0_0] active:shadow-none active:translate-y-1.5 transition-all flex items-center justify-center gap-2 ${canStart
                 ? 'bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] text-white shadow-[#4c1d95] hover:from-[#8b5cf6] hover:to-[#7c3aed]'

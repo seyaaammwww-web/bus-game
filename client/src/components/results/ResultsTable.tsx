@@ -3,6 +3,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Check, X, Shield, Users, Trophy } from 'lucide-react';
 import { PixelAvatar } from '@/components/ui/PixelAvatar';
+import Confetti from '@/components/ui/Confetti';
 import { cn } from '@/lib/utils';
 import { categories, type Category } from '@shared/schema';
 
@@ -146,17 +147,24 @@ export function ResultsTable({
                                             </div>
 
                                             {/* Score Badge */}
-                                            <div className="shrink-0 md:absolute md:top-1 md:left-1">
+                                            <div className="shrink-0 md:absolute md:top-1 md:left-1 relative">
                                                 {answer && (
                                                     isValid ? (
-                                                        <span className={cn(
-                                                            "text-[10px] px-1.5 py-0.5 rounded border shadow-sm font-bold font-pixel-text",
-                                                            score > 10
-                                                                ? "bg-[#7c3aed] text-white border-[#5b21b6]"
-                                                                : "bg-[#ddd6fe] text-[#5b21b6] border-[#8b5cf6]"
-                                                        )}>
-                                                            {score}
-                                                        </span>
+                                                        <div className="relative">
+                                                            {score > 10 && (
+                                                                <div className="absolute inset-0 z-50 pointer-events-none flex items-center justify-center">
+                                                                    <Confetti active={true} count={3} />
+                                                                </div>
+                                                            )}
+                                                            <span className={cn(
+                                                                "text-[10px] px-1.5 py-0.5 rounded border shadow-sm font-bold font-pixel-text relative z-10",
+                                                                score > 10
+                                                                    ? "bg-[#7c3aed] text-white border-[#5b21b6]"
+                                                                    : "bg-[#ddd6fe] text-[#5b21b6] border-[#8b5cf6]"
+                                                            )}>
+                                                                {score}
+                                                            </span>
+                                                        </div>
                                                     ) : (
                                                         <X className="w-4 h-4 text-red-400 opacity-50" />
                                                     )
