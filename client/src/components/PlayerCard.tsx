@@ -1,3 +1,4 @@
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Crown, Check, Clock, Shield, Zap, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -15,7 +16,7 @@ interface PlayerCardProps {
 const rankColors = ['bg-yellow-400', 'bg-gray-300', 'bg-amber-600'];
 const rankEmojis = ['1', '2', '3'];
 
-export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank, index }: PlayerCardProps) {
+export const PlayerCard = React.memo(function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank, index }: PlayerCardProps) {
 
   return (
     <motion.div
@@ -119,5 +120,5 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
       </div>
     </motion.div>
   );
-}
+});
 

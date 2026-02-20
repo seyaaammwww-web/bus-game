@@ -8,23 +8,23 @@ import { categories, type Category } from '@shared/schema';
 import { playSuccessSound, playCountdownSound, playBonusSound, playWinnerFanfare, playCountdownTick } from '@/lib/sounds';
 import { RetroCard } from '@/components/ui/RetroCard';
 import { PixelAvatar } from '@/components/ui/PixelAvatar';
-import { RetroQuote } from '@/components/ui/RetroQuote';
-import { LetterDisplay } from '@/components/LetterDisplay';
-import { VotingOverlay } from '@/components/VotingOverlay';
-import { RefereeReviewOverlay } from '@/components/RefereeReviewOverlay';
-import { GameStats } from '@/components/results/GameStats';
-import { AppealDialog } from '@/components/results/AppealDialog';
-import { ResultsTable } from '@/components/results/ResultsTable';
 import { PixelReveal } from '@/components/ui/PixelReveal';
-
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 const categoryIcons: Record<Category, any> = {
-  'ولد': User,
-  'بنت': Users,
-  'بلد': Globe,
-  'حيوان': PawPrint,
-  'جماد': Box,
-};
+  import { GameStats } from '@/components/results/GameStats';
+  import { AppealDialog } from '@/components/results/AppealDialog';
+  import { ResultsTable } from '@/components/results/ResultsTable';
+  import { PixelReveal } from '@/components/ui/PixelReveal';
+
+
+  const categoryIcons: Record<Category, any> = {
+    'ولد': User,
+    'بنت': Users,
+    'بلد': Globe,
+    'حيوان': PawPrint,
+    'جماد': Box,
+  };
 
 const categoryColors: Record<Category, string> = {
   'ولد': 'category-boy',
@@ -128,14 +128,7 @@ export default function Results() {
     };
   }, [isFinal, room.rounds, room.players]);
 
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 1024);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
+  const isMobile = useIsMobile();
 
   return (
     <div className="min-h-screen p-4 overflow-hidden relative text-white font-pixel-text">

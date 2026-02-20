@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { playClick, playSubmit, playBusComplete, playWildcard, playBanish } from '@/lib/sounds';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 const categoryIcons: Record<Category, any> = {
   'ولد': User,
@@ -205,14 +206,13 @@ export default function Game() {
     }
   }, [submitAnswers]);
 
-  // Auto-submit when time runs out
   useEffect(() => {
     if (state.timeLeft <= 1 && !hasSubmitted) {
       handleSubmit();
     }
   }, [state.timeLeft, hasSubmitted]);
 
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
+  const isMobile = useIsMobile();
 
   return (
     <motion.div

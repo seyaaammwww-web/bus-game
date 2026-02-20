@@ -13,6 +13,8 @@ import Results from "@/pages/Results";
 import WorkOSBackground from "@/components/WorkOSBackground";
 import { BusHUD } from "@/components/BusHUD";
 import { SoundProvider } from "@/lib/soundManager";
+import { useIsMobile } from "@/hooks/useIsMobile";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 function GameRouter() {
   const { state } = useGame();
@@ -47,14 +49,11 @@ function GameRouter() {
 
 // ... imports
 
-// Helper to check if mobile
-const isMobile = () => typeof window !== 'undefined' && window.innerWidth < 1024;
-
 function BackgroundManager() {
   const { state } = useGame();
 
   // Performance mode active on mobile to save GPU resources
-  const performanceMode = isMobile();
+  const performanceMode = useIsMobile();
 
   return <WorkOSBackground performanceMode={performanceMode} />;
 }
@@ -67,7 +66,9 @@ function App() {
           <GameProvider>
             <BackgroundManager />
             <BusHUD />
-            <GameRouter />
+            <ErrorBoundary>
+              <GameRouter />
+            </ErrorBoundary>
           </GameProvider>
         </SoundProvider>
         <Toaster />

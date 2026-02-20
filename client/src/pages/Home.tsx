@@ -14,10 +14,7 @@ import { RetroQuote } from '@/components/ui/RetroQuote';
 import { PixelReveal } from '@/components/ui/PixelReveal';
 import { Text3D } from '@/components/ui/Text3D';
 import { PixelAvatar } from '@/components/ui/PixelAvatar';
-
-
-
-
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 export default function Home() {
   const { createRoom, joinRoom, state } = useGame();
@@ -53,7 +50,7 @@ export default function Home() {
 
 
   // ... inside component
-  const isMobileView = typeof window !== 'undefined' && window.innerWidth < 1024;
+  const isMobileView = useIsMobile();
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden relative text-white">

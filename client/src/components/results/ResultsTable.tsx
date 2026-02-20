@@ -6,6 +6,7 @@ import { PixelAvatar } from '@/components/ui/PixelAvatar';
 import Confetti from '@/components/ui/Confetti';
 import { cn } from '@/lib/utils';
 import { categories, type Category } from '@shared/schema';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 // Helper for category icons/colors (Reusing logic for consistency)
 import { User, Box, Globe, PawPrint } from 'lucide-react';
@@ -28,7 +29,7 @@ interface ResultsTableProps {
     onAppeal: (playerId: string, category: string, answer: string) => void;
 }
 
-export function ResultsTable({
+export const ResultsTable = React.memo(function ResultsTable({
     round,
     players,
     currentPlayerId,
@@ -37,6 +38,7 @@ export function ResultsTable({
     onRefereeDeduct,
     onAppeal
 }: ResultsTableProps) {
+    const isMobile = useIsMobile();
 
     return (
         <div className="flex flex-col gap-4">
@@ -61,8 +63,6 @@ export function ResultsTable({
                 {round.submissions.map((submission: any, idx: number) => {
                     const isMe = submission.playerId === currentPlayerId;
                     const player = players.find(p => p.id === submission.playerId);
-
-                    const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
 
                     return (
                         <motion.div
@@ -180,7 +180,7 @@ export function ResultsTable({
             </div>
         </div>
     );
-}
+});
 
 function calculateTotalScore(round: any, playerId: string) {
     let total = 0;

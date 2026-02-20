@@ -8,6 +8,7 @@ import { RetroCard } from '@/components/ui/RetroCard';
 import { Tutorial } from '@/components/Tutorial';
 import { useGameSound } from '@/lib/soundManager';
 import { playReady, playRoundStart } from '@/lib/sounds';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 // ============================================
 // 🎮 LOBBY PAGE - Perfect Purple Theme
@@ -37,7 +38,7 @@ export default function Lobby() {
     setShowRefereeSelect(false);
   };
 
-  const isMobileView = typeof window !== 'undefined' && window.innerWidth < 1024;
+  const isMobileView = useIsMobile();
 
   return (
     <div className="min-h-screen p-3 md:p-6 overflow-hidden relative text-white font-pixel-text">

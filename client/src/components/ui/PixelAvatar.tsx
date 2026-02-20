@@ -8,7 +8,7 @@ interface PixelAvatarProps extends React.HTMLAttributes<HTMLDivElement> {
     size?: 'sm' | 'md' | 'lg';
 }
 
-export function PixelAvatar({ src, alt, size = 'md', className, ...props }: PixelAvatarProps) {
+export const PixelAvatar = React.memo(function PixelAvatar({ src, alt, size = 'md', className, ...props }: PixelAvatarProps) {
     const sizeClasses = {
         sm: "w-12 h-12",
         md: "w-24 h-24",
@@ -37,5 +37,5 @@ export function PixelAvatar({ src, alt, size = 'md', className, ...props }: Pixe
             </div>
         </div>
     )
-}
+});
 
