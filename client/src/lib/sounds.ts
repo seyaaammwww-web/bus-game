@@ -58,3 +58,6 @@ export const playTimerUrgent = () => soundManager.play('rush');
 export const playErrorSound = () => soundManager.play('rush');
 export const playTypeSound = () => soundManager.play('vote');
 export const resumeAudioContext = () => { };
+export const setMasterVolume = (v: number) => soundManager.setVolume(v);
+export const muteAll = () => soundManager.setEnabled(false);
+export const unmuteAll = () => soundManager.setEnabled(true);
