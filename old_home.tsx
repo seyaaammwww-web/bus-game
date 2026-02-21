@@ -1,4 +1,4 @@
-// ... imports
+﻿// ... imports
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Plus, ArrowLeft } from 'lucide-react';
@@ -7,15 +7,16 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RetroCard } from '@/components/ui/RetroCard';
 import { useGame } from '@/lib/gameContext';
-import { playClick } from '@/lib/sounds';
+import { resumeAudioContext } from '@/lib/sounds';
 import { Tutorial } from '@/components/Tutorial';
 import { HelpCircle } from 'lucide-react';
 import { RetroQuote } from '@/components/ui/RetroQuote';
 import { PixelReveal } from '@/components/ui/PixelReveal';
 import { Text3D } from '@/components/ui/Text3D';
-import { PixelAvatar } from '@/components/ui/PixelAvatar';
-import { useIsMobile } from '@/hooks/useIsMobile';
-import DynamicPixelBackground from '@/components/DynamicPixelBackground';
+
+
+
+
 
 export default function Home() {
   const { createRoom, joinRoom, state } = useGame();
@@ -27,6 +28,7 @@ export default function Home() {
 
   useEffect(() => {
     const handleInteraction = () => {
+      resumeAudioContext();
       window.removeEventListener('click', handleInteraction);
     };
     window.addEventListener('click', handleInteraction);
@@ -50,55 +52,46 @@ export default function Home() {
 
 
   // ... inside component
-  const isMobileView = useIsMobile();
-
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden relative text-white">
 
       {showHelp && <Tutorial onClose={() => setShowHelp(false)} />}
 
-      {!isMobileView && <DynamicPixelBackground />}
-
-      {isMobileView && (
-        <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none opacity-40">
-          {[...Array(30)].map((_, i) => (
-            <motion.div
-              key={`rain-${i}`}
-              className="absolute w-[2px] bg-white h-[30px]"
-              style={{ left: `${Math.random() * 100}%`, top: `-${Math.random() * 20}%` }}
-              animate={{ y: ['0vh', '120vh'] }}
-              transition={{ duration: 0.4 + Math.random() * 0.4, repeat: Infinity, ease: 'linear' }}
-            />
-          ))}
-        </div>
-      )}
-
       {/* Large Floating Help Button */}
       <motion.button
         className="fixed bottom-4 right-4 z-50 w-12 h-12 bg-[#FFFDD1] rounded-full flex items-center justify-center shadow-[4px_4px_0px_0px_#2e1065] border-[3px] border-[#2e1065] hover:bg-[#FFFEF0] hover:scale-110 active:scale-95 transition-all"
         onClick={() => setShowHelp(true)}
-        whileHover={isMobileView ? {} : { scale: 1.1 }}
+        whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
       >
-        <span className="text-2xl font-bold text-[#2e1065] font-pixel-title">؟</span>
+        <span className="text-2xl font-bold text-[#2e1065] font-pixel-title">╪ƒ</span>
       </motion.button>
 
-      <AnimatePresence>
-        {mode !== 'home' && (
-          <motion.div
-            initial={{ y: -30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -30, opacity: 0 }}
-            className="text-center mb-8 relative z-10"
-          >
-            <img
-              src="/assets/logo.png"
-              alt="أوتوبيس كومبليت"
-              className="w-64 max-w-full mx-auto object-contain pixelated"
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <motion.div
+        initial={{ y: -50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ type: 'spring', stiffness: 200 }}
+        className="text-center mb-12 relative z-10"
+      >
+        <div className="logo-container animate-slow-float mb-2">
+          {/* Logo with shine effect - uses CSS mask to constrain glow to logo shape */}
+          <img
+            src="/assets/logo.png"
+            alt="╪ú┘ê╪¬┘ê╪¿┘è╪│ ┘â┘ê┘à╪¿┘ä┘è╪¬"
+            className="w-full max-w-[500px] object-contain pixelated"
+          />
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 }}
+        >
+          <div className="text-sm md:text-base font-pixel-text text-[#FEFADE]/90 mt-4 tracking-widest uppercase">
+            By Mohamed Seyam
+          </div>
+        </motion.div>
+      </motion.div>
 
       <AnimatePresence mode="wait">
         {state.error && (
@@ -106,7 +99,7 @@ export default function Home() {
             initial={{ scale: 0.9, opacity: 0, y: -10 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: -10 }}
-            className="bg-destructive/10 border-2 border-destructive/30 text-destructive px-6 py-4 rounded-2xl mb-6 text-center max-w-md shadow-lg relative z-20"
+            className="bg-destructive/10 border-2 border-destructive/30 text-destructive px-6 py-4 rounded-2xl mb-6 text-center max-w-md shadow-lg"
           >
             <motion.div
               animate={{ rotate: [0, 5, -5, 0] }}
@@ -122,52 +115,45 @@ export default function Home() {
         {mode === 'home' && (
           <motion.div
             key="home"
-            className="w-full max-w-lg relative z-10"
+            className="flex flex-col gap-6 w-full max-w-sm relative z-10"
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -30, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
           >
-            <div className="relative h-[480px] md:h-[520px] w-full flex flex-col items-center justify-between py-6">
 
-              {/* Logo Area */}
-              <div className="w-[90%] z-20 text-center mb-8 mt-4 md:mt-10">
-                <img
-                  src="/assets/logo.png"
-                  alt="أوتوبيس كومبليت"
-                  className="w-full max-w-[340px] mx-auto object-contain pixelated drop-shadow-[0_0_15px_rgba(251,191,36,0.3)] animate-slow-float"
-                />
-              </div>
 
-              {/* Cleaned up background items - Rain is now global, and Bus is removed */}
+            <motion.div
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+            >
+              <Button
+                size="lg"
+                variant="primary"
+                className="w-full h-20 text-3xl font-pixel-title"
+                onClick={() => setMode('create')}
+                data-testid="button-create-room"
+              >
+                <Plus className="w-8 h-8 ml-2" />
+                ╪║╪▒┘ü╪⌐ ╪¼╪»┘è╪»╪⌐
+              </Button>
+            </motion.div>
 
-              {/* Neon Ticket Buttons */}
-              <div className="w-[90%] flex flex-col gap-4 z-20 mb-4">
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                  <Button
-                    size="lg"
-                    className="w-full h-16 md:h-20 text-2xl md:text-3xl font-pixel-title border-[3px] border-[#fbbf24] bg-[#4c1d95]/90 text-[#fbbf24] hover:bg-[#fbbf24] hover:text-[#4c1d95] shadow-[0_0_20px_rgba(251,191,36,0.5)] transition-all"
-                    onClick={() => { playClick(); setMode('create'); }}
-                    data-testid="button-create-room"
-                  >
-                    <Plus className="w-6 h-6 md:w-8 md:h-8 ml-2" />
-                    غرفة جديدة
-                  </Button>
-                </motion.div>
-
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                  <Button
-                    size="lg"
-                    className="w-full h-16 md:h-20 text-2xl md:text-3xl font-pixel-title border-[3px] border-[#e9d5ff] bg-transparent text-[#e9d5ff] hover:bg-[#e9d5ff] hover:text-[#4c1d95] shadow-[0_0_15px_rgba(233,213,255,0.2)] transition-all"
-                    onClick={() => { playClick(); setMode('join'); }}
-                    data-testid="button-join-room"
-                  >
-                    <Users className="w-6 h-6 md:w-8 md:h-8 ml-2" />
-                    انضم لغرفة
-                  </Button>
-                </motion.div>
-              </div>
-            </div>
+            <motion.div
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+            >
+              <Button
+                size="lg"
+                variant="retro"
+                className="w-full h-20 text-3xl font-pixel-title"
+                onClick={() => setMode('join')}
+                data-testid="button-join-room"
+              >
+                <Users className="w-8 h-8 ml-2" />
+                ╪º┘å╪╢┘à ┘ä╪║╪▒┘ü╪⌐
+              </Button>
+            </motion.div>
           </motion.div>
         )}
 
@@ -198,10 +184,10 @@ export default function Home() {
                 >
                   <CardTitle className="flex items-center gap-2 font-pixel-title text-4xl">
                     <Plus className="w-7 h-7 text-primary" />
-                    غرفة جديدة
+                    ╪║╪▒┘ü╪⌐ ╪¼╪»┘è╪»╪⌐
                   </CardTitle>
                 </motion.div>
-                <CardDescription className="font-pixel-text text-xl mt-2">أنشئ غرفة وادعي أصحابك</CardDescription>
+                <CardDescription className="font-pixel-text text-xl mt-2">╪ú┘å╪┤╪ª ╪║╪▒┘ü╪⌐ ┘ê╪º╪»╪╣┘è ╪ú╪╡╪¡╪º╪¿┘â</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <motion.div
@@ -209,10 +195,10 @@ export default function Home() {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <label className="text-3xl font-bold mb-3 block font-pixel-title">اسمك</label>
+                  <label className="text-3xl font-bold mb-3 block font-pixel-title">╪º╪│┘à┘â</label>
                   <Input
                     type="text"
-                    placeholder="اكتب اسمك هنا"
+                    placeholder="╪º┘â╪¬╪¿ ╪º╪│┘à┘â ┘ç┘å╪º"
                     value={playerName}
                     onChange={(e) => setPlayerName(e.target.value)}
                     maxLength={20}
@@ -229,24 +215,19 @@ export default function Home() {
                 >
                   <Button
                     className="w-full h-20 text-3xl font-bold bg-gradient-to-r from-primary to-secondary font-pixel-title"
-                    onClick={() => { playClick(); handleCreate(); }}
+                    onClick={handleCreate}
                     disabled={playerName.trim().length < 2 || isLoading}
                     data-testid="button-create-confirm"
                   >
                     {isLoading ? (
-                      <div className="flex items-center gap-3">
-                        <svg className="w-5 h-5 animate-spin text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="12" cy="12" r="10" />
-                          <circle cx="12" cy="12" r="4" />
-                          <line x1="12" y1="2" x2="12" y2="8" />
-                          <line x1="12" y1="16" x2="12" y2="22" />
-                          <line x1="2" y1="12" x2="8" y2="12" />
-                          <line x1="16" y1="12" x2="22" y2="12" />
-                        </svg>
-                        جاري الإنشاء...
-                      </div>
+                      <motion.span
+                        animate={{ opacity: [1, 0.5, 1] }}
+                        transition={{ repeat: Infinity, duration: 1 }}
+                      >
+                        ╪¼╪º╪▒┘è ╪º┘ä╪Ñ┘å╪┤╪º╪í...
+                      </motion.span>
                     ) : (
-                      'أنشئ الغرفة'
+                      '╪ú┘å╪┤╪ª ╪º┘ä╪║╪▒┘ü╪⌐'
                     )}
                   </Button>
                 </motion.div>
@@ -282,10 +263,10 @@ export default function Home() {
                 >
                   <CardTitle className="flex items-center gap-2 font-pixel-title text-4xl">
                     <Users className="w-7 h-7 text-secondary" />
-                    انضم لغرفة
+                    ╪º┘å╪╢┘à ┘ä╪║╪▒┘ü╪⌐
                   </CardTitle>
                 </motion.div>
-                <CardDescription className="font-pixel-text text-xl mt-2">اكتب كود الغرفة من صاحبك</CardDescription>
+                <CardDescription className="font-pixel-text text-xl mt-2">╪º┘â╪¬╪¿ ┘â┘ê╪» ╪º┘ä╪║╪▒┘ü╪⌐ ┘à┘å ╪╡╪º╪¡╪¿┘â</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <motion.div
@@ -293,10 +274,10 @@ export default function Home() {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <label className="text-3xl font-bold mb-3 block font-pixel-title">اسمك</label>
+                  <label className="text-3xl font-bold mb-3 block font-pixel-title">╪º╪│┘à┘â</label>
                   <Input
                     type="text"
-                    placeholder="اكتب اسمك هنا"
+                    placeholder="╪º┘â╪¬╪¿ ╪º╪│┘à┘â ┘ç┘å╪º"
                     value={playerName}
                     onChange={(e) => setPlayerName(e.target.value)}
                     maxLength={20}
@@ -309,7 +290,7 @@ export default function Home() {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.3 }}
                 >
-                  <label className="text-3xl font-bold mb-3 block font-pixel-title">كود الغرفة</label>
+                  <label className="text-3xl font-bold mb-3 block font-pixel-title">┘â┘ê╪» ╪º┘ä╪║╪▒┘ü╪⌐</label>
                   <Input
                     type="text"
                     placeholder="XXXX"
@@ -329,24 +310,19 @@ export default function Home() {
                 >
                   <Button
                     className="w-full h-14 text-xl font-bold bg-gradient-to-r from-secondary to-primary font-pixel-text"
-                    onClick={() => { playClick(); handleJoin(); }}
+                    onClick={handleJoin}
                     disabled={playerName.trim().length < 2 || roomCode.length !== 4 || isLoading}
                     data-testid="button-join-confirm"
                   >
                     {isLoading ? (
-                      <div className="flex items-center gap-2">
-                        <svg className="w-4 h-4 animate-spin text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="12" cy="12" r="10" />
-                          <circle cx="12" cy="12" r="4" />
-                          <line x1="12" y1="2" x2="12" y2="8" />
-                          <line x1="12" y1="16" x2="12" y2="22" />
-                          <line x1="2" y1="12" x2="8" y2="12" />
-                          <line x1="16" y1="12" x2="22" y2="12" />
-                        </svg>
-                        جاري الانضمام...
-                      </div>
+                      <motion.span
+                        animate={{ opacity: [1, 0.5, 1] }}
+                        transition={{ repeat: Infinity, duration: 1 }}
+                      >
+                        ╪¼╪º╪▒┘è ╪º┘ä╪º┘å╪╢┘à╪º┘à...
+                      </motion.span>
                     ) : (
-                      'انضم للغرفة'
+                      '╪º┘å╪╢┘à ┘ä┘ä╪║╪▒┘ü╪⌐'
                     )}
                   </Button>
                 </motion.div>

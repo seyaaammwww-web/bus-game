@@ -23,7 +23,7 @@ export default function Lobby() {
 
   const room = state.room!;
   const allReady = room.players.every(p => p.isReady);
-  const canStart = isHost && allReady && room.players.length >= 2;
+  const canStart = isHost && allReady && room.players.length >= 1;
   const readyCount = room.players.filter(p => p.isReady).length;
   const isVotingEnabled = room.settings?.enableVoting || false;
 
