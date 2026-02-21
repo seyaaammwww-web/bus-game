@@ -94,13 +94,27 @@ export default function Home() {
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8 }}
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: {},
+            visible: { transition: { staggerChildren: 0.08, delayChildren: 1.2 } }
+          }}
+          className="flex justify-center gap-[2px] mt-4"
         >
-          <div className="text-sm md:text-base font-pixel-text text-[#FEFADE]/90 mt-4 tracking-widest uppercase">
-            By Mohamed Seyam
-          </div>
+          {"By Mohamed Seyam".split('').map((char, i) => (
+            <motion.span
+              key={i}
+              variants={{
+                hidden: { opacity: 0, y: 10 },
+                visible: { opacity: 1, y: 0 }
+              }}
+              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+              className="text-sm md:text-base font-pixel-text text-[#FEFADE]/90 tracking-widest uppercase"
+            >
+              {char === ' ' ? '\u00A0' : char}
+            </motion.span>
+          ))}
         </motion.div>
       </motion.div>
 
