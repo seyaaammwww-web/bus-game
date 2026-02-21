@@ -1008,3 +1008,50 @@
     -30vw -60px 0 0 rgba(255, 255, 255, 0.5),
     10vw 40px 0 0 rgba(255, 255, 255, 0.3);
 }
+
+/* --- Mobile Home Juicy Background --- */
+.mobile-juicy-bg {
+  /* 1. Breathing Gradient */
+  background: linear-gradient(145deg, #1e0942 0%, #3b1182 50%, #1e0942 100%);
+  background-size: 200% 200%;
+  animation: bg-breathe 10s ease infinite;
+}
+
+@keyframes bg-breathe {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* 2. Scrolling Pixel Grid */
+.mobile-juicy-bg::before {
+  content: '';
+  position: absolute;
+  inset: -100px; /* Oversize to prevent edge clipping during parallax/animation */
+  background-image: 
+    linear-gradient(rgba(139, 92, 246, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139, 92, 246, 0.1) 1px, transparent 1px);
+  background-size: 30px 30px;
+  animation: grid-scroll-mobile 15s linear infinite;
+  z-index: 0;
+  pointer-events: none;
+}
+
+@keyframes grid-scroll-mobile {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(30px); }
+}
+
+/* 3. CRT Scanlines (Retro feel) */
+.mobile-juicy-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.15) 50%
+  );
+  background-size: 100% 4px;
+  z-index: 10; /* Above grid, below content */
+  pointer-events: none;
+}
