@@ -57,6 +57,15 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden relative text-white">
 
+      {/* Mobile Pixel Rain Background */}
+      {isMobileView && (
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-40">
+          <div className="pixel-rain pixel-rain-1"></div>
+          <div className="pixel-rain pixel-rain-2"></div>
+          <div className="pixel-rain pixel-rain-3"></div>
+        </div>
+      )}
+
       {showHelp && <Tutorial onClose={() => setShowHelp(false)} />}
 
       {/* Large Floating Help Button */}
