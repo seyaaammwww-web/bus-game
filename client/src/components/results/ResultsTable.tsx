@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Check, X, Shield, Users, Trophy } from 'lucide-react';
+import { Check, X, Shield, Users, Trophy, MessageSquarePlus } from 'lucide-react';
 import { PixelAvatar } from '@/components/ui/PixelAvatar';
 import { cn } from '@/lib/utils';
 import { categories, type Category } from '@shared/schema';
@@ -130,13 +130,9 @@ export function ResultsTable({
                                             key={cat}
                                             className={cn(
                                                 "relative p-3 flex md:flex-col items-center justify-between md:justify-center gap-2 transition-colors border-b md:border-b-0 border-gray-100 last:border-0 md:border-r md:border-gray-100",
-                                                statusClass
+                                                statusClass,
+                                                isMe && !isValid && answer && !isReferee ? 'cursor-pointer group/cell' : ''
                                             )}
-                                            onClick={() => {
-                                                if (isMe && !isValid && answer && !isReferee) {
-                                                    onAppeal(submission.playerId, cat, answer);
-                                                }
-                                            }}
                                         >
                                             {/* Mobile Category Label */}
                                             <div className="md:hidden flex items-center gap-2 w-24 shrink-0 text-gray-400 text-xs font-bold">
@@ -175,6 +171,19 @@ export function ResultsTable({
                                                     )
                                                 )}
                                             </div>
+
+                                            {/* Appeal Button — visible for my invalid answers */}
+                                            {isMe && !isValid && answer && !isReferee && (
+                                                <button
+                                                    onClick={() => onAppeal(submission.playerId, cat, answer)}
+                                                    className="absolute inset-0 w-full h-full flex items-end justify-center pb-1 opacity-0 group-hover/cell:opacity-100 group-active/cell:opacity-100 md:opacity-0 md:group-hover/cell:opacity-100 transition-opacity bg-red-50/80"
+                                                >
+                                                    <span className="inline-flex items-center gap-1 bg-[#7c3aed] text-white text-[9px] font-pixel-text font-bold px-2 py-0.5 rounded-full border border-[#4c1d95] shadow-[1px_1px_0_0_#2e1065] whitespace-nowrap">
+                                                        <MessageSquarePlus className="w-3 h-3" />
+                                                        استئناف
+                                                    </span>
+                                                </button>
+                                            )}
                                         </div>
                                     );
                                 })}

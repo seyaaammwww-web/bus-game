@@ -401,7 +401,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [sendMessage]);
 
   const castDemocraticVote = useCallback((vote: 'yes' | 'no') => {
-    sendMessage('vote_cast', { vote });
+    sendMessage('cast_democratic_vote', { vote });
   }, [sendMessage]);
 
   const activatePowerUp = useCallback((type: PowerUpType, targetId?: string) => {
