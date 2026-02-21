@@ -174,20 +174,27 @@ export default function Results() {
                 </motion.div>
               </motion.div>
 
-              <div className="p-6 bg-gradient-to-b from-white to-[#faf5ff] rounded-2xl border-[3px] border-[#4c1d95] shadow-[4px_4px_0_0_#2e1065,_0_0_30px_rgba(139,92,246,0.15)] mb-4">
+              <motion.div
+                className="relative p-8 bg-gradient-to-b from-white to-[#faf5ff] rounded-3xl border-[4px] border-[#4c1d95] shadow-[0_10px_30px_rgba(124,58,237,0.4)] mb-8 winner-podium"
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.4 }}
+              >
+                <div className="winner-glow" />
                 <motion.h1
-                  className="text-5xl font-pixel-title mb-4 text-[#4c1d95] font-bold"
+                  className="text-5xl font-pixel-title mb-6 text-[#4c1d95] font-bold drop-shadow-sm"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.3, type: 'spring' }}
                 >
                   الفائز! 👑
                 </motion.h1>
-                <div className="flex justify-center mb-4">
-                  <PixelAvatar src={winner.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${winner.id}`} size="lg" />
+                <div className="flex justify-center mb-6 relative">
+                  <div className="absolute inset-0 bg-yellow-400 rounded-full blur-xl opacity-30 animate-pulse" />
+                  <PixelAvatar src={winner.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${winner.id}`} size="lg" className="border-4 border-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.5)] bg-white relative z-10" />
                 </div>
                 <motion.p
-                  className="text-4xl font-pixel-text font-bold text-[#4c1d95]"
+                  className="text-5xl font-pixel-text font-bold text-[#4c1d95] mb-2"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5 }}
@@ -195,14 +202,14 @@ export default function Results() {
                   {winner.name}
                 </motion.p>
                 <motion.p
-                  className="text-2xl text-[#7c3aed] mt-3 font-pixel-text font-bold"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
+                  className="text-3xl text-[#7c3aed] mt-4 font-pixel-text font-bold bg-[#7c3aed] text-white inline-block px-6 py-2 rounded-full border-2 border-[#4c1d95] shadow-[2px_2px_0_0_#2e1065]"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.7 }}
                 >
                   {winner.score} نقطة
                 </motion.p>
-              </div>
+              </motion.div>
             </>
           ) : (
             <>

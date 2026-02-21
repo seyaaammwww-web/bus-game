@@ -56,7 +56,19 @@ export function ResultsTable({
                 })}
             </div>
 
-            <div className="space-y-3">
+            <motion.div
+                className="space-y-3"
+                initial="hidden"
+                animate="visible"
+                variants={{
+                    hidden: {},
+                    visible: {
+                        transition: {
+                            staggerChildren: 0.3, // 300ms delay between each player
+                        }
+                    }
+                }}
+            >
                 {round.submissions.map((submission: any, idx: number) => {
                     const isMe = submission.playerId === currentPlayerId;
                     const player = players.find(p => p.id === submission.playerId);
@@ -66,9 +78,10 @@ export function ResultsTable({
                     return (
                         <motion.div
                             key={submission.playerId}
-                            initial={isMobile ? { opacity: 0 } : { x: -20, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            transition={isMobile ? { duration: 0.2 } : { delay: idx * 0.1 }}
+                            variants={{
+                                hidden: { opacity: 0, y: 50, scale: 0.9 },
+                                visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 300, damping: 20 } }
+                            }}
                             className={cn(
                                 "relative group rounded-xl border-[3px] overflow-hidden transition-all duration-300",
                                 isMe
@@ -169,7 +182,7 @@ export function ResultsTable({
                         </motion.div>
                     );
                 })}
-            </div>
+            </motion.div>
         </div>
     );
 }
