@@ -538,9 +538,38 @@ export default function Game() {
                     "bg-white border-2 border-[#4c1d95] shadow-[3px_3px_0px_0px_#2e1065] rounded-xl overflow-hidden hover:-translate-y-1 hover:shadow-[5px_5px_0px_0px_#2e1065] transition-all duration-200",
                     isLastOdd && "w-[calc(50%-6px)] md:w-full"
                   )}>
-                    <div className={`${categoryColors[category]} py-1.5 px-2 border-b-2 border-[#4c1d95] flex items-center justify-center gap-1.5`}>
+                    <div className={`${categoryColors[category]} py-1.5 px-2 border-b-2 border-[#4c1d95] flex items-center justify-center gap-1.5 relative`}>
                       <Icon className="w-3.5 h-3.5 text-white" />
                       <span className="font-bold text-white font-pixel-text text-xs md:text-sm whitespace-nowrap">{category}</span>
+
+                      <AnimatePresence>
+                        {answers[category]?.trim().length > 0 && (
+                          <motion.div
+                            initial={{ scale: 0, rotate: -20 }}
+                            animate={{ scale: 1, rotate: 8 }}
+                            exit={{ scale: 0, opacity: 0 }}
+                            className="absolute -top-3 -right-2 md:-right-4 bg-[#10b981] text-white text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg border-[2px] border-white z-20 flex items-center justify-center font-pixel-text"
+                          >
+                            ✓ تم
+                            {/* Tiny Confetti Burst */}
+                            {[...Array(6)].map((_, j) => (
+                              <motion.div
+                                key={`burst-${j}`}
+                                className="absolute w-1 h-1 rounded-full pointer-events-none"
+                                style={{ backgroundColor: ['#ef4444', '#3b82f6', '#fbbf24', '#10b981'][j % 4], top: '50%', left: '50%' }}
+                                initial={{ x: 0, y: 0, opacity: 1, scale: 0 }}
+                                animate={{
+                                  x: (Math.random() - 0.5) * 40,
+                                  y: (Math.random() - 0.5) * 40,
+                                  opacity: 0,
+                                  scale: 1.5
+                                }}
+                                transition={{ duration: 0.6, ease: "easeOut" }}
+                              />
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                     <div className="p-2 bg-gradient-to-b from-white to-gray-50">
                       <Input
@@ -588,10 +617,26 @@ export default function Game() {
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="text-center p-8 mt-6 bg-gradient-to-b from-white to-[#faf5ff] rounded-2xl border-[3px] border-[#4c1d95] shadow-[4px_4px_0_0_#2e1065,_0_0_20px_rgba(139,92,246,0.2)]"
+              className="text-center p-8 mt-6 bg-gradient-to-b from-white to-[#faf5ff] rounded-2xl border-[3px] border-[#4c1d95] shadow-[4px_4px_0_0_#2e1065,_0_0_20px_rgba(139,92,246,0.2)] relative overflow-hidden"
             >
+              {/* Road Rush Background Animation (Mobile Bonus) */}
+              {isMobile && (
+                <div className="absolute inset-0 z-0 opacity-15 pointer-events-none overflow-hidden bg-[#faf5ff]">
+                  {[...Array(12)].map((_, i) => (
+                    <motion.div
+                      key={`rush-${i}`}
+                      className="absolute h-1 bg-[#4c1d95] rounded-full"
+                      style={{ top: `${Math.random() * 100}%`, width: `${20 + Math.random() * 80}px` }}
+                      initial={{ right: '-20%' }}
+                      animate={{ right: '120%' }}
+                      transition={{ duration: 0.2 + Math.random() * 0.4, repeat: Infinity, ease: 'linear' }}
+                    />
+                  ))}
+                </div>
+              )}
+
               <motion.div
-                className="w-16 h-16 bg-gradient-to-br from-[#7c3aed] to-[#4c1d95] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg"
+                className="w-16 h-16 bg-gradient-to-br from-[#7c3aed] to-[#4c1d95] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg relative z-10"
                 animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
                 transition={{ repeat: Infinity, duration: 1.5 }}
               >

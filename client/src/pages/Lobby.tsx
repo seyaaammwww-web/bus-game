@@ -215,7 +215,7 @@ export default function Lobby() {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.12 }}
-          className={`mb-5 p-5 bg-gradient-to-b from-[#2e1065] to-[#1a0533] rounded-2xl border-[4px] shadow-[0_0_30px_rgba(251,191,36,0.2)] transition-all duration-300 relative overflow-hidden ${isVotingEnabled ? 'border-orange-500 !shadow-[0_0_30px_rgba(249,115,22,0.4)]' : 'border-[#fbbf24]'
+          className={`mb-5 p-5 retro-card-dark transition-all duration-300 relative overflow-hidden rounded-xl ${isVotingEnabled ? 'border-orange-500 !shadow-[0_0_30px_rgba(249,115,22,0.4)]' : ''
             }`}
         >
           {isVotingEnabled && (
@@ -237,7 +237,7 @@ export default function Lobby() {
               <span className="text-white">{readyCount} / {room.players.length}</span>
             </div>
             {/* Ready Meter */}
-            <div className="h-3 bg-[#4c1d95] rounded-full overflow-hidden shadow-inner">
+            <div className="h-4 bg-[#1a0533] border-2 border-[#111] overflow-hidden shadow-inner">
               <motion.div
                 className="h-full bg-gradient-to-r from-[#fbbf24] to-[#f59e0b]"
                 initial={{ width: 0 }}
@@ -250,8 +250,8 @@ export default function Lobby() {
             <div className="space-y-3">
               {/* Voting Toggle */}
               <div
-                className={`flex items-center justify-between p-3 rounded-xl border ${isVotingEnabled ? 'bg-orange-500/10 border-orange-500/30' : 'bg-white/5 border-white/10'
-                  } group cursor-pointer transition-colors`}
+                className={`flex items-center justify-between p-3 border-2 ${isVotingEnabled ? 'bg-orange-500/10 border-orange-500/30' : 'bg-[#1a0533]/50 border-[#4c1d95]/50'
+                  } group cursor-pointer transition-colors active:scale-95`}
                 onClick={() => updateSettings({ enableVoting: !isVotingEnabled })}
                 title="التحكيم الديمقراطي = كل اللاعبين يصوتون على الإجابات"
               >
@@ -272,8 +272,8 @@ export default function Lobby() {
                   </div>
                 </div>
                 <div
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold font-pixel-text transition-all flex items-center gap-1 ${isVotingEnabled
-                    ? 'bg-orange-500 text-white shadow-md'
+                  className={`px-3 py-1.5 text-xs font-bold font-pixel-text transition-all flex items-center gap-1 ${isVotingEnabled
+                    ? 'bg-orange-500 text-white shadow-[2px_2px_0_#9a3412]'
                     : 'bg-transparent text-white/50 border-2 border-white/20'
                     }`}
                 >
@@ -283,15 +283,15 @@ export default function Lobby() {
               </div>
 
               {/* Referee Selection */}
-              <div className={`p-3 rounded-xl border transition-all ${referee
-                ? 'bg-[#fbbf24]/10 border-[#fbbf24]/30'
-                : 'bg-white/5 border-white/10'
+              <div className={`p-3 border-2 transition-all ${referee
+                ? 'bg-[#fbbf24]/10 border-[#fbbf24]/50'
+                : 'bg-[#1a0533]/50 border-[#4c1d95]/50'
                 }`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center border transition-colors ${referee
-                      ? 'bg-[#fbbf24] border-[#d97706]'
-                      : 'bg-white/10 border-white/20'
+                    <div className={`w-9 h-9 flex items-center justify-center border-2 transition-colors ${referee
+                      ? 'bg-[#fbbf24] border-[#b45309]'
+                      : 'bg-[#2e1065] border-[#4c1d95]'
                       }`}>
                       <Shield className={`w-4 h-4 ${referee ? 'text-[#2e1065]' : 'text-white/50'}`} />
                     </div>
@@ -306,7 +306,7 @@ export default function Lobby() {
                   {referee ? (
                     <button
                       onClick={(e) => { e.stopPropagation(); removeReferee(); }}
-                      className="w-8 h-8 flex items-center justify-center rounded-lg text-[#fbbf24] hover:bg-[#fbbf24] hover:text-[#2e1065] transition-colors"
+                      className="w-8 h-8 flex items-center justify-center border-2 border-[#b45309] text-[#2e1065] bg-[#fbbf24] hover:bg-[#f59e0b] shadow-[2px_2px_0_#b45309] active:translate-y-[2px] active:shadow-none transition-all"
                       data-testid="button-remove-referee"
                     >
                       <X className="w-4 h-4" />
@@ -314,7 +314,7 @@ export default function Lobby() {
                   ) : (
                     <button
                       onClick={(e) => { e.stopPropagation(); setShowRefereeSelect(!showRefereeSelect); }}
-                      className="px-3 py-1.5 bg-white/10 border border-white/20 text-white rounded-lg text-xs font-bold font-pixel-text hover:bg-white/20 transition-colors"
+                      className="px-3 py-1.5 bg-[#4c1d95] border-2 border-[#2e1065] text-white text-xs font-bold font-pixel-text shadow-[2px_2px_0_#2e1065] active:translate-y-[2px] active:shadow-none hover:bg-[#5b21b6] transition-all"
                       data-testid="button-choose-referee"
                     >
                       اختر
@@ -329,14 +329,14 @@ export default function Lobby() {
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      className="mt-3 pt-3 border-t border-white/10 overflow-hidden"
+                      className="mt-3 pt-3 border-t-2 border-[#4c1d95]/50 overflow-hidden"
                     >
                       <div className="grid grid-cols-2 gap-2">
                         {room.players.map((player) => (
                           <button
                             key={player.id}
                             onClick={() => handleSetReferee(player.id)}
-                            className="flex items-center gap-2 p-2 bg-white/5 border border-white/10 rounded-lg text-white font-pixel-text text-sm hover:border-white/30 hover:bg-white/10 transition-colors"
+                            className="flex items-center gap-2 p-2 bg-[#2e1065] border-2 border-[#4c1d95] text-white font-pixel-text text-sm hover:bg-[#4c1d95] hover:border-[#7c3aed] active:scale-95 transition-all shadow-sm"
                             data-testid={`button-select-referee-${player.id}`}
                           >
                             {player.isHost && <Crown className="w-4 h-4 text-[#fbbf24] flex-shrink-0" />}
@@ -353,7 +353,7 @@ export default function Lobby() {
             <>
               {/* Voting Indicator (Non-Host) */}
               {room.settings?.enableVoting && (
-                <div className="flex items-center justify-center gap-2 p-3 bg-orange-500/10 rounded-xl border border-orange-500/30">
+                <div className="flex items-center justify-center gap-2 p-3 bg-orange-500/10 border-2 border-orange-500/30">
                   <div className="relative">
                     <Users className="w-5 h-5 text-orange-500" />
                     <motion.div
@@ -362,7 +362,7 @@ export default function Lobby() {
                       transition={{ repeat: Infinity, duration: 0.5 }}
                     />
                   </div>
-                  <span className="text-sm font-bold text-orange-400 font-pixel-text" title="التحكيم الديمقراطي = كل اللاعبين يصوتون على الإجابات">نظام التحكيم الديمقراطي مفعل</span>
+                  <span className="text-sm font-bold text-orange-400 font-pixel-text" title="التحكيم الديمقراطي = كل اللاعبين يصوتون على الإجابات">नظام التحكيم الديمقراطي مفعل</span>
                 </div>
               )}
             </>
