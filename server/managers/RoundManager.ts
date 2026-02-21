@@ -19,8 +19,17 @@ function normalizeArabic(text: string): string {
 function validateAnswerLenient(letter: string, category: Category, answer: string): boolean {
     const trimmedAnswer = answer.trim();
 
-    // Minimum 3 characters — blocks gibberish like "سي", "يس", etc.
-    if (!trimmedAnswer || trimmedAnswer.length < 3) return false;
+    // 1. Min 2 chars (so 2-letter words go to vote)
+    if (!trimmedAnswer || trimmedAnswer.length < 2) return false;
+
+    // 2. Block obvious keyboard mashing (gibberish)
+    // E.g. "شسيشس", "بببب", "ههههه"
+    // Block if it's 3+ of the *exact same* character
+    if (/^(.)\1{2,}$/.test(trimmedAnswer)) return false;
+
+    // Block common Arabic keyboard mash sequence (e.g. شسي, يبل) if it's longer than 3 chars
+    const mashPattern = /شسيشس|شسي|ببب|ةةة|ننن|ممم|ووو/;
+    if (trimmedAnswer.length >= 3 && mashPattern.test(trimmedAnswer)) return false;
 
     const normalizedLetter = normalizeArabic(letter);
     const normalizedAnswer = normalizeArabic(trimmedAnswer);
