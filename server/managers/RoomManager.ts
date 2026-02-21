@@ -38,7 +38,7 @@ export class RoomManager {
             voteQueue: [],
             currentVote: null,
             settings: {
-                enableVoting: true,
+                enableVoting: false,
                 customCategories: []
             }
         };

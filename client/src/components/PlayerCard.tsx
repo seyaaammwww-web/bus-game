@@ -104,8 +104,8 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
         ) : (
           <div className="flex items-center gap-1">
             {player.isReady ? (
-              <div className="flex items-center gap-1 text-green-600 text-xs font-bold bg-green-50 px-2 py-0.5 rounded-sm border border-green-200">
-                <Check className="w-3 h-3" />
+              <div className="flex items-center gap-1 text-[#4c1d95] text-xs font-bold bg-[#f5f3ff] px-2 py-0.5 rounded-sm border border-[#7c3aed]/30 shadow-sm">
+                <Check className="w-3 h-3 text-[#7c3aed] stroke-[3]" />
                 جاهز
               </div>
             ) : (
