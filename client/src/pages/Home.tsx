@@ -151,7 +151,7 @@ export default function Home() {
               <Button
                 size="lg"
                 variant="retro"
-                className="w-full h-20 text-3xl font-pixel-title relative overflow-hidden"
+                className="w-full h-20 text-3xl font-pixel-title shine-effect relative overflow-hidden"
                 onClick={() => setMode('join')}
                 data-testid="button-join-room"
               >
@@ -217,7 +217,8 @@ export default function Home() {
                   transition={{ delay: 0.3 }}
                 >
                   <Button
-                    className="w-full h-20 text-3xl font-bold bg-gradient-to-r from-primary to-secondary font-pixel-title"
+                    variant="primary"
+                    className="w-full h-20 text-3xl font-bold font-pixel-title shine-effect relative overflow-hidden"
                     onClick={handleCreate}
                     disabled={playerName.trim().length < 2 || isLoading}
                     data-testid="button-create-confirm"
@@ -310,7 +311,8 @@ export default function Home() {
                   transition={{ delay: 0.4 }}
                 >
                   <Button
-                    className="w-full h-14 text-xl font-bold bg-gradient-to-r from-secondary to-primary font-pixel-text"
+                    variant="retro"
+                    className="w-full h-14 text-xl font-bold font-pixel-title shine-effect relative overflow-hidden"
                     onClick={handleJoin}
                     disabled={playerName.trim().length < 2 || roomCode.length !== 4 || isLoading}
                     data-testid="button-join-confirm"

@@ -68,35 +68,26 @@ export class GameManager {
     const buffer = this.roomManager.getRoomBuffer(roomCode);
     if (!buffer) return;
 
-    let nextVoteReady = false;
+    let allVotesDone = false;
 
     buffer.transact(draft => {
       if (draft.phase !== 'voting' || !draft.currentVote) return;
 
-      // Timeout = Resolve based on current majority or Reject if 0 votes?
-      // Let's say: If Yes >= No, accept. (Unless 0-0 => Reject).
-      const { yes, no } = draft.currentVote.votes;
-      if (yes === 0 && no === 0) {
-        // Auto-reject if nobody voted? Or Auto-accept if nobody complained?
-        // Usually if it's "Review", it means it's suspicious. Auto-reject?
-        // But if it's "Request Check", maybe auto-reject.
-        // Let's go with: Tie goes to requester? No, tie goes to NO.
-      }
-
-      // Force resolution
+      // Force resolution on timeout
       this.resolveCurrentVoteInDraft(draft);
-      if (draft.currentVote) nextVoteReady = true;
-
+      if (!draft.currentVote) {
+        allVotesDone = true;
+      }
     }, "handleVoteTimeout");
 
     const room = buffer.get();
     this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
 
-    if (nextVoteReady) {
+    if (allVotesDone) {
+      this.roundManager.clearTimer(room.code);
+      this.finishRoundPhase(room.code);
+    } else {
       this.startVoteTimer(roomCode);
-    } else if (room.phase === 'results') {
-      // Timer naturally cleared or we can start results timer
-      // finishRoundPhase handles auto-start timer if needed
     }
   }
 
@@ -714,26 +705,45 @@ export class GameManager {
     const buffer = this.roomManager.getRoomBuffer(p.roomId);
     if (!buffer) return;
 
+    let allVotesDone = false;
+
     buffer.transact(draft => {
       if (draft.phase !== 'voting' || !draft.currentVote) return;
       if (draft.currentVote.voterIds.includes(p.playerId)) return;
+
+      const eligibleVoters = draft.players.filter(pl =>
+        pl.id !== draft.currentVote!.requesterId &&
+        pl.id !== draft.refereeId &&
+        pl.id !== draft.rounds[draft.currentRound]?.banishedPlayerId
+      );
+
+      // Guard: Only eligible voters can cast a vote
+      if (!eligibleVoters.some(ev => ev.id === p.playerId)) return;
 
       draft.currentVote.voterIds.push(p.playerId);
       if (vote === 'yes') draft.currentVote.votes.yes++;
       else draft.currentVote.votes.no++;
 
       // Check majority
-      const active = draft.players.length; // simplified
-      if (draft.currentVote.votes.yes > active / 2 || draft.currentVote.votes.no > active / 2) {
+      const activeCount = eligibleVoters.length;
+
+      const { yes, no } = draft.currentVote.votes;
+      if (yes > activeCount / 2 || no > activeCount / 2 || yes + no === activeCount) {
         // Resolve immediately
         this.resolveCurrentVoteInDraft(draft);
+      }
+      if (!draft.currentVote) {
+        allVotesDone = true;
       }
     }, "castVote");
 
     const room = buffer.get();
     this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
 
-    if (room.phase === 'voting' && room.currentVote) {
+    if (allVotesDone) {
+      this.roundManager.clearTimer(room.code);
+      this.finishRoundPhase(room.code);
+    } else if (room.phase === 'voting' && room.currentVote) {
       // Check if we moved to NEXT vote (new session started by resolution)
       const elapsed = Date.now() - room.currentVote.startTime;
       if (elapsed < 1000) {
@@ -788,8 +798,6 @@ export class GameManager {
     if (draft.voteQueue.length > 0) {
       const next = draft.voteQueue.shift();
       draft.currentVote = { ...next, votes: { yes: 0, no: 0 }, voterIds: [], votesDetails: {}, startTime: Date.now() };
-    } else {
-      draft.phase = 'results';
     }
   }
 

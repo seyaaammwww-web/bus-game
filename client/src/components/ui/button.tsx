@@ -10,22 +10,22 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-gradient-to-b from-[#FFFEF5] to-[#F5F0E0] text-[#4c1d95] hover:brightness-110",
+          "bg-white text-[#4c1d95] hover:bg-[#f3f4f6]",
         destructive:
-          "bg-gradient-to-b from-[#ff6b6b] to-[#ee5a5a] text-white !border-[#c0392b] !shadow-[4px_4px_0_0_#7f1d1d] hover:brightness-110",
+          "bg-[#ef4444] text-white !border-[#7f1d1d] !shadow-[4px_4px_0_0_#450a0a] hover:bg-[#dc2626]",
         outline:
           "bg-white/90 backdrop-blur-sm text-[#4c1d95] hover:bg-[#f5f0ff]",
         secondary:
-          "bg-gradient-to-b from-[#a78bfa] to-[#8b5cf6] text-white hover:brightness-110 flex-col",
+          "bg-[#8b5cf6] text-white !border-[#4c1d95] !shadow-[4px_4px_0_0_#2e1065] hover:bg-[#7c3aed] flex-col",
         ghost:
           "hover:bg-[#4c1d95]/10 text-[#4c1d95] !border-transparent !shadow-none hover:transform-none active:!transform-none",
         link: "text-[#7c3aed] underline-offset-4 hover:underline !border-transparent !shadow-none active:!transform-none",
         retro:
-          "bg-gradient-to-b from-white to-[#faf5ff] text-[#4c1d95] hover:brightness-110",
+          "bg-[#fbbf24] text-[#4c1d95] !border-[#78350f] !shadow-[4px_4px_0_0_#451a03] hover:bg-[#f59e0b]",
         primary:
-          "bg-gradient-to-b from-[#8b5cf6] to-[#7c3aed] text-white hover:brightness-110",
+          "bg-[#7c3aed] text-white !border-[#2e1065] !shadow-[4px_4px_0_0_#170831] hover:bg-[#6d28d9]",
         accent:
-          "bg-gradient-to-b from-[#22d3ee] to-[#06b6d4] text-[#1e1b4b] hover:brightness-110",
+          "bg-[#06b6d4] text-[#1e1b4b] !border-[#164e63] !shadow-[4px_4px_0_0_#083344] hover:bg-[#0891b2]",
       },
       size: {
         default: "h-11 px-6 py-2",

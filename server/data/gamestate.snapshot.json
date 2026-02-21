@@ -1,14 +1,14 @@
 {
-  "timestamp": 1770744912354,
+  "timestamp": 1771712684675,
   "rooms": [
     {
-      "id": "7afcc131-24cd-4c87-ae6c-effacc51eb42",
-      "code": "X5JW",
-      "hostId": "2c2f37c5-363f-4644-b753-d46bb3224c1b",
+      "id": "95b551aa-8fa4-4fb7-bc9a-f12d8f946e0b",
+      "code": "ALVQ",
+      "hostId": "f32dcd6d-e708-4365-b2ca-724b562dc6f5",
       "players": [
         {
-          "id": "2c2f37c5-363f-4644-b753-d46bb3224c1b",
-          "name": "Host",
+          "id": "f32dcd6d-e708-4365-b2ca-724b562dc6f5",
+          "name": "Alice",
           "score": 0,
           "isHost": true,
           "isReady": true,
@@ -25,21 +25,20 @@
             "wildcard": false,
             "banish": false
           },
-          "totalEarnedPoints": 0,
-          "isReferee": true
+          "totalEarnedPoints": 0
         },
         {
-          "id": "151aaf7c-027d-4b1a-9397-a9a2a1336bef",
-          "name": "Player1",
+          "id": "43f05dcb-5ed8-41b4-a72a-67345cf0400b",
+          "name": "Bob",
           "score": 0,
           "isHost": false,
           "isReady": true,
           "busStreak": 0,
           "powerUps": {
-            "wildcard": 0,
-            "banish": 0,
             "hint": 0,
-            "steal": 0
+            "steal": 0,
+            "wildcard": 0,
+            "banish": 0
           },
           "usedPowerUps": {
             "hint": false,
@@ -47,35 +46,50 @@
             "wildcard": false,
             "banish": false
           },
-          "totalEarnedPoints": 0,
-          "isReferee": false
+          "totalEarnedPoints": 0
         }
       ],
       "rounds": [
         {
           "number": 1,
-          "letter": "ج",
-          "startTime": 1770728454544,
-          "endTime": 1770728499544,
-          "isRush": false,
+          "letter": "د",
+          "startTime": 1771708013600,
+          "endTime": 1771708029001,
+          "isRush": true,
           "submissions": [
             {
-              "playerId": "151aaf7c-027d-4b1a-9397-a9a2a1336bef",
-              "playerName": "Player1",
+              "playerId": "43f05dcb-5ed8-41b4-a72a-67345cf0400b",
+              "playerName": "Bob",
               "answers": {
-                "ولد": "Ahmad",
-                "بنت": "Amira"
+                "ولد": "ددد",
+                "بنت": "ددد",
+                "بلد": "ددد",
+                "حيوان": "ددد",
+                "جماد": "ددد"
               },
-              "submittedAt": 1770728454546,
+              "submittedAt": 1771708019000,
+              "busComplete": true
+            },
+            {
+              "playerId": "f32dcd6d-e708-4365-b2ca-724b562dc6f5",
+              "playerName": "Alice",
+              "answers": {
+                "ولد": "دد",
+                "بنت": "دد",
+                "بلد": "دد",
+                "حيوان": "دد",
+                "جماد": "دد"
+              },
+              "submittedAt": 1771708020040,
               "busComplete": false
             }
           ],
           "validatedAnswers": [
             {
-              "playerId": "151aaf7c-027d-4b1a-9397-a9a2a1336bef",
-              "playerName": "Player1",
+              "playerId": "43f05dcb-5ed8-41b4-a72a-67345cf0400b",
+              "playerName": "Bob",
               "category": "ولد",
-              "answer": "Ahmad",
+              "answer": "ددد",
               "isValid": false,
               "isPendingVote": false,
               "isUnique": false,
@@ -88,10 +102,26 @@
               "isFabricated": false
             },
             {
-              "playerId": "151aaf7c-027d-4b1a-9397-a9a2a1336bef",
-              "playerName": "Player1",
+              "playerId": "f32dcd6d-e708-4365-b2ca-724b562dc6f5",
+              "playerName": "Alice",
+              "category": "ولد",
+              "answer": "دد",
+              "isValid": true,
+              "isPendingVote": false,
+              "isUnique": false,
+              "score": 0,
+              "votes": {
+                "accepted": 0,
+                "rejected": 0
+              },
+              "reason": "تم قبوله بالتصويت",
+              "isFabricated": false
+            },
+            {
+              "playerId": "43f05dcb-5ed8-41b4-a72a-67345cf0400b",
+              "playerName": "Bob",
               "category": "بنت",
-              "answer": "Amira",
+              "answer": "ددد",
               "isValid": false,
               "isPendingVote": false,
               "isUnique": false,
@@ -102,6 +132,118 @@
               },
               "reason": "حرف خطأ",
               "isFabricated": false
+            },
+            {
+              "playerId": "f32dcd6d-e708-4365-b2ca-724b562dc6f5",
+              "playerName": "Alice",
+              "category": "بنت",
+              "answer": "دد",
+              "isValid": true,
+              "isPendingVote": false,
+              "isUnique": false,
+              "score": 0,
+              "votes": {
+                "accepted": 0,
+                "rejected": 0
+              },
+              "reason": "تم قبوله بالتصويت",
+              "isFabricated": false
+            },
+            {
+              "playerId": "43f05dcb-5ed8-41b4-a72a-67345cf0400b",
+              "playerName": "Bob",
+              "category": "بلد",
+              "answer": "ددد",
+              "isValid": false,
+              "isPendingVote": false,
+              "isUnique": false,
+              "score": 0,
+              "votes": {
+                "accepted": 0,
+                "rejected": 0
+              },
+              "reason": "حرف خطأ",
+              "isFabricated": false
+            },
+            {
+              "playerId": "f32dcd6d-e708-4365-b2ca-724b562dc6f5",
+              "playerName": "Alice",
+              "category": "بلد",
+              "answer": "دد",
+              "isValid": true,
+              "isPendingVote": false,
+              "isUnique": false,
+              "score": 0,
+              "votes": {
+                "accepted": 0,
+                "rejected": 0
+              },
+              "reason": "تم قبوله بالتصويت",
+              "isFabricated": false
+            },
+            {
+              "playerId": "43f05dcb-5ed8-41b4-a72a-67345cf0400b",
+              "playerName": "Bob",
+              "category": "حيوان",
+              "answer": "ددد",
+              "isValid": false,
+              "isPendingVote": false,
+              "isUnique": false,
+              "score": 0,
+              "votes": {
+                "accepted": 0,
+                "rejected": 0
+              },
+              "reason": "حرف خطأ",
+              "isFabricated": false
+            },
+            {
+              "playerId": "f32dcd6d-e708-4365-b2ca-724b562dc6f5",
+              "playerName": "Alice",
+              "category": "حيوان",
+              "answer": "دد",
+              "isValid": true,
+              "isPendingVote": false,
+              "isUnique": false,
+              "score": 0,
+              "votes": {
+                "accepted": 0,
+                "rejected": 0
+              },
+              "reason": "تم قبوله بالتصويت",
+              "isFabricated": false
+            },
+            {
+              "playerId": "43f05dcb-5ed8-41b4-a72a-67345cf0400b",
+              "playerName": "Bob",
+              "category": "جماد",
+              "answer": "ددد",
+              "isValid": false,
+              "isPendingVote": false,
+              "isUnique": false,
+              "score": 0,
+              "votes": {
+                "accepted": 0,
+                "rejected": 0
+              },
+              "reason": "حرف خطأ",
+              "isFabricated": false
+            },
+            {
+              "playerId": "f32dcd6d-e708-4365-b2ca-724b562dc6f5",
+              "playerName": "Alice",
+              "category": "جماد",
+              "answer": "دد",
+              "isValid": true,
+              "isPendingVote": false,
+              "isUnique": false,
+              "score": 0,
+              "votes": {
+                "accepted": 0,
+                "rejected": 0
+              },
+              "reason": "تم قبوله بالتصويت",
+              "isFabricated": false
             }
           ],
           "votingComplete": false,
@@ -109,28 +251,27 @@
         }
       ],
       "currentRound": 0,
-      "totalRounds": 3,
-      "phase": "referee_review",
+      "totalRounds": 10,
+      "phase": "results",
       "letters": [
-        "ج",
+        "د",
         "أ",
-        "ص",
-        "ح",
-        "ب",
-        "ط",
-        "هـ",
         "ل",
-        "ث",
-        "ظ"
+        "و",
+        "ي",
+        "غ",
+        "ع",
+        "ب",
+        "س",
+        "ح"
       ],
-      "createdAt": 1770728454539,
+      "createdAt": 1771708009010,
       "voteQueue": [],
       "currentVote": null,
       "settings": {
-        "enableVoting": false,
+        "enableVoting": true,
         "customCategories": []
-      },
-      "refereeId": "2c2f37c5-363f-4644-b753-d46bb3224c1b"
+      }
     }
   ]
 }
