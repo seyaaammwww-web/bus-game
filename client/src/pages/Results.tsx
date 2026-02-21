@@ -203,13 +203,13 @@ export default function Results() {
                       <PixelAvatar
                         src={sortedPlayers[1].avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${sortedPlayers[1].id}`}
                         size="sm"
-                        className="border-[3px] border-slate-400 mb-1 shadow-[2px_2px_0_0_#475569]"
+                        className="border-[3px] border-slate-400 shadow-[2px_2px_0_0_#475569]"
                       />
-                      <p className="text-xs font-pixel-text text-white font-bold truncate max-w-[72px]">{sortedPlayers[1].name}</p>
-                      <p className="text-xs font-pixel-title text-slate-200">{sortedPlayers[1].score}</p>
-                      <div className="w-20 h-14 bg-gradient-to-b from-slate-300 to-slate-400 border-[3px] border-slate-600 shadow-[3px_3px_0_0_#334155] flex items-center justify-center mt-1">
-                        <span className="text-2xl font-pixel-title text-slate-700">2</span>
-                      </div>
+                      <span className="text-xl my-0.5">🥈</span>
+                      <p className="text-xs font-pixel-text text-white font-bold truncate max-w-[72px] leading-tight">{sortedPlayers[1].name}</p>
+                      <p className="text-xs font-pixel-title text-slate-200 leading-tight">{sortedPlayers[1].score}</p>
+                      {/* Podium bar */}
+                      <div className="w-20 h-10 bg-gradient-to-b from-slate-300 to-slate-500 border-t-[3px] border-slate-500 mt-2" />
                     </motion.div>
                   )}
 
@@ -229,16 +229,15 @@ export default function Results() {
                         <PixelAvatar
                           src={winner.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${winner.id}`}
                           size="md"
-                          className="border-[4px] border-amber-400 mb-1 relative z-10 shadow-[0_0_20px_rgba(250,204,21,0.6)]"
+                          className="border-[4px] border-amber-400 relative z-10 shadow-[0_0_20px_rgba(250,204,21,0.6)]"
                         />
                       </div>
                     </motion.div>
-                    <Crown className="w-5 h-5 text-amber-300 mb-0.5" />
-                    <p className="text-sm font-pixel-text text-white font-bold truncate max-w-[90px]">{winner.name}</p>
-                    <p className="text-sm font-pixel-title text-amber-200">{winner.score} نقطة</p>
-                    <div className="w-24 h-20 bg-gradient-to-b from-amber-300 to-yellow-500 border-[3px] border-amber-700 shadow-[3px_3px_0_0_#78350f] flex items-center justify-center mt-1">
-                      <span className="text-3xl font-pixel-title text-amber-900">1</span>
-                    </div>
+                    <span className="text-2xl my-0.5">🥇</span>
+                    <p className="text-sm font-pixel-text text-white font-bold truncate max-w-[90px] leading-tight">{winner.name}</p>
+                    <p className="text-sm font-pixel-title text-amber-200 leading-tight">{winner.score} نقطة</p>
+                    {/* Podium bar — tallest */}
+                    <div className="w-24 h-16 bg-gradient-to-b from-amber-300 to-yellow-600 border-t-[3px] border-amber-600 mt-2" />
                   </motion.div>
 
                   {/* 3rd place */}
@@ -252,13 +251,13 @@ export default function Results() {
                       <PixelAvatar
                         src={sortedPlayers[2].avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${sortedPlayers[2].id}`}
                         size="sm"
-                        className="border-[3px] border-orange-400 mb-1 shadow-[2px_2px_0_0_#9a3412]"
+                        className="border-[3px] border-orange-400 shadow-[2px_2px_0_0_#9a3412]"
                       />
-                      <p className="text-xs font-pixel-text text-white font-bold truncate max-w-[72px]">{sortedPlayers[2].name}</p>
-                      <p className="text-xs font-pixel-title text-orange-200">{sortedPlayers[2].score}</p>
-                      <div className="w-20 h-10 bg-gradient-to-b from-orange-400 to-amber-600 border-[3px] border-amber-800 shadow-[3px_3px_0_0_#7c2d12] flex items-center justify-center mt-1">
-                        <span className="text-2xl font-pixel-title text-orange-900">3</span>
-                      </div>
+                      <span className="text-xl my-0.5">🥉</span>
+                      <p className="text-xs font-pixel-text text-white font-bold truncate max-w-[72px] leading-tight">{sortedPlayers[2].name}</p>
+                      <p className="text-xs font-pixel-title text-orange-200 leading-tight">{sortedPlayers[2].score}</p>
+                      {/* Podium bar — shortest */}
+                      <div className="w-20 h-6 bg-gradient-to-b from-orange-400 to-amber-700 border-t-[3px] border-amber-800 mt-2" />
                     </motion.div>
                   )}
                 </motion.div>
