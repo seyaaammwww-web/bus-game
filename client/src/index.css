@@ -1067,25 +1067,23 @@
 .shine-effect::after {
   content: '';
   position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
+  top: 0;
+  left: -150%;
+  width: 50%; /* Narrower beam for sharper effect */
+  height: 100%;
   background: linear-gradient(
-    to bottom right,
+    to right,
     rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.1) 40%,
     rgba(255, 255, 255, 0.4) 50%,
-    rgba(255, 255, 255, 0.1) 60%,
     rgba(255, 255, 255, 0) 100%
   );
-  transform: rotate(30deg) translate(-100%, -100%);
-  animation: shine-sweep 4s infinite linear;
-  pointer-events: none; /* Don't block clicks */
+  transform: skewX(-25deg); /* Professional slanting */
+  animation: shine-sweep 3.5s cubic-bezier(0.19, 1, 0.22, 1) infinite;
+  pointer-events: none;
 }
 
 @keyframes shine-sweep {
-  0% { transform: rotate(30deg) translate(-100%, -100%); }
-  20% { transform: rotate(30deg) translate(100%, 100%); }
-  100% { transform: rotate(30deg) translate(100%, 100%); } /* Pause between sweeps */
+  0% { left: -150%; }
+  15% { left: 200%; } /* Fast sweep */
+  100% { left: 200%; } /* Long pause before next sweep */
 }
