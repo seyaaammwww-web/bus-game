@@ -59,9 +59,9 @@ function SquarePowerUp({ type, title, cost, icon: Icon, status, onActivate }: Sq
         <button
             onClick={handleClick}
             className={cn(
-                "retro-action-btn relative w-32 h-32 md:w-40 md:h-40 rounded-xl flex flex-col items-center justify-center gap-2 group",
+                "relative w-32 h-32 md:w-40 md:h-40 rounded-xl flex flex-col items-center justify-center gap-2 group transition-all active:scale-95",
                 theme.bg,
-                isDisabled ? "opacity-70 grayscale cursor-not-allowed pointer-events-none" : "hover:brightness-110"
+                isDisabled ? "opacity-70 grayscale cursor-not-allowed pointer-events-none" : "hover:scale-105 hover:-translate-y-1 hover:brightness-110 shadow-[4px_4px_0_0_rgba(0,0,0,0.5)] border-[3px]"
             )}
         >
             {/* Price Badge */}
@@ -113,7 +113,7 @@ export function PowerUpMenu() {
         <>
             <Button
                 onClick={toggleOpen}
-                className="h-9 md:h-14 px-3 md:px-6 flex items-center gap-2 font-pixel-title relative overflow-hidden bg-gradient-to-b from-[#fbbf24] to-[#f59e0b] text-[#78350f] hover:brightness-110 group rounded-xl"
+                className="retro-action-btn h-10 md:h-14 px-4 md:px-6 flex items-center justify-center gap-2 font-pixel-title relative overflow-hidden bg-gradient-to-b from-[#fbbf24] to-[#f59e0b] text-[#78350f] group rounded-xl !shadow-[3px_3px_0_0_#78350f] !border-[#78350f] hover:brightness-110"
             >
                 {/* Shimmer Effect */}
                 <motion.div
@@ -122,12 +122,12 @@ export function PowerUpMenu() {
                     transition={{ repeat: Infinity, duration: 3, ease: "linear", repeatDelay: 1 }}
                 />
 
-                <div className="relative z-10 bg-[#451a03] text-[#fbbf24] p-1 md:p-1.5 rounded-lg border-2 border-[#78350f] shadow-inner group-hover:scale-110 transition-transform">
-                    <Zap className="w-3.5 h-3.5 md:w-5 md:h-5 fill-current" />
+                <div className="relative z-10 flex items-center justify-center">
+                    <Zap className="w-5 h-5 md:w-6 md:h-6 fill-current" />
                 </div>
 
-                <div className="relative z-10">
-                    <span className="text-sm md:text-xl">مساعدات</span>
+                <div className="relative z-10 flex items-center justify-center mt-1">
+                    <span className="text-base md:text-xl">مساعدات</span>
                 </div>
 
                 <div className="absolute right-1 top-1 w-1 h-1 bg-white/60 rounded-full animate-pulse" />
