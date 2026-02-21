@@ -18,7 +18,9 @@ function normalizeArabic(text: string): string {
 
 function validateAnswerLenient(letter: string, category: Category, answer: string): boolean {
     const trimmedAnswer = answer.trim();
-    if (!trimmedAnswer || trimmedAnswer.length < 2) return false;
+
+    // Minimum 3 characters — blocks gibberish like "سي", "يس", etc.
+    if (!trimmedAnswer || trimmedAnswer.length < 3) return false;
 
     const normalizedLetter = normalizeArabic(letter);
     const normalizedAnswer = normalizeArabic(trimmedAnswer);
@@ -42,6 +44,7 @@ function validateAnswerLenient(letter: string, category: Category, answer: strin
     const validFirstChars = letterVariants[letterFirstChar] || [letterFirstChar];
     return validFirstChars.includes(answerFirstChar);
 }
+
 
 export class RoundManager {
     private timers: Map<string, NodeJS.Timeout> = new Map();
