@@ -7,7 +7,7 @@ import { RetroCard } from '@/components/ui/RetroCard';
 import { useGame } from '@/lib/gameContext';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
-import { playClick, playWrong } from '@/lib/sounds';
+import { playClickSound, playErrorSound } from '@/lib/sounds';
 
 interface SquarePowerUpProps {
     type: 'wildcard' | 'banish';
@@ -33,7 +33,7 @@ function SquarePowerUp({ type, title, cost, icon: Icon, status, onActivate }: Sq
         if (isUsed || isDisabled) return;
 
         if (isLocked) {
-            playWrong();
+            playErrorSound();
             toast({
                 title: "رصيدك غير كافي! ❌",
                 description: `محتاج ${cost} نقطة عشان تستخدم ${title}`,
@@ -42,7 +42,7 @@ function SquarePowerUp({ type, title, cost, icon: Icon, status, onActivate }: Sq
             return;
         }
 
-        playClick();
+        playClickSound();
         onActivate();
     };
 
@@ -100,7 +100,7 @@ export function PowerUpMenu() {
     const { currentPlayer, activatePowerUp, currentRound, setBanishOverlay } = useGame();
 
     const toggleOpen = () => {
-        playClick();
+        playClickSound();
         setIsOpen(!isOpen);
     };
 

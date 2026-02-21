@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { Crown, Check, Clock, Shield, Zap, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -16,18 +15,18 @@ interface PlayerCardProps {
 const rankColors = ['bg-yellow-400', 'bg-gray-300', 'bg-amber-600'];
 const rankEmojis = ['1', '2', '3'];
 
-export const PlayerCard = React.memo(function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank, index }: PlayerCardProps) {
+export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank, index }: PlayerCardProps) {
 
   return (
     <motion.div
       className={cn(
-        "flex items-center gap-3 rounded-lg border-2 relative overflow-visible",
+        "flex items-center gap-3 rounded-lg border-2 relative transition-all overflow-visible",
         isCurrentPlayer
           ? "bg-[#f5f3ff] border-[#7c3aed] shadow-[4px_4px_0_0_#4c1d95]"
           : "bg-white border-gray-900 shadow-[4px_4px_0_0_rgba(0,0,0,0.2)]"
       )}
       whileHover={{ y: -4 }}
-      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+      transition={{ type: "spring", stiffness: 400, damping: 20 }}
     >
       {/* Rank Badge */}
       {rank !== undefined && rank < 3 && (
@@ -105,7 +104,7 @@ export const PlayerCard = React.memo(function PlayerCard({ player, isCurrentPlay
         ) : (
           <div className="flex items-center gap-1">
             {player.isReady ? (
-              <div className="flex items-center gap-1 text-[#7c3aed] text-xs font-bold bg-[#7c3aed]/10 px-2 py-0.5 rounded-sm border border-[#7c3aed]/20">
+              <div className="flex items-center gap-1 text-green-600 text-xs font-bold bg-green-50 px-2 py-0.5 rounded-sm border border-green-200">
                 <Check className="w-3 h-3" />
                 جاهز
               </div>
@@ -120,5 +119,5 @@ export const PlayerCard = React.memo(function PlayerCard({ player, isCurrentPlay
       </div>
     </motion.div>
   );
-});
+}
 

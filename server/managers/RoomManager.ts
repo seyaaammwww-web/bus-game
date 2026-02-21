@@ -67,11 +67,7 @@ export class RoomManager {
         if (room.players.find(p => p.id === playerId)) return room; // Already joined
 
         buffer.transact((draft) => {
-            const isFirst = draft.players.length === 0;
-            const player = this.createPlayerObject(playerId, playerName, isFirst);
-            if (isFirst) {
-                draft.hostId = playerId;
-            }
+            const player = this.createPlayerObject(playerId, playerName, false);
             draft.players.push(player);
         }, "joinRoom");
 

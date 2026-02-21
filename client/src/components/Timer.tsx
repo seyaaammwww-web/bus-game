@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Clock, AlertTriangle, Zap } from 'lucide-react';
-import { playCountdownTick, playCountdownFinal } from '@/lib/sounds';
+import { playTimerWarning, playTimerUrgent } from '@/lib/sounds';
 
 interface TimerProps {
   timeLeft: number;
@@ -15,9 +15,9 @@ export function Timer({ timeLeft, isRush }: TimerProps) {
     if (prevTimeRef.current !== timeLeft) {
       // Play a tick sound every second when time is low
       if (timeLeft <= 5 && timeLeft > 0) {
-        playCountdownFinal(); // Urgent tick
+        playTimerUrgent(); // Urgent tick
       } else if (timeLeft <= 15 && timeLeft > 5) {
-        playCountdownTick(); // Standard tick
+        playTimerWarning(); // Standard tick
       }
       prevTimeRef.current = timeLeft;
     }

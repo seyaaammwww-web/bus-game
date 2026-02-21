@@ -11,19 +11,13 @@ import RefereeWaiting from "@/pages/RefereeWaiting";
 import Results from "@/pages/Results";
 
 import WorkOSBackground from "@/components/WorkOSBackground";
-import { BusHUD } from "@/components/BusHUD";
-import { SoundProvider } from "@/lib/soundManager";
-import { useIsMobile } from "@/hooks/useIsMobile";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 function GameRouter() {
-  const { state } = useGame();
+  const { state, isReferee } = useGame();
 
   if (!state.room) {
     return <Home />;
   }
-
-  const { isReferee } = useGame();
 
   switch (state.room.phase) {
     case 'lobby':
@@ -49,11 +43,14 @@ function GameRouter() {
 
 // ... imports
 
+// Helper to check if mobile
+const isMobile = () => typeof window !== 'undefined' && window.innerWidth < 1024;
+
 function BackgroundManager() {
   const { state } = useGame();
 
   // Performance mode active on mobile to save GPU resources
-  const performanceMode = useIsMobile();
+  const performanceMode = isMobile();
 
   return <WorkOSBackground performanceMode={performanceMode} />;
 }
@@ -62,15 +59,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <SoundProvider>
-          <GameProvider>
-            <BackgroundManager />
-            <BusHUD />
-            <ErrorBoundary>
-              <GameRouter />
-            </ErrorBoundary>
-          </GameProvider>
-        </SoundProvider>
+        <GameProvider>
+          <BackgroundManager />
+          <GameRouter />
+        </GameProvider>
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>

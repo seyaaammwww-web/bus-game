@@ -3,10 +3,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Check, X, Shield, Users, Trophy } from 'lucide-react';
 import { PixelAvatar } from '@/components/ui/PixelAvatar';
-import { Confetti } from '@/components/Confetti';
 import { cn } from '@/lib/utils';
 import { categories, type Category } from '@shared/schema';
-import { useIsMobile } from '@/hooks/useIsMobile';
 
 // Helper for category icons/colors (Reusing logic for consistency)
 import { User, Box, Globe, PawPrint } from 'lucide-react';
@@ -29,7 +27,7 @@ interface ResultsTableProps {
     onAppeal: (playerId: string, category: string, answer: string) => void;
 }
 
-export const ResultsTable = React.memo(function ResultsTable({
+export function ResultsTable({
     round,
     players,
     currentPlayerId,
@@ -38,7 +36,6 @@ export const ResultsTable = React.memo(function ResultsTable({
     onRefereeDeduct,
     onAppeal
 }: ResultsTableProps) {
-    const isMobile = useIsMobile();
 
     return (
         <div className="flex flex-col gap-4">
@@ -63,6 +60,8 @@ export const ResultsTable = React.memo(function ResultsTable({
                 {round.submissions.map((submission: any, idx: number) => {
                     const isMe = submission.playerId === currentPlayerId;
                     const player = players.find(p => p.id === submission.playerId);
+
+                    const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
 
                     return (
                         <motion.div
@@ -109,8 +108,8 @@ export const ResultsTable = React.memo(function ResultsTable({
                                     // Status Color Logic
                                     let statusClass = "bg-gray-50/50";
                                     if (answer) {
-                                        if (isValid) statusClass = score > 10 ? "bg-[#7c3aed]/10 border-[#7c3aed]/30" : "bg-[#7c3aed]/5 border-[#7c3aed]/20";
-                                        else statusClass = "bg-red-50 border-red-100";
+                                        if (isValid) statusClass = score > 10 ? "bg-green-50" : "bg-green-50/30";
+                                        else statusClass = "bg-red-50";
                                     }
 
                                     return (
@@ -136,8 +135,8 @@ export const ResultsTable = React.memo(function ResultsTable({
                                             <div className="flex-1 text-center md:w-full">
                                                 {answer ? (
                                                     <span className={cn(
-                                                        "font-bold text-sm md:text-base break-words block font-pixel-text",
-                                                        isValid ? "text-[#4c1d95]" : "text-[#b91c1c] line-through decoration-2 decoration-red-300"
+                                                        "font-bold text-sm md:text-base break-words block",
+                                                        isValid ? "text-[#15803d]" : "text-[#b91c1c] line-through decoration-2 decoration-red-300"
                                                     )}>
                                                         {answer}
                                                     </span>
@@ -147,24 +146,17 @@ export const ResultsTable = React.memo(function ResultsTable({
                                             </div>
 
                                             {/* Score Badge */}
-                                            <div className="shrink-0 md:absolute md:top-1 md:left-1 relative">
+                                            <div className="shrink-0 md:absolute md:top-1 md:left-1">
                                                 {answer && (
                                                     isValid ? (
-                                                        <div className="relative">
-                                                            {score > 10 && (
-                                                                <div className="absolute inset-0 z-50 pointer-events-none flex items-center justify-center">
-                                                                    <Confetti active={true} count={3} />
-                                                                </div>
-                                                            )}
-                                                            <span className={cn(
-                                                                "text-[10px] px-1.5 py-0.5 rounded border shadow-sm font-bold font-pixel-text relative z-10",
-                                                                score > 10
-                                                                    ? "bg-[#7c3aed] text-white border-[#5b21b6]"
-                                                                    : "bg-[#ddd6fe] text-[#5b21b6] border-[#8b5cf6]"
-                                                            )}>
-                                                                {score}
-                                                            </span>
-                                                        </div>
+                                                        <span className={cn(
+                                                            "text-[10px] px-1.5 py-0.5 rounded border shadow-sm font-bold font-pixel-text",
+                                                            score > 10
+                                                                ? "bg-yellow-100 text-yellow-700 border-yellow-200"
+                                                                : "bg-green-100 text-green-700 border-green-200"
+                                                        )}>
+                                                            {score}
+                                                        </span>
                                                     ) : (
                                                         <X className="w-4 h-4 text-red-400 opacity-50" />
                                                     )
@@ -180,7 +172,7 @@ export const ResultsTable = React.memo(function ResultsTable({
             </div>
         </div>
     );
-});
+}
 
 function calculateTotalScore(round: any, playerId: string) {
     let total = 0;

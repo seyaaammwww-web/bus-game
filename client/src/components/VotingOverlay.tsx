@@ -5,6 +5,7 @@ import { RetroCard } from '@/components/ui/RetroCard';
 import { PixelAvatar } from '@/components/ui/PixelAvatar';
 import { Timer } from '@/components/Timer';
 import { useEffect, useState } from 'react';
+import { playCountdownSound } from '@/lib/sounds';
 
 export function VotingOverlay() {
     const { state, castDemocraticVote, currentPlayer } = useGame();
@@ -116,25 +117,25 @@ export function VotingOverlay() {
                                 <p className="text-sm text-[#4c1d95]/70 mt-1">لا يمكنك التصويت على إجابتك</p>
                             </div>
                         ) : hasVoted ? (
-                            <div className="text-center p-4 bg-[#7c3aed]/10 rounded-xl border-2 border-[#7c3aed] border-dashed">
-                                <div className="w-8 h-8 bg-[#7c3aed] rounded-full flex items-center justify-center mx-auto mb-2 text-white shadow-[2px_2px_0_0_#4c1d95]">
+                            <div className="text-center p-4 bg-green-50 rounded-xl border-2 border-green-500 border-dashed">
+                                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-2 text-white">
                                     {currentVote.votes.yes > currentVote.votes.no ? <ThumbsUp className="w-5 h-5" /> : <ThumbsDown className="w-5 h-5" />}
                                 </div>
-                                <p className="font-bold text-[#4c1d95] font-pixel-text">تم تسجيل صوتك!</p>
-                                <p className="text-sm text-[#7c3aed] mt-1">في انتظار باقي اللاعبين...</p>
+                                <p className="font-bold text-green-700 font-pixel-text">تم تسجيل صوتك!</p>
+                                <p className="text-sm text-green-600/70 mt-1">في انتظار باقي اللاعبين...</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-2 gap-4">
                                 <button
                                     onClick={() => castDemocraticVote('no')}
-                                    className="h-16 bg-[#ef4444] hover:bg-red-600 text-white font-bold font-pixel-title text-lg border-b-4 border-[#991b1b] active:border-b-0 active:translate-y-1 rounded-xl shadow-[4px_4px_0_0_#7f1d1d] inline-flex items-center justify-center gap-2 transition-all"
+                                    className="h-16 bg-red-500 hover:bg-red-600 text-white font-bold font-pixel-title text-lg border-b-4 border-red-700 active:border-b-0 active:translate-y-1 rounded-md inline-flex items-center justify-center gap-2 transition-all"
                                 >
                                     <ThumbsDown className="w-6 h-6 mr-2" />
                                     رفض
                                 </button>
                                 <button
                                     onClick={() => castDemocraticVote('yes')}
-                                    className="h-16 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold font-pixel-title text-lg border-b-4 border-[#4c1d95] active:border-b-0 active:translate-y-1 rounded-xl shadow-[4px_4px_0_0_#2e1065] inline-flex items-center justify-center gap-2 transition-all"
+                                    className="h-16 bg-green-500 hover:bg-green-600 text-white font-bold font-pixel-title text-lg border-b-4 border-green-700 active:border-b-0 active:translate-y-1 rounded-md inline-flex items-center justify-center gap-2 transition-all"
                                 >
                                     <ThumbsUp className="w-6 h-6 mr-2" />
                                     موافقة
@@ -150,11 +151,11 @@ export function VotingOverlay() {
                             </div>
                             <div className="h-4 bg-gray-200 rounded-full overflow-hidden border-2 border-[#4c1d95] flex">
                                 <div
-                                    className="h-full bg-[#ef4444] transition-all duration-500"
+                                    className="h-full bg-red-500 transition-all duration-500"
                                     style={{ width: `${totalVotes === 0 ? 50 : (currentVote.votes.no / totalVotes) * 100}%` }}
                                 />
                                 <div
-                                    className="h-full bg-[#7c3aed] transition-all duration-500"
+                                    className="h-full bg-green-500 transition-all duration-500"
                                     style={{ width: `${totalVotes === 0 ? 50 : (currentVote.votes.yes / totalVotes) * 100}%` }}
                                 />
                             </div>

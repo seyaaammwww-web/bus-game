@@ -19,7 +19,7 @@ import { categories, type Category, type RoundAnswers } from '@shared/schema';
 import { AlertTriangle, Send, User, Users, Globe, PawPrint, Box, LogOut, Zap, Eye, Trophy, Flame, Sparkles, Crown, Skull, Pyramid, Gavel } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { playCountdownTick, playCountdownFinal, playRoundStart, playWildcard, playBanish, playClick, playSubmit, playBusComplete } from '@/lib/sounds';
+import { playCountdownSound, playCountdownFinalSound, playRoundStart, playBusSound, playFreezeSound, playWildcardSound, playBanishSound, playSubmitSound, playClickSound, playRushActivateSound, playBonusSound, playTypeSound } from '@/lib/sounds';
 import { RetroCard } from '@/components/ui/RetroCard';
 import { cn } from '@/lib/utils';
 
@@ -109,13 +109,14 @@ export default function Game() {
 
   useEffect(() => {
     if (showCountdown && countdown > 0) {
-      playCountdownTick();
+      playCountdownSound();
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
       return () => clearTimeout(timer);
     } else if (countdown === 0) {
-      playCountdownFinal();
+      playCountdownFinalSound();
       setTimeout(() => {
         setShowCountdown(false);
+        playRoundStart();
         inputRefs.current[currentCategories[0]]?.focus();
       }, 500);
     }
@@ -124,8 +125,8 @@ export default function Game() {
   useEffect(() => {
     if (state.isRush) {
       setShake(true);
-      playWildcard();
-      playBanish();
+      playRushActivateSound();
+      playBusSound();
       setTimeout(() => setShake(false), 500);
     }
   }, [state.isRush]);
@@ -169,7 +170,7 @@ export default function Game() {
     if (!hasSubmitted) {
       if (!allFilled) return;
 
-      playClick();
+      playClickSound();
       handleSubmit();
       triggerBusComplete();
     }
@@ -189,13 +190,7 @@ export default function Game() {
 
   const handleSubmit = () => {
     if (!hasSubmittedRef.current) {
-      playSubmit();
-      if (typeof window !== 'undefined' && window.innerWidth < 1024) {
-        playSubmit();
-        setTimeout(playBusComplete, 300); // Play bus horn shortly after submit on mobile
-      } else {
-        playSubmit();
-      }
+      playSubmitSound();
       submitAnswers(answersRef.current);
       setHasSubmitted(true);
       hasSubmittedRef.current = true;

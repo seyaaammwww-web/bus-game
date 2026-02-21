@@ -517,12 +517,7 @@ export class GameManager {
 
     buffer.transact(draft => {
       const isHost = draft.players.find(pl => pl.id === p.playerId)?.isHost;
-      console.log(`[UpdateSettings] Req from ${p.playerId} (${p.playerId === draft.hostId ? 'HOST' : 'NOT HOST'}). Settings:`, settings);
-
-      if (!isHost) {
-        console.log('[UpdateSettings] Denied: Not host');
-        return;
-      }
+      if (!isHost) return;
 
       if (draft.phase === 'lobby') {
         if (settings.customCategories) draft.settings = { ...draft.settings, customCategories: settings.customCategories };
@@ -778,9 +773,6 @@ export class GameManager {
     if (ans) {
       ans.isValid = accepted;
       ans.isPendingVote = false;
-
-      // Fix: Recalculate scores immediately so the UI shows points (10 or 20) instead of 0
-      this.roundManager.calculateAnswerScores(draft);
     }
     draft.currentVote = null;
     if (draft.voteQueue.length > 0) {

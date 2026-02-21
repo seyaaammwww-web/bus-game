@@ -80,8 +80,8 @@ export function RefereeReviewOverlay() {
                                                 key={idx}
                                                 onClick={() => refereeToggleValidity(player.id, answer.category)}
                                                 className={`p-2 rounded-lg border-2 cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] ${answer.isValid
-                                                    ? 'bg-[#7c3aed]/10 border-[#7c3aed] shadow-[2px_2px_0_0_rgba(124,58,237,0.2)]'
-                                                    : 'bg-red-50 border-red-500 hover:bg-red-100 shadow-[2px_2px_0_0_rgba(239,68,68,0.2)]'
+                                                    ? 'bg-green-50 border-green-500 hover:bg-green-100'
+                                                    : 'bg-red-50 border-red-500 hover:bg-red-100'
                                                     }`}
                                                 title="اضغط لتغيير الحالة"
                                             >
@@ -96,7 +96,7 @@ export function RefereeReviewOverlay() {
                                                     </div>
                                                     <div className="flex items-center gap-1">
                                                         {answer.isValid ? (
-                                                            <CheckCircle className="w-5 h-5 text-[#7c3aed]" />
+                                                            <CheckCircle className="w-5 h-5 text-green-600" />
                                                         ) : (
                                                             <XCircle className="w-5 h-5 text-red-600" />
                                                         )}
@@ -124,7 +124,7 @@ export function RefereeReviewOverlay() {
                     <div className="text-center">
                         <Button
                             onClick={handleApprove}
-                            className="h-14 px-8 bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] hover:from-[#6d28d9] hover:to-[#5b21b6] text-white font-bold font-pixel-title text-xl border-b-4 border-[#4c1d95] active:border-b-0 active:translate-y-1 shadow-[4px_4px_0_0_#2e1065]"
+                            className="h-14 px-8 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold font-pixel-title text-xl border-b-4 border-green-700 active:border-b-0 active:translate-y-1 shadow-lg"
                         >
                             <CheckCircle className="w-6 h-6 mr-2" />
                             الموافقة على النتائج

@@ -1,73 +1,89 @@
 import { motion } from 'framer-motion';
 import { Gavel } from 'lucide-react';
-import { useGame } from '@/lib/gameContext';
-import { useEffect } from 'react';
-import { playCountdownTick } from '@/lib/sounds';
 
 export default function RefereeWaiting() {
-    const { state } = useGame();
-
-    useEffect(() => {
-        const timer = setInterval(() => {
-            playCountdownTick();
-        }, 1000);
-        return () => clearInterval(timer);
-    }, []);
-
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-[#0f0a1f] p-6 text-white overflow-hidden">
-            {/* Heartbeat Background Pulse */}
+        <div className="min-h-screen flex items-center justify-center overflow-hidden relative">
+            {/* Centered spinning 3D 8-bit gavel icon */}
             <motion.div
-                className="absolute w-[800px] h-[800px] bg-gradient-to-r from-[#7c3aed]/10 to-[#c084fc]/10 rounded-full blur-[100px]"
-                animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-                transition={{ duration: 2, repeat: Infinity }}
-            />
-
-            <div className="text-center relative z-10">
-                <motion.div
-                    className="relative mb-12 flex justify-center"
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                >
-                    {/* 3D layered effect */}
-                    <div className="absolute inset-0 translate-x-3 translate-y-3 opacity-30 flex justify-center items-center">
-                        <div className="w-40 h-40 bg-gradient-to-br from-amber-900 to-[#2e1065] rounded-3xl"
-                            style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)', imageRendering: 'pixelated' }}
-                        />
-                    </div>
-
-                    <div className="absolute inset-0 translate-x-1.5 translate-y-1.5 opacity-60 flex justify-center items-center">
-                        <div className="w-40 h-40 bg-gradient-to-br from-amber-700 to-[#4c1d95] rounded-3xl"
-                            style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)', imageRendering: 'pixelated' }}
-                        />
-                    </div>
-
-                    {/* Main icon container */}
-                    <div
-                        className="relative w-40 h-40 bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 flex items-center justify-center border-4 border-amber-300"
+                className="relative"
+                animate={{
+                    rotate: 360
+                }}
+                transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "linear"
+                }}
+            >
+                {/* 3D layered effect - shadow layers */}
+                <div className="absolute inset-0 translate-x-2 translate-y-2 opacity-30">
+                    <div className="w-32 h-32 bg-gradient-to-br from-amber-900 to-amber-950 rounded-2xl"
                         style={{
-                            clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
-                            imageRendering: 'pixelated',
-                            boxShadow: 'inset 0 4px 12px rgba(255, 255, 255, 0.5), inset 0 -4px 12px rgba(0, 0, 0, 0.4)'
+                            clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)',
+                            imageRendering: 'pixelated'
                         }}
-                    >
-                        {/* Pixel art highlights */}
-                        <div className="absolute top-4 left-4 w-10 h-10 bg-amber-200 opacity-50 rounded-sm"
-                            style={{ imageRendering: 'pixelated', clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
-                        />
+                    />
+                </div>
+                <div className="absolute inset-0 translate-x-1 translate-y-1 opacity-50">
+                    <div className="w-32 h-32 bg-gradient-to-br from-amber-800 to-amber-900 rounded-2xl"
+                        style={{
+                            clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)',
+                            imageRendering: 'pixelated'
+                        }}
+                    />
+                </div>
 
-                        {/* Gavel icon */}
-                        <Gavel
-                            className="w-20 h-20 text-amber-950 relative z-10"
-                            strokeWidth={2.5}
-                            style={{ filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4))' }}
-                        />
-                    </div>
+                {/* Main icon container with 3D effect */}
+                <motion.div
+                    className="relative w-32 h-32 bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 rounded-2xl flex items-center justify-center shadow-2xl border-4 border-amber-300"
+                    style={{
+                        imageRendering: 'pixelated',
+                        boxShadow: '0 8px 32px rgba(251, 191, 36, 0.4), inset 0 2px 8px rgba(255, 255, 255, 0.3), inset 0 -2px 8px rgba(0, 0, 0, 0.3)'
+                    }}
+                    animate={{
+                        scale: [1, 1.05, 1]
+                    }}
+                    transition={{
+                        duration: 1.5,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                    }}
+                >
+                    {/* Pixel art style highlights */}
+                    <div className="absolute top-2 left-2 w-8 h-8 bg-amber-200 opacity-40 rounded"
+                        style={{ imageRendering: 'pixelated' }}
+                    />
+
+                    {/* Gavel icon */}
+                    <Gavel
+                        className="w-16 h-16 text-amber-950 relative z-10"
+                        strokeWidth={2.5}
+                        style={{
+                            filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))'
+                        }}
+                    />
                 </motion.div>
 
-                <p className="text-3xl font-pixel-title text-[#fbbf24] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">الحكم بيراجع...</p>
-                <p className="text-[#7c3aed] mt-4 font-pixel-text text-xl">اللاعبين لسه بيكتبوا...</p>
-            </div>
+                {/* Glowing pulse effect */}
+                <motion.div
+                    className="absolute inset-0 rounded-2xl"
+                    style={{
+                        background: 'radial-gradient(circle, rgba(251, 191, 36, 0.3) 0%, transparent 70%)',
+                        filter: 'blur(20px)'
+                    }}
+                    animate={{
+                        opacity: [0.5, 0.8, 0.5],
+                        scale: [1, 1.2, 1]
+                    }}
+                    transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                    }}
+                />
+            </motion.div>
         </div>
     );
 }
+

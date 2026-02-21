@@ -5,11 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Confetti } from '@/components/Confetti';
 import { useGame } from '@/lib/gameContext';
 import { categories, type Category } from '@shared/schema';
-import { playCorrect, playBonus, playWinnerFanfare, playCountdownTick } from '@/lib/sounds';
+import { playSuccessSound, playCountdownSound, playBonusSound } from '@/lib/sounds';
 import { RetroCard } from '@/components/ui/RetroCard';
 import { PixelAvatar } from '@/components/ui/PixelAvatar';
-import { PixelReveal } from '@/components/ui/PixelReveal';
-import { useIsMobile } from '@/hooks/useIsMobile';
 import { RetroQuote } from '@/components/ui/RetroQuote';
 import { LetterDisplay } from '@/components/LetterDisplay';
 import { VotingOverlay } from '@/components/VotingOverlay';
@@ -17,6 +15,8 @@ import { RefereeReviewOverlay } from '@/components/RefereeReviewOverlay';
 import { GameStats } from '@/components/results/GameStats';
 import { AppealDialog } from '@/components/results/AppealDialog';
 import { ResultsTable } from '@/components/results/ResultsTable';
+import { PixelReveal } from '@/components/ui/PixelReveal';
+
 
 const categoryIcons: Record<Category, any> = {
   'ولد': User,
@@ -45,21 +45,14 @@ export default function Results() {
   const room = state.room!;
   const isFinal = room.phase === 'final';
   const sortedPlayers = [...room.players].sort((a, b) => b.score - a.score);
-  useEffect(() => {
-    if (isFinal && !state.error && room?.players.length) {
-      setTimeout(() => {
-        playWinnerFanfare();
-      }, 500);
-    }
-  }, [isFinal, state.error, room?.players.length]);
   const winner = sortedPlayers[0];
 
   useEffect(() => {
     if (isFinal) {
-      playCorrect();
+      playSuccessSound();
       const bonusRecipients = Object.values(room.players || {}).filter((p: any) => (p.busStreak || 0) >= 3);
       if (bonusRecipients.length > 0) {
-        setTimeout(() => playBonus(), 1500);
+        setTimeout(() => playBonusSound(), 1500);
       }
     }
   }, [isFinal]);
@@ -72,13 +65,11 @@ export default function Results() {
     }
     const timer = setInterval(() => {
       setCountdown(prev => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          return 0;
+        if (prev > 1) {
+          playCountdownSound();
+          return prev - 1;
         }
-        if (prev <= 4) playCountdownTick(); // Tick sounds for last 3 seconds
-        else playCountdownTick();
-        return prev - 1;
+        return prev;
       });
     }, 1000);
     return () => clearInterval(timer);
@@ -128,11 +119,11 @@ export default function Results() {
     };
   }, [isFinal, room.rounds, room.players]);
 
-  const isMobile = useIsMobile();
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
 
   return (
     <div className="min-h-screen p-4 overflow-hidden relative text-white font-pixel-text">
-      <Confetti active={isFinal} count={isMobile ? 30 : 80} />
+      <Confetti active={isFinal} count={isMobile ? 1 : 3} />
       <VotingOverlay />
       <RefereeReviewOverlay />
 
@@ -322,31 +313,6 @@ export default function Results() {
                 onRefereeDeduct={(pid, cat) => refereeDeduct(pid, cat, 'رفض الحكم')}
                 onAppeal={(pid, cat, ans) => setAppealDialog({ playerId: pid, category: cat, word: ans })}
               />
-
-              {/* Scoreboard TV with Scanline & Live Ticker */}
-              <div className="relative h-14 bg-[#1a0533] mt-6 overflow-hidden rounded-xl border-2 border-[#4c1d95] shadow-inner">
-                {/* Scanline Effect */}
-                <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.25)_50%)] bg-[length:100%_4px] z-10" />
-
-                {/* Glowing Overlay */}
-                <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_20px_rgba(124,58,237,0.3)] z-10" />
-
-                <div className="overflow-hidden h-10 mt-2">
-                  {/* Live Ticker */}
-                  <motion.div
-                    className="flex whitespace-nowrap gap-8 text-sm text-white"
-                    animate={{ x: [0, -50 * sortedPlayers.length] }}
-                    transition={{ duration: 12, repeat: Infinity, ease: 'linear' }}
-                  >
-                    {[...sortedPlayers, ...sortedPlayers].map((p, i) => (
-                      <span key={`${p.id}-${i}`} className="font-pixel-text text-[#fbbf24]">
-                        {p.name} • {p.score} نقطة
-                        <Star className="inline w-3 h-3 text-[#7c3aed] ml-4 mr-1" />
-                      </span>
-                    ))}
-                  </motion.div>
-                </div>
-              </div>
             </div>
           </motion.div>
         )}
@@ -383,7 +349,7 @@ export default function Results() {
                       <Button
                         onClick={() => room.phase === 'results' ? nextRound() : refereeApprove()}
                         size="lg"
-                        className="w-full h-14 text-lg font-bold bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] hover:from-[#6d28d9] hover:to-[#5b21b6] shadow-[4px_4px_0_0_#2e1065] border-[3px] border-[#4c1d95] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
+                        className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
                       >
                         {room.phase === 'results' ? '➡️ بدء الجولة التالية' : '✅ اعتماد النتيجة وبدء الجولة'}
                       </Button>
@@ -397,7 +363,7 @@ export default function Results() {
                       <Button
                         onClick={() => nextRound()}
                         size="lg"
-                        className="w-full h-14 text-lg font-bold bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] hover:from-[#6d28d9] hover:to-[#5b21b6] shadow-[4px_4px_0_0_#2e1065] border-[3px] border-[#4c1d95] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
+                        className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
                         data-testid="button-next-round"
                       >
                         ➡️ الاستمرار للجولة التالية

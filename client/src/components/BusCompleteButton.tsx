@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { Bus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { playBusComplete, playWrong } from '@/lib/sounds';
+import { playBusSound } from '@/lib/sounds';
 
 interface BusCompleteButtonProps {
   onPress: () => void;
@@ -10,7 +10,7 @@ interface BusCompleteButtonProps {
 
 export function BusCompleteButton({ onPress, disabled }: BusCompleteButtonProps) {
   const handleClick = () => {
-    playBusComplete();
+    playBusSound();
     onPress();
   };
 
@@ -22,7 +22,7 @@ export function BusCompleteButton({ onPress, disabled }: BusCompleteButtonProps)
       <Button
         onClick={() => {
           if (disabled) {
-            playWrong();
+            import('@/lib/sounds').then(({ playErrorSound }) => playErrorSound());
             // Show hint if clicked while not ready
             import('@/hooks/use-toast').then(({ toast }) => {
               toast({
