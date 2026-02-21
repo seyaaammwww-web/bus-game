@@ -775,13 +775,14 @@ export class GameManager {
   }
 
   private resolveCurrentVoteInDraft(draft: any) {
-    // Resolve logic
-    const accepted = draft.currentVote.votes.yes >= draft.currentVote.votes.no;
+    // Resolve logic: requires strict majority (ties/0-votes fail)
+    const accepted = draft.currentVote.votes.yes > draft.currentVote.votes.no;
     const round = draft.rounds[draft.currentRound];
     const ans = round.validatedAnswers.find((a: any) => a.playerId === draft.currentVote.requesterId && a.category === draft.currentVote.category);
     if (ans) {
       ans.isValid = accepted;
       ans.isPendingVote = false;
+      ans.reason = accepted ? 'تم قبوله بالتصويت' : 'تم رفضه (أغلبية أو تعادل)';
     }
     draft.currentVote = null;
     if (draft.voteQueue.length > 0) {
