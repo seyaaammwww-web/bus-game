@@ -213,6 +213,15 @@ export default function Game() {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 1.05 }}
     >
+      {/* Mobile Pixel Rain Background */}
+      {isMobile && (
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-40 mobile-juicy-bg">
+          <div className="pixel-rain pixel-rain-1"></div>
+          <div className="pixel-rain pixel-rain-2"></div>
+          <div className="pixel-rain pixel-rain-3"></div>
+        </div>
+      )}
+
       <AnimatePresence>
         {showCountdown && (
           <motion.div
