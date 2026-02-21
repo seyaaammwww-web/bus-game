@@ -46,18 +46,15 @@ export function WildcardOverlay({ isActive, playerName, message }: WildcardOverl
             </motion.div>
           ))}
 
-          {/* Center message */}
           <motion.div
             className="relative z-10 text-center"
-            initial={{ scale: 0.5, opacity: 0 }}
+            initial={{ scale: 0.7, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.5, opacity: 0 }}
-            transition={{ delay: 0.1 }}
+            exit={{ scale: 0.7, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
           >
-            <motion.div
-              className="bg-white/95 backdrop-blur-md p-8 rounded-3xl shadow-2xl border-4 border-amber-300 max-w-md"
-              animate={{ y: [0, -8, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
+            <div
+              className="retro-overlay p-8 max-w-md border-amber-300 shadow-[8px_8px_0_0_#d97706]"
             >
               <motion.div
                 animate={{ rotate: [0, 15, -15, 0], scale: [1, 1.1, 1] }}
@@ -79,7 +76,7 @@ export function WildcardOverlay({ isActive, playerName, message }: WildcardOverl
                   ({playerName})
                 </p>
               )}
-            </motion.div>
+            </div>
           </motion.div>
 
           {/* Magic effect lines */}

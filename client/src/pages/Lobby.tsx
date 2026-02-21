@@ -311,8 +311,6 @@ export default function Lobby() {
         >
           {!currentPlayer?.isReady && (
             <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.90 }}
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             >
               <Button
@@ -347,8 +345,6 @@ export default function Lobby() {
 
           {isHost && (
             <motion.div
-              whileHover={{ scale: canStart ? 1.05 : 1 }}
-              whileTap={{ scale: canStart ? 0.90 : 1 }}
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             >
               <Button

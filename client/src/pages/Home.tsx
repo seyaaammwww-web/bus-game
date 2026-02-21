@@ -131,8 +131,6 @@ export default function Home() {
 
 
             <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.90 }}
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             >
               <Button
@@ -148,8 +146,6 @@ export default function Home() {
             </motion.div>
 
             <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.90 }}
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             >
               <Button
@@ -219,8 +215,6 @@ export default function Home() {
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.3 }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
                 >
                   <Button
                     className="w-full h-20 text-3xl font-bold bg-gradient-to-r from-primary to-secondary font-pixel-title"
@@ -314,8 +308,6 @@ export default function Home() {
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.4 }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
                 >
                   <Button
                     className="w-full h-14 text-xl font-bold bg-gradient-to-r from-secondary to-primary font-pixel-text"

@@ -9,11 +9,11 @@ interface BanishOverlayProps {
   onClose: () => void;
 }
 
-export function BanishOverlay({ 
-  isOpen, 
-  players, 
-  onSelectPlayer, 
-  onClose 
+export function BanishOverlay({
+  isOpen,
+  players,
+  onSelectPlayer,
+  onClose
 }: BanishOverlayProps) {
 
   return (
@@ -28,11 +28,12 @@ export function BanishOverlay({
         >
           {/* Main card */}
           <motion.div
-            initial={{ scale: 0.8, y: 20 }}
+            initial={{ scale: 0.8, y: 30 }}
             animate={{ scale: 1, y: 0 }}
-            exit={{ scale: 0.8, y: 20 }}
+            exit={{ scale: 0.8, y: 30 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
+            className="retro-overlay overflow-hidden max-w-md w-full"
           >
             {/* Header */}
             <div className="bg-gradient-to-r from-red-500 to-red-600 p-6 relative overflow-hidden">

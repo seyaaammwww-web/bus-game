@@ -37,11 +37,12 @@ export function RefereeReviewOverlay() {
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto"
         >
             <motion.div
-                initial={{ scale: 0.9, y: 20 }}
+                initial={{ scale: 0.8, y: 30 }}
                 animate={{ scale: 1, y: 0 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
                 className="w-full max-w-4xl my-8"
             >
-                <RetroCard className="border-[4px] border-[#7c3aed] shadow-[0_0_50px_rgba(124,58,237,0.3)]">
+                <div className="retro-overlay p-6">
                     {/* Header */}
                     <div className="text-center mb-6">
                         <div className="inline-flex items-center gap-2 bg-[#7c3aed] text-white px-4 py-2 rounded-full border-2 border-[#4c1d95] mb-2 shadow-[2px_2px_0_0_#2e1065]">
@@ -133,7 +134,7 @@ export function RefereeReviewOverlay() {
                             سيتم الانتقال للجولة التالية بعد الموافقة
                         </p>
                     </div>
-                </RetroCard>
+                </div>
             </motion.div>
         </motion.div>
     );
