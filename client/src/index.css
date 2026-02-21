@@ -937,6 +937,7 @@
     transform: translateY(0) rotate(180deg);
   }
 }
+
 /* --- Mobile Pixel Rain --- */
 .pixel-rain {
   position: absolute;
@@ -967,8 +968,13 @@
 }
 
 @keyframes rain-fall {
-  0% { transform: translateY(-100px); }
-  100% { transform: translateY(120vh); }
+  0% {
+    transform: translateY(-100px);
+  }
+
+  100% {
+    transform: translateY(120vh);
+  }
 }
 
 /* Add more rain drops purely via box-shadow for performance */
@@ -978,7 +984,7 @@
   width: 2px;
   height: 10px;
   background: inherit;
-  box-shadow: 
+  box-shadow:
     20vw -50px 0 0 rgba(255, 255, 255, 0.3),
     40vw 30px 0 0 rgba(255, 255, 255, 0.5),
     65vw -80px 0 0 rgba(255, 255, 255, 0.4),
@@ -991,7 +997,7 @@
   width: 2px;
   height: 12px;
   background: inherit;
-  box-shadow: 
+  box-shadow:
     -20vw 40px 0 0 rgba(255, 255, 255, 0.5),
     -40vw -20px 0 0 rgba(255, 255, 255, 0.3),
     30vw 90px 0 0 rgba(255, 255, 255, 0.4);
@@ -1003,7 +1009,7 @@
   width: 2px;
   height: 8px;
   background: inherit;
-  box-shadow: 
+  box-shadow:
     -60vw 10px 0 0 rgba(255, 255, 255, 0.4),
     -30vw -60px 0 0 rgba(255, 255, 255, 0.5),
     10vw 40px 0 0 rgba(255, 255, 255, 0.3);
@@ -1018,17 +1024,26 @@
 }
 
 @keyframes bg-breathe {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 /* 2. Scrolling Pixel Grid */
 .mobile-juicy-bg::before {
   content: '';
   position: absolute;
-  inset: -100px; /* Oversize to prevent edge clipping during parallax/animation */
-  background-image: 
+  inset: -100px;
+  /* Oversize to prevent edge clipping during parallax/animation */
+  background-image:
     linear-gradient(rgba(139, 92, 246, 0.1) 1px, transparent 1px),
     linear-gradient(90deg, rgba(139, 92, 246, 0.1) 1px, transparent 1px);
   background-size: 30px 30px;
@@ -1038,8 +1053,13 @@
 }
 
 @keyframes grid-scroll-mobile {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(30px); }
+  0% {
+    transform: translateY(0);
+  }
+
+  100% {
+    transform: translateY(30px);
+  }
 }
 
 /* 3. CRT Scanlines (Retro feel) */
@@ -1047,12 +1067,11 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    rgba(18, 16, 16, 0) 50%, 
-    rgba(0, 0, 0, 0.15) 50%
-  );
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%,
+      rgba(0, 0, 0, 0.15) 50%);
   background-size: 100% 4px;
-  z-index: 10; /* Above grid, below content */
+  z-index: 10;
+  /* Above grid, below content */
   pointer-events: none;
 }
 
@@ -1068,22 +1087,35 @@
   content: '';
   position: absolute;
   top: 0;
-  left: -150%;
-  width: 50%; /* Narrower beam for sharper effect */
+  left: -200%;
+  width: 150%;
+  /* Deep, wide soft shine */
   height: 100%;
-  background: linear-gradient(
-    to right,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.4) 50%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  transform: skewX(-25deg); /* Professional slanting */
-  animation: shine-sweep 3.5s cubic-bezier(0.19, 1, 0.22, 1) infinite;
+  background: linear-gradient(to right,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.15) 30%,
+      rgba(255, 255, 255, 0.3) 50%,
+      rgba(255, 255, 255, 0.15) 70%,
+      rgba(255, 255, 255, 0) 100%);
+  transform: skewX(-20deg);
+  animation: shine-sweep 6s ease-in-out infinite;
+  /* Much slower, very smooth */
   pointer-events: none;
 }
 
 @keyframes shine-sweep {
-  0% { left: -150%; }
-  15% { left: 200%; } /* Fast sweep */
-  100% { left: 200%; } /* Long pause before next sweep */
+  0% {
+    left: -200%;
+  }
+
+  40% {
+    left: 200%;
+  }
+
+  /* Slower sweep across */
+  100% {
+    left: 200%;
+  }
+
+  /* Wait gently until next sweep */
 }
