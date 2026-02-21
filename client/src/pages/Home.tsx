@@ -135,33 +135,35 @@ export default function Home() {
 
 
             <motion.div
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.90 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             >
               <Button
                 size="lg"
                 variant="primary"
-                className="w-full h-20 text-3xl font-pixel-title"
+                className="w-full h-20 text-3xl font-pixel-title shine-effect relative overflow-hidden"
                 onClick={() => setMode('create')}
                 data-testid="button-create-room"
               >
-                <Plus className="w-8 h-8 ml-2" />
+                <Plus className="w-8 h-8 ml-2 absolute right-4" />
                 غرفة جديدة
               </Button>
             </motion.div>
 
             <motion.div
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.90 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             >
               <Button
                 size="lg"
                 variant="retro"
-                className="w-full h-20 text-3xl font-pixel-title"
+                className="w-full h-20 text-3xl font-pixel-title relative overflow-hidden"
                 onClick={() => setMode('join')}
                 data-testid="button-join-room"
               >
-                <Users className="w-8 h-8 ml-2" />
+                <Users className="w-8 h-8 ml-2 absolute right-4" />
                 انضم لغرفة
               </Button>
             </motion.div>

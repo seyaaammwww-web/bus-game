@@ -311,17 +311,18 @@ export default function Lobby() {
         >
           {!currentPlayer?.isReady && (
             <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.90 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             >
               <Button
                 variant="primary"
                 size="lg"
-                className="w-full h-16 text-xl font-pixel-title"
+                className="w-full h-16 text-xl font-pixel-title shine-effect relative overflow-hidden"
                 onClick={setReady}
                 data-testid="button-ready"
               >
-                <Check className="w-6 h-6 ml-2" />
+                <Check className="w-6 h-6 ml-2 absolute right-4" />
                 أنا جاهز!
               </Button>
             </motion.div>
@@ -346,18 +347,19 @@ export default function Lobby() {
 
           {isHost && (
             <motion.div
-              whileHover={{ scale: canStart ? 1.02 : 1 }}
-              whileTap={{ scale: canStart ? 0.98 : 1 }}
+              whileHover={{ scale: canStart ? 1.05 : 1 }}
+              whileTap={{ scale: canStart ? 0.90 : 1 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             >
               <Button
                 size="lg"
                 variant={canStart ? "secondary" : "default"}
-                className={`w-full h-16 text-lg font-pixel-title ${!canStart ? 'opacity-50 cursor-not-allowed bg-gray-400 border-gray-600' : ''}`}
+                className={`w-full h-16 text-lg font-pixel-title relative overflow-hidden ${!canStart ? 'opacity-50 cursor-not-allowed bg-gray-400 border-gray-600' : 'shine-effect'}`}
                 onClick={startGame}
                 disabled={!canStart}
                 data-testid="button-start-game"
               >
-                <Play className="w-6 h-6 ml-2" />
+                <Play className="w-6 h-6 ml-2 absolute right-4" />
                 {allReady ? 'ابدأ اللعبة!' : 'في انتظار اللاعبين...'}
               </Button>
             </motion.div>

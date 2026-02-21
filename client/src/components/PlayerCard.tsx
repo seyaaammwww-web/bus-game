@@ -25,8 +25,10 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
           ? "bg-[#f5f3ff] border-[#7c3aed] shadow-[4px_4px_0_0_#4c1d95]"
           : "bg-white border-gray-900 shadow-[4px_4px_0_0_rgba(0,0,0,0.2)]"
       )}
-      whileHover={{ y: -4 }}
-      transition={{ type: "spring", stiffness: 400, damping: 20 }}
+      initial={{ scale: 0.8, opacity: 0, y: 20 }}
+      animate={{ scale: 1, opacity: 1, y: 0 }}
+      whileHover={{ y: -6, scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 400, damping: 15 }}
     >
       {/* Rank Badge */}
       {rank !== undefined && rank < 3 && (
@@ -104,10 +106,15 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
         ) : (
           <div className="flex items-center gap-1">
             {player.isReady ? (
-              <div className="flex items-center gap-1 text-[#4c1d95] text-xs font-bold bg-[#f5f3ff] px-2 py-0.5 rounded-sm border border-[#7c3aed]/30 shadow-sm">
+              <motion.div
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                className="flex items-center gap-1 text-[#4c1d95] text-xs font-bold bg-[#f5f3ff] px-2 py-0.5 rounded-sm border border-[#7c3aed]/30 shadow-sm"
+              >
                 <Check className="w-3 h-3 text-[#7c3aed] stroke-[3]" />
                 جاهز
-              </div>
+              </motion.div>
             ) : (
               <div className="flex items-center gap-1 text-gray-400 text-xs font-bold bg-gray-50 px-2 py-0.5 rounded-sm border border-gray-200">
                 <Clock className="w-3 h-3" />
