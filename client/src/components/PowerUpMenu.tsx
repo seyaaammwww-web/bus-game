@@ -24,8 +24,8 @@ function SquarePowerUp({ type, title, cost, icon: Icon, status, onActivate }: Sq
     const isDisabled = status === 'disabled';
 
     const theme = type === 'wildcard'
-        ? { bg: 'bg-[#fbbf24]', border: 'border-[#b45309]', shadow: 'shadow-[#78350f]', text: 'text-[#78350f]' }
-        : { bg: 'bg-[#f87171]', border: 'border-[#991b1b]', shadow: 'shadow-[#7f1d1d]', text: 'text-[#7f1d1d]' };
+        ? { bg: 'bg-[#fbbf24]', text: 'text-[#78350f]' }
+        : { bg: 'bg-[#f87171]', text: 'text-[#7f1d1d]' };
 
     const formatCost = (c: number) => c.toLocaleString('en-US');
 
@@ -56,16 +56,12 @@ function SquarePowerUp({ type, title, cost, icon: Icon, status, onActivate }: Sq
     }
 
     return (
-        <motion.button
+        <button
             onClick={handleClick}
-            whileHover={!isDisabled && !isLocked ? { scale: 1.05, y: -4 } : {}}
-            whileTap={!isDisabled && !isLocked ? { scale: 0.95 } : {}}
             className={cn(
-                "relative w-32 h-32 md:w-40 md:h-40 rounded-xl border-4 flex flex-col items-center justify-center gap-2 transition-all group",
+                "retro-action-btn relative w-32 h-32 md:w-40 md:h-40 rounded-xl flex flex-col items-center justify-center gap-2 group",
                 theme.bg,
-                theme.border,
-                `shadow-[4px_4px_0_0_${type === 'wildcard' ? '#78350f' : '#7f1d1d'}]`,
-                isDisabled ? "opacity-70 grayscale cursor-not-allowed" : "cursor-pointer"
+                isDisabled ? "opacity-70 grayscale cursor-not-allowed pointer-events-none" : "hover:brightness-110"
             )}
         >
             {/* Price Badge */}
@@ -91,7 +87,7 @@ function SquarePowerUp({ type, title, cost, icon: Icon, status, onActivate }: Sq
                     <Lock className="w-8 h-8 text-white/80" />
                 </div>
             )}
-        </motion.button>
+        </button>
     );
 }
 
@@ -117,8 +113,7 @@ export function PowerUpMenu() {
         <>
             <Button
                 onClick={toggleOpen}
-                variant="outline"
-                className="h-9 md:h-14 px-3 md:px-6 flex items-center gap-2 font-pixel-title relative overflow-hidden bg-gradient-to-br from-[#fbbf24] via-[#f59e0b] to-[#d97706] text-[#451a03] border-[#451a03] border-[3px] shadow-[4px_4px_0_0_#78350f] hover:translate-y-[-2px] hover:shadow-[6px_6px_0_0_#78350f] active:translate-y-[2px] active:shadow-[2px_2px_0_0_#78350f] transition-all group rounded-xl"
+                className="h-9 md:h-14 px-3 md:px-6 flex items-center gap-2 font-pixel-title relative overflow-hidden bg-gradient-to-b from-[#fbbf24] to-[#f59e0b] text-[#78350f] hover:brightness-110 group rounded-xl"
             >
                 {/* Shimmer Effect */}
                 <motion.div
