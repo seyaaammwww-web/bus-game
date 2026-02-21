@@ -1,106 +1,91 @@
 import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Clock, AlertTriangle, Zap } from 'lucide-react';
+import { Clock, AlertTriangle } from 'lucide-react';
 import { playTimerWarning, playTimerUrgent } from '@/lib/sounds';
 
 interface TimerProps {
   timeLeft: number;
   isRush: boolean;
+  /** Max seconds (used to draw the fuse bar). Default 60. */
+  maxTime?: number;
 }
 
-export function Timer({ timeLeft, isRush }: TimerProps) {
+export function Timer({ timeLeft, isRush, maxTime = 60 }: TimerProps) {
   const prevTimeRef = useRef(timeLeft);
 
   useEffect(() => {
     if (prevTimeRef.current !== timeLeft) {
-      // Play a tick sound every second when time is low
       if (timeLeft <= 5 && timeLeft > 0) {
-        playTimerUrgent(); // Urgent tick
+        playTimerUrgent();
       } else if (timeLeft <= 15 && timeLeft > 5) {
-        playTimerWarning(); // Standard tick
+        playTimerWarning();
       }
       prevTimeRef.current = timeLeft;
     }
   }, [timeLeft]);
 
-  const getTimerClass = () => {
-    if (timeLeft <= 5) return 'text-red-600';
-    if (timeLeft <= 15) return 'text-amber-500';
-    return 'text-primary';
-  };
-
-  const getTimerBg = () => {
-    if (timeLeft <= 5) return 'from-red-100 to-red-50';
-    if (timeLeft <= 15) return 'from-amber-100 to-amber-50';
-    return 'from-blue-100 to-blue-50';
-  };
-
   const isDanger = timeLeft <= 5;
   const isWarning = timeLeft <= 15;
 
+  // ---- colour tokens ----
+  const pillBg = isDanger ? 'bg-red-500' : isWarning ? 'bg-amber-400' : 'bg-[#FFFDD1]';
+  const pillBorder = isDanger ? 'border-red-700' : isWarning ? 'border-amber-600' : 'border-[#4c1d95]';
+  const pillShadow = isDanger ? 'shadow-[3px_3px_0_0_#7f1d1d]' : isWarning ? 'shadow-[3px_3px_0_0_#92400e]' : 'shadow-[3px_3px_0_0_#2e1065]';
+  const numColor = isDanger ? 'text-white' : isWarning ? 'text-[#7c2d12]' : 'text-[#4c1d95]';
+  const iconColor = isDanger ? 'text-white' : isWarning ? 'text-[#7c2d12]' : 'text-[#7c3aed]';
+  const fuseColor = isDanger ? 'from-red-300 to-white' : isWarning ? 'from-orange-400 to-yellow-300' : 'from-violet-400 to-purple-300';
+
+  const fuseWidth = Math.max(0, Math.min(1, timeLeft / maxTime));
+
   return (
     <motion.div
-      className={`flex items-center justify-center gap-4 p-4 rounded-xl bg-[#FFFDD1] border-[3px] ${isDanger ? 'border-red-500' : isWarning ? 'border-orange-500' : 'border-[#2e1065]'
-        } shadow-lg relative overflow-hidden font-pixel-text`}
-      initial={{ scale: 0.8, opacity: 0, rotate: -10 }}
-      animate={{ scale: 1, opacity: 1, rotate: 0 }}
-      transition={{ type: 'spring', stiffness: 300 }}
+      className={`
+        relative flex items-center gap-2
+        px-3 py-1.5 md:px-4 md:py-2
+        rounded-full border-[3px] overflow-hidden
+        font-pixel-text
+        ${pillBg} ${pillBorder} ${pillShadow}
+        ${isDanger ? 'animate-pulse' : ''}
+      `}
+      initial={{ scale: 0.8, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
     >
-      {/* Pulsing background effect */}
-      {isDanger && (
-        <motion.div
-          className="absolute inset-0 bg-red-500 opacity-10"
-          animate={{ opacity: [0.05, 0.2, 0.05] }}
-          transition={{ duration: 0.6, repeat: Infinity }}
-        />
-      )}
+      {/* Fuse bar at bottom */}
+      <div
+        className={`absolute bottom-0 left-0 h-[3px] bg-gradient-to-r ${fuseColor} transition-all duration-1000 ease-linear`}
+        style={{ width: `${fuseWidth * 100}%` }}
+      >
+        {/* Fire spark at fuse tip */}
+        {fuseWidth > 0.02 && (
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-yellow-200 shadow-[0_0_6px_#fbbf24] animate-ping" />
+        )}
+      </div>
 
-      {/* Icon with animation */}
+      {/* Icon */}
       <motion.div
         animate={
-          isDanger
-            ? { scale: [1, 1.2, 1], rotate: [0, -10, 10, -10, 0] }
-            : isWarning
-              ? { scale: [1, 1.1, 1] }
-              : {}
+          isDanger ? { scale: [1, 1.3, 1], rotate: [0, -15, 15, 0] } :
+            isWarning ? { scale: [1, 1.1, 1] } : {}
         }
-        transition={{
-          duration: isDanger ? 0.5 : 1,
-          repeat: Infinity,
-        }}
+        transition={{ duration: isDanger ? 0.4 : 0.8, repeat: Infinity }}
       >
-        {isDanger ? (
-          <AlertTriangle className="w-8 h-8 text-red-600" />
-        ) : (
-          <Clock className={`w-8 h-8 ${getTimerClass()}`} />
-        )}
+        {isDanger
+          ? <AlertTriangle className={`w-4 h-4 md:w-5 md:h-5 ${iconColor}`} />
+          : <Clock className={`w-4 h-4 md:w-5 md:h-5 ${iconColor}`} />
+        }
       </motion.div>
 
-      {/* Timer number with relative positioning */}
-      <motion.div
-        className="relative"
+      {/* Number — pops in every tick */}
+      <motion.span
         key={timeLeft}
-        initial={{ scale: 0.5, opacity: 0 }}
+        className={`tabular-nums font-pixel-title text-xl md:text-2xl leading-none ${numColor}`}
+        initial={{ scale: 1.4, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.5, opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 18 }}
       >
-        <span className={`text-4xl font-pixel-title tabular-nums ${isDanger ? 'text-red-600' : isWarning ? 'text-orange-600' : 'text-[#4c1d95]'} relative z-10`}>
-          {String(timeLeft).padStart(2, '0')}
-        </span>
-        {isDanger && (
-          <motion.div
-            className="absolute inset-0 text-red-400 text-6xl font-black opacity-30"
-            animate={{ scale: [1, 1.2] }}
-            transition={{ duration: 0.3, repeat: Infinity }}
-          >
-            {String(timeLeft).padStart(2, '0')}
-          </motion.div>
-        )}
-      </motion.div>
-
-      {/* Rush mode indicator */}
-
+        {String(timeLeft).padStart(2, '0')}
+      </motion.span>
     </motion.div>
   );
 }
-

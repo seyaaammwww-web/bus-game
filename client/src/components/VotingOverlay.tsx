@@ -87,14 +87,7 @@ export function VotingOverlay() {
 
                         {/* Timer */}
                         <div className="flex justify-center mb-6">
-                            <div className={`relative px-6 py-2 rounded-full border-4 shadow-inner overflow-hidden ${timeLeft <= 5 ? 'bg-red-500 border-red-700 animate-pulse' : 'bg-[#FFFDD1] border-[#4c1d95]'}`}>
-                                <Timer timeLeft={timeLeft} isRush={timeLeft <= 5} />
-                                {/* Burning Fuse Effect */}
-                                <div className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-orange-500 to-yellow-300 w-full" style={{ transformOrigin: 'left', transform: `scaleX(${timeLeft / 15})`, transition: 'transform 1s linear' }}>
-                                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-orange-400 rounded-full blur-[2px] animate-ping" />
-                                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-yellow-200 rounded-full shadow-[0_0_10px_#fbbf24]" />
-                                </div>
-                            </div>
+                            <Timer timeLeft={timeLeft} isRush={timeLeft <= 5} maxTime={15} />
                         </div>
 
                         {/* Content to Vote On */}
