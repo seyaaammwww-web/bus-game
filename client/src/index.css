@@ -1156,3 +1156,53 @@
     border-color: transparent;
   }
 }
+/* --- Game Board Dopamine --- */
+
+/* 2. Input Lock-in Pop */
+.input-locked {
+  animation: input-lock-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  border-color: #7c3aed !important;
+  background-color: #f5f3ff !important;
+  box-shadow: inset 0 2px 4px rgba(124, 58, 237, 0.1) !important;
+}
+
+@keyframes input-lock-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02) translateY(-2px); }
+  100% { transform: scale(1) translateY(0); }
+}
+
+/* 3. The Smash Button (Pulse) */
+.pulse-ready {
+  animation: button-heartbeat 1.2s infinite;
+  box-shadow: 0 0 15px rgba(124, 58, 237, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.3) !important;
+}
+
+@keyframes button-heartbeat {
+  0% { transform: scale(1); }
+  15% { transform: scale(1.04); }
+  30% { transform: scale(1); }
+  45% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+
+/* 1. Slot Machine Letter Scramble */
+.slot-machine-text {
+  animation: slot-machine-blur 0.1s infinite;
+}
+
+@keyframes slot-machine-blur {
+  0% { transform: translateY(0) scaleY(1); opacity: 1; filter: blur(0); }
+  50% { transform: translateY(10px) scaleY(1.2); opacity: 0.8; filter: blur(2px); }
+  100% { transform: translateY(-10px) scaleY(1); opacity: 0; filter: blur(0); }
+}
+
+.slot-machine-land {
+  animation: slot-machine-pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes slot-machine-pop {
+  0% { transform: scale(0.5) translateY(-50px); opacity: 0; }
+  50% { transform: scale(1.2) translateY(10px); opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}

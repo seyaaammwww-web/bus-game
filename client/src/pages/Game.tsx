@@ -39,6 +39,32 @@ const categoryColors: Record<Category, string> = {
   'جماد': 'category-thing',
 };
 
+// Slot Machine Letter Scramble Component
+function SlotMachineLetter({ targetLetter, isRolling }: { targetLetter: string, isRolling: boolean }) {
+  const [displayLetter, setDisplayLetter] = useState(targetLetter);
+  const alphabet = "أبتثجحخدذرزسشصضطظعغفقكلمنهوي";
+
+  useEffect(() => {
+    if (!isRolling) {
+      setDisplayLetter(targetLetter);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      const randomChar = alphabet[Math.floor(Math.random() * alphabet.length)];
+      setDisplayLetter(randomChar);
+    }, 50); // Fast scramble
+
+    return () => clearInterval(interval);
+  }, [isRolling, targetLetter]);
+
+  return (
+    <span className={`text-7xl font-pixel-title text-white drop-shadow-lg ${isRolling ? 'slot-machine-text text-[#fbbf24]' : 'slot-machine-land'}`}>
+      {displayLetter}
+    </span>
+  );
+}
+
 export default function Game() {
   const {
     state,
@@ -237,11 +263,11 @@ export default function Game() {
               exit={{ scale: 0, opacity: 0 }}
             >
               <motion.div
-                className="w-40 h-40 bg-gradient-to-br from-[#7c3aed] to-[#4c1d95] rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-[0_0_60px_rgba(139,92,246,0.5)] border-4 border-white/20"
+                className="w-40 h-40 bg-gradient-to-br from-[#7c3aed] to-[#4c1d95] rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-[0_0_60px_rgba(139,92,246,0.5)] border-4 border-white/20 overflow-hidden"
                 animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.05, 1] }}
                 transition={{ duration: 0.5, repeat: Infinity }}
               >
-                <span className="text-7xl font-pixel-title text-white drop-shadow-lg">{letter}</span>
+                <SlotMachineLetter targetLetter={letter} isRolling={countdown > 1} />
               </motion.div>
               <motion.p className="text-4xl text-white mb-6 font-pixel-title">
                 الجولة {room.currentRound + 1} / {room.totalRounds}
@@ -562,7 +588,7 @@ export default function Game() {
                             }, 300);
                           }
                         }}
-                        className={`text-center text-sm md:text-lg h-9 md:h-12 border-2 border-[#e5e7eb] focus:border-[#7c3aed] focus:ring-0 focus:shadow-[0_0_0_2px_rgba(124,58,237,0.1)] transition-all font-pixel-text font-bold bg-white text-[#4c1d95] placeholder:text-gray-300 rounded-lg ${hasSubmitted || isBanished ? 'opacity-60 grayscale' : ''}`}
+                        className={`text-center text-sm md:text-lg h-9 md:h-12 border-2 border-[#e5e7eb] focus:border-[#7c3aed] focus:ring-0 focus:shadow-[0_0_0_2px_rgba(124,58,237,0.1)] transition-all font-pixel-text font-bold bg-white text-[#4c1d95] placeholder:text-gray-300 rounded-lg ${hasSubmitted || isBanished ? 'opacity-60 grayscale' : ''} ${answers[category]?.trim().length > 0 ? 'input-locked scale-100' : ''}`}
                         data-testid={`input-${category}`}
                       />
                     </div>
@@ -581,7 +607,7 @@ export default function Game() {
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="mt-6"
+              className={`mt-6 rounded-lg ${canBusComplete ? 'pulse-ready' : ''}`}
             >
               <BusCompleteButton
                 onPress={handleBusComplete}
