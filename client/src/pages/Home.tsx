@@ -128,10 +128,10 @@ export default function Home() {
             exit={{ y: -30, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
           >
-            <div className="relative h-[480px] md:h-[520px] w-full flex flex-col items-center justify-between py-6">
+            <div className="relative h-[480px] md:h-[520px] overflow-hidden rounded-3xl border-[6px] border-[#4c1d95] shadow-[8px_8px_0_#2e1065] bg-gradient-to-b from-[#1a0533]/90 to-[#2e1065] backdrop-blur-md">
 
               {/* Logo Area */}
-              <div className="w-[90%] z-20 text-center mb-8 mt-4 md:mt-10">
+              <div className="absolute top-6 left-1/2 -translate-x-1/2 w-[90%] z-20 text-center">
                 <img
                   src="/assets/logo.png"
                   alt="أوتوبيس كومبليت"
@@ -139,10 +139,8 @@ export default function Home() {
                 />
               </div>
 
-              {/* Cleaned up background items - Rain is now global, and Bus is removed */}
-
               {/* Neon Ticket Buttons */}
-              <div className="w-[90%] flex flex-col gap-4 z-20 mb-4">
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] flex flex-col gap-4 z-20">
                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <Button
                     size="lg"
