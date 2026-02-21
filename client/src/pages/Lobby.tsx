@@ -162,6 +162,32 @@ export default function Lobby() {
               </motion.span>
             </div>
             <div className="space-y-3">
+              {/* Round Count Picker (Host only) */}
+              {isHost && (
+                <div className="flex items-center justify-between p-3 bg-white/50 rounded-lg border-2 border-[#4c1d95]/20">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-[#4c1d95] rounded-lg flex items-center justify-center text-white font-pixel-title text-sm">
+                      {room.totalRounds}
+                    </div>
+                    <div>
+                      <p className="font-bold text-[#4c1d95] font-pixel-text text-sm">عدد الجولات</p>
+                      <p className="text-[10px] text-[#4c1d95]/70 font-pixel-text">بين 3 و 20 جولة</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => updateSettings({ totalRounds: Math.max(3, room.totalRounds - 1) })}
+                      className="w-8 h-8 bg-white border-[2px] border-[#4c1d95] rounded-lg text-[#4c1d95] font-pixel-title text-lg flex items-center justify-center hover:bg-[#4c1d95] hover:text-white active:scale-90 transition-all shadow-[2px_2px_0_0_#2e1065]"
+                    >−</button>
+                    <span className="w-8 text-center font-pixel-title text-[#4c1d95] text-base">{room.totalRounds}</span>
+                    <button
+                      onClick={() => updateSettings({ totalRounds: Math.min(20, room.totalRounds + 1) })}
+                      className="w-8 h-8 bg-[#4c1d95] border-[2px] border-[#2e1065] rounded-lg text-white font-pixel-title text-lg flex items-center justify-center hover:bg-[#7c3aed] active:scale-90 transition-all shadow-[2px_2px_0_0_#2e1065]"
+                    >+</button>
+                  </div>
+                </div>
+              )}
+
               {/* Voting Toggle (New) */}
               {isHost ? (
                 <div className="flex items-center justify-between p-3 bg-white/50 rounded-lg border-2 border-[#4c1d95]/20">

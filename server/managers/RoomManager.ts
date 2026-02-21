@@ -31,7 +31,7 @@ export class RoomManager {
             players: [player],
             rounds: [],
             currentRound: 0,
-            totalRounds: 3, // Reduced for testing
+            totalRounds: 10,
             phase: 'lobby',
             letters: getRandomLetters(10),
             createdAt: Date.now(),

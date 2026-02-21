@@ -521,6 +521,15 @@ export class GameManager {
 
       if (draft.phase === 'lobby') {
         if (settings.customCategories) draft.settings = { ...draft.settings, customCategories: settings.customCategories };
+
+        if (settings.totalRounds !== undefined) {
+          const val = Math.max(3, Math.min(20, Number(settings.totalRounds)));
+          if (!isNaN(val)) {
+            draft.totalRounds = val;
+            // Generate fresh letters to match new round count
+            draft.letters = Array.from({ length: val }, (_, i) => draft.letters[i] || 'س');
+          }
+        }
       }
 
       if (settings.enableVoting !== undefined) {

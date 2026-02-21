@@ -156,59 +156,180 @@ export default function Results() {
         >
           {isFinal ? (
             <>
+              {/* Trophy Header */}
               <motion.div
                 initial={{ scale: 0, rotate: -180 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ type: 'spring', stiffness: 150, damping: 15 }}
-                className="relative inline-block mb-6"
+                className="relative inline-block mb-4"
               >
-                <div className="w-36 h-36 bg-gradient-to-br from-[#7c3aed] to-[#4c1d95] rounded-3xl flex items-center justify-center shadow-[0_0_60px_rgba(139,92,246,0.5)] border-4 border-white/30">
-                  <Trophy className="w-20 h-20 text-white" />
+                <div className="w-28 h-28 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-3xl flex items-center justify-center shadow-[6px_6px_0_0_#78350f] border-[4px] border-[#78350f]">
+                  <Trophy className="w-16 h-16 text-white drop-shadow-lg" />
                 </div>
                 <motion.div
-                  className="absolute -top-4 -right-4 w-14 h-14 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full flex items-center justify-center shadow-lg border-3 border-white"
-                  animate={{ scale: [1, 1.2, 1], rotate: [0, 10, -10, 0] }}
-                  transition={{ repeat: Infinity, duration: 1 }}
+                  className="absolute -top-3 -right-3 w-12 h-12 bg-[#4c1d95] rounded-full flex items-center justify-center shadow-[3px_3px_0_0_#2e1065] border-[3px] border-[#2e1065]"
+                  animate={{ scale: [1, 1.2, 1], rotate: [0, 15, -15, 0] }}
+                  transition={{ repeat: Infinity, duration: 1.2 }}
                 >
-                  <Crown className="w-7 h-7 text-white" />
+                  <Crown className="w-6 h-6 text-amber-300" />
                 </motion.div>
               </motion.div>
 
-              <motion.div
-                className="relative p-8 bg-gradient-to-b from-white to-[#faf5ff] rounded-3xl border-[4px] border-[#4c1d95] shadow-[0_10px_30px_rgba(124,58,237,0.4)] mb-8 winner-podium"
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.4 }}
+              <motion.h1
+                className="text-4xl md:text-5xl font-pixel-title text-white mb-6 drop-shadow-[0_4px_0_rgba(0,0,0,0.5)]"
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2 }}
               >
-                <div className="winner-glow" />
-                <motion.h1
-                  className="text-5xl font-pixel-title mb-6 text-[#4c1d95] font-bold drop-shadow-sm"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.3, type: 'spring' }}
-                >
-                  الفائز! 👑
-                </motion.h1>
-                <div className="flex justify-center mb-6 relative">
-                  <div className="absolute inset-0 bg-yellow-400 rounded-full blur-xl opacity-30 animate-pulse" />
-                  <PixelAvatar src={winner.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${winner.id}`} size="lg" className="border-4 border-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.5)] bg-white relative z-10" />
-                </div>
-                <motion.p
-                  className="text-5xl font-pixel-text font-bold text-[#4c1d95] mb-2"
-                  initial={{ opacity: 0, y: 20 }}
+                🏆 نهاية اللعبة!
+              </motion.h1>
+
+              {/* Top-3 Podium */}
+              {sortedPlayers.length >= 1 && (
+                <motion.div
+                  className="flex items-end justify-center gap-3 mb-6"
+                  initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
+                  transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
                 >
-                  {winner.name}
-                </motion.p>
-                <motion.p
-                  className="text-3xl text-[#7c3aed] mt-4 font-pixel-text font-bold bg-[#7c3aed] text-white inline-block px-6 py-2 rounded-full border-2 border-[#4c1d95] shadow-[2px_2px_0_0_#2e1065]"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.7 }}
-                >
-                  {winner.score} نقطة
-                </motion.p>
+                  {/* 2nd place */}
+                  {sortedPlayers[1] && (
+                    <motion.div
+                      className="flex flex-col items-center"
+                      initial={{ opacity: 0, y: 40 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.6 }}
+                    >
+                      <PixelAvatar
+                        src={sortedPlayers[1].avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${sortedPlayers[1].id}`}
+                        size="sm"
+                        className="border-[3px] border-slate-400 mb-1 shadow-[2px_2px_0_0_#475569]"
+                      />
+                      <p className="text-xs font-pixel-text text-white font-bold truncate max-w-[72px]">{sortedPlayers[1].name}</p>
+                      <p className="text-xs font-pixel-title text-slate-200">{sortedPlayers[1].score}</p>
+                      <div className="w-20 h-14 bg-gradient-to-b from-slate-300 to-slate-400 border-[3px] border-slate-600 shadow-[3px_3px_0_0_#334155] flex items-center justify-center mt-1">
+                        <span className="text-2xl font-pixel-title text-slate-700">2</span>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* 1st place */}
+                  <motion.div
+                    className="flex flex-col items-center"
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
+                  >
+                    <motion.div
+                      animate={{ y: [0, -6, 0] }}
+                      transition={{ repeat: Infinity, duration: 2 }}
+                    >
+                      <div className="relative">
+                        <div className="absolute inset-0 bg-amber-400 rounded-full blur-xl opacity-40 animate-pulse" />
+                        <PixelAvatar
+                          src={winner.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${winner.id}`}
+                          size="md"
+                          className="border-[4px] border-amber-400 mb-1 relative z-10 shadow-[0_0_20px_rgba(250,204,21,0.6)]"
+                        />
+                      </div>
+                    </motion.div>
+                    <Crown className="w-5 h-5 text-amber-300 mb-0.5" />
+                    <p className="text-sm font-pixel-text text-white font-bold truncate max-w-[90px]">{winner.name}</p>
+                    <p className="text-sm font-pixel-title text-amber-200">{winner.score} نقطة</p>
+                    <div className="w-24 h-20 bg-gradient-to-b from-amber-300 to-yellow-500 border-[3px] border-amber-700 shadow-[3px_3px_0_0_#78350f] flex items-center justify-center mt-1">
+                      <span className="text-3xl font-pixel-title text-amber-900">1</span>
+                    </div>
+                  </motion.div>
+
+                  {/* 3rd place */}
+                  {sortedPlayers[2] && (
+                    <motion.div
+                      className="flex flex-col items-center"
+                      initial={{ opacity: 0, y: 40 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.7 }}
+                    >
+                      <PixelAvatar
+                        src={sortedPlayers[2].avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${sortedPlayers[2].id}`}
+                        size="sm"
+                        className="border-[3px] border-orange-400 mb-1 shadow-[2px_2px_0_0_#9a3412]"
+                      />
+                      <p className="text-xs font-pixel-text text-white font-bold truncate max-w-[72px]">{sortedPlayers[2].name}</p>
+                      <p className="text-xs font-pixel-title text-orange-200">{sortedPlayers[2].score}</p>
+                      <div className="w-20 h-10 bg-gradient-to-b from-orange-400 to-amber-600 border-[3px] border-amber-800 shadow-[3px_3px_0_0_#7c2d12] flex items-center justify-center mt-1">
+                        <span className="text-2xl font-pixel-title text-orange-900">3</span>
+                      </div>
+                    </motion.div>
+                  )}
+                </motion.div>
+              )}
+
+              {/* Full Scoreboard */}
+              <motion.div
+                initial={{ y: 30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.8 }}
+                className="mb-6"
+              >
+                <RetroCard>
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-7 h-7 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-lg flex items-center justify-center shadow-[2px_2px_0_0_#78350f]">
+                      <Trophy className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-pixel-title text-[#4c1d95] text-base font-bold">الترتيب النهائي</span>
+                  </div>
+                  <div className="space-y-2">
+                    {sortedPlayers.map((player, index) => {
+                      const isMe = player.id === state.playerId;
+                      const isRef = player.id === room.refereeId;
+                      const medals = ['🥇', '🥈', '🥉'];
+                      return (
+                        <motion.div
+                          key={player.id}
+                          initial={{ x: -30, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          transition={{ delay: 0.85 + index * 0.07, type: 'spring', stiffness: 300 }}
+                          className={`flex items-center gap-3 px-3 py-2 rounded-xl border-[2px] font-pixel-text text-sm ${isMe
+                            ? 'bg-gradient-to-r from-[#7c3aed]/15 to-[#8b5cf6]/15 border-[#7c3aed] shadow-[2px_2px_0_0_#4c1d95]'
+                            : 'bg-white border-[#4c1d95]/20'
+                            }`}
+                        >
+                          {/* Rank */}
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-base font-bold flex-shrink-0 ${index === 0 ? 'bg-gradient-to-br from-amber-300 to-yellow-500 shadow-[2px_2px_0_0_#78350f]' :
+                            index === 1 ? 'bg-gradient-to-br from-slate-300 to-gray-400 shadow-[2px_2px_0_0_#334155]' :
+                              index === 2 ? 'bg-gradient-to-br from-orange-400 to-amber-600 shadow-[2px_2px_0_0_#7c2d12]' :
+                                'bg-[#4c1d95]/10 text-[#4c1d95] text-sm'
+                            } text-white`}>
+                            {index < 3 ? medals[index] : index + 1}
+                          </div>
+
+                          {/* Avatar */}
+                          <PixelAvatar
+                            src={player.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${player.id}`}
+                            size="sm"
+                            className="border border-[#4c1d95]/30 flex-shrink-0"
+                          />
+
+                          {/* Name */}
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-sm text-[#4c1d95] font-pixel-text truncate flex items-center gap-1">
+                              {player.name}
+                              {player.isHost && <Crown className="w-3 h-3 text-amber-500 flex-shrink-0" />}
+                              {isRef && <Shield className="w-3 h-3 text-[#7c3aed] flex-shrink-0" />}
+                              {isMe && <span className="text-[9px] bg-[#7c3aed] text-white px-1 rounded font-pixel-text flex-shrink-0">أنت</span>}
+                            </p>
+                          </div>
+
+                          {/* Score */}
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                            <span className="text-lg font-bold text-[#4c1d95] font-pixel-title tabular-nums">{player.score}</span>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </RetroCard>
               </motion.div>
             </>
           ) : (
@@ -224,65 +345,67 @@ export default function Results() {
           )}
         </motion.div>
 
-        <motion.div
-          initial={{ y: 30, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2 }}
-        >
-          <RetroCard className="mb-4">
-            <div className="flex items-center gap-2 mb-3 font-pixel-title text-[#4c1d95] text-base">
-              <div className="w-7 h-7 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-lg flex items-center justify-center">
-                <Trophy className="w-4 h-4 text-white" />
+        {!isFinal && (
+          <motion.div
+            initial={{ y: 30, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            <RetroCard className="mb-4">
+              <div className="flex items-center gap-2 mb-3 font-pixel-title text-[#4c1d95] text-base">
+                <div className="w-7 h-7 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-lg flex items-center justify-center">
+                  <Trophy className="w-4 h-4 text-white" />
+                </div>
+                الترتيب
               </div>
-              الترتيب
-            </div>
-            <div className="space-y-2">
-              <AnimatePresence>
-                {sortedPlayers.map((player, index) => {
-                  const RankIcon = rankIcons[index] || Star;
-                  const isReferee = player.id === room.refereeId;
-                  return (
-                    <motion.div
-                      key={player.id}
-                      className={`flex items-center gap-2 p-2 rounded-lg border-[2px] ${player.id === state.playerId
-                        ? 'bg-gradient-to-r from-[#7c3aed]/10 to-[#8b5cf6]/10 border-[#7c3aed]'
-                        : 'bg-white/80 border-[#4c1d95]/20'
-                        } font-pixel-text text-sm`}
-                      initial={{ x: -20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: 0.05 * index }}
-                    >
-                      {index < 3 ? (
-                        <div className={`w-8 h-8 rounded-lg ${rankColors[index]} flex items-center justify-center text-white border border-white/50`}>
-                          <RankIcon className="w-4 h-4" />
-                        </div>
-                      ) : (
-                        <div className="w-8 h-8 rounded-lg bg-[#4c1d95]/10 flex items-center justify-center text-[#4c1d95] font-bold text-sm">
-                          {index + 1}
-                        </div>
-                      )}
+              <div className="space-y-2">
+                <AnimatePresence>
+                  {sortedPlayers.map((player, index) => {
+                    const RankIcon = rankIcons[index] || Star;
+                    const isReferee = player.id === room.refereeId;
+                    return (
+                      <motion.div
+                        key={player.id}
+                        className={`flex items-center gap-2 p-2 rounded-lg border-[2px] ${player.id === state.playerId
+                          ? 'bg-gradient-to-r from-[#7c3aed]/10 to-[#8b5cf6]/10 border-[#7c3aed]'
+                          : 'bg-white/80 border-[#4c1d95]/20'
+                          } font-pixel-text text-sm`}
+                        initial={{ x: -20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ delay: 0.05 * index }}
+                      >
+                        {index < 3 ? (
+                          <div className={`w-8 h-8 rounded-lg ${rankColors[index]} flex items-center justify-center text-white border border-white/50`}>
+                            <RankIcon className="w-4 h-4" />
+                          </div>
+                        ) : (
+                          <div className="w-8 h-8 rounded-lg bg-[#4c1d95]/10 flex items-center justify-center text-[#4c1d95] font-bold text-sm">
+                            {index + 1}
+                          </div>
+                        )}
 
-                      <PixelAvatar
-                        src={player.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${player.id}`}
-                        className="w-8 h-8 border border-[#4c1d95]/30"
-                        size="sm"
-                      />
+                        <PixelAvatar
+                          src={player.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${player.id}`}
+                          className="w-8 h-8 border border-[#4c1d95]/30"
+                          size="sm"
+                        />
 
-                      <div className="flex-1 min-w-0">
-                        <p className="font-bold text-sm text-[#4c1d95] font-pixel-text truncate">
-                          {player.name}
-                          {player.isHost && <Crown className="w-3 h-3 text-amber-500 inline mr-1" />}
-                          {isReferee && <Shield className="w-3 h-3 text-[#7c3aed] inline mr-1" />}
-                        </p>
-                      </div>
-                      <span className="text-lg font-bold text-[#4c1d95] font-pixel-title">{player.score}</span>
-                    </motion.div>
-                  );
-                })}
-              </AnimatePresence>
-            </div>
-          </RetroCard>
-        </motion.div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-sm text-[#4c1d95] font-pixel-text truncate">
+                            {player.name}
+                            {player.isHost && <Crown className="w-3 h-3 text-amber-500 inline mr-1" />}
+                            {isReferee && <Shield className="w-3 h-3 text-[#7c3aed] inline mr-1" />}
+                          </p>
+                        </div>
+                        <span className="text-lg font-bold text-[#4c1d95] font-pixel-title">{player.score}</span>
+                      </motion.div>
+                    );
+                  })}
+                </AnimatePresence>
+              </div>
+            </RetroCard>
+          </motion.div>
+        )}
 
         {isFinal && gameStats && (
           <GameStats gameStats={gameStats} />
