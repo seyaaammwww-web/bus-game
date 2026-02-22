@@ -157,10 +157,8 @@ export default function Game() {
 
   useEffect(() => {
     if (state.isRush) {
-      setShake(true);
       playRushActivateSound();
       playBusSound();
-      setTimeout(() => setShake(false), 500);
     }
   }, [state.isRush]);
 
@@ -241,7 +239,7 @@ export default function Game() {
 
   return (
     <motion.div
-      className={`min-h-screen text-white p-4 font-pixel-text relative overflow-x-hidden md:flex md:items-center ${shake ? 'animate-shake' : ''}`}
+      className="min-h-screen text-white p-4 font-pixel-text relative overflow-x-hidden md:flex md:items-center"
       initial={isMobile ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 1.05 }}
