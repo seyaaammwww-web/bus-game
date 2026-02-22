@@ -55,6 +55,8 @@ export interface Player {
   powerUps: PowerUps;
   usedPowerUps: UsedPowerUps; // Track one-time usage
   totalEarnedPoints: number;
+  status?: 'active' | 'disconnected';
+  disconnectedAt?: number;
 }
 
 // Answers for a round
@@ -234,7 +236,9 @@ export type WSMessageType =
   | 'vote_session_start' // Individual word vote start
   | 'vote_session_result'
   | 'referee_toggle_validity'
-  | 'ping';
+  | 'ping'
+  | 'pong'
+  | 'reconnect';
 
 export interface WSMessage {
   type: WSMessageType;

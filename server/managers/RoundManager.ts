@@ -1,5 +1,4 @@
-
-import { CorruptionProofBuffer, stringToSeed } from '../utils/reliability';
+import { stringToSeed } from '../utils/reliability';
 import { GameRoom, Round, PlayerSubmission, RoundAnswers, Category, ValidatedAnswer } from '../../shared/schema';
 import { randomUUID } from 'crypto';
 import { categories } from '../../shared/schema';
@@ -22,11 +21,9 @@ function validateAnswerLenient(letter: string, category: Category, answer: strin
     if (!trimmedAnswer || trimmedAnswer.length < 2) return false;
 
     // 2. Block obvious keyboard mashing (gibberish)
-    // E.g. "شسيشس", "بببب", "ههههه"
-    // Block if it's 3+ of the *exact same* character
     if (/^(.)\1{2,}$/.test(trimmedAnswer)) return false;
 
-    // Block common Arabic keyboard mash sequence (e.g. شسي, يبل) if it's longer than 3 chars
+    // Block common Arabic keyboard mash sequence
     const mashPattern = /شسيشس|شسي|ببب|ةةة|ننن|ممم|ووو/;
     if (trimmedAnswer.length >= 3 && mashPattern.test(trimmedAnswer)) return false;
 
@@ -53,33 +50,25 @@ function validateAnswerLenient(letter: string, category: Category, answer: strin
     return validFirstChars.includes(answerFirstChar);
 }
 
-
 export class RoundManager {
     private timers: Map<string, NodeJS.Timeout> = new Map();
-    private calculatingRooms = new Map<string, number>();
 
-    startRound(buffer: CorruptionProofBuffer<GameRoom>): Round {
-        let round: Round;
+    startRound(draft: GameRoom): Round {
+        const round: Round = {
+            number: draft.currentRound + 1,
+            letter: draft.letters[draft.currentRound],
+            startTime: Date.now(),
+            endTime: Date.now() + 45000,
+            isRush: false,
+            submissions: [],
+            validatedAnswers: [],
+            votingComplete: false,
+            powerUpUsedInRound: false,
+        };
 
-        buffer.transact((draft) => {
-            round = {
-                number: draft.currentRound + 1,
-                letter: draft.letters[draft.currentRound],
-                startTime: Date.now(),
-                endTime: Date.now() + 45000,
-                isRush: false,
-                submissions: [],
-                validatedAnswers: [],
-                votingComplete: false,
-                powerUpUsedInRound: false,
-            };
-
-            draft.rounds[draft.currentRound] = round;
-            draft.phase = 'playing';
-        }, "startRound");
-
-        const room = buffer.get();
-        return room.rounds[room.currentRound];
+        draft.rounds[draft.currentRound] = round;
+        draft.phase = 'playing';
+        return round;
     }
 
     setRoundTimer(roomCode: string, callback: () => void, durationMs: number = 45000) {
@@ -89,88 +78,70 @@ export class RoundManager {
     }
 
     clearTimer(roomCode: string) {
-        if (this.timers.has(roomCode)) {
-            clearTimeout(this.timers.get(roomCode)!);
+        const timer = this.timers.get(roomCode);
+        if (timer) {
+            clearTimeout(timer);
             this.timers.delete(roomCode);
         }
     }
 
     handleSubmission(
-        buffer: CorruptionProofBuffer<GameRoom>,
+        draft: GameRoom,
         playerId: string,
         answers: RoundAnswers
     ): { isComplete: boolean, round: Round } {
-
         let isComplete = false;
+        const round = draft.rounds[draft.currentRound];
+        if (!round) return { isComplete: false, round: null as any };
 
-        buffer.transact((draft) => {
-            const round = draft.rounds[draft.currentRound];
-            if (!round) return;
+        if (round.banishedPlayerId === playerId) return { isComplete: false, round };
 
-            if (round.banishedPlayerId === playerId) return;
+        const player = draft.players.find(p => p.id === playerId);
+        if (!player) return { isComplete, round };
 
-            const player = draft.players.find(p => p.id === playerId);
-            if (!player) return;
+        const existingIdx = round.submissions.findIndex(s => s.playerId === playerId);
+        if (existingIdx !== -1) {
+            round.submissions[existingIdx].answers = answers;
+        } else {
+            round.submissions.push({
+                playerId,
+                playerName: player.name,
+                answers,
+                submittedAt: Date.now(),
+                busComplete: false
+            });
+        }
 
-            const existingIdx = round.submissions.findIndex(s => s.playerId === playerId);
-            if (existingIdx !== -1) {
-                round.submissions[existingIdx].answers = answers;
-            } else {
-                round.submissions.push({
-                    playerId,
-                    playerName: player.name,
-                    answers,
-                    submittedAt: Date.now(),
-                    busComplete: false
-                });
-            }
+        const activePlayers = draft.refereeId
+            ? draft.players.filter(p => p.id !== draft.refereeId && p.id !== round.banishedPlayerId).length
+            : draft.players.filter(p => p.id !== round.banishedPlayerId).length;
 
-            const activePlayers = draft.refereeId
-                ? draft.players.filter(p => p.id !== draft.refereeId && p.id !== round.banishedPlayerId).length
-                : draft.players.filter(p => p.id !== round.banishedPlayerId).length;
+        if (round.submissions.length === activePlayers) {
+            isComplete = true;
+        }
 
-            if (round.submissions.length === activePlayers) {
-                isComplete = true;
-            }
-        }, "handleSubmission");
-
-        const room = buffer.get();
-        return { isComplete, round: room.rounds[room.currentRound] };
+        return { isComplete, round };
     }
 
-    async processRoundWithAI(
-        buffer: CorruptionProofBuffer<GameRoom>,
+    processRound(
+        draft: GameRoom,
         onVotingStart: () => void,
         onRoundFinish: () => void
-    ): Promise<void> {
-        const roomCode = buffer.get().code;
-
-        // Prevent Re-entry / Race
-        const now = Date.now();
-        const existing = this.calculatingRooms.get(roomCode);
-        if (existing && (now - existing) < 30000) return;
-        this.calculatingRooms.set(roomCode, now);
-
-        try {
-            await this.calculateScores(buffer, onVotingStart, onRoundFinish);
-        } catch (e) {
-            console.error("Error calculating scores:", e);
-        } finally {
-            this.calculatingRooms.delete(roomCode);
+    ): void {
+        const hasVoting = this.calculateScores(draft);
+        if (hasVoting) {
+            onVotingStart();
+        } else {
+            onRoundFinish();
         }
     }
 
-    private async calculateScores(
-        buffer: CorruptionProofBuffer<GameRoom>,
-        onVotingStart: () => void,
-        onRoundFinish: () => void
-    ): Promise<void> {
-        const roomRead = buffer.get();
-        const round = roomRead.rounds[roomRead.currentRound];
-        if (!round) return;
+    private calculateScores(draft: GameRoom): boolean {
+        const round = draft.rounds[draft.currentRound];
+        if (!round) return false;
 
-        const currentCategories = roomRead.settings?.customCategories?.length
-            ? roomRead.settings.customCategories
+        const currentCategories = draft.settings?.customCategories?.length
+            ? draft.settings.customCategories
             : categories;
 
         const allAnswers: { playerId: string, category: string, answer: string }[] = [];
@@ -187,101 +158,83 @@ export class RoundManager {
             }
         }
 
-        // Apply Results to State
         let hasPendingVotes = false;
+        round.validatedAnswers = [];
 
-        buffer.transact((draft) => {
-            const dRound = draft.rounds[draft.currentRound];
-            dRound.validatedAnswers = [];
+        for (const item of allAnswers) {
+            let isValid = false;
+            let reason = '';
+            let isPendingVote = false;
 
-            for (const item of allAnswers) {
-                let isValid = false;
-                let reason = '';
-                let isPendingVote = false;
-
-                if (dRound.wildcardUsedByPlayerId === item.playerId) {
-                    isValid = true;
-                    reason = 'جوكر';
-                } else if (item.answer.trim().length >= 2) {
-                    // Offline validation
-                    isValid = validateAnswerLenient(dRound.letter, item.category as Category, item.answer);
-                    if (isValid) {
-                        reason = 'صحيح (بدون ذكاء اصطناعي)';
-                        // Optionally force everything to voting if enabled
-                        if (draft.settings?.enableVoting) {
-                            isPendingVote = true;
-                            reason = 'تتطلب تصويت';
-                            hasPendingVotes = true;
-                        }
-                    } else {
-                        reason = 'غلط أو حرف غير متطابق';
-                        if (draft.settings?.enableVoting) {
-                            // If it failed strict local validation, but voting is on, let people vote? 
-                            // Actually, local validation is just letter match. If letter doesn't match, it's strictly wrong.
-                            isValid = false;
-                        }
+            if (round.wildcardUsedByPlayerId === item.playerId) {
+                isValid = true;
+                reason = 'جوكر';
+            } else if (item.answer.trim().length >= 2) {
+                isValid = validateAnswerLenient(round.letter, item.category as Category, item.answer);
+                if (isValid) {
+                    reason = 'صحيح (بدون ذكاء اصطناعي)';
+                    if (draft.settings?.enableVoting) {
+                        isPendingVote = true;
+                        reason = 'تتطلب تصويت';
+                        hasPendingVotes = true;
                     }
                 } else {
-                    reason = 'كلمة قصيرة جداً';
-                }
-
-                dRound.validatedAnswers.push({
-                    playerId: item.playerId,
-                    playerName: draft.players.find(p => p.id === item.playerId)?.name || '',
-                    category: item.category as Category,
-                    answer: item.answer,
-                    isValid: isValid && !isPendingVote,
-                    isPendingVote,
-                    isUnique: false,
-                    score: 0,
-                    votes: { accepted: 0, rejected: 0 },
-                    reason,
-                    isFabricated: false
-                });
-            }
-
-            if (hasPendingVotes) {
-                if (!draft.settings) draft.settings = {};
-                draft.settings.enableVoting = true;
-                draft.phase = 'voting';
-
-                // Populate Vote Queue
-                draft.voteQueue = dRound.validatedAnswers
-                    .filter(a => a.isPendingVote)
-                    .map(a => ({
-                        requestId: randomUUID(),
-                        requesterId: a.playerId,
-                        requesterName: a.playerName,
-                        category: a.category,
-                        word: a.answer
-                    }));
-
-                // Start first vote
-                if (draft.voteQueue.length > 0) {
-                    const next = draft.voteQueue.shift()!;
-                    draft.currentVote = {
-                        ...next,
-                        votes: { yes: 0, no: 0 },
-                        voterIds: [],
-                        votesDetails: {},
-                        startTime: Date.now()
-                    };
+                    reason = 'غلط أو حرف غير متطابق';
                 }
             } else {
-                this.calculateAnswerScores(draft);
+                reason = 'كلمة قصيرة جداً';
             }
 
-        }, "calculateScores");
+            round.validatedAnswers.push({
+                playerId: item.playerId,
+                playerName: draft.players.find(p => p.id === item.playerId)?.name || '',
+                category: item.category as Category,
+                answer: item.answer,
+                isValid: isValid && !isPendingVote,
+                isPendingVote,
+                isUnique: false,
+                score: 0,
+                votes: { accepted: 0, rejected: 0 },
+                reason,
+                isFabricated: false
+            });
+        }
 
         if (hasPendingVotes) {
-            onVotingStart();
+            if (!draft.settings) draft.settings = {};
+            draft.settings.enableVoting = true;
+            draft.phase = 'voting';
+
+            draft.voteQueue = round.validatedAnswers
+                .filter(a => a.isPendingVote)
+                .map(a => ({
+                    requestId: randomUUID(),
+                    requesterId: a.playerId,
+                    requesterName: a.playerName,
+                    category: a.category,
+                    word: a.answer
+                }));
+
+            if (draft.voteQueue.length > 0) {
+                const next = draft.voteQueue.shift()!;
+                draft.currentVote = {
+                    ...next,
+                    votes: { yes: 0, no: 0 },
+                    voterIds: [],
+                    votesDetails: {},
+                    startTime: Date.now()
+                };
+            }
         } else {
-            onRoundFinish();
+            this.calculateAnswerScores(draft);
         }
+
+        return hasPendingVotes;
     }
 
     calculateAnswerScores(draft: GameRoom) {
         const round = draft.rounds[draft.currentRound];
+        if (!round) return;
 
         const answerCounts = new Map<string, number>();
 
@@ -304,13 +257,12 @@ export class RoundManager {
 
     commitRoundResults(draft: GameRoom) {
         const round = draft.rounds[draft.currentRound];
-        if (round.resultsCommitted) return;
+        if (!round || round.resultsCommitted) return;
 
         const currentCategories = draft.settings?.customCategories?.length
             ? draft.settings.customCategories
             : categories;
 
-        // Ensure scores are fresh before committing
         this.calculateAnswerScores(draft);
 
         for (const player of draft.players) {
@@ -331,12 +283,11 @@ export class RoundManager {
                 player.busStreak = 0;
             }
 
-            // Wallet Update
             player.powerUps = {
                 wildcard: player.usedPowerUps.wildcard ? 0 : Math.floor((player.totalEarnedPoints || 0) / 200),
                 banish: player.usedPowerUps.banish ? 0 : Math.floor((player.totalEarnedPoints || 0) / 400),
-                hint: 0, // Not implemented fully yet
-                steal: 0 // Not implemented fully yet
+                hint: 0,
+                steal: 0
             };
         }
 

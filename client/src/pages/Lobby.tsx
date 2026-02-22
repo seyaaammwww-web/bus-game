@@ -21,7 +21,7 @@ export default function Lobby() {
 
   const room = state.room!;
   const allReady = room.players.every(p => p.isReady);
-  const canStart = isHost && allReady && room.players.length >= 1;
+  const canStart = isHost && allReady && room.players.length >= 2;
 
   const copyCode = async () => {
     await navigator.clipboard.writeText(room.code);

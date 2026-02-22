@@ -1,11 +1,13 @@
 
 import { WebSocket } from 'ws';
-import type { WSMessage, RoundAnswers, Category, PowerUpType, ReactionType } from '../shared/schema';
+import { randomUUID } from 'crypto';
+import type { WSMessage, RoundAnswers, Category, PowerUpType, ReactionType, GameRoom } from '../shared/schema';
 import { RoomManager } from './managers/RoomManager';
 import { PlayerManager } from './managers/PlayerManager';
 import { RoundManager } from './managers/RoundManager';
 import { CorruptionProofBuffer } from './utils/reliability';
 import { StateOrchestrator } from './persistence/StateOrchestrator';
+import { votingService, reconnectService } from './container';
 
 export class GameManager {
   private roomManager: RoomManager;
@@ -13,16 +15,7 @@ export class GameManager {
   private roundManager: RoundManager;
   private stateOrchestrator: StateOrchestrator;
 
-  // Causal Logging (Persistence TODO)
-  private causalityLog: Map<string, Array<{ tick: number, event: string }>> = new Map();
-
-  // Voting Timers (Keep here or move to RoundManager? RoundManager seems appropriate for round-scoped timers, but Voting is a phase)
-  // Let's keep voting timers in RoundManager eventually, but for now we can manage them here or in RM.
-  // actually RoundManager has generic timers, let's use that.
-
-  // Drafts for rescue
   private drafts: Map<string, Map<string, { answers: RoundAnswers, updatedAt: number, roundNumber: number }>> = new Map();
-
   private heartbeatInterval: NodeJS.Timeout | null = null;
   private disconnectTimeouts = new Map<string, NodeJS.Timeout>();
 
@@ -41,13 +34,11 @@ export class GameManager {
       const players = this.playerManager.getAllPlayers();
       for (const p of players) {
         const wsWrapper = p.ws as any;
-        // If not alive from previous ping, kill socket to save RAM
         if (wsWrapper.isAlive === false) {
           console.log(`[GameManager] Terminating zombie socket: ${p.playerId}`);
           p.ws.terminate();
           continue;
         }
-
         wsWrapper.isAlive = false;
         if (p.ws.readyState === WebSocket.OPEN) {
           this.send(p.ws, { type: 'ping', payload: { timestamp: Date.now() } });
@@ -62,43 +53,10 @@ export class GameManager {
   }
 
   // ==========================================
-  // Connection Handling
+  // Connection & Core Handling
   // ==========================================
 
-  private startVoteTimer(roomCode: string) {
-    this.roundManager.setRoundTimer(roomCode, () => {
-      this.handleVoteTimeout(roomCode);
-    }, 15000); // 15 seconds per vote
-  }
-
-  private handleVoteTimeout(roomCode: string) {
-    const buffer = this.roomManager.getRoomBuffer(roomCode);
-    if (!buffer) return;
-
-    let allVotesDone = false;
-
-    buffer.transact(draft => {
-      if (draft.phase !== 'voting' || !draft.currentVote) return;
-
-      // Force resolution on timeout
-      this.resolveCurrentVoteInDraft(draft);
-      if (!draft.currentVote) {
-        allVotesDone = true;
-      }
-    }, "handleVoteTimeout");
-
-    const room = buffer.get();
-    this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
-
-    if (allVotesDone) {
-      this.roundManager.clearTimer(room.code);
-      this.finishRoundPhase(room.code);
-    } else {
-      this.startVoteTimer(roomCode);
-    }
-  }
-
-  handleMessage(ws: WebSocket, message: WSMessage): void {
+  async handleMessage(ws: WebSocket, message: WSMessage): Promise<void> {
     if (message.type !== 'ping' && message.type !== 'pong') {
       console.log(`[GameManager] Received: ${message.type}`, message.payload);
     }
@@ -106,31 +64,31 @@ export class GameManager {
 
     try {
       switch (message.type) {
-        case 'pong': break; // handled above by isAlive
-        case 'reconnect': this.reconnect(ws, message.payload.playerId); break;
-        case 'create_room': this.createRoom(ws, message.payload.playerName); break;
-        case 'join_room': this.joinRoom(ws, message.payload.roomCode, message.payload.playerName); break;
-        case 'join_public_room': this.joinPublicRoom(ws, message.payload.playerName); break;
-        case 'player_ready': this.setReady(ws); break;
-        case 'start_game': this.startGame(ws); break;
-        case 'submit_answers': this.submitAnswers(ws, message.payload.answers); break;
-        case 'bus_complete': this.triggerBusComplete(ws); break;
-        case 'vote': this.vote(ws, message.payload.playerId, message.payload.category, message.payload.accepted); break;
-        case 'next_round': this.nextRound(ws); break;
-        case 'play_again': this.playAgain(ws); break;
-        case 'set_referee': this.setReferee(ws, message.payload.playerId); break;
-        case 'remove_referee': this.removeReferee(ws); break;
-        case 'referee_approve': this.refereeApprove(ws); break;
-        case 'update_settings': this.updateSettings(ws, message.payload); break;
-        case 'draft_update': this.handleDraftUpdate(ws, message.payload.answers); break;
-        case 'activate_powerup': this.activatePowerUp(ws, message.payload); break;
-        case 'send_reaction': this.sendReaction(ws, message.payload.reactionType); break;
-        case 'request_vote': this.requestVote(ws, message.payload); break;
+        case 'pong': break;
+        case 'reconnect': await this.reconnect(ws, message.payload.token || message.payload.playerId); break;
+        case 'create_room': await this.createRoom(ws, message.payload.playerName); break;
+        case 'join_room': await this.joinRoom(ws, message.payload.roomCode, message.payload.playerName); break;
+        case 'join_public_room': await this.joinPublicRoom(ws, message.payload.playerName); break;
+        case 'player_ready': await this.setReady(ws); break;
+        case 'start_game': await this.startGame(ws); break;
+        case 'submit_answers': await this.submitAnswers(ws, message.payload.answers); break;
+        case 'bus_complete': await this.triggerBusComplete(ws); break;
+        case 'vote': await this.vote(ws, message.payload.playerId, message.payload.category, message.payload.accepted); break;
+        case 'next_round': await this.nextRound(ws); break;
+        case 'play_again': await this.playAgain(ws); break;
+        case 'set_referee': await this.setReferee(ws, message.payload.playerId); break;
+        case 'remove_referee': await this.removeReferee(ws); break;
+        case 'referee_approve': await this.refereeApprove(ws); break;
+        case 'update_settings': await this.updateSettings(ws, message.payload); break;
+        case 'draft_update': await this.handleDraftUpdate(ws, message.payload.answers); break;
+        case 'activate_powerup': await this.activatePowerUp(ws, message.payload); break;
+        case 'send_reaction': await this.sendReaction(ws, message.payload.reactionType); break;
+        case 'request_vote': await this.requestVote(ws, message.payload); break;
         case 'vote_cast':
         case 'cast_democratic_vote':
-          this.castDemocraticVote(ws, message.payload.vote || message.payload);
+          await this.castDemocraticVote(ws, message.payload.vote || message.payload);
           break;
-        case 'referee_toggle_validity': this.refereeToggleValidity(ws, message.payload); break;
+        case 'referee_toggle_validity': await this.refereeToggleValidity(ws, message.payload); break;
       }
     } catch (e: any) {
       console.error(`[GameManager] Error handling ${message.type}:`, e);
@@ -138,19 +96,23 @@ export class GameManager {
     }
   }
 
-  handleDisconnect(ws: WebSocket): void {
+  async handleDisconnect(ws: WebSocket): Promise<void> {
     const playerInfo = this.playerManager.removePlayer(ws);
     if (!playerInfo) return;
 
-    // Grace period for reconnections
-    const timeout = setTimeout(() => {
-      this.roomManager.removePlayerFromRoom(playerInfo.roomId, playerInfo.playerId);
-      const buffer = this.roomManager.getRoomBuffer(playerInfo.roomId);
-      if (buffer) {
-        const room = buffer.get();
-        if (room.players.length > 0) {
-          this.broadcastToRoom(room.code, { type: 'player_left', payload: { players: room.players } });
-        }
+    await this.roomManager.transact(playerInfo.roomId, draft => {
+      const p = draft.players.find(p => p.id === playerInfo.playerId);
+      if (p) {
+        p.status = 'disconnected';
+        p.disconnectedAt = Date.now();
+      }
+    }, "markDisconnected");
+
+    const timeout = setTimeout(async () => {
+      await this.roomManager.removePlayerFromRoom(playerInfo.roomId, playerInfo.playerId);
+      const room = await this.roomManager.getRoom(playerInfo.roomId);
+      if (room && room.players.length > 0) {
+        this.broadcastToRoom(room.code, { type: 'player_left', payload: { players: room.players } });
       }
       this.disconnectTimeouts.delete(playerInfo.playerId);
     }, 45000);
@@ -158,67 +120,54 @@ export class GameManager {
     this.disconnectTimeouts.set(playerInfo.playerId, timeout);
   }
 
-  reconnect(ws: WebSocket, playerId: string): void {
-    const timeout = this.disconnectTimeouts.get(playerId);
-    if (timeout) {
-      clearTimeout(timeout);
-      this.disconnectTimeouts.delete(playerId);
-    }
+  async reconnect(ws: WebSocket, token: string): Promise<void> {
+    const session = await reconnectService.restore(token);
+    if (session) {
+      const { playerId, roomId, newToken } = session;
+      const timeout = this.disconnectTimeouts.get(playerId);
+      if (timeout) {
+        clearTimeout(timeout);
+        this.disconnectTimeouts.delete(playerId);
+      }
 
-    const rooms = this.roomManager.getAllRoomBuffers();
-    const room = rooms.find(r => r.players.some(p => p.id === playerId));
+      const room = await this.roomManager.transact(roomId, draft => {
+        const p = draft.players.find(player => player.id === playerId);
+        if (p) {
+          p.status = 'active';
+          delete p.disconnectedAt;
+        }
+      }, "restoreActive");
 
-    if (room) {
       this.playerManager.addPlayer(ws, room.code, playerId);
       (ws as any).isAlive = true;
-      this.send(ws, { type: 'sync_state', payload: { room } });
+      this.send(ws, { type: 'sync_state', payload: { room, reconnectToken: newToken } });
+      this.broadcastToRoom(room.code, { type: 'player_joined', payload: { players: room.players } }, ws);
     } else {
-      this.send(ws, { type: 'error', payload: { message: 'انتهت المهلة، لا يمكنك العودة للغرفة' } });
+      this.send(ws, { type: 'error', payload: { message: 'انتهت المهلة أو التوكن غير صالح' } });
     }
   }
 
   // ==========================================
-  // Room Logic
+  // Room Management
   // ==========================================
 
-  createRoom(ws: WebSocket, playerName: string): void {
-    const playerId = this.playerManager.addPlayer(ws, '', '').playerId; // Temp add to generate ID
-    // Actually addPlayer logic in PlayerManager might need adjustment to handle "pending" or re-assignment
-    // distinct from "host".
-    // Let's refine:
-
-    // 1. Create Room (generates IDs)
-    // We need host ID first? Or CreateRoom returns it?
-    // Let's use a temp ID for creation
-
-    // Better: RoomManager.createRoom returns the room and host ID used.
-    // The player's socket needs to be mapped to that ID.
-    // Note: My PlayerManager.addPlayer generates an ID if not provided.
-
-    // Fix: We should generate ID, map it, then create room using that ID.
-    const tempId = crypto.randomUUID();
-
+  async createRoom(ws: WebSocket, playerName: string): Promise<void> {
+    const tempId = randomUUID();
     try {
-      const { room } = this.roomManager.createRoom(tempId, playerName);
+      const { room } = await this.roomManager.createRoom(tempId, playerName);
       this.playerManager.addPlayer(ws, room.code, tempId);
-
-      this.send(ws, {
-        type: 'room_created',
-        payload: { room, playerId: tempId }
-      });
+      this.send(ws, { type: 'room_created', payload: { room, playerId: tempId } });
     } catch (e: any) {
       this.send(ws, { type: 'error', payload: { message: e.message } });
     }
   }
 
-  joinRoom(ws: WebSocket, roomCode: string, playerName: string): void {
+  async joinRoom(ws: WebSocket, roomCode: string, playerName: string): Promise<void> {
     const normCode = roomCode.toUpperCase();
-    const playerId = crypto.randomUUID();
-
+    const playerId = randomUUID();
     try {
-      const room = this.roomManager.joinRoom(normCode, playerId, playerName);
+      const room = await this.roomManager.joinRoom(normCode, playerId, playerName);
       this.playerManager.addPlayer(ws, room.code, playerId);
-
       this.send(ws, { type: 'room_joined', payload: { room, playerId } });
       this.broadcastToRoom(room.code, { type: 'player_joined', payload: { players: room.players } }, ws);
     } catch (e: any) {
@@ -226,97 +175,81 @@ export class GameManager {
     }
   }
 
-  joinPublicRoom(ws: WebSocket, playerName: string): void {
-    const playerId = crypto.randomUUID();
+  async joinPublicRoom(ws: WebSocket, playerName: string): Promise<void> {
+    const playerId = randomUUID();
     try {
-      const room = this.roomManager.joinPublicRoom(playerId, playerName);
+      const room = await this.roomManager.joinPublicRoom(playerId, playerName);
       this.playerManager.addPlayer(ws, room.code, playerId);
-
       this.send(ws, { type: 'room_joined', payload: { room, playerId } });
       this.broadcastToRoom(room.code, { type: 'player_joined', payload: { players: room.players } }, ws);
     } catch (e: any) {
       this.send(ws, { type: 'error', payload: { message: e.message } });
     }
+  }
+
+  async setReady(ws: WebSocket): Promise<void> {
+    const p = this.playerManager.getPlayer(ws);
+    if (!p) return;
+    const room = await this.roomManager.transact(p.roomId, draft => {
+      const player = draft.players.find(pl => pl.id === p.playerId);
+      if (player) player.isReady = !player.isReady;
+    }, "setReady");
+    this.broadcastToRoom(room.code, { type: 'player_ready', payload: { players: room.players } });
   }
 
   // ==========================================
   // Game Flow
   // ==========================================
 
-  setReady(ws: WebSocket): void {
+  async startGame(ws: WebSocket): Promise<void> {
     const p = this.playerManager.getPlayer(ws);
     if (!p) return;
 
-    const buffer = this.roomManager.getRoomBuffer(p.roomId);
-    if (!buffer) return;
+    const room = await this.roomManager.transact(p.roomId, draft => {
+      const isHost = draft.players.find(pl => pl.id === p.playerId)?.isHost;
+      if (!isHost) throw new Error("Only host can start the game");
+      this.roundManager.startRound(draft);
+    }, "startGame");
 
-    buffer.transact(draft => {
-      const player = draft.players.find(pl => pl.id === p.playerId);
-      if (player) player.isReady = true;
-    }, "setReady");
-
-    const room = buffer.get();
-    this.broadcastToRoom(room.code, { type: 'player_ready', payload: { players: room.players } });
-  }
-
-  startGame(ws: WebSocket): void {
-    const p = this.playerManager.getPlayer(ws);
-    if (!p) return;
-    const buffer = this.roomManager.getRoomBuffer(p.roomId);
-    if (!buffer) return;
-
-    const room = buffer.get();
-    if (!room.players.find(pl => pl.id === p.playerId)?.isHost) return;
-
-    // Start Round
-    const round = this.roundManager.startRound(buffer); // Mutates
-
-    const updated = buffer.get();
-    this.broadcastToRoom(updated.code, { type: 'round_start', payload: { room: updated } });
-
-    this.roundManager.setRoundTimer(updated.code, () => {
-      this.endRound(updated.code);
+    this.broadcastToRoom(room.code, { type: 'round_start', payload: { room } });
+    this.roundManager.setRoundTimer(room.code, async () => {
+      await this.endRound(room.code);
     });
   }
 
-  submitAnswers(ws: WebSocket, answers: RoundAnswers): void {
+  async submitAnswers(ws: WebSocket, answers: RoundAnswers): Promise<void> {
     const p = this.playerManager.getPlayer(ws);
     if (!p) return;
-    const buffer = this.roomManager.getRoomBuffer(p.roomId);
-    if (!buffer) return;
 
-    const { isComplete, round } = this.roundManager.handleSubmission(buffer, p.playerId, answers);
+    let isComplete = false;
+    const room = await this.roomManager.transact(p.roomId, draft => {
+      const result = this.roundManager.handleSubmission(draft, p.playerId, answers);
+      isComplete = result.isComplete;
+    }, "submitAnswers");
 
-    const room = buffer.get();
-    const activePlayers = room.refereeId
-      ? room.players.filter(pl => pl.id !== room.refereeId && pl.id !== round.banishedPlayerId).length
-      : room.players.filter(pl => pl.id !== round.banishedPlayerId).length;
+    const round = room.rounds[room.currentRound];
+    const activeCount = room.players.filter(pl => pl.id !== room.refereeId && pl.id !== round.banishedPlayerId).length;
 
     this.broadcastToRoom(room.code, {
       type: 'player_submitted',
       payload: {
         playerId: p.playerId,
         submissionsCount: round.submissions.length,
-        totalPlayers: activePlayers
+        totalPlayers: activeCount
       }
     });
 
-    if (isComplete) {
-      this.endRound(room.code);
-    }
+    if (isComplete) await this.endRound(room.code);
   }
 
-  triggerBusComplete(ws: WebSocket): void {
+  async triggerBusComplete(ws: WebSocket): Promise<void> {
     const p = this.playerManager.getPlayer(ws);
     if (!p) return;
-    const buffer = this.roomManager.getRoomBuffer(p.roomId);
-    if (!buffer) return;
 
     let startedRush = false;
-    buffer.transact(draft => {
+    const room = await this.roomManager.transact(p.roomId, draft => {
       const round = draft.rounds[draft.currentRound];
-      if (!round || round.isRush) return;
-      if (round.banishedPlayerId === p.playerId) return;
+      if (!round || round.isRush || round.banishedPlayerId === p.playerId) return;
 
       const sub = round.submissions.find(s => s.playerId === p.playerId);
       if (!sub) return;
@@ -328,22 +261,17 @@ export class GameManager {
     }, "triggerBusComplete");
 
     if (startedRush) {
-      const room = buffer.get();
       this.broadcastToRoom(room.code, { type: 'rush_mode', payload: { room } });
-
-      this.roundManager.setRoundTimer(room.code, () => {
-        this.endRound(room.code);
+      this.roundManager.setRoundTimer(room.code, async () => {
+        await this.endRound(room.code);
       }, 10000);
     }
   }
 
-  private endRound(roomCode: string) {
+  private async endRound(roomCode: string) {
     this.roundManager.clearTimer(roomCode);
-    const buffer = this.roomManager.getRoomBuffer(roomCode);
-    if (!buffer) return;
 
-    // Draft Rescue Logic
-    buffer.transact(draft => {
+    const room = await this.roomManager.transact(roomCode, draft => {
       const round = draft.rounds[draft.currentRound];
       const roomDrafts = this.drafts.get(roomCode);
       const active = draft.players.filter(pl => pl.id !== draft.refereeId && pl.id !== round.banishedPlayerId);
@@ -355,539 +283,316 @@ export class GameManager {
           if (saved && saved.roundNumber === draft.currentRound) {
             answers = saved.answers;
           } else {
-            // fill empty
             (draft.settings?.customCategories || ['ولد', 'بنت', 'بلد', 'حيوان', 'جماد']).forEach(c => answers[c] = '');
           }
-
-          round.submissions.push({
-            playerId: player.id,
-            playerName: player.name,
-            answers,
-            submittedAt: Date.now(),
-            busComplete: false
-          });
+          this.roundManager.handleSubmission(draft, player.id, answers);
         }
       }
-    }, "endRound_rescue");
+      this.drafts.delete(roomCode);
+      this.roundManager.processRound(draft, () => { }, () => { });
+    }, "endRound");
 
-    this.drafts.delete(roomCode);
-
-    const room = buffer.get();
     this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
 
-    // Calculate Scores
-    this.roundManager.processRoundWithAI(buffer, () => {
-      // On Voting Start
-      const r = buffer.get();
-      this.broadcastToRoom(r.code, {
+    if (room.phase === 'voting') {
+      this.broadcastToRoom(room.code, {
         type: 'voting_start',
-        payload: { room: r, validatedAnswers: r.rounds[r.currentRound].validatedAnswers }
+        payload: { room, validatedAnswers: room.rounds[room.currentRound].validatedAnswers }
       });
-
-      // Vote Timeout
-      // Vote Timeout - Start Per Vote Timer
-      this.startVoteTimer(r.code);
-    }, () => {
-
-      // On Round Finish directly
-      const r = buffer.get();
-      this.finishRoundPhase(r.code);
-    });
+      this.startVoteTimer(room.code);
+    } else {
+      await this.finishRoundPhase(room.code);
+    }
   }
 
-  private resolveAllPendingVotes(roomCode: string) {
-    const buffer = this.roomManager.getRoomBuffer(roomCode);
-    if (!buffer) return;
-
-    buffer.transact(draft => {
+  private async finishRoundPhase(roomCode: string) {
+    const room = await this.roomManager.transact(roomCode, draft => {
       const round = draft.rounds[draft.currentRound];
-      let changed = false;
-      round.validatedAnswers.forEach(a => {
-        if (a.isPendingVote) {
-          const yes = a.votes.accepted;
-          const no = a.votes.rejected;
-          a.isValid = yes > no;
-          a.reason = a.isValid ? 'تم قبوله (انتهاء الوقت)' : 'تم رفضه (انتهاء الوقت)';
-          a.isPendingVote = false;
-          changed = true;
-        }
-      });
+      if (round) round.powerUpUsedInRound = false;
 
-      if (changed) {
-        this.roundManager.calculateAnswerScores(draft);
+      if (draft.phase === 'playing' && draft.refereeId) {
+        draft.phase = 'referee_review';
+      } else {
+        if (round.resultsCommitted) return;
+        draft.phase = 'results';
+        this.roundManager.commitRoundResults(draft);
       }
-    }, "resolveAllVotes");
+    }, "finishRoundPhase");
 
-    this.finishRoundPhase(roomCode);
-  }
-
-  private finishRoundPhase(roomCode: string) {
-    try {
-      const buffer = this.roomManager.getRoomBuffer(roomCode);
-      if (!buffer) return;
-
-      let autoStart = false;
-      buffer.transact(draft => {
-        const round = draft.rounds[draft.currentRound];
-        if (round) round.powerUpUsedInRound = false;
-
-        // Logic to determine next phase
-        // If we are currently playing, check for Referee
-        if (draft.phase === 'playing' && draft.refereeId) {
-          draft.phase = 'referee_review';
-        }
-        // If we are coming from Voting or Referee Review, or Playing (no referee), go to Results
-        else {
-          if (round.resultsCommitted) return; // Prevent re-entry
-
-          draft.phase = 'results';
-          this.roundManager.commitRoundResults(draft);
-
-          // Auto-start logic only if not manual (no referee, maybe no voting)
-          if (!draft.refereeId && !draft.settings?.enableVoting) {
-            draft.nextRoundAt = Date.now() + 20000;
-            autoStart = true;
-          }
-        }
-      }, "finishRoundPhase");
-
-      const room = buffer.get();
-      this.broadcastToRoom(room.code, { type: 'round_results', payload: { room } });
-
-      if (autoStart && room.currentRound < room.totalRounds - 1) {
-        setTimeout(() => {
-          const check = buffer.get();
-          if (check.phase === 'results' && check.currentRound === room.currentRound) {
-            this.nextRoundByRoomCode(room.code);
-          }
-        }, 20000);
-      } else if (room.currentRound >= room.totalRounds - 1) {
-        setTimeout(() => {
-          const check = buffer.get();
-          if (check.phase === 'results') {
-            this.handleGameEnd(check.code);
-          }
-        }, 20000);
-      }
-    } catch (e: any) {
-      console.error(`[FinishRoundPhase] Error in room ${roomCode}:`, e);
-      // Attempt to broadcast error or safe state?
-      // For now just logging prevents the process from crashing if uncaught.
-    }
-  }
-
-  nextRound(ws: WebSocket) {
-    const p = this.playerManager.getPlayer(ws);
-    if (!p) return;
-    this.nextRoundByRoomCode(p.roomId);
-  }
-
-  private nextRoundByRoomCode(roomCode: string) {
-    const buffer = this.roomManager.getRoomBuffer(roomCode);
-    if (!buffer) return;
-
-    const room = buffer.get();
-    if (room.currentRound >= room.totalRounds - 1) {
-      this.handleGameEnd(roomCode);
-      return;
-    }
-
-    buffer.transact(draft => {
-      draft.currentRound++;
-    }, "nextRoundInc");
-
-    const round = this.roundManager.startRound(buffer);
-    const updated = buffer.get();
-
-    this.broadcastToRoom(updated.code, { type: 'round_start', payload: { room: updated } });
-    this.roundManager.setRoundTimer(updated.code, () => this.endRound(updated.code));
-  }
-
-  private handleGameEnd(roomCode: string) {
-    const buffer = this.roomManager.getRoomBuffer(roomCode);
-    if (!buffer) return;
-
-    buffer.transact(draft => {
-      // Bonus logic could go here similar to before
-      draft.phase = 'final';
-    }, "gameEnd");
-
-    const room = buffer.get();
-    this.broadcastToRoom(room.code, { type: 'game_end', payload: { room } });
+    this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
   }
 
   // ==========================================
-  // Misc / Setters / Powerups
+  // Voting & Referee
   // ==========================================
 
-  handleDraftUpdate(ws: WebSocket, answers: RoundAnswers) {
-    const p = this.playerManager.getPlayer(ws);
-    if (!p) return;
-
-    const buffer = this.roomManager.getRoomBuffer(p.roomId);
-    if (!buffer || buffer.get().phase !== 'playing') return;
-
-    if (!this.drafts.has(p.roomId)) this.drafts.set(p.roomId, new Map());
-    this.drafts.get(p.roomId)!.set(p.playerId, {
-      answers,
-      updatedAt: Date.now(),
-      roundNumber: buffer.get().currentRound
-    });
+  private startVoteTimer(roomCode: string) {
+    this.roundManager.setRoundTimer(roomCode, async () => {
+      await this.handleVoteTimeout(roomCode);
+    }, 15000);
   }
 
-  updateSettings(ws: WebSocket, settings: any) {
+  private async handleVoteTimeout(roomCode: string) {
+    const room = await this.roomManager.transact(roomCode, draft => {
+      if (draft.phase !== 'voting' || !draft.currentVote) return;
+      this.resolveCurrentVoteInDraft(draft);
+    }, "handleVoteTimeout");
+
+    this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
+
+    if (!room.currentVote) {
+      await this.finishRoundPhase(room.code);
+    } else {
+      this.startVoteTimer(room.code);
+    }
+  }
+
+  private resolveCurrentVoteInDraft(draft: GameRoom) {
+    const vote = draft.currentVote;
+    if (!vote) return;
+
+    const round = draft.rounds[draft.currentRound];
+    const answer = round.validatedAnswers.find(a => a.playerId === vote.requesterId && a.category === vote.category);
+
+    if (answer) {
+      answer.isValid = vote.votes.yes > vote.votes.no;
+      answer.isPendingVote = false;
+      answer.reason = answer.isValid ? 'تم قبوله بالتصويت' : 'تم رفضه بالتصويت';
+    }
+
+    if (draft.voteQueue && draft.voteQueue.length > 0) {
+      const next = draft.voteQueue.shift()!;
+      draft.currentVote = { ...next, votes: { yes: 0, no: 0 }, voterIds: [], votesDetails: {}, startTime: Date.now() };
+    } else {
+      draft.currentVote = null;
+    }
+  }
+
+  async castDemocraticVote(ws: WebSocket, vote: 'yes' | 'no') {
     const p = this.playerManager.getPlayer(ws);
     if (!p) return;
 
-    const buffer = this.roomManager.getRoomBuffer(p.roomId);
-    if (!buffer) return;
+    const room = await this.roomManager.transact(p.roomId, draft => {
+      if (draft.phase !== 'voting' || !draft.currentVote) return;
+      const round = draft.rounds[draft.currentRound];
+      const eligible = draft.players.filter(pl =>
+        pl.id !== draft.currentVote!.requesterId &&
+        pl.id !== draft.refereeId &&
+        pl.id !== round?.banishedPlayerId
+      );
 
-    buffer.transact(draft => {
+      if (!eligible.find(ev => ev.id === p.playerId)) return;
+      if (draft.currentVote.voterIds.includes(p.playerId)) return;
+
+      draft.currentVote.voterIds.push(p.playerId);
+      if (vote === 'yes') draft.currentVote.votes.yes++;
+      else draft.currentVote.votes.no++;
+
+      if (draft.currentVote.voterIds.length >= eligible.length) {
+        this.resolveCurrentVoteInDraft(draft);
+      }
+    }, "castDemocraticVote");
+
+    this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
+    if (room.phase !== 'voting') {
+      await this.finishRoundPhase(room.code);
+    }
+  }
+
+  async refereeApprove(ws: WebSocket) {
+    const p = this.playerManager.getPlayer(ws);
+    if (!p) return;
+    await this.finishRoundPhase(p.roomId);
+  }
+
+  async refereeToggleValidity(ws: WebSocket, payload: { playerId: string, category: Category }) {
+    const p = this.playerManager.getPlayer(ws);
+    if (!p) return;
+
+    const room = await this.roomManager.transact(p.roomId, draft => {
+      if (draft.refereeId !== p.playerId) return;
+      const round = draft.rounds[draft.currentRound];
+      const ans = round.validatedAnswers.find(a => a.playerId === payload.playerId && a.category === payload.category);
+      if (ans) {
+        ans.isValid = !ans.isValid;
+        ans.reason = 'تعديل الحكم';
+      }
+    }, "refereeToggle");
+
+    this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
+  }
+
+  // ==========================================
+  // Misc Methods
+  // ==========================================
+
+  async updateSettings(ws: WebSocket, settings: any) {
+    const p = this.playerManager.getPlayer(ws);
+    if (!p) return;
+
+    const room = await this.roomManager.transact(p.roomId, draft => {
       const isHost = draft.players.find(pl => pl.id === p.playerId)?.isHost;
       if (!isHost) return;
 
       if (draft.phase === 'lobby') {
         if (settings.customCategories) draft.settings = { ...draft.settings, customCategories: settings.customCategories };
-
-        if (settings.totalRounds !== undefined) {
-          const val = Math.max(3, Math.min(20, Number(settings.totalRounds)));
-          if (!isNaN(val)) {
-            draft.totalRounds = val;
-            // Generate fresh letters to match new round count
-            draft.letters = Array.from({ length: val }, (_, i) => draft.letters[i] || 'س');
-          }
+        if (settings.totalRounds) {
+          draft.totalRounds = Math.max(3, Math.min(20, Number(settings.totalRounds)));
+          draft.letters = Array.from({ length: draft.totalRounds }, (_, i) => draft.letters[i] || 'س');
         }
       }
 
       if (settings.enableVoting !== undefined) {
         if (!draft.settings) draft.settings = {};
         draft.settings.enableVoting = settings.enableVoting;
-
         if (settings.enableVoting && draft.refereeId) {
           draft.refereeId = undefined;
           draft.players.forEach(pl => pl.isReferee = false);
-          if (draft.phase === 'referee_review') {
-            draft.phase = 'results';
-          }
         }
       }
-    }, "settings");
+    }, "updateSettings");
 
-    const room = buffer.get();
     this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
   }
 
-  setReferee(ws: WebSocket, targetId: string) {
+  async handleDraftUpdate(ws: WebSocket, answers: RoundAnswers) {
     const p = this.playerManager.getPlayer(ws);
     if (!p) return;
-    const buffer = this.roomManager.getRoomBuffer(p.roomId);
-    if (!buffer) return;
 
-    buffer.transact(draft => {
-      if (!draft.players.find(pl => pl.id === p.playerId)?.isHost) return;
-      const target = draft.players.find(pl => pl.id === targetId);
-      if (!target) return;
+    const room = await this.roomManager.getRoom(p.roomId);
+    if (!room || room.phase !== 'playing') return;
 
-      draft.players.forEach(pl => pl.isReferee = false);
-      target.isReferee = true;
-      draft.refereeId = targetId;
-
-      // Clear voting state to avoid conflicts
-      draft.voteQueue = [];
-      draft.currentVote = null;
-      if (!draft.settings) draft.settings = {};
-      draft.settings.enableVoting = false;
-
-      console.log(`[SetReferee] Referee set to ${target.name} (${targetId}), Voting Disabled`);
-    }, "setReferee");
-
-    const room = buffer.get();
-    this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
+    if (!this.drafts.has(p.roomId)) this.drafts.set(p.roomId, new Map());
+    this.drafts.get(p.roomId)!.set(p.playerId, {
+      answers,
+      updatedAt: Date.now(),
+      roundNumber: room.currentRound
+    });
   }
 
-  removeReferee(ws: WebSocket) {
+  async activatePowerUp(ws: WebSocket, payload: any) {
     const p = this.playerManager.getPlayer(ws);
     if (!p) return;
-    const buffer = this.roomManager.getRoomBuffer(p.roomId);
-    if (!buffer) return;
 
-    buffer.transact(draft => {
-      if (!draft.players.find(pl => pl.id === p.playerId)?.isHost) return;
-      draft.refereeId = undefined;
-      draft.players.forEach(pl => pl.isReferee = false);
-    }, "removeReferee");
-
-    const room = buffer.get();
-    this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
-  }
-
-  refereeApprove(ws: WebSocket) {
-    const p = this.playerManager.getPlayer(ws);
-    if (!p) return;
-    // ... logic similar to original, transition to results
-    this.finishRoundPhase(p.roomId);
-  }
-
-  activatePowerUp(ws: WebSocket, payload: any) {
-    const p = this.playerManager.getPlayer(ws);
-    if (!p) return;
-    const buffer = this.roomManager.getRoomBuffer(p.roomId);
-    if (!buffer) return;
-
-    buffer.transact(draft => {
+    const room = await this.roomManager.transact(p.roomId, draft => {
       const round = draft.rounds[draft.currentRound];
-      if (!round || round.powerUpUsedInRound) return; // Error handling usually needed
-      if (round.banishedPlayerId === p.playerId) return;
+      if (!round || round.powerUpUsedInRound || round.banishedPlayerId === p.playerId) return;
 
       const player = draft.players.find(pl => pl.id === p.playerId);
       if (!player) return;
 
-      if (payload.type === 'wildcard') {
-        if (!player.usedPowerUps.wildcard && player.powerUps.wildcard > 0) {
-          player.powerUps.wildcard--;
-          player.usedPowerUps.wildcard = true;
-          round.wildcardUsedByPlayerId = p.playerId;
-          round.powerUpUsedInRound = true;
-        }
-      } else if (payload.type === 'banish') {
-        if (!player.usedPowerUps.banish && player.powerUps.banish > 0) {
-          player.powerUps.banish--;
-          player.usedPowerUps.banish = true;
-          round.banishedPlayerId = payload.targetPlayerId;
-          round.powerUpUsedInRound = true;
-        }
+      if (payload.type === 'wildcard' && player.powerUps.wildcard > 0) {
+        player.powerUps.wildcard--;
+        player.usedPowerUps.wildcard = true;
+        round.wildcardUsedByPlayerId = p.playerId;
+        round.powerUpUsedInRound = true;
+      } else if (payload.type === 'banish' && player.powerUps.banish > 0) {
+        player.powerUps.banish--;
+        player.usedPowerUps.banish = true;
+        round.banishedPlayerId = payload.targetPlayerId;
+        round.powerUpUsedInRound = true;
       }
-      // Hint/Steal not full impl in original either or simple
     }, "activatePowerUp");
 
-    const room = buffer.get();
     this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
-
-    if (room.phase === 'voting' && room.currentVote) {
-      this.startVoteTimer(room.code);
-    }
   }
 
-  vote(ws: WebSocket, targetId: string, category: Category, accepted: boolean) {
+  async nextRound(ws: WebSocket) {
     const p = this.playerManager.getPlayer(ws);
     if (!p) return;
-    const buffer = this.roomManager.getRoomBuffer(p.roomId);
-    if (!buffer) return;
 
-    buffer.transact(draft => {
-      if (draft.phase !== 'voting') return;
-      const round = draft.rounds[draft.currentRound];
-      const answer = round.validatedAnswers.find(a => a.playerId === targetId && a.category === category);
-      if (!answer || !answer.isPendingVote) return;
-
-      if (!answer.votes) answer.votes = { accepted: 0, rejected: 0 };
-      // Logic for simple voting (not democratic full flow, but the request_vote flow)
-      // Actually original had 'vote' separate from 'cast_democratic_vote'
-      // This matches the 'vote' case in original switch
-    }, "vote");
-    // This seems to be the old voting logic. 
-    // The democratic logic is `castDemocraticVote`.
-  }
-
-  requestVote(ws: WebSocket, payload: any) {
-    const p = this.playerManager.getPlayer(ws);
-    if (!p) return;
-    const buffer = this.roomManager.getRoomBuffer(p.roomId);
-    if (!buffer) return;
-
-    buffer.transact(draft => {
-      if (!draft.settings?.enableVoting) {
-        console.log('[RequestVote] Voting disabled in settings');
-        return;
-      }
-
-      const player = draft.players.find(pl => pl.id === p.playerId);
-
-      // Add to vote queue
-      if (!draft.voteQueue) draft.voteQueue = [];
-      draft.voteQueue.push({
-        requestId: crypto.randomUUID(),
-        requesterId: p.playerId,
-        requesterName: player?.name || 'Unknown',
-        category: payload.category,
-        word: payload.word
-      });
-
-      console.log(`[RequestVote] Queue length: ${draft.voteQueue.length}, CurrentVote: ${!!draft.currentVote}`);
-
-      if (!draft.currentVote && draft.voteQueue.length > 0) {
-        const next = draft.voteQueue.shift()!;
-        draft.currentVote = { ...next, votes: { yes: 0, no: 0 }, voterIds: [], votesDetails: {}, startTime: Date.now() };
-        draft.phase = 'voting';
-        console.log('[RequestVote] Started voting phase');
-      }
-    }, "requestVote");
-
-    const room = buffer.get();
-    this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
-
-    if (room.phase === 'voting' && room.currentVote) {
-      // Only start timer if this is a newly created vote session
-      const elapsed = Date.now() - room.currentVote.startTime;
-      if (elapsed < 1000) {
-        this.startVoteTimer(room.code);
-      }
-    }
-  }
-
-  castDemocraticVote(ws: WebSocket, vote: 'yes' | 'no') {
-    const p = this.playerManager.getPlayer(ws);
-    if (!p) return;
-    const buffer = this.roomManager.getRoomBuffer(p.roomId);
-    if (!buffer) return;
-
-    let allVotesDone = false;
-
-    buffer.transact(draft => {
-      if (draft.phase !== 'voting' || !draft.currentVote) return;
-      if (draft.currentVote.voterIds.includes(p.playerId)) return;
-
-      const eligibleVoters = draft.players.filter(pl =>
-        pl.id !== draft.currentVote!.requesterId &&
-        pl.id !== draft.refereeId &&
-        pl.id !== draft.rounds[draft.currentRound]?.banishedPlayerId
-      );
-
-      // Guard: Only eligible voters can cast a vote
-      if (!eligibleVoters.some(ev => ev.id === p.playerId)) return;
-
-      draft.currentVote.voterIds.push(p.playerId);
-      if (vote === 'yes') draft.currentVote.votes.yes++;
-      else draft.currentVote.votes.no++;
-
-      // Check majority
-      const activeCount = eligibleVoters.length;
-
-      const { yes, no } = draft.currentVote.votes;
-      if (yes > activeCount / 2 || no > activeCount / 2 || yes + no === activeCount) {
-        // Resolve immediately
-        this.resolveCurrentVoteInDraft(draft);
-      }
-      if (!draft.currentVote) {
-        allVotesDone = true;
-      }
-    }, "castVote");
-
-    const room = buffer.get();
-    this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
-
-    if (allVotesDone) {
-      this.roundManager.clearTimer(room.code);
-      this.finishRoundPhase(room.code);
-    } else if (room.phase === 'voting' && room.currentVote) {
-      // Check if we moved to NEXT vote (new session started by resolution)
-      const elapsed = Date.now() - room.currentVote.startTime;
-      if (elapsed < 1000) {
-        this.startVoteTimer(room.code);
-      }
-    }
-  }
-
-  refereeToggleValidity(ws: WebSocket, payload: any) {
-    const p = this.playerManager.getPlayer(ws);
-    if (!p) return;
-    const buffer = this.roomManager.getRoomBuffer(p.roomId);
-    if (!buffer) return;
-
-    buffer.transact(draft => {
-      // Security check: Must be Referee (or Host as fallback if no referee set explicitly, but mostly Referee)
-      // console.log(`[RefereeToggle] Req from ${p.playerId}, Referee: ${draft.refereeId}, IsHost: ${draft.players.find(pl => pl.id === p.playerId)?.isHost}`);
-      if (draft.refereeId !== p.playerId && !draft.players.find(pl => pl.id === p.playerId)?.isHost) {
-        console.log('[RefereeToggle] Denied: Not referee or host');
-        return;
-      }
-
-      const round = draft.rounds[draft.currentRound];
-      const ans = round.validatedAnswers.find((a: any) => a.playerId === payload.playerId && a.category === payload.category);
-
-      if (ans) {
-        console.log(`[RefereeToggle] Toggling ${ans.category} for ${ans.playerName} from ${ans.isValid} to ${!ans.isValid}`);
-        ans.isValid = !ans.isValid;
-        ans.reason = ans.isValid ? 'تم القبول من الحكم' : 'تم الرفض من الحكم';
-        // Recalculate answer scores (unique etc) immediately for UI feedback
-        this.roundManager.calculateAnswerScores(draft);
+    const room = await this.roomManager.transact(p.roomId, draft => {
+      if (draft.currentRound + 1 < draft.totalRounds) {
+        draft.currentRound++;
+        this.roundManager.startRound(draft);
       } else {
-        console.log(`[RefereeToggle] Answer not found for ${payload.playerId} / ${payload.category}`);
+        draft.phase = 'final';
       }
-    }, "refereeToggleValidity");
+    }, "nextRound");
 
-    const room = buffer.get();
+    if (room.phase === 'playing') {
+      this.broadcastToRoom(room.code, { type: 'round_start', payload: { room } });
+      this.roundManager.setRoundTimer(room.code, async () => await this.endRound(room.code));
+    } else {
+      this.broadcastToRoom(room.code, { type: 'game_end', payload: { room } });
+    }
+  }
+
+  async playAgain(ws: WebSocket) {
+    const p = this.playerManager.getPlayer(ws);
+    if (!p) return;
+    const room = await this.roomManager.transact(p.roomId, draft => {
+      draft.phase = 'lobby';
+      draft.currentRound = 0;
+      draft.rounds = [];
+      draft.players.forEach(pl => { pl.score = 0; pl.isReady = false; pl.busStreak = 0; });
+    }, "playAgain");
     this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
   }
 
-  private resolveCurrentVoteInDraft(draft: any) {
-    // Resolve logic: requires strict majority (ties/0-votes fail)
-    const accepted = draft.currentVote.votes.yes > draft.currentVote.votes.no;
-    const round = draft.rounds[draft.currentRound];
-    const ans = round.validatedAnswers.find((a: any) => a.playerId === draft.currentVote.requesterId && a.category === draft.currentVote.category);
-    if (ans) {
-      ans.isValid = accepted;
-      ans.isPendingVote = false;
-      ans.reason = accepted ? 'تم قبوله بالتصويت' : 'تم رفضه (أغلبية أو تعادل)';
-    }
-    draft.currentVote = null;
-    if (draft.voteQueue.length > 0) {
-      const next = draft.voteQueue.shift();
-      draft.currentVote = { ...next, votes: { yes: 0, no: 0 }, voterIds: [], votesDetails: {}, startTime: Date.now() };
-    }
-  }
-
-  sendReaction(ws: WebSocket, type: ReactionType) {
+  async sendReaction(ws: WebSocket, reactionType: ReactionType) {
     const p = this.playerManager.getPlayer(ws);
     if (!p) return;
     this.broadcastToRoom(p.roomId, {
-      type: 'reaction_received',
-      payload: { reaction: { id: crypto.randomUUID(), type, playerId: p.playerId, playerName: '', timestamp: Date.now() } } // simplified
+      type: 'player_reaction',
+      payload: { playerId: p.playerId, reactionType }
     });
   }
 
-  playAgain(ws: WebSocket) {
+  async setReferee(ws: WebSocket, targetId: string) {
     const p = this.playerManager.getPlayer(ws);
     if (!p) return;
-    const buffer = this.roomManager.getRoomBuffer(p.roomId);
-    if (!buffer) return;
-
-    buffer.transact(draft => {
-      // reset logic
-      draft.currentRound = 0;
-      draft.phase = 'lobby';
-      draft.rounds = [];
-      draft.voteQueue = [];
-      draft.currentVote = null;
-      draft.players.forEach(pl => {
-        pl.score = 0;
-        pl.isReady = false;
-        pl.busStreak = 0;
-        pl.powerUps = { wildcard: 0, banish: 0, hint: 0, steal: 0 };
-        pl.usedPowerUps = { wildcard: false, banish: false, hint: false, steal: false };
-      });
-    }, "playAgain");
-
-    const room = buffer.get();
+    const room = await this.roomManager.transact(p.roomId, draft => {
+      const host = draft.players.find(pl => pl.id === p.playerId);
+      if (!host?.isHost) return;
+      draft.players.forEach(pl => pl.isReferee = false);
+      const target = draft.players.find(pl => pl.id === targetId);
+      if (target) {
+        target.isReferee = true;
+        draft.refereeId = targetId;
+      }
+      if (!draft.settings) draft.settings = {};
+      draft.settings.enableVoting = false;
+    }, "setReferee");
     this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
   }
 
-  // Helpers
-  private send(ws: WebSocket, message: WSMessage) {
-    if (message.type !== 'ping') console.log(`[GameManager] Sending: ${message.type}`, message.payload ? Object.keys(message.payload) : 'no payload');
-    if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(message));
+  async removeReferee(ws: WebSocket) {
+    const p = this.playerManager.getPlayer(ws);
+    if (!p) return;
+    const room = await this.roomManager.transact(p.roomId, draft => {
+      draft.refereeId = undefined;
+      draft.players.forEach(pl => pl.isReferee = false);
+    }, "removeReferee");
+    this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
   }
 
-  private broadcastToRoom(roomCode: string, message: WSMessage, exclude?: WebSocket) {
-    const players = this.playerManager.getAllPlayers();
+  async vote(ws: WebSocket, targetId: string, category: Category, accepted: boolean) {
+    // Legacy or simple vote handler - usually castDemocraticVote is used now.
+  }
+
+  async requestVote(ws: WebSocket, payload: any) {
+    // Logic for manual vote requests if applicable
+  }
+
+  // ==========================================
+  // Helpers
+  // ==========================================
+
+  private broadcastToRoom(roomCode: string, message: WSMessage, excludeWs?: WebSocket) {
+    const players = this.playerManager.getPlayersInRoom(roomCode);
     for (const p of players) {
-      if (p.roomId === roomCode && p.ws !== exclude) {
+      if (p.ws !== excludeWs && p.ws.readyState === WebSocket.OPEN) {
         this.send(p.ws, message);
       }
     }
   }
+
+  private send(ws: WebSocket, message: WSMessage) {
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify(message));
+    }
+  }
 }
 
-// Export singleton
 export const gameManager = new GameManager();
-

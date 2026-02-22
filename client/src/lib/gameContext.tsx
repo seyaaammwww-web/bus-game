@@ -4,6 +4,7 @@ import type { GameRoom, Player, Round, GamePhase, RoundAnswers, Category, Valida
 interface GameState {
   room: GameRoom | null;
   playerId: string | null;
+  reconnectToken: string | null;
   ws: WebSocket | null;
   connected: boolean;
   error: string | null;
@@ -19,9 +20,9 @@ type GameAction =
   | { type: 'SET_ERROR'; error: string | null }
   | { type: 'SET_TIME_LEFT'; timeLeft: number }
   | { type: 'SET_RUSH'; isRush: boolean }
+  | { type: 'SET_RECONNECT_TOKEN'; token: string | null }
   | { type: 'UPDATE_PLAYERS'; players: Player[] }
   | { type: 'UPDATE_PHASE'; phase: GamePhase }
-  | { type: 'UPDATE_ROUND'; round: Round }
   | { type: 'UPDATE_ROUND'; round: Round }
   | { type: 'UPDATE_VOTE_STATE'; payload: any }
   | { type: 'DECREMENT_TIME' }
@@ -29,7 +30,8 @@ type GameAction =
 
 const initialState: GameState = {
   room: null,
-  playerId: null,
+  playerId: localStorage.getItem('busPlayerId'),
+  reconnectToken: localStorage.getItem('busReconnectToken'),
   ws: null,
   connected: false,
   error: null,
@@ -53,6 +55,8 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return { ...state, timeLeft: action.timeLeft };
     case 'SET_RUSH':
       return { ...state, isRush: action.isRush };
+    case 'SET_RECONNECT_TOKEN':
+      return { ...state, reconnectToken: action.token };
     case 'UPDATE_PLAYERS':
       return state.room ? { ...state, room: { ...state.room, players: action.players } } : state;
     case 'UPDATE_PHASE':
@@ -164,6 +168,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
       case 'room_joined':
         dispatch({ type: 'SET_ROOM', room: message.payload.room });
         dispatch({ type: 'SET_PLAYER_ID', playerId: message.payload.playerId });
+        if (message.payload.reconnectToken) {
+          dispatch({ type: 'SET_RECONNECT_TOKEN', token: message.payload.reconnectToken });
+        }
         break;
       case 'player_joined':
       case 'player_left':
@@ -188,6 +195,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
       case 'sync_state':
         dispatch({ type: 'SET_ROOM', room: message.payload.room });
         dispatch({ type: 'SET_RUSH', isRush: false });
+        if (message.payload.reconnectToken) {
+          dispatch({ type: 'SET_RECONNECT_TOKEN', token: message.payload.reconnectToken });
+        }
         break;
       case 'vote_session_start':
       case 'vote_update':
@@ -261,9 +271,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
       dispatch({ type: 'SET_CONNECTED', connected: true });
       dispatch({ type: 'SET_ERROR', error: null });
 
-      // Re-identify if we have a player ID (Reconnection logic)
-      if (state.playerId && state.room) {
-        ws.send(JSON.stringify({ type: 'reconnect', payload: { playerId: state.playerId } }));
+      // Re-identify if we have a valid token (Rolling Reconnection)
+      if (state.reconnectToken) {
+        ws.send(JSON.stringify({ type: 'reconnect', payload: { token: state.reconnectToken } }));
       }
     };
 
@@ -421,8 +431,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
   // Timer effect
   useEffect(() => {
     if (state.room?.phase === 'playing') {
-      // Force immediate sync to target time if server provided nextRoundAt or we have standard 45s.
-      // But keeping simple decrement for now.
       timerRef.current = setInterval(() => {
         dispatch({ type: 'DECREMENT_TIME' });
       }, 1000);
@@ -438,6 +446,13 @@ export function GameProvider({ children }: { children: ReactNode }) {
       }
     };
   }, [state.room?.phase]);
+
+  // Persist session tokens
+  useEffect(() => {
+    if (state.playerId) localStorage.setItem('busPlayerId', state.playerId);
+    if (state.reconnectToken) localStorage.setItem('busReconnectToken', state.reconnectToken);
+    else localStorage.removeItem('busReconnectToken');
+  }, [state.playerId, state.reconnectToken]);
 
   // Cleanup on unmount
   useEffect(() => {

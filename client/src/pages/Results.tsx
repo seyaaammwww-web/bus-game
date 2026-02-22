@@ -10,7 +10,7 @@ import { RetroCard } from '@/components/ui/RetroCard';
 import { PixelAvatar } from '@/components/ui/PixelAvatar';
 import { RetroQuote } from '@/components/ui/RetroQuote';
 import { LetterDisplay } from '@/components/LetterDisplay';
-import { VotingOverlay } from '@/components/VotingOverlay';
+import { VotingPhase } from '@/components/VotingPhase';
 import { RefereeReviewOverlay } from '@/components/RefereeReviewOverlay';
 import { GameStats } from '@/components/results/GameStats';
 import { AppealDialog } from '@/components/results/AppealDialog';
@@ -143,7 +143,7 @@ export default function Results() {
       )}
 
       <Confetti active={isFinal} count={isMobile ? 1 : 3} />
-      <VotingOverlay />
+      <VotingPhase />
       <RefereeReviewOverlay />
 
       <div className="max-w-3xl mx-auto relative z-10">
