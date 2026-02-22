@@ -437,8 +437,12 @@ export class GameManager {
       if (draft.phase === 'lobby') {
         if (settings.customCategories) draft.settings = { ...draft.settings, customCategories: settings.customCategories };
         if (settings.totalRounds) {
-          draft.totalRounds = Math.max(3, Math.min(20, Number(settings.totalRounds)));
-          draft.letters = Array.from({ length: draft.totalRounds }, (_, i) => draft.letters[i] || 'س');
+          const newTotal = Math.max(3, Math.min(20, Number(settings.totalRounds)));
+          const alphabet = "أبتثجحخدذرزسشصضطظعغفقكلمنهوي";
+          draft.totalRounds = newTotal;
+          draft.letters = Array.from({ length: newTotal }, (_, i) =>
+            draft.letters[i] || alphabet[Math.floor(Math.random() * alphabet.length)]
+          );
         }
       }
 
@@ -525,7 +529,18 @@ export class GameManager {
       draft.phase = 'lobby';
       draft.currentRound = 0;
       draft.rounds = [];
-      draft.players.forEach(pl => { pl.score = 0; pl.isReady = false; pl.busStreak = 0; });
+      const alphabet = "أبتثجحخدذرزسشصضطظعغفقكلمنهوي";
+      draft.letters = Array.from({ length: draft.totalRounds }, () =>
+        alphabet[Math.floor(Math.random() * alphabet.length)]
+      );
+      draft.players.forEach(pl => {
+        pl.score = 0;
+        pl.isReady = pl.isHost; // Keep host ready
+        pl.busStreak = 0;
+        pl.totalEarnedPoints = 0;
+        pl.usedPowerUps = { wildcard: false, banish: false, hint: false, steal: false };
+        pl.powerUps = { wildcard: 0, banish: 0, hint: 0, steal: 0 };
+      });
     }, "playAgain");
     this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
   }

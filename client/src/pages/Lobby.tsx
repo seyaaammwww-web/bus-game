@@ -20,8 +20,14 @@ export default function Lobby() {
   const [customCats, setCustomCats] = useState(categories);
 
   const room = state.room!;
-  const allReady = room.players.every(p => p.isReady);
-  const canStart = isHost && allReady && room.players.length >= 2;
+  const activePlayers = room.players.filter(p => p.status === 'active');
+  const allReady = activePlayers.every(p => p.isReady);
+  const canStart = isHost && (allReady || true) && activePlayers.length >= 2;
+  // Note: Host is technically always ready to start if they are the one clicking.
+  // But we still show the "Waiting" state if others aren't ready.
+  // Revised logic:
+  const effectiveAllReady = activePlayers.filter(p => !p.isHost).every(p => p.isReady);
+  const finalCanStart = isHost && effectiveAllReady && activePlayers.length >= 2;
 
   const copyCode = async () => {
     await navigator.clipboard.writeText(room.code);
@@ -375,14 +381,14 @@ export default function Lobby() {
             >
               <Button
                 size="lg"
-                variant={canStart ? "secondary" : "default"}
-                className={`w-full h-16 text-lg font-pixel-title relative overflow-hidden ${!canStart ? 'opacity-50 cursor-not-allowed bg-gray-400 border-gray-600' : 'shine-effect'}`}
+                variant={finalCanStart ? "secondary" : "default"}
+                className={`w-full h-16 text-lg font-pixel-title relative overflow-hidden ${!finalCanStart ? 'opacity-50 cursor-not-allowed bg-gray-400 border-gray-600' : 'shine-effect'}`}
                 onClick={startGame}
-                disabled={!canStart}
+                disabled={!finalCanStart}
                 data-testid="button-start-game"
               >
                 <Play className="w-6 h-6 ml-2 absolute right-4" />
-                {allReady ? 'ابدأ اللعبة!' : 'في انتظار اللاعبين...'}
+                {effectiveAllReady ? 'ابدأ اللعبة!' : 'في انتظار اللاعبين...'}
               </Button>
             </motion.div>
           )}

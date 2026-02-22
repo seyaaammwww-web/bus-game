@@ -131,6 +131,7 @@ export class RoomManager {
                 if (draft.players.length > 0 && wasHost) {
                     draft.hostId = draft.players[0].id;
                     draft.players[0].isHost = true;
+                    draft.players[0].isReady = true; // New host is ready
                 }
             }, "removePlayer");
         } catch (e) {
@@ -144,7 +145,7 @@ export class RoomManager {
             name,
             score: 0,
             isHost,
-            isReady: false,
+            isReady: isHost, // Host is ready by default
             busStreak: 0,
             powerUps: { hint: 0, steal: 0, wildcard: 0, banish: 0 },
             usedPowerUps: { hint: false, steal: false, wildcard: false, banish: false },
