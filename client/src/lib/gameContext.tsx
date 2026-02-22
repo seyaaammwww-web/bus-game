@@ -254,7 +254,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
     if (wsRef.current?.readyState === WebSocket.OPEN) return wsRef.current;
 
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const ws = new WebSocket(`${protocol}//${window.location.host}/ws`);
+    const wsUrl = import.meta.env.VITE_WS_URL || `${protocol}//${window.location.host}/ws`;
+    const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
       dispatch({ type: 'SET_CONNECTED', connected: true });
