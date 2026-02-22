@@ -64,7 +64,7 @@ export function ResultsTable({
                     hidden: {},
                     visible: {
                         transition: {
-                            staggerChildren: 0.3, // 300ms delay between each player
+                            staggerChildren: 0.25, // 300ms delay between each player
                         }
                     }
                 }}
@@ -110,27 +110,36 @@ export function ResultsTable({
                                 </div>
 
                                 {/* Answers Columns (Desktop: Cols 2-6, Mobile: Grid) */}
-                                {categories.map((cat) => {
+                                {/* Polish G: stagger each category cell 80ms apart */}
+                                {categories.map((cat, catIdx) => {
                                     const answer = submission.answers[cat];
                                     const validation = round.validatedAnswers.find(
                                         (v: any) => v.playerId === submission.playerId && v.category === cat
                                     );
                                     const isValid = validation?.isValid;
                                     const score = validation?.score || 0;
+                                    // Polish H: unique = score > 10
+                                    const isUnique = isValid && score > 10;
 
-                                    // Status Color Logic
+                                    // Status Color Logic — Polish H: amber bg for unique
                                     let statusClass = "bg-gray-50/50";
                                     if (answer) {
-                                        if (isValid) statusClass = score > 10 ? "bg-green-50" : "bg-green-50/30";
+                                        if (isUnique) statusClass = "bg-amber-50";
+                                        else if (isValid) statusClass = "bg-green-50/70";
                                         else statusClass = "bg-red-50";
                                     }
 
                                     return (
-                                        <div
+                                        <motion.div
                                             key={cat}
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: catIdx * 0.08, duration: 0.22 }}
                                             className={cn(
                                                 "relative p-3 flex md:flex-col items-center justify-between md:justify-center gap-2 transition-colors border-b md:border-b-0 border-gray-100 last:border-0 md:border-r md:border-gray-100",
                                                 statusClass,
+                                                // Polish H: amber border for unique
+                                                isUnique ? 'border-amber-200' : '',
                                                 isMe && !isValid && answer && !isReferee ? 'cursor-pointer group/cell' : ''
                                             )}
                                         >
@@ -154,18 +163,23 @@ export function ResultsTable({
                                                 )}
                                             </div>
 
-                                            {/* Score Badge */}
+                                            {/* Score Badge — Polish K: pops in with scale on reveal */}
                                             <div className="shrink-0 md:absolute md:top-1 md:left-1">
                                                 {answer && (
                                                     isValid ? (
-                                                        <span className={cn(
-                                                            "text-[10px] px-1.5 py-0.5 rounded border shadow-sm font-bold font-pixel-text",
-                                                            score > 10
-                                                                ? "bg-yellow-100 text-yellow-700 border-yellow-200"
-                                                                : "bg-green-100 text-green-700 border-green-200"
-                                                        )}>
+                                                        <motion.span
+                                                            initial={{ scale: 0, opacity: 0 }}
+                                                            animate={{ scale: 1, opacity: 1 }}
+                                                            transition={{ delay: catIdx * 0.08 + 0.15, type: 'spring', stiffness: 400, damping: 15 }}
+                                                            className={cn(
+                                                                "text-[10px] px-1.5 py-0.5 rounded border shadow-sm font-bold font-pixel-text",
+                                                                isUnique
+                                                                    ? "bg-amber-100 text-amber-700 border-amber-300"
+                                                                    : "bg-green-100 text-green-700 border-green-200"
+                                                            )}
+                                                        >
                                                             {score}
-                                                        </span>
+                                                        </motion.span>
                                                     ) : (
                                                         <X className="w-4 h-4 text-red-400 opacity-50" />
                                                     )
@@ -184,7 +198,7 @@ export function ResultsTable({
                                                     </span>
                                                 </button>
                                             )}
-                                        </div>
+                                        </motion.div>
                                     );
                                 })}
                             </div>

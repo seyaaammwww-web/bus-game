@@ -97,6 +97,13 @@ export default function Game() {
   const [shake, setShake] = useState(false);
   const [showCountdown, setShowCountdown] = useState(true);
   const [countdown, setCountdown] = useState(3);
+  const [waitMsgIdx, setWaitMsgIdx] = useState(0);
+  const waitMessages = [
+    'في انتظار باقي اللاعبين',
+    'في انتظار باقي اللاعبين.',
+    'في انتظار باقي اللاعبين..',
+    'في انتظار باقي اللاعبين...',
+  ];
   const [wildcardActive, setWildcardActive] = useState(false);
   const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
@@ -277,7 +284,10 @@ export default function Game() {
                 initial={{ scale: 2, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0, opacity: 0 }}
-                className="text-9xl font-pixel-title text-white drop-shadow-[0_0_30px_rgba(139,92,246,0.8)]"
+                className={`text-9xl font-pixel-title drop-shadow-[0_0_30px_rgba(139,92,246,0.8)] ${countdown === 3 ? 'text-white' :
+                  countdown === 2 ? 'text-amber-300' :
+                    countdown === 1 ? 'text-red-400' : 'text-white'
+                  }`}
               >
                 {countdown === 0 ? 'ابدأ!' : countdown}
               </motion.div>
@@ -562,11 +572,15 @@ export default function Game() {
                   initial={isMobile ? { opacity: 0 } : { opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={isMobile ? { duration: 0.2 } : { delay: i * 0.05 }}
-                  className={cn("relative group", isLastOdd && "col-span-2 flex justify-center")}
+                  className={cn('relative group', isLastOdd && 'col-span-2 flex justify-center')}
                 >
+                  {/* Polish B: border turns green when the card's input is filled */}
                   <div className={cn(
-                    "bg-white border-2 border-[#4c1d95] shadow-[3px_3px_0px_0px_#2e1065] rounded-xl overflow-hidden hover:-translate-y-1 hover:shadow-[5px_5px_0px_0px_#2e1065] transition-all duration-200",
-                    isLastOdd && "w-[calc(50%-6px)] md:w-full"
+                    "bg-white border-2 shadow-[3px_3px_0px_0px_#2e1065] rounded-xl overflow-hidden hover:-translate-y-1 hover:shadow-[5px_5px_0px_0px_#2e1065] transition-all duration-200",
+                    answers[category]?.trim().length > 0
+                      ? 'border-[#16a34a]'
+                      : 'border-[#4c1d95]',
+                    isLastOdd && 'w-[calc(50%-6px)] md:w-full'
                   )}>
                     <div className={`${categoryColors[category]} py-1.5 px-2 border-b-2 border-[#4c1d95] flex items-center justify-center gap-1.5`}>
                       <Icon className="w-3.5 h-3.5 text-white" />
@@ -628,12 +642,26 @@ export default function Game() {
                 <Send className="w-8 h-8 text-white" />
               </motion.div>
               <p className="font-pixel-title text-2xl text-[#4c1d95] mb-2">تم الإرسال!</p>
-              <motion.p className="text-lg text-[#7c3aed] font-bold font-pixel-text"
-                animate={{ opacity: [0.8, 1, 0.8] }}
-                transition={{ repeat: Infinity, duration: 2 }}
-              >
-                في انتظار باقي اللاعبين...
-              </motion.p>
+              {/* Polish F: rotating waiting messages every 2.5s */}
+              <AnimatePresence mode="wait">
+                <motion.p
+                  key={waitMsgIdx}
+                  className="text-lg text-[#7c3aed] font-bold font-pixel-text"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.35 }}
+                  onAnimationComplete={() => {
+                    const t = setTimeout(
+                      () => setWaitMsgIdx(i => (i + 1) % waitMessages.length),
+                      2500
+                    );
+                    return () => clearTimeout(t);
+                  }}
+                >
+                  {waitMessages[waitMsgIdx]}
+                </motion.p>
+              </AnimatePresence>
             </motion.div>
           )
         }
