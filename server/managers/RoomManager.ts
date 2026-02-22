@@ -4,7 +4,7 @@ import { CorruptionProofBuffer } from '../utils/reliability';
 import type { GameRoom, Player } from '../../shared/schema';
 import { getRandomLetters } from '../../shared/arabicWords';
 
-const MAX_ROOMS = 100;
+const MAX_ROOMS = 5000;
 const PUBLIC_ROOM_CODE = 'PLAY';
 
 export class RoomManager {
@@ -159,16 +159,16 @@ export class RoomManager {
             const now = Date.now();
             for (const [code, buffer] of this.rooms.entries()) {
                 const room = buffer.get();
-                // Remove if empty for > 10 min OR created > 24h
+                // Remove if empty for > 5 min OR created > 12h
                 const isEmpty = room.players.length === 0;
-                const isOld = now - room.createdAt > 24 * 60 * 60 * 1000;
+                const isOld = now - room.createdAt > 12 * 60 * 60 * 1000;
 
-                if ((isEmpty && now - room.createdAt > 10 * 60 * 1000) || isOld) {
+                if ((isEmpty && now - room.createdAt > 5 * 60 * 1000) || isOld) {
                     this.rooms.delete(code);
                     console.log(`[RoomManager] Cleaned up room ${code}`);
                 }
             }
-        }, 60 * 60 * 1000);
+        }, 15 * 60 * 1000); // Check every 15 mins
     }
 
     // Persistence Helpers

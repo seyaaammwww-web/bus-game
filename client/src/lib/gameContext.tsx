@@ -24,6 +24,7 @@ type GameAction =
   | { type: 'UPDATE_ROUND'; round: Round }
   | { type: 'UPDATE_ROUND'; round: Round }
   | { type: 'UPDATE_VOTE_STATE'; payload: any }
+  | { type: 'DECREMENT_TIME' }
   | { type: 'RESET' };
 
 const initialState: GameState = {
@@ -97,6 +98,8 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           voteQueue: newVoteQueue
         }
       };
+    case 'DECREMENT_TIME':
+      return { ...state, timeLeft: Math.max(0, state.timeLeft - 1) };
     case 'RESET':
       return initialState;
     default:
@@ -259,10 +262,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
       // Re-identify if we have a player ID (Reconnection logic)
       if (state.playerId && state.room) {
-        // We might need a specific 'reconnect' message type or just rely on cookie/session?
-        // For now, simpler: user might need to click 'join' again if totally lost, 
-        // but mapped playerId on server should let them claim seat.
-        // Ideally send: { type: 'reconnect', payload: { playerId: state.playerId } }
+        ws.send(JSON.stringify({ type: 'reconnect', payload: { playerId: state.playerId } }));
       }
     };
 
@@ -284,6 +284,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         const message = JSON.parse(event.data);
         if (message.type === 'ping') {
           // Heartbeat Ack
+          ws.send(JSON.stringify({ type: 'pong', payload: {} }));
           return;
         }
         handleMessage(message);
@@ -418,9 +419,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   // Timer effect
   useEffect(() => {
-    if (state.room?.phase === 'playing' && state.timeLeft > 0) {
+    if (state.room?.phase === 'playing') {
+      // Force immediate sync to target time if server provided nextRoundAt or we have standard 45s.
+      // But keeping simple decrement for now.
       timerRef.current = setInterval(() => {
-        dispatch({ type: 'SET_TIME_LEFT', timeLeft: state.timeLeft - 1 });
+        dispatch({ type: 'DECREMENT_TIME' });
       }, 1000);
     } else if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -433,7 +436,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         timerRef.current = null;
       }
     };
-  }, [state.room?.phase, state.timeLeft]);
+  }, [state.room?.phase]);
 
   // Cleanup on unmount
   useEffect(() => {

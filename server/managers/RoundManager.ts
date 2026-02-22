@@ -2,7 +2,6 @@
 import { CorruptionProofBuffer, stringToSeed } from '../utils/reliability';
 import { GameRoom, Round, PlayerSubmission, RoundAnswers, Category, ValidatedAnswer } from '../../shared/schema';
 import { randomUUID } from 'crypto';
-import { HybridValidator } from '../hybridValidator';
 import { categories } from '../../shared/schema';
 
 // Helper to normalize arabic for comparison/validation
@@ -180,26 +179,12 @@ export class RoundManager {
             for (const submission of round.submissions) {
                 if (submission.playerId === round.banishedPlayerId) continue;
 
-                const answer = submission.answers[category];
-                if (answer && answer.trim()) {
-                    allAnswers.push({ playerId: submission.playerId, category, answer });
+                const answer = submission.answers[category] || '';
+                // Fix Wildcard: Force push if wildcard is active for this player, even if empty
+                if (answer.trim() || round.wildcardUsedByPlayerId === submission.playerId) {
+                    allAnswers.push({ playerId: submission.playerId, category, answer: answer.trim() || 'جوكر' });
                 }
             }
-        }
-
-        const itemsToValidate = allAnswers.map(item => ({
-            playerId: item.playerId,
-            category: item.category as Category,
-            letter: round.letter,
-            answer: item.answer
-        }));
-
-        const seed = stringToSeed(roomRead.code + round.number);
-        let validationResults: Map<string, any>;
-        try {
-            validationResults = await HybridValidator.getInstance().validateBatch(itemsToValidate, seed);
-        } catch (e) {
-            validationResults = new Map();
         }
 
         // Apply Results to State
@@ -210,32 +195,34 @@ export class RoundManager {
             dRound.validatedAnswers = [];
 
             for (const item of allAnswers) {
-                const key = `${item.playerId}:${item.category}`;
-                const result = validationResults.get(key);
-                let isValid = result?.isValid || false;
-                let reason = result?.reason || '';
+                let isValid = false;
+                let reason = '';
                 let isPendingVote = false;
 
                 if (dRound.wildcardUsedByPlayerId === item.playerId) {
                     isValid = true;
                     reason = 'جوكر';
-                }
-
-                if (!isValid && !isPendingVote && item.answer.trim().length >= 2) {
-                    const lenient = validateAnswerLenient(dRound.letter, item.category as Category, item.answer);
-                    if (lenient) {
+                } else if (item.answer.trim().length >= 2) {
+                    // Offline validation
+                    isValid = validateAnswerLenient(dRound.letter, item.category as Category, item.answer);
+                    if (isValid) {
+                        reason = 'صحيح (بدون ذكاء اصطناعي)';
+                        // Optionally force everything to voting if enabled
                         if (draft.settings?.enableVoting) {
                             isPendingVote = true;
                             reason = 'تتطلب تصويت';
                             hasPendingVotes = true;
-                        } else {
-                            isValid = false;
-                            reason = 'غير موجودة في القاموس';
                         }
                     } else {
-                        isValid = false;
-                        reason = 'حرف خطأ';
+                        reason = 'غلط أو حرف غير متطابق';
+                        if (draft.settings?.enableVoting) {
+                            // If it failed strict local validation, but voting is on, let people vote? 
+                            // Actually, local validation is just letter match. If letter doesn't match, it's strictly wrong.
+                            isValid = false;
+                        }
                     }
+                } else {
+                    reason = 'كلمة قصيرة جداً';
                 }
 
                 dRound.validatedAnswers.push({

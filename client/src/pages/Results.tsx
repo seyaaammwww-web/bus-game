@@ -75,6 +75,16 @@ export default function Results() {
     return () => clearInterval(timer);
   }, [isFinal, room.nextRoundAt]);
 
+  // Host AFK Fallback for Voting Mode
+  useEffect(() => {
+    if (!isFinal && room.phase === 'results' && room.settings?.enableVoting && isHost) {
+      const timer = setTimeout(() => {
+        nextRound();
+      }, 60000);
+      return () => clearTimeout(timer);
+    }
+  }, [isFinal, room.phase, room.settings?.enableVoting, isHost, nextRound]);
+
   const gameStats = useMemo(() => {
     if (!isFinal || room.rounds.length === 0) return null;
     const playerStats = new Map<string, any>();

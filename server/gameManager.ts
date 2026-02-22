@@ -24,6 +24,7 @@ export class GameManager {
   private drafts: Map<string, Map<string, { answers: RoundAnswers, updatedAt: number, roundNumber: number }>> = new Map();
 
   private heartbeatInterval: NodeJS.Timeout | null = null;
+  private disconnectTimeouts = new Map<string, NodeJS.Timeout>();
 
   constructor() {
     this.roomManager = new RoomManager();
@@ -39,10 +40,16 @@ export class GameManager {
     this.heartbeatInterval = setInterval(() => {
       const players = this.playerManager.getAllPlayers();
       for (const p of players) {
+        const wsWrapper = p.ws as any;
+        // If not alive from previous ping, kill socket to save RAM
+        if (wsWrapper.isAlive === false) {
+          console.log(`[GameManager] Terminating zombie socket: ${p.playerId}`);
+          p.ws.terminate();
+          continue;
+        }
+
+        wsWrapper.isAlive = false;
         if (p.ws.readyState === WebSocket.OPEN) {
-          // p.ws.ping(); 
-          // browser client might not handle ping frame control messages easily accessible, 
-          // so we use a custom message 'ping'
           this.send(p.ws, { type: 'ping', payload: { timestamp: Date.now() } });
         }
       }
@@ -92,9 +99,15 @@ export class GameManager {
   }
 
   handleMessage(ws: WebSocket, message: WSMessage): void {
-    console.log(`[GameManager] Received: ${message.type}`, message.payload);
+    if (message.type !== 'ping' && message.type !== 'pong') {
+      console.log(`[GameManager] Received: ${message.type}`, message.payload);
+    }
+    (ws as any).isAlive = true;
+
     try {
       switch (message.type) {
+        case 'pong': break; // handled above by isAlive
+        case 'reconnect': this.reconnect(ws, message.payload.playerId); break;
         case 'create_room': this.createRoom(ws, message.payload.playerName); break;
         case 'join_room': this.joinRoom(ws, message.payload.roomCode, message.payload.playerName); break;
         case 'join_public_room': this.joinPublicRoom(ws, message.payload.playerName); break;
@@ -129,15 +142,38 @@ export class GameManager {
     const playerInfo = this.playerManager.removePlayer(ws);
     if (!playerInfo) return;
 
-    this.roomManager.removePlayerFromRoom(playerInfo.roomId, playerInfo.playerId);
-
-    // Broadcast leave
-    const buffer = this.roomManager.getRoomBuffer(playerInfo.roomId);
-    if (buffer) {
-      const room = buffer.get();
-      if (room.players.length > 0) {
-        this.broadcastToRoom(room.code, { type: 'player_left', payload: { players: room.players } });
+    // Grace period for reconnections
+    const timeout = setTimeout(() => {
+      this.roomManager.removePlayerFromRoom(playerInfo.roomId, playerInfo.playerId);
+      const buffer = this.roomManager.getRoomBuffer(playerInfo.roomId);
+      if (buffer) {
+        const room = buffer.get();
+        if (room.players.length > 0) {
+          this.broadcastToRoom(room.code, { type: 'player_left', payload: { players: room.players } });
+        }
       }
+      this.disconnectTimeouts.delete(playerInfo.playerId);
+    }, 45000);
+
+    this.disconnectTimeouts.set(playerInfo.playerId, timeout);
+  }
+
+  reconnect(ws: WebSocket, playerId: string): void {
+    const timeout = this.disconnectTimeouts.get(playerId);
+    if (timeout) {
+      clearTimeout(timeout);
+      this.disconnectTimeouts.delete(playerId);
+    }
+
+    const rooms = this.roomManager.getAllRoomBuffers();
+    const room = rooms.find(r => r.players.some(p => p.id === playerId));
+
+    if (room) {
+      this.playerManager.addPlayer(ws, room.code, playerId);
+      (ws as any).isAlive = true;
+      this.send(ws, { type: 'sync_state', payload: { room } });
+    } else {
+      this.send(ws, { type: 'error', payload: { message: 'انتهت المهلة، لا يمكنك العودة للغرفة' } });
     }
   }
 
@@ -821,7 +857,15 @@ export class GameManager {
       draft.currentRound = 0;
       draft.phase = 'lobby';
       draft.rounds = [];
-      draft.players.forEach(pl => { pl.score = 0; pl.isReady = false; });
+      draft.voteQueue = [];
+      draft.currentVote = null;
+      draft.players.forEach(pl => {
+        pl.score = 0;
+        pl.isReady = false;
+        pl.busStreak = 0;
+        pl.powerUps = { wildcard: 0, banish: 0, hint: 0, steal: 0 };
+        pl.usedPowerUps = { wildcard: false, banish: false, hint: false, steal: false };
+      });
     }, "playAgain");
 
     const room = buffer.get();
