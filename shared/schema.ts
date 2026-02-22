@@ -1,16 +1,4 @@
-import { pgTable, text, serial, integer, boolean } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
-import { sqliteTable, text as sqliteText, integer as sqliteInteger } from "drizzle-orm/sqlite-core";
-
-export const users = sqliteTable("users", {
-  id: sqliteInteger("id").primaryKey({ autoIncrement: true }),
-  username: sqliteText("username").notNull().unique(),
-  password: sqliteText("password").notNull(),
-});
-
-export const insertUserSchema = createInsertSchema(users);
-export const selectUserSchema = createInsertSchema(users);
 
 
 // Game Types

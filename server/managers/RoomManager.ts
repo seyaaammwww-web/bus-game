@@ -171,4 +171,10 @@ export class RoomManager {
         }
         return rooms;
     }
+
+    async restoreRooms(rooms: GameRoom[]): Promise<void> {
+        for (const room of rooms) {
+            await this.repository.set(room.code, room);
+        }
+    }
 }

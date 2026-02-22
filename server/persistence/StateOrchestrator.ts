@@ -40,24 +40,13 @@ export class StateOrchestrator {
 
     async saveState() {
         try {
-            // We need access to rooms in RoomManager. 
-            // I need to add a method to RoomManager to get all buffers or iterate.
-            // Since RoomManager.rooms is private, I should add a getter or access it if I can make it public/internal.
-            // For now, let's assume I'll add `getAllRoomBuffers()` to RoomManager.
-
-            const rooms: GameRoom[] = [];
-            // @ts-ignore - access private for now or add getter
-            for (const buffer of this.roomManager.rooms.values()) {
-                rooms.push(buffer.get());
-            }
-
+            const rooms = await this.roomManager.getAllRoomBuffers();
             const state = {
                 timestamp: Date.now(),
                 rooms
             };
 
             await fs.promises.writeFile(SNAPSHOT_FILE, JSON.stringify(state, null, 2));
-            // console.log(`[Persistence] Saved ${rooms.length} rooms`);
         } catch (e) {
             console.error('[Persistence] Save failed:', e);
         }
@@ -78,17 +67,7 @@ export class StateOrchestrator {
                 return;
             }
 
-            // Restore
-            for (const roomData of state.rooms) {
-                // Validate/Sanitize if needed
-                // Re-hydrate CorruptionProofBuffer
-                // We need to inject into RoomManager
-                // Again, need access method
-
-                // @ts-ignore
-                this.roomManager.rooms.set(roomData.code, new CorruptionProofBuffer(roomData));
-            }
-
+            await this.roomManager.restoreRooms(state.rooms);
             console.log(`[Persistence] Restored ${state.rooms.length} rooms from snapshot.`);
         } catch (e) {
             console.error('[Persistence] Load failed:', e);
