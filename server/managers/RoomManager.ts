@@ -1,25 +1,28 @@
+
 import { randomUUID } from 'crypto';
 import { CorruptionProofBuffer } from '../utils/reliability';
 import type { GameRoom, Player } from '../../shared/schema';
 import { getRandomLetters } from '../../shared/arabicWords';
-import { IRoomRepository } from '../repositories/roomRepository';
-import { roomRepository } from '../container';
 
+const MAX_ROOMS = 100;
 const PUBLIC_ROOM_CODE = 'PLAY';
 
 export class RoomManager {
-    private repository: IRoomRepository;
+    private rooms: Map<string, CorruptionProofBuffer<GameRoom>> = new Map();
 
     constructor() {
-        this.repository = roomRepository;
+        this.startCleanupInterval();
     }
 
-    async createRoom(hostPlayerId: string, playerName: string): Promise<{ room: GameRoom, isNew: boolean }> {
-        const roomCode = await this.generateRoomCode();
+    createRoom(hostPlayerId: string, playerName: string): { room: GameRoom, isNew: boolean } {
+        if (this.rooms.size >= MAX_ROOMS) {
+            throw new Error('السيرفر مشغول جداً');
+        }
+
+        const roomCode = this.generateRoomCode();
         const roomId = randomUUID();
 
         const player: Player = this.createPlayerObject(hostPlayerId, playerName, true);
-        player.status = 'active';
 
         const room: GameRoom = {
             id: roomId,
@@ -40,61 +43,42 @@ export class RoomManager {
             }
         };
 
-        await this.repository.set(roomCode, room);
+        this.rooms.set(roomCode, new CorruptionProofBuffer(room));
         return { room, isNew: true };
     }
 
-    async getRoom(roomCode: string): Promise<GameRoom | null> {
-        return await this.repository.get(roomCode.toUpperCase());
+    getRoom(roomCode: string): GameRoom | undefined {
+        return this.rooms.get(roomCode)?.get();
     }
 
-    /**
-     * Atomic Transaction Wrapper for Room State.
-     * Fetches, Mutates, and Saves with Distributed Locking.
-     */
-    async transact(roomCode: string, mutator: (draft: GameRoom) => void, description: string): Promise<GameRoom> {
-        const code = roomCode.toUpperCase();
-
-        // Acquire distributed lock (safe for multi-server)
-        const locked = await this.repository.acquireLock(code);
-        if (!locked) throw new Error(`فشل في تأمين الغرفة ${code} - حاول مرة أخرى`);
-
-        try {
-            const room = await this.repository.get(code);
-            if (!room) throw new Error(`الغرفة ${code} غير موجودة`);
-
-            const buffer = new CorruptionProofBuffer(room);
-            buffer.transact(mutator, description);
-
-            const updatedRoom = buffer.get();
-            await this.repository.set(code, updatedRoom);
-            return updatedRoom;
-        } finally {
-            await this.repository.releaseLock(code);
-        }
+    getRoomBuffer(roomCode: string): CorruptionProofBuffer<GameRoom> | undefined {
+        return this.rooms.get(roomCode);
     }
 
-    async joinRoom(roomCode: string, playerId: string, playerName: string): Promise<GameRoom> {
-        const code = roomCode.toUpperCase();
-        const room = await this.getRoom(code);
-        if (!room) throw new Error('الغرفة مش موجودة');
+    joinRoom(roomCode: string, playerId: string, playerName: string): GameRoom {
+        const buffer = this.rooms.get(roomCode);
+        if (!buffer) throw new Error('الغرفة مش موجودة');
+
+        let room = buffer.get();
 
         // Check constraints
         if (room.phase !== 'lobby') throw new Error('اللعبة بدأت');
         if (room.players.length >= 8) throw new Error('الغرفة ممتلئة');
-        if (room.players.find(p => p.id === playerId)) return room;
+        if (room.players.find(p => p.id === playerId)) return room; // Already joined
 
-        return await this.transact(code, (draft) => {
+        buffer.transact((draft) => {
             const player = this.createPlayerObject(playerId, playerName, false);
-            player.status = 'active';
             draft.players.push(player);
         }, "joinRoom");
+
+        return buffer.get();
     }
 
-    async joinPublicRoom(playerId: string, playerName: string): Promise<GameRoom> {
-        const exists = await this.repository.exists(PUBLIC_ROOM_CODE);
+    joinPublicRoom(playerId: string, playerName: string): GameRoom {
+        let buffer = this.rooms.get(PUBLIC_ROOM_CODE);
 
-        if (!exists) {
+        if (!buffer) {
+            // Create public room if not exists
             const room: GameRoom = {
                 id: randomUUID(),
                 code: PUBLIC_ROOM_CODE,
@@ -109,34 +93,41 @@ export class RoomManager {
                 isPublicRoom: true,
                 settings: { enableVoting: false }
             };
-            await this.repository.set(PUBLIC_ROOM_CODE, room);
+            buffer = new CorruptionProofBuffer(room);
+            this.rooms.set(PUBLIC_ROOM_CODE, buffer);
         }
 
-        return await this.transact(PUBLIC_ROOM_CODE, (draft) => {
+        buffer.transact((draft) => {
+            if (draft.phase !== 'lobby') {
+                // Reset if game ended? Or handle new public room logic (advanced)
+                // For now, simple check
+            }
+
             const isFirst = draft.players.length === 0;
             const player = this.createPlayerObject(playerId, playerName, isFirst);
-            player.status = 'active';
             if (isFirst) draft.hostId = playerId;
+
             draft.players.push(player);
         }, "joinPublicRoom");
+
+        return buffer.get();
     }
 
-    async removePlayerFromRoom(roomCode: string, playerId: string): Promise<void> {
-        try {
-            await this.transact(roomCode, (draft) => {
-                const wasHost = draft.hostId === playerId;
-                draft.players = draft.players.filter(p => p.id !== playerId);
+    removePlayerFromRoom(roomCode: string, playerId: string) {
+        const buffer = this.rooms.get(roomCode);
+        if (!buffer) return;
 
-                // Handle Host Migration
-                if (draft.players.length > 0 && wasHost) {
-                    draft.hostId = draft.players[0].id;
-                    draft.players[0].isHost = true;
-                    draft.players[0].isReady = true; // New host is ready
-                }
-            }, "removePlayer");
-        } catch (e) {
-            // Silently fail if room already deleted
-        }
+        buffer.transact((draft) => {
+            draft.players = draft.players.filter(p => p.id !== playerId);
+
+            // Handle Host Migration
+            if (draft.players.length > 0 && draft.hostId === playerId) {
+                draft.hostId = draft.players[0].id;
+                draft.players[0].isHost = true;
+            }
+        }, "removePlayer");
+
+        // If empty, cleanup is handled by interval
     }
 
     private createPlayerObject(id: string, name: string, isHost: boolean): Player {
@@ -145,7 +136,7 @@ export class RoomManager {
             name,
             score: 0,
             isHost,
-            isReady: isHost, // Host is ready by default
+            isReady: false,
             busStreak: 0,
             powerUps: { hint: 0, steal: 0, wildcard: 0, banish: 0 },
             usedPowerUps: { hint: false, steal: false, wildcard: false, banish: false },
@@ -153,29 +144,43 @@ export class RoomManager {
         };
     }
 
-    private async generateRoomCode(): Promise<string> {
+    private generateRoomCode(): string {
         const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
         let code = '';
         for (let i = 0; i < 4; i++) {
             code += chars[Math.floor(Math.random() * chars.length)];
         }
-        const exists = await this.repository.exists(code);
-        return exists ? this.generateRoomCode() : code;
+        return this.rooms.has(code) ? this.generateRoomCode() : code;
     }
 
-    async getAllRoomBuffers(): Promise<GameRoom[]> {
-        const codes = await this.repository.getAllCodes();
+
+    private startCleanupInterval() {
+        setInterval(() => {
+            const now = Date.now();
+            for (const [code, buffer] of this.rooms.entries()) {
+                const room = buffer.get();
+                // Remove if empty for > 10 min OR created > 24h
+                const isEmpty = room.players.length === 0;
+                const isOld = now - room.createdAt > 24 * 60 * 60 * 1000;
+
+                if ((isEmpty && now - room.createdAt > 10 * 60 * 1000) || isOld) {
+                    this.rooms.delete(code);
+                    console.log(`[RoomManager] Cleaned up room ${code}`);
+                }
+            }
+        }, 60 * 60 * 1000);
+    }
+
+    // Persistence Helpers
+    getAllRoomBuffers(): GameRoom[] {
         const rooms: GameRoom[] = [];
-        for (const code of codes) {
-            const room = await this.repository.get(code);
-            if (room) rooms.push(room);
+        for (const buffer of this.rooms.values()) {
+            rooms.push(buffer.get());
         }
         return rooms;
     }
 
-    async restoreRooms(rooms: GameRoom[]): Promise<void> {
-        for (const room of rooms) {
-            await this.repository.set(room.code, room);
-        }
+    restoreRoom(room: GameRoom) {
+        this.rooms.set(room.code, new CorruptionProofBuffer(room));
     }
 }

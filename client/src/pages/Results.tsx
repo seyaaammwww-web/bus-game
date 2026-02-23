@@ -10,7 +10,7 @@ import { RetroCard } from '@/components/ui/RetroCard';
 import { PixelAvatar } from '@/components/ui/PixelAvatar';
 import { RetroQuote } from '@/components/ui/RetroQuote';
 import { LetterDisplay } from '@/components/LetterDisplay';
-import { VotingPhase } from '@/components/VotingPhase';
+import { VotingOverlay } from '@/components/VotingOverlay';
 import { RefereeReviewOverlay } from '@/components/RefereeReviewOverlay';
 import { GameStats } from '@/components/results/GameStats';
 import { AppealDialog } from '@/components/results/AppealDialog';
@@ -75,16 +75,6 @@ export default function Results() {
     return () => clearInterval(timer);
   }, [isFinal, room.nextRoundAt]);
 
-  // Host AFK Fallback for Voting Mode
-  useEffect(() => {
-    if (!isFinal && room.phase === 'results' && room.settings?.enableVoting && isHost) {
-      const timer = setTimeout(() => {
-        nextRound();
-      }, 60000);
-      return () => clearTimeout(timer);
-    }
-  }, [isFinal, room.phase, room.settings?.enableVoting, isHost, nextRound]);
-
   const gameStats = useMemo(() => {
     if (!isFinal || room.rounds.length === 0) return null;
     const playerStats = new Map<string, any>();
@@ -143,7 +133,7 @@ export default function Results() {
       )}
 
       <Confetti active={isFinal} count={isMobile ? 1 : 3} />
-      <VotingPhase />
+      <VotingOverlay />
       <RefereeReviewOverlay />
 
       <div className="max-w-3xl mx-auto relative z-10">
@@ -194,7 +184,7 @@ export default function Results() {
                 🏆 نهاية اللعبة!
               </motion.h1>
 
-              {/* Top-3 Podium — Polish I: 3rd reveals first, 1st last with bigger spring */}
+              {/* Top-3 Podium */}
               {sortedPlayers.length >= 1 && (
                 <motion.div
                   className="flex items-end justify-center gap-3 mb-6"
@@ -202,13 +192,13 @@ export default function Results() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
                 >
-                  {/* 2nd place — reveals second */}
+                  {/* 2nd place */}
                   {sortedPlayers[1] && (
                     <motion.div
                       className="flex flex-col items-center"
                       initial={{ opacity: 0, y: 40 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.55 }}
+                      transition={{ delay: 0.6 }}
                     >
                       <PixelAvatar
                         src={sortedPlayers[1].avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${sortedPlayers[1].id}`}
@@ -218,16 +208,17 @@ export default function Results() {
                       <span className="text-xl my-0.5">🥈</span>
                       <p className="text-xs font-pixel-text text-white font-bold truncate max-w-[72px] leading-tight">{sortedPlayers[1].name}</p>
                       <p className="text-xs font-pixel-title text-slate-200 leading-tight">{sortedPlayers[1].score}</p>
+                      {/* Podium bar */}
                       <div className="w-20 h-10 bg-gradient-to-b from-slate-300 to-slate-500 border-t-[3px] border-slate-500 mt-2" />
                     </motion.div>
                   )}
 
-                  {/* 1st place — reveals last with overshoot spring */}
+                  {/* 1st place */}
                   <motion.div
                     className="flex flex-col items-center"
-                    initial={{ opacity: 0, y: 60, scale: 0.8 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    transition={{ delay: 0.75, type: 'spring', stiffness: 180, damping: 12 }}
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
                   >
                     <motion.div
                       animate={{ y: [0, -6, 0] }}
@@ -245,16 +236,17 @@ export default function Results() {
                     <span className="text-2xl my-0.5">🥇</span>
                     <p className="text-sm font-pixel-text text-white font-bold truncate max-w-[90px] leading-tight">{winner.name}</p>
                     <p className="text-sm font-pixel-title text-amber-200 leading-tight">{winner.score} نقطة</p>
+                    {/* Podium bar — tallest */}
                     <div className="w-24 h-16 bg-gradient-to-b from-amber-300 to-yellow-600 border-t-[3px] border-amber-600 mt-2" />
                   </motion.div>
 
-                  {/* 3rd place — reveals first */}
+                  {/* 3rd place */}
                   {sortedPlayers[2] && (
                     <motion.div
                       className="flex flex-col items-center"
                       initial={{ opacity: 0, y: 40 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.35 }}
+                      transition={{ delay: 0.7 }}
                     >
                       <PixelAvatar
                         src={sortedPlayers[2].avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${sortedPlayers[2].id}`}
@@ -264,6 +256,7 @@ export default function Results() {
                       <span className="text-xl my-0.5">🥉</span>
                       <p className="text-xs font-pixel-text text-white font-bold truncate max-w-[72px] leading-tight">{sortedPlayers[2].name}</p>
                       <p className="text-xs font-pixel-title text-orange-200 leading-tight">{sortedPlayers[2].score}</p>
+                      {/* Podium bar — shortest */}
                       <div className="w-20 h-6 bg-gradient-to-b from-orange-400 to-amber-700 border-t-[3px] border-amber-800 mt-2" />
                     </motion.div>
                   )}
@@ -329,16 +322,7 @@ export default function Results() {
                           {/* Score */}
                           <div className="flex items-center gap-1 flex-shrink-0">
                             <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                            {/* Polish K: score number pings green on change */}
-                            <motion.span
-                              key={player.score}
-                              initial={{ scale: 1.5, color: '#16a34a' }}
-                              animate={{ scale: 1, color: '#4c1d95' }}
-                              transition={{ type: 'spring', stiffness: 350, damping: 18 }}
-                              className="text-lg font-bold font-pixel-title tabular-nums"
-                            >
-                              {player.score}
-                            </motion.span>
+                            <span className="text-lg font-bold text-[#4c1d95] font-pixel-title tabular-nums">{player.score}</span>
                           </div>
                         </motion.div>
                       );
@@ -412,19 +396,7 @@ export default function Results() {
                             {isReferee && <Shield className="w-3 h-3 text-[#7c3aed] inline mr-1" />}
                           </p>
                         </div>
-                        <div className="flex items-center gap-1 flex-shrink-0">
-                          <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                          {/* Polish K: score pings green on change in mid-round scoreboard */}
-                          <motion.span
-                            key={player.score}
-                            initial={{ scale: 1.5, color: '#16a34a' }}
-                            animate={{ scale: 1, color: '#4c1d95' }}
-                            transition={{ type: 'spring', stiffness: 350, damping: 18 }}
-                            className="text-lg font-bold font-pixel-title"
-                          >
-                            {player.score}
-                          </motion.span>
-                        </div>
+                        <span className="text-lg font-bold text-[#4c1d95] font-pixel-title">{player.score}</span>
                       </motion.div>
                     );
                   })}

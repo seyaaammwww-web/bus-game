@@ -84,7 +84,7 @@ export default function Home() {
         transition={{ type: 'spring', stiffness: isMobileView ? 100 : 200, damping: 20 }}
         className="text-center mb-12 relative z-10"
       >
-        <div className="logo-container mb-2 animate-slow-float">
+        <div className={`logo-container mb-2 ${!isMobileView ? 'animate-slow-float' : ''}`}>
           {/* Logo with shine effect - uses CSS mask to constrain glow to logo shape */}
           <img
             src="/assets/logo.png"

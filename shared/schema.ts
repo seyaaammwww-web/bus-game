@@ -1,4 +1,16 @@
+import { pgTable, text, serial, integer, boolean } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { sqliteTable, text as sqliteText, integer as sqliteInteger } from "drizzle-orm/sqlite-core";
+
+export const users = sqliteTable("users", {
+  id: sqliteInteger("id").primaryKey({ autoIncrement: true }),
+  username: sqliteText("username").notNull().unique(),
+  password: sqliteText("password").notNull(),
+});
+
+export const insertUserSchema = createInsertSchema(users);
+export const selectUserSchema = createInsertSchema(users);
 
 
 // Game Types
@@ -43,8 +55,6 @@ export interface Player {
   powerUps: PowerUps;
   usedPowerUps: UsedPowerUps; // Track one-time usage
   totalEarnedPoints: number;
-  status?: 'active' | 'disconnected';
-  disconnectedAt?: number;
 }
 
 // Answers for a round
@@ -224,9 +234,7 @@ export type WSMessageType =
   | 'vote_session_start' // Individual word vote start
   | 'vote_session_result'
   | 'referee_toggle_validity'
-  | 'ping'
-  | 'pong'
-  | 'reconnect';
+  | 'ping';
 
 export interface WSMessage {
   type: WSMessageType;
