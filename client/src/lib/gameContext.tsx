@@ -157,6 +157,7 @@ interface GameContextType {
 
   refereeToggleValidity: (playerId: string, category: Category) => void;
   refereeOverride: (requestId: string, category: string, accepted: boolean) => void;
+  hostAdjustScore: (playerId: string, delta: number) => void;
 }
 
 const GameContext = createContext<GameContextType | null>(null);
@@ -410,6 +411,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
       }));
     }
   }, []);
+  const hostAdjustScore = useCallback((playerId: string, delta: number) => {
+    sendMessage('host_adjust_score', { targetPlayerId: playerId, delta });
+  }, [sendMessage]);
 
   const hostResolveVotes = useCallback(() => { sendMessage('host_resolve_votes', {}); }, [sendMessage]);
   // FIX: Host kick
@@ -496,6 +500,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       sendDraftUpdate,
       refereeToggleValidity,
       refereeOverride,
+      hostAdjustScore,
     }}>
       {children}
     </GameContext.Provider>

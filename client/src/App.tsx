@@ -11,6 +11,7 @@ import RefereeWaiting from "@/pages/RefereeWaiting";
 import Results from "@/pages/Results";
 
 import WorkOSBackground from "@/components/WorkOSBackground";
+import { AuditLog } from "@/components/AuditLog";
 
 function GameRouter() {
   const { state, isReferee } = useGame();
@@ -62,6 +63,7 @@ function App() {
         <GameProvider>
           <BackgroundManager />
           <GameRouter />
+          <AuditLog />
         </GameProvider>
         <Toaster />
       </TooltipProvider>

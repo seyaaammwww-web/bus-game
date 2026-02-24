@@ -10,6 +10,7 @@ import { useGame } from '@/lib/gameContext';
 import { RetroCard } from '@/components/ui/RetroCard';
 import { Tutorial } from '@/components/Tutorial';
 import { HelpCircle } from 'lucide-react';
+import { HostControls } from '@/components/HostControls';
 
 export default function Lobby() {
   const { state, currentPlayer, isHost, setReady, startGame, setReferee, removeReferee, referee, disconnect, updateSettings, kickPlayer } = useGame();
@@ -254,17 +255,9 @@ export default function Lobby() {
                         isReferee={player.id === room.refereeId}
                         index={index}
                       />
-                      {/* FIX: Kick button for host (can't kick yourself) */}
-                      {isHost && player.id !== state.playerId && (
-                        <button
-                          onClick={() => kickPlayer(player.id)}
-                          className="absolute top-2 left-2 w-7 h-7 bg-red-500 border-2 border-red-800 rounded-md flex items-center justify-center text-white hover:bg-red-600 active:scale-90 transition-all shadow-[2px_2px_0_0_#7f1d1d] z-10"
-                          title={`طرد ${player.name}`}
-                          data-testid={`button-kick-${player.id}`}
-                        >
-                          <UserX className="w-3.5 h-3.5" />
-                        </button>
-                      )}
+                      <div className="absolute top-2 left-2 z-10 scale-90">
+                        <HostControls type="player_row" targetPlayer={player} />
+                      </div>
                     </motion.div>
                   ))}
               </AnimatePresence>

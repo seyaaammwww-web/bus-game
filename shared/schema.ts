@@ -143,6 +143,15 @@ export interface VoteRequest {
   aiSuggestion?: boolean;
 }
 
+export interface AuditEntry {
+  type: string;
+  hostId: string;
+  targetId?: string;
+  details: string;
+  timestamp: number;
+  round: number;
+}
+
 export interface ActiveVote extends VoteRequest {
   votes: { yes: number; no: number };
   voterIds: string[]; // Who voted in this session
@@ -173,6 +182,7 @@ export interface GameRoom {
     customCategories?: string[];
     enableVoting?: boolean; // New Toggle
   };
+  auditLog?: AuditEntry[];
 }
 
 // Reaction types
@@ -245,6 +255,7 @@ export type WSMessageType =
   // FIX: New message types for parallel voting and host controls
   | 'pong'
   | 'cast_parallel_vote'
+  | 'host_adjust_score'
   | 'host_resolve_votes'
   | 'kick_player'
   | 'kicked'
