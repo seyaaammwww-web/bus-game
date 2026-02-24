@@ -22,6 +22,7 @@ interface ResultsTableProps {
     players: any[];
     currentPlayerId: string;
     isReferee: boolean;
+    isHost?: boolean;
     onRefereeToggle: (playerId: string, category: string) => void;
     onRefereeDeduct: (playerId: string, category: string) => void;
     onAppeal: (playerId: string, category: string, answer: string) => void;
@@ -32,10 +33,12 @@ export function ResultsTable({
     players,
     currentPlayerId,
     isReferee,
+    isHost,
     onRefereeToggle,
     onRefereeDeduct,
     onAppeal
 }: ResultsTableProps) {
+    const canOverride = isReferee || isHost;
 
     return (
         <div className="flex flex-col gap-4">
@@ -155,7 +158,7 @@ export function ResultsTable({
                                             </div>
 
                                             {/* Score Badge */}
-                                            <div className="shrink-0 md:absolute md:top-1 md:left-1">
+                                            <div className="shrink-0 md:absolute md:top-1 md:left-1 flex flex-col gap-1 items-center">
                                                 {answer && (
                                                     isValid ? (
                                                         <span className={cn(
@@ -169,6 +172,17 @@ export function ResultsTable({
                                                     ) : (
                                                         <X className="w-4 h-4 text-red-400 opacity-50" />
                                                     )
+                                                )}
+
+                                                {/* Host / Referee Toggle Button */}
+                                                {canOverride && answer && (
+                                                    <button
+                                                        onClick={() => onRefereeToggle(submission.playerId, cat)}
+                                                        className="p-1 rounded bg-black/10 hover:bg-black/20 transition-colors mt-1"
+                                                        title="تعديل احتساب الكلمة"
+                                                    >
+                                                        <Shield className="w-3 h-3 text-[#4c1d95]" />
+                                                    </button>
                                                 )}
                                             </div>
 

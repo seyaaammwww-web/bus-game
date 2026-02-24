@@ -845,6 +845,12 @@ export class GameManager {
 
     let allVotesDone = false;
 
+    // Security check: cannot vote for your own word
+    if (votePayload.requesterId === p.playerId) {
+      this.send(ws, { type: 'toast', payload: { message: 'لا يمكنك التصويت على إجابتك!', type: 'error' } });
+      return;
+    }
+
     buffer.transact(draft => {
       if (draft.phase !== 'voting') return;
       if (!draft.voteQueue) return;

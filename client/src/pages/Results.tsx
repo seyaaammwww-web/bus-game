@@ -447,6 +447,7 @@ export default function Results() {
                 players={room.players}
                 currentPlayerId={state.playerId!}
                 isReferee={isReferee}
+                isHost={isHost}
                 onRefereeToggle={refereeToggleUnique}
                 onRefereeDeduct={(pid, cat) => refereeDeduct(pid, cat, 'رفض الحكم')}
                 onAppeal={(pid, cat, ans) => setAppealDialog({ playerId: pid, category: cat, word: ans })}
@@ -496,7 +497,7 @@ export default function Results() {
                     // Host Control for Voting Mode
                     <div className="space-y-2">
                       <p className="text-[#FFFDD1] font-bold font-pixel-text text-lg">
-                        🗳️ وضع التصويت مفعل
+                        وضع التصويت مفعل
                       </p>
                       <Button
                         onClick={() => nextRound()}
@@ -504,7 +505,7 @@ export default function Results() {
                         className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
                         data-testid="button-next-round"
                       >
-                        ➡️ الاستمرار للجولة التالية
+                        الاستمرار للجولة التالية
                       </Button>
                     </div>
                   ) : (
