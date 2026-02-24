@@ -77,10 +77,11 @@ export function ResultsTable({
                     const player = players.find(p => p.id === submission.playerId);
 
                     const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
+                    const totalScore = calculateTotalScore(round, submission.playerId);
 
                     return (
                         <motion.div
-                            key={submission.playerId}
+                            key={`${submission.playerId}-${totalScore}`}
                             variants={{
                                 hidden: { opacity: 0, y: 50, scale: 0.9 },
                                 visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 300, damping: 20 } }
@@ -108,7 +109,7 @@ export function ResultsTable({
                                         </div>
                                     </div>
                                     <div className="text-xl font-bold font-pixel-title text-[#4c1d95]">
-                                        +{calculateTotalScore(round, submission.playerId)}
+                                        +{totalScore}
                                     </div>
                                 </div>
 

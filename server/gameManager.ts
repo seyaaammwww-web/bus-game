@@ -1326,6 +1326,9 @@ export class GameManager {
           );
 
           // FIX (#3): Phase 3 Real-time Score Re-calculations
+          // Calculate round scores FIRST
+          this.roundManager.calculateAnswerScores(draft);
+          // Then recalculate total player scores
           this.recalculatePlayerTotals(draft);
 
           if (draft.nextRoundAt) {
@@ -1336,7 +1339,6 @@ export class GameManager {
       }
 
       if (draft.voteQueue.length === 0) {
-        this.roundManager.calculateAnswerScores(draft);
         allVotesDone = true;
       }
     }, "referee_override");

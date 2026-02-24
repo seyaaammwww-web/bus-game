@@ -284,7 +284,7 @@ export default function Results() {
                       const medals = ['1', '2', '3'];
                       return (
                         <motion.div
-                          key={player.id}
+                          key={`${player.id}-${player.score}`}
                           initial={{ x: -30, opacity: 0 }}
                           animate={{ x: 0, opacity: 1 }}
                           transition={{ delay: 0.85 + index * 0.07, type: 'spring', stiffness: 300 }}
@@ -376,7 +376,7 @@ export default function Results() {
                     const isReferee = player.id === room.refereeId;
                     return (
                       <motion.div
-                        key={player.id}
+                        key={`${player.id}-${player.score}`}
                         className={`flex items-center gap-2 p-2 rounded-lg border-[2px] ${player.id === state.playerId
                           ? 'bg-gradient-to-r from-[#7c3aed]/10 to-[#8b5cf6]/10 border-[#7c3aed]'
                           : 'bg-white/80 border-[#4c1d95]/20'
