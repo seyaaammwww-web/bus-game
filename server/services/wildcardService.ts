@@ -127,8 +127,9 @@ export class WildcardService {
     private getDatabaseKey(letter: string): string | null {
         if (this.database[letter]) return letter;
 
-        const normalized = this.normalizeArabic(letter);
-        const key = Object.keys(this.database).find(k => this.normalizeArabic(k) === normalized);
+        // WS5: Use this.normalizer.normalize (same as validateWord) for consistency
+        const normalized = this.normalizer.normalize(letter);
+        const key = Object.keys(this.database).find(k => this.normalizer.normalize(k) === normalized);
         return key || null;
     }
 
@@ -213,16 +214,16 @@ export class WildcardService {
             isValid = true;
         }
 
-        // 6. Update Cache with LRU eviction
+        // 6. Update Cache with FIFO eviction (Map preserves insertion order)
+        // WS1: Removes oldest 25% of entries when full — not true LRU but practical for this use case
         if (this.validationCache.size >= this.MAX_CACHE_SIZE) {
-            // LRU eviction: Remove oldest 25% when full
             const entriesToRemove = Math.floor(this.MAX_CACHE_SIZE * 0.25);
             const iterator = this.validationCache.keys();
             for (let i = 0; i < entriesToRemove; i++) {
                 const key = iterator.next().value;
                 if (key) this.validationCache.delete(key);
             }
-            console.log(`[Cache] Evicted ${entriesToRemove} oldest entries (LRU)`);
+            console.log(`[Cache] Evicted ${entriesToRemove} oldest entries (FIFO)`);
         }
         this.validationCache.set(cacheKey, isValid);
 
@@ -375,9 +376,9 @@ export class WildcardService {
         if (!this.database[dbKey]) this.database[dbKey] = {};
         if (!this.database[dbKey][category]) this.database[dbKey][category] = [];
 
-        const normalizedWord = this.normalizeArabic(word);
+        const normalizedWord = this.normalizer.normalize(word);
         const exists = this.database[dbKey][category].some(w =>
-            this.normalizeArabic(w) === normalizedWord
+            this.normalizer.normalize(w) === normalizedWord
         );
 
         if (exists) return false;
@@ -388,15 +389,19 @@ export class WildcardService {
         const cacheKey = `${letter}:${category}:${normalizedWord}`;
         this.validationCache.delete(cacheKey);
 
-        try {
-            this.database[dbKey][category].sort();
-            fs.writeFileSync(cleanDbPath, JSON.stringify(this.database, null, 2), 'utf-8');
-            console.log(`[Wildcard DB] Added ${word} to ${dbKey}:${category}`);
-            return true;
-        } catch (error) {
-            console.error('[Wildcard DB] Failed to save:', error);
-            return false;
-        }
+        // WS3: Use async write queue to avoid blocking the event loop
+        this.database[dbKey][category].sort();
+        const snapshot = JSON.stringify(this.database, null, 2);
+        enqueueWrite(async () => {
+            try {
+                await fsAsync.writeFile(cleanDbPath, snapshot, 'utf-8');
+                console.log(`[Wildcard DB] Added ${word} to ${dbKey}:${category}`);
+            } catch (error) {
+                console.error('[Wildcard DB] Failed to save:', error);
+            }
+        });
+
+        return true;
     }
 
     /**

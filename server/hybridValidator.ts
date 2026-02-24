@@ -73,9 +73,10 @@ export class HybridValidator {
   }
 
   /**
-   * Validate a batch synchronously — much faster now without AI calls.
+   * Validate a batch — synchronous internally, async return kept for API compatibility.
+   * HV1: No await calls inside, so async keyword is removed for clarity.
    */
-  async validateBatch(
+  validateBatch(
     items: Array<{ playerId: string, category: Category, letter: string, answer: string }>,
     seed?: number
   ): Promise<Map<string, ValidationResult>> {
@@ -88,7 +89,7 @@ export class HybridValidator {
       results.set(key, result);
     }
 
-    return results;
+    return Promise.resolve(results);
   }
 
   getMetrics() {
