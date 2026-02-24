@@ -280,7 +280,17 @@ export class RoundManager {
         try {
             validationResults = await HybridValidator.getInstance().validateBatch(itemsToValidate, seed);
         } catch (e) {
+            // RM4: Validation failure must NOT penalise players — fall back to lenient per-answer check
+            console.error(`[RoundManager] validateBatch failed for room ${roomRead.code}, falling back to lenient validation.`, e);
             validationResults = new Map();
+            for (const item of itemsToValidate) {
+                const isLenient = validateAnswerLenient(round.letter, item.category as Category, item.answer);
+                validationResults.set(`${item.playerId}:${item.category}`, {
+                    isValid: isLenient,
+                    reason: isLenient ? 'مقبول (احتياطي)' : 'غير مقبول (احتياطي)',
+                    source: 'heuristic'
+                });
+            }
         }
 
         // Apply Results to State
@@ -375,6 +385,12 @@ export class RoundManager {
         const eligibleVoterIds = draft.players
             .filter(pl => pl.id !== draft.refereeId && pl.id !== dRound.banishedPlayerId)
             .map(pl => pl.id);
+
+        // RM5: Guard against undefined validatedAnswers (shouldn't happen, but defensive)
+        if (!dRound.validatedAnswers || dRound.validatedAnswers.length === 0) {
+            draft.voteQueue = [];
+            return;
+        }
 
         // Build queue from all pending votes
         draft.voteQueue = dRound.validatedAnswers

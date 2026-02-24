@@ -59,8 +59,11 @@ export class HybridValidator {
     }
 
     this.metrics.dbMisses++;
-    // Log unknown words for future database expansion
-    WildcardService.getInstance().logSuggestion(letter, category, trimmed);
+    // DATA3: Only log Arabic words to suggestions — filter out test/English entries
+    const isArabic = /[\u0600-\u06FF]/.test(trimmed);
+    if (isArabic) {
+      WildcardService.getInstance().logSuggestion(letter, category, trimmed);
+    }
 
     return {
       isValid: false,
