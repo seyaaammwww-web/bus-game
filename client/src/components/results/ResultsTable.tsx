@@ -25,7 +25,6 @@ interface ResultsTableProps {
     isHost?: boolean;
     onRefereeToggle: (playerId: string, category: string) => void;
     onRefereeDeduct: (playerId: string, category: string) => void;
-    onAppeal: (playerId: string, category: string, answer: string) => void;
 }
 
 export function ResultsTable({
@@ -35,8 +34,7 @@ export function ResultsTable({
     isReferee,
     isHost,
     onRefereeToggle,
-    onRefereeDeduct,
-    onAppeal
+    onRefereeDeduct
 }: ResultsTableProps) {
     const canOverride = isReferee || isHost;
 
@@ -185,19 +183,6 @@ export function ResultsTable({
                                                     </button>
                                                 )}
                                             </div>
-
-                                            {/* Appeal Button — visible for my invalid answers */}
-                                            {isMe && !isValid && answer && !isReferee && (
-                                                <button
-                                                    onClick={() => onAppeal(submission.playerId, cat, answer)}
-                                                    className="absolute inset-0 w-full h-full flex items-end justify-center pb-1 opacity-0 group-hover/cell:opacity-100 group-active/cell:opacity-100 md:opacity-0 md:group-hover/cell:opacity-100 transition-opacity bg-red-50/80"
-                                                >
-                                                    <span className="inline-flex items-center gap-1 bg-[#7c3aed] text-white text-[9px] font-pixel-text font-bold px-2 py-0.5 rounded-full border border-[#4c1d95] shadow-[1px_1px_0_0_#2e1065] whitespace-nowrap">
-                                                        <MessageSquarePlus className="w-3 h-3" />
-                                                        استئناف
-                                                    </span>
-                                                </button>
-                                            )}
                                         </div>
                                     );
                                 })}

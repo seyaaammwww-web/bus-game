@@ -154,7 +154,7 @@ interface GameContextType {
   banishedBy: string | null;
   banishOverlay: boolean;
   setBanishOverlay: (show: boolean) => void;
-  appealAnswer: (playerId: string, category: string, word: string) => void;
+
   refereeToggleValidity: (playerId: string, category: Category) => void;
   refereeOverride: (requestId: string, category: string, accepted: boolean) => void;
 }
@@ -417,7 +417,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const activatePowerUp = useCallback((type: PowerUpType, targetId?: string) => {
     sendMessage('activate_powerup', targetId ? { type, targetPlayerId: targetId } : { type });
   }, [sendMessage]);
-  const appealAnswer = useCallback((playerId: string, category: string, word: string) => { sendMessage('appeal_answer', { playerId, category, word }); }, [sendMessage]);
 
   const disconnect = useCallback(() => {
     isIntentionalDisconnectRef.current = true;
@@ -493,7 +492,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       banishedBy,
       banishOverlay,
       setBanishOverlay,
-      appealAnswer,
+
       sendDraftUpdate,
       refereeToggleValidity,
       refereeOverride,

@@ -13,7 +13,7 @@ import { LetterDisplay } from '@/components/LetterDisplay';
 import { VotingOverlay } from '@/components/VotingOverlay';
 import { RefereeReviewOverlay } from '@/components/RefereeReviewOverlay';
 import { GameStats } from '@/components/results/GameStats';
-import { AppealDialog } from '@/components/results/AppealDialog';
+
 import { ResultsTable } from '@/components/results/ResultsTable';
 import { PixelReveal } from '@/components/ui/PixelReveal';
 
@@ -38,9 +38,8 @@ const rankColors = ['bg-gradient-to-br from-amber-300 to-yellow-500', 'bg-gradie
 const rankIcons = [Crown, Medal, Star];
 
 export default function Results() {
-  const { state, currentRound, isHost, nextRound, playAgain, disconnect, isReferee, refereeDeduct, refereeToggleUnique, refereeApprove, appealAnswer, requestVote } = useGame();
+  const { state, currentRound, isHost, nextRound, playAgain, disconnect, isReferee, refereeDeduct, refereeToggleUnique, refereeApprove, requestVote } = useGame();
   const [countdown, setCountdown] = useState(5);
-  const [appealDialog, setAppealDialog] = useState<{ playerId: string; category: string; word: string } | null>(null);
 
   const room = state.room!;
   const isFinal = room.phase === 'final';
@@ -450,7 +449,6 @@ export default function Results() {
                 isHost={isHost}
                 onRefereeToggle={refereeToggleUnique}
                 onRefereeDeduct={(pid, cat) => refereeDeduct(pid, cat, 'رفض الحكم')}
-                onAppeal={(pid, cat, ans) => setAppealDialog({ playerId: pid, category: cat, word: ans })}
               />
             </div>
           </motion.div>
@@ -521,24 +519,6 @@ export default function Results() {
             </>
           )}
         </motion.div>
-        {/* Appeal Confirmation Dialog */}
-        <AppealDialog
-          isOpen={!!appealDialog}
-          onClose={() => setAppealDialog(null)}
-          onConfirm={() => {
-            if (appealDialog) {
-              if (room.settings?.enableVoting) {
-                requestVote(appealDialog.playerId, appealDialog.category, appealDialog.word);
-              } else {
-                appealAnswer(appealDialog.playerId, appealDialog.category, appealDialog.word);
-              }
-              setAppealDialog(null);
-            }
-          }}
-          itemName={appealDialog?.word}
-          categoryName={appealDialog?.category}
-          isVotingEnabled={room.settings?.enableVoting}
-        />
       </div>
     </div>
   );
