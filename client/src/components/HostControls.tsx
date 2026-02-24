@@ -26,35 +26,6 @@ export const HostControls: React.FC<HostControlsProps> = ({ type, targetPlayer }
         return (
             <div className="flex items-center gap-1 ml-auto">
                 <TooltipProvider>
-                    <div className="flex items-center bg-slate-800/50 rounded-lg p-1 border border-slate-700">
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-6 w-6 text-red-400 hover:text-red-300 hover:bg-red-400/10"
-                                    onClick={() => hostAdjustScore(targetPlayer.id, -10)}
-                                >
-                                    <Minus className="w-3 h-3" />
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent className="bg-slate-900 border-slate-700 text-[10px] font-pixel">خسم 10 نقاط</TooltipContent>
-                        </Tooltip>
-
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-6 w-6 text-green-400 hover:text-green-300 hover:bg-green-400/10"
-                                    onClick={() => hostAdjustScore(targetPlayer.id, 10)}
-                                >
-                                    <Plus className="w-3 h-3" />
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent className="bg-slate-900 border-slate-700 text-[10px] font-pixel">إضافة 10 نقاط</TooltipContent>
-                        </Tooltip>
-                    </div>
 
                     {!isMe && (
                         <Tooltip>
