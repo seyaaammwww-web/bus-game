@@ -261,14 +261,39 @@ export class GameManager {
       // FIX (#12): Clean up eligibleVoterIds and orphaned vote requests when player leaves
       buffer.transact(draft => {
         if (draft.voteQueue) {
+          // Remove any vote items that belong to this player (their answer was pending)
           draft.voteQueue = draft.voteQueue.filter((v: any) => v.requesterId !== playerInfo.playerId);
+
           draft.voteQueue.forEach((v: any) => {
+            // Remove from eligible list
             if (v.eligibleVoterIds) {
               v.eligibleVoterIds = v.eligibleVoterIds.filter((id: string) => id !== playerInfo.playerId);
+            }
+
+            // Retract any vote they already cast — keeps yes+no <= eligibleVoterIds.length
+            // so the "all voted" condition can still trigger correctly
+            if (v.voterIds && v.voterIds.includes(playerInfo.playerId)) {
+              v.voterIds = v.voterIds.filter((id: string) => id !== playerInfo.playerId);
+              // Precise retraction using voteMap if available
+              if (v.voteMap && v.voteMap[playerInfo.playerId]) {
+                const direction = v.voteMap[playerInfo.playerId];
+                if (direction === 'yes' && v.votes?.yes > 0) v.votes.yes--;
+                else if (direction === 'no' && v.votes?.no > 0) v.votes.no--;
+                delete v.voteMap[playerInfo.playerId];
+              } else if (v.votes) {
+                // Fallback heuristic: decrement minority side
+                const newTotal = v.eligibleVoterIds?.length ?? 0;
+                const currentTotal = (v.votes.yes ?? 0) + (v.votes.no ?? 0);
+                if (currentTotal > newTotal) {
+                  if ((v.votes.no ?? 0) > 0) v.votes.no = Math.max(0, (v.votes.no ?? 0) - 1);
+                  else v.votes.yes = Math.max(0, (v.votes.yes ?? 0) - 1);
+                }
+              }
             }
           });
         }
       }, `player_left:${playerInfo.playerId}`);
+
 
       const room = buffer.get();
       if (room.players.length > 0) {
@@ -1109,6 +1134,8 @@ export class GameManager {
 
       item.voterIds.push(p.playerId);
       if (!item.votes) item.votes = { yes: 0, no: 0 };
+      if (!item.voteMap) item.voteMap = {}; // { [playerId]: 'yes' | 'no' }
+      item.voteMap[p.playerId] = votePayload.vote;
       if (votePayload.vote === 'yes') item.votes.yes++;
       else item.votes.no++;
 
