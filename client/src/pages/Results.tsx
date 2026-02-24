@@ -339,201 +339,204 @@ export default function Results() {
               </motion.div>
             </>
           ) : (
-              </div>
-    </>
-  )
-}
-
-{/* Overall Host Controls (Force Resolve, etc.) */ }
-{
-  isHost && (
-    <div className="mb-6 flex justify-center">
-      <HostControls type="overall" />
-    </div>
-  )
-}
-        </motion.div >
-
-  {!isFinal && (
-    <motion.div
-      initial={{ y: 30, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ delay: 0.2 }}
-    >
-      <RetroCard className="mb-4">
-        <div className="flex items-center gap-2 mb-3 font-pixel-title text-[#4c1d95] text-base">
-          <div className="w-7 h-7 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-lg flex items-center justify-center">
-            <Trophy className="w-4 h-4 text-white" />
-          </div>
-          الترتيب
-        </div>
-        <div className="space-y-2">
-          <AnimatePresence>
-            {sortedPlayers.map((player, index) => {
-              const RankIcon = rankIcons[index] || Star;
-              const isReferee = player.id === room.refereeId;
-              return (
-                <motion.div
-                  key={player.id}
-                  className={`flex items-center gap-2 p-2 rounded-lg border-[2px] ${player.id === state.playerId
-                    ? 'bg-gradient-to-r from-[#7c3aed]/10 to-[#8b5cf6]/10 border-[#7c3aed]'
-                    : 'bg-white/80 border-[#4c1d95]/20'
-                    } font-pixel-text text-sm`}
-                  initial={{ x: -20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.05 * index }}
-                >
-                  {index < 3 ? (
-                    <div className={`w-8 h-8 rounded-lg ${rankColors[index]} flex items-center justify-center text-white border border-white/50`}>
-                      <RankIcon className="w-4 h-4" />
-                    </div>
-                  ) : (
-                    <div className="w-8 h-8 rounded-lg bg-[#4c1d95]/10 flex items-center justify-center text-[#4c1d95] font-bold text-sm">
-                      {index + 1}
-                    </div>
-                  )}
-
-                  <PixelAvatar
-                    src={player.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${player.id}`}
-                    className="w-8 h-8 border border-[#4c1d95]/30"
-                    size="sm"
-                  />
-
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-sm text-[#4c1d95] font-pixel-text truncate">
-                      {player.name}
-                      {player.isHost && <Crown className="w-3 h-3 text-amber-500 inline mr-1" />}
-                      {isReferee && <Shield className="w-3 h-3 text-[#7c3aed] inline mr-1" />}
-                    </p>
-                  </div>
-                  <span className="text-lg font-bold text-[#4c1d95] font-pixel-title">{player.score}</span>
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
-        </div>
-      </RetroCard>
-    </motion.div>
-  )}
-
-{
-  isFinal && gameStats && (
-    <GameStats gameStats={gameStats} />
-  )
-}
-
-{/* End Game Button for Final Screen */ }
-<motion.div
-  initial={{ y: 20, opacity: 0 }}
-  animate={{ y: 0, opacity: 1 }}
-  transition={{ delay: 0.5 }}
->
-  <Button
-    onClick={disconnect}
-    size="lg"
-    className="w-full h-16 text-xl font-bold bg-gradient-to-r from-[#7c3aed] to-[#8b5cf6] hover:from-[#6d28d9] hover:to-[#7c3aed] text-white shadow-[4px_4px_0_0_#2e1065] border-[3px] border-[#4c1d95] font-pixel-title"
-    data-testid="button-end-game"
-  >
-    <Home className="w-6 h-6 ml-2" />
-    العودة للرئيسية
-  </Button>
-</motion.div>
-
-
-{
-  !isFinal && currentRound && (
-    <motion.div
-      initial={{ y: 30, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ delay: 0.3 }}
-    >
-      <div className="bg-[#4c1d95] text-[#FFFDD1] px-4 py-3 border-b-4 border-[#2e1065] rounded-t-lg">
-        <div className="flex items-center gap-2">
-          <span className="text-xl"></span>
-          <span className="font-pixel-title text-lg tracking-wide">نتائج الجولة</span>
-        </div>
-      </div>
-
-      <div className="bg-[#f3e8ff] p-4 rounded-b-lg border-x-4 border-b-4 border-[#4c1d95]">
-        <ResultsTable
-          round={currentRound}
-          players={room.players}
-          currentPlayerId={state.playerId!}
-          isReferee={isReferee}
-          isHost={isHost}
-          onRefereeToggle={refereeToggleUnique}
-          onRefereeDeduct={(pid, cat) => refereeDeduct(pid, cat, 'رفض الحكم')}
-        />
-      </div>
-    </motion.div>
-  )
-}
-
-<motion.div
-  className="space-y-3"
-  initial={{ y: 30, opacity: 0 }}
-  animate={{ y: 0, opacity: 1 }}
-  transition={{ delay: 0.4 }}
->
-  {!isFinal && (
-    <>
-      {/* Case 1: Countdown Running (Approved or Auto) */}
-      {room.nextRoundAt ? (
-        <div className="w-full h-20 bg-gradient-to-r from-[#7c3aed]/20 to-[#8b5cf6]/20 rounded-2xl flex items-center justify-center gap-5 border-[3px] border-[#4c1d95] shadow-[3px_3px_0_0_#2e1065] font-pixel-text text-xl font-bold">
-          <span className="text-white text-xl">الجولة التالية في</span>
-          <motion.span
-            key={countdown}
-            initial={{ scale: 1.5, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="w-14 h-14 bg-gradient-to-br from-white to-[#faf5ff] text-[#4c1d95] rounded-full flex items-center justify-center font-bold shadow-lg border-2 border-[#4c1d95] font-pixel-title text-2xl"
-          >
-            {countdown}
-          </motion.span>
-        </div>
-      ) : (
-        /* Case 2: Waiting for Referee (No Timer) */
-        <div className="w-full p-4 bg-[#4c1d95]/80 rounded-2xl text-center border-[3px] border-[#FFFDD1] shadow-lg backdrop-blur-sm">
-          {isReferee ? (
-            <div className="space-y-2">
-              <p className="text-[#FFFDD1] font-bold font-pixel-text text-lg animate-pulse">
-                الوقت متوقف للمراجعة
-              </p>
-              <Button
-                onClick={() => room.phase === 'results' ? nextRound() : refereeApprove()}
-                size="lg"
-                className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
-              >
-                {room.phase === 'results' ? '➡️ بدء الجولة التالية' : 'اعتماد النتيجة وبدء الجولة'}
-              </Button>
-            </div>
-          ) : room.settings?.enableVoting && isHost ? (
-            // Host Control for Voting Mode
-            <div className="space-y-2">
-              <p className="text-[#FFFDD1] font-bold font-pixel-text text-lg">
-                وضع التصويت مفعل
-              </p>
-              <Button
-                onClick={() => nextRound()}
-                size="lg"
-                className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
-                data-testid="button-next-round"
-              >
-                الاستمرار للجولة التالية
-              </Button>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center gap-2">
-              <Timer className="w-8 h-8 text-[#FFFDD1] animate-spin-slow" />
-              <p className="text-[#FFFDD1] font-bold font-pixel-text text-xl">
-                {room.settings?.enableVoting ? 'في انتظار المضيف...' : 'في انتظار اعتماد الحكم...'}
-              </p>
+            <div className="flex justify-center mb-6">
+              <LetterDisplay
+                letter={currentRound?.letter || '?'}
+                round={room.currentRound + 1}
+                totalRounds={room.totalRounds}
+              />
             </div>
           )}
-        </div>
-      )}
-    </>
-</motion.div>
-      </div >
-    </div >
+
+          {/* Overall Host Controls (Force Resolve, etc.) */}
+          {isHost && (
+            <div className="mb-6 flex justify-center">
+              <HostControls type="overall" />
+            </div>
+          )}
+        </motion.div>
+
+        {!isFinal && (
+          <motion.div
+            initial={{ y: 30, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            <RetroCard className="mb-4">
+              <div className="flex items-center gap-2 mb-3 font-pixel-title text-[#4c1d95] text-base">
+                <div className="w-7 h-7 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-lg flex items-center justify-center">
+                  <Trophy className="w-4 h-4 text-white" />
+                </div>
+                الترتيب
+              </div>
+              <div className="space-y-2">
+                <AnimatePresence>
+                  {sortedPlayers.map((player, index) => {
+                    const RankIcon = rankIcons[index] || Star;
+                    const isReferee = player.id === room.refereeId;
+                    return (
+                      <motion.div
+                        key={player.id}
+                        className={`flex items-center gap-2 p-2 rounded-lg border-[2px] ${player.id === state.playerId
+                          ? 'bg-gradient-to-r from-[#7c3aed]/10 to-[#8b5cf6]/10 border-[#7c3aed]'
+                          : 'bg-white/80 border-[#4c1d95]/20'
+                          } font-pixel-text text-sm`}
+                        initial={{ x: -20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ delay: 0.05 * index }}
+                      >
+                        {index < 3 ? (
+                          <div className={`w-8 h-8 rounded-lg ${rankColors[index]} flex items-center justify-center text-white border border-white/50`}>
+                            <RankIcon className="w-4 h-4" />
+                          </div>
+                        ) : (
+                          <div className="w-8 h-8 rounded-lg bg-[#4c1d95]/10 flex items-center justify-center text-[#4c1d95] font-bold text-sm">
+                            {index + 1}
+                          </div>
+                        )}
+
+                        <PixelAvatar
+                          src={player.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${player.id}`}
+                          className="w-8 h-8 border border-[#4c1d95]/30"
+                          size="sm"
+                        />
+
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-sm text-[#4c1d95] font-pixel-text truncate">
+                            {player.name}
+                            {player.isHost && <Crown className="w-3 h-3 text-amber-500 inline mr-1" />}
+                            {isReferee && <Shield className="w-3 h-3 text-[#7c3aed] inline mr-1" />}
+                          </p>
+                        </div>
+                        <span className="text-lg font-bold text-[#4c1d95] font-pixel-title">{player.score}</span>
+                      </motion.div>
+                    );
+                  })}
+                </AnimatePresence>
+              </div>
+            </RetroCard>
+          </motion.div>
+        )}
+
+        {
+          isFinal && gameStats && (
+            <GameStats gameStats={gameStats} />
+          )
+        }
+
+        {/* End Game Button for Final Screen */}
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5 }}
+        >
+          <Button
+            onClick={disconnect}
+            size="lg"
+            className="w-full h-16 text-xl font-bold bg-gradient-to-r from-[#7c3aed] to-[#8b5cf6] hover:from-[#6d28d9] hover:to-[#7c3aed] text-white shadow-[4px_4px_0_0_#2e1065] border-[3px] border-[#4c1d95] font-pixel-title"
+            data-testid="button-end-game"
+          >
+            <Home className="w-6 h-6 ml-2" />
+            العودة للرئيسية
+          </Button>
+        </motion.div>
+
+
+        {
+          !isFinal && currentRound && (
+            <motion.div
+              initial={{ y: 30, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              <div className="bg-[#4c1d95] text-[#FFFDD1] px-4 py-3 border-b-4 border-[#2e1065] rounded-t-lg">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl"></span>
+                  <span className="font-pixel-title text-lg tracking-wide">نتائج الجولة</span>
+                </div>
+              </div>
+
+              <div className="bg-[#f3e8ff] p-4 rounded-b-lg border-x-4 border-b-4 border-[#4c1d95]">
+                <ResultsTable
+                  round={currentRound}
+                  players={room.players}
+                  currentPlayerId={state.playerId!}
+                  isReferee={isReferee}
+                  isHost={isHost}
+                  onRefereeToggle={refereeToggleUnique}
+                  onRefereeDeduct={(pid, cat) => refereeDeduct(pid, cat, 'رفض الحكم')}
+                />
+              </div>
+            </motion.div>
+          )
+        }
+
+        <motion.div
+          className="space-y-3"
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.4 }}
+        >
+          {!isFinal && (
+            <>
+              {/* Case 1: Countdown Running (Approved or Auto) */}
+              {room.nextRoundAt ? (
+                <div className="w-full h-20 bg-gradient-to-r from-[#7c3aed]/20 to-[#8b5cf6]/20 rounded-2xl flex items-center justify-center gap-5 border-[3px] border-[#4c1d95] shadow-[3px_3px_0_0_#2e1065] font-pixel-text text-xl font-bold">
+                  <span className="text-white text-xl">الجولة التالية في</span>
+                  <motion.span
+                    key={countdown}
+                    initial={{ scale: 1.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="w-14 h-14 bg-gradient-to-br from-white to-[#faf5ff] text-[#4c1d95] rounded-full flex items-center justify-center font-bold shadow-lg border-2 border-[#4c1d95] font-pixel-title text-2xl"
+                  >
+                    {countdown}
+                  </motion.span>
+                </div>
+              ) : (
+                /* Case 2: Waiting for Referee (No Timer) */
+                <div className="w-full p-4 bg-[#4c1d95]/80 rounded-2xl text-center border-[3px] border-[#FFFDD1] shadow-lg backdrop-blur-sm">
+                  {isReferee ? (
+                    <div className="space-y-2">
+                      <p className="text-[#FFFDD1] font-bold font-pixel-text text-lg animate-pulse">
+                        الوقت متوقف للمراجعة
+                      </p>
+                      <Button
+                        onClick={() => room.phase === 'results' ? nextRound() : refereeApprove()}
+                        size="lg"
+                        className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
+                      >
+                        {room.phase === 'results' ? '➡️ بدء الجولة التالية' : 'اعتماد النتيجة وبدء الجولة'}
+                      </Button>
+                    </div>
+                  ) : room.settings?.enableVoting && isHost ? (
+                    // Host Control for Voting Mode
+                    <div className="space-y-2">
+                      <p className="text-[#FFFDD1] font-bold font-pixel-text text-lg">
+                        وضع التصويت مفعل
+                      </p>
+                      <Button
+                        onClick={() => nextRound()}
+                        size="lg"
+                        className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
+                        data-testid="button-next-round"
+                      >
+                        الاستمرار للجولة التالية
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-2">
+                      <Timer className="w-8 h-8 text-[#FFFDD1] animate-spin-slow" />
+                      <p className="text-[#FFFDD1] font-bold font-pixel-text text-xl">
+                        {room.settings?.enableVoting ? 'في انتظار المضيف...' : 'في انتظار اعتماد الحكم...'}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+        </motion.div>
+      </div>
+    </div>
   );
 }

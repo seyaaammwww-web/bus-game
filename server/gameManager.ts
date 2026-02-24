@@ -710,48 +710,87 @@ export class GameManager {
   }
 
   activatePowerUp(ws: WebSocket, payload: any) {
-    // existing implementation unchanged
+    const p = this.playerManager.getPlayer(ws);
+    if (!p) return;
+    const buffer = this.roomManager.getRoomBuffer(p.roomId);
+    if (!buffer) return;
+
+    buffer.transact(draft => {
+      const round = draft.rounds[draft.currentRound];
+      if (!round || round.powerUpUsedInRound) return;
+      if (round.banishedPlayerId === p.playerId) return;
+
+      const player = draft.players.find(pl => pl.id === p.playerId);
+      if (!player) return;
+
+      if (payload.type === 'wildcard') {
+        if (!player.usedPowerUps.wildcard && player.powerUps.wildcard > 0) {
+          player.powerUps.wildcard--;
+          player.usedPowerUps.wildcard = true;
+          round.wildcardUsedByPlayerId = p.playerId;
+          round.powerUpUsedInRound = true;
+
+          // FIX (#17): Pick a random unused word from DB for the player
+          const letter = draft.letters[draft.currentRound];
+          const category = payload.category as string;
+          if (category) {
+            const possibleWords = WildcardService.getInstance().getWords(letter, category);
+            const usedAnswers = round.submissions.flatMap(sub =>
+              sub.answers[category] ? [sub.answers[category]] : []
+            );
+
+            // Filter out already used words to ensure uniqueness
+            const freshWords = possibleWords.filter(w => !usedAnswers.includes(w));
+            const chosen = freshWords.length > 0 ? freshWords[Math.floor(Math.random() * freshWords.length)] : possibleWords[0];
+
+            if (chosen) {
+              const submission = round.submissions.find(s => s.playerId === p.playerId);
+              if (submission) {
+                submission.answers[category] = chosen;
+              } else {
+                round.submissions.push({
+                  playerId: p.playerId,
+                  playerName: player?.name || 'Unknown',
+                  answers: { [category]: chosen },
+                  submittedAt: Date.now(),
+                  busComplete: false
+                });
+              }
+            } else {
+              // Fallback if no fresh words available
+              const fallback = possibleWords.length > 0 ? possibleWords[Math.floor(Math.random() * possibleWords.length)] : 'جمل';
+              const submission = round.submissions.find(s => s.playerId === p.playerId);
+              if (submission) {
+                submission.answers[category] = fallback;
+              } else {
+                round.submissions.push({
+                  playerId: p.playerId,
+                  playerName: player?.name || 'Unknown',
+                  answers: { [category]: fallback },
+                  submittedAt: Date.now(),
+                  busComplete: false
+                });
+              }
+            }
+          }
+        }
+      } else if (payload.type === 'banish') {
+        if (!player.usedPowerUps.banish && player.powerUps.banish > 0) {
+          player.powerUps.banish--;
+          player.usedPowerUps.banish = true;
+          round.banishedPlayerId = payload.targetPlayerId;
+          round.powerUpUsedInRound = true;
+        }
+      }
+    }, "activatePowerUp");
+
+    const room = buffer.get();
+    this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
   }
 
   // ---------- Host Control Methods ----------
 
   /** Host can resolve all pending votes as accepted */
-  hostResolveVotes(ws: WebSocket) {
-    const p = this.playerManager.getPlayer(ws);
-    if (!p) return;
-    const buffer = this.roomManager.getRoomBuffer(p.roomId);
-    if (!buffer) return;
-    // Ensure only host can perform
-    const isHost = buffer.get().players.find(pl => pl.id === p.playerId)?.isHost;
-    if (!isHost) return;
-    buffer.transact(draft => {
-      // Resolve current vote if exists
-      if (draft.currentVote) {
-        const cv = draft.currentVote;
-        const ans = draft.rounds[draft.currentRound]?.validatedAnswers.find(a => a.playerId === cv.requesterId && a.category === cv.category);
-        if (ans) {
-          ans.isValid = true;
-          ans.isPendingVote = false;
-          ans.reason = 'تم القبول بواسطة المضيف';
-        }
-        draft.currentVote = undefined;
-      }
-      // Resolve all queued votes as accepted
-      if (draft.voteQueue && draft.voteQueue.length) {
-        for (const item of draft.voteQueue) {
-          const ans = draft.rounds[draft.currentRound]?.validatedAnswers.find(a => a.playerId === item.requesterId && a.category === item.category);
-          if (ans) {
-            ans.isValid = true;
-            ans.isPendingVote = false;
-            ans.reason = 'تم القبول بواسطة المضيف';
-          }
-        }
-        draft.voteQueue = [];
-      }
-    }, 'host_resolve_votes');
-    const room = buffer.get();
-    this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
-  }
 
   /** Host can adjust a player's score by delta */
   hostAdjustScore(ws: WebSocket, payload: { targetPlayerId: string, delta: number }) {
@@ -890,579 +929,439 @@ export class GameManager {
   }
 
   /** Host can kick a player out of the room */
-  kickPlayer(ws: WebSocket, payload: { playerId: string }) {
+
+  vote(ws: WebSocket, targetId: string, category: string, accepted: boolean) {
+    const p = this.playerManager.getPlayer(ws);
+    if (!p) return;
+    this.castParallelVote(ws, { requesterId: targetId, category: category as any, vote: accepted ? 'yes' : 'no' });
+  }
+
+  requestVote(ws: WebSocket, payload: any) {
     const p = this.playerManager.getPlayer(ws);
     if (!p) return;
     const buffer = this.roomManager.getRoomBuffer(p.roomId);
     if (!buffer) return;
-    const isHost = buffer.get().players.find(pl => pl.id === p.playerId)?.isHost;
-    if (!isHost) return;
-    const { playerId } = payload;
-    // Remove player from room and close their socket if connected
-    const targetSocket = this.playerManager.getSocket(playerId);
-    if (targetSocket) {
-      this.playerManager.removePlayer(targetSocket);
-      try { targetSocket.close(); } catch { }
-    }
-    this.roomManager.removePlayerFromRoom(p.roomId, playerId);
-    const room = buffer.get();
-    this.broadcastToRoom(room.code, { type: 'player_kicked', payload: { playerId } });
-    this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
-  }
-  const p = this.playerManager.getPlayer(ws);
-  if(!p) return;
-  const buffer = this.roomManager.getRoomBuffer(p.roomId);
-  if(!buffer) return;
 
     buffer.transact(draft => {
-    const round = draft.rounds[draft.currentRound];
-    if (!round || round.powerUpUsedInRound) return;
-if (round.banishedPlayerId === p.playerId) return;
+      if (!draft.settings?.enableVoting) return;
 
-const player = draft.players.find(pl => pl.id === p.playerId);
-if (!player) return;
+      const player = draft.players.find(pl => pl.id === p.playerId);
 
-if (payload.type === 'wildcard') {
-  if (!player.usedPowerUps.wildcard && player.powerUps.wildcard > 0) {
-    player.powerUps.wildcard--;
-    player.usedPowerUps.wildcard = true;
-    round.wildcardUsedByPlayerId = p.playerId;
-    round.powerUpUsedInRound = true;
+      if (!draft.voteQueue) draft.voteQueue = [];
 
-    // FIX (#17): Pick a random unused word from DB for the player
-    const letter = draft.letters[draft.currentRound];
-    const category = payload.category as string;
+      const eligibleVoterIds = draft.players
+        .filter(pl => pl.id !== p.playerId && pl.id !== draft.refereeId)
+        .map(pl => pl.id);
 
-    if (category) {
-      const possibleWords = WildcardService.getInstance().getWords(letter, category);
-      const usedAnswers = round.submissions.flatMap(sub =>
-        sub.answers[category] ? [sub.answers[category]] : []
-      );
-      const available = possibleWords.filter(w => !usedAnswers.includes(w));
+      draft.voteQueue.push({
+        requestId: crypto.randomUUID(),
+        requesterId: p.playerId,
+        requesterName: player?.name || 'Unknown',
+        category: payload.category,
+        word: payload.word,
+        eligibleVoterIds,
+        voterIds: [],
+        votes: { yes: 0, no: 0 }
+      });
 
-      if (available.length > 0) {
-        const chosen = available[Math.floor(Math.random() * available.length)];
-        // Auto-submit this word for the player
-        const pSub = round.submissions.find(s => s.playerId === p.playerId);
-        if (pSub) {
-          pSub.answers[category] = chosen;
-        } else {
-          round.submissions.push({
-            playerId: p.playerId,
-            playerName: player?.name || 'Unknown',
-            answers: { [category]: chosen },
-            submittedAt: Date.now(),
-            busComplete: false
-          });
-        }
-      } else {
-        // Fallback if no fresh words available
-        const fallback = possibleWords.length > 0 ? possibleWords[Math.floor(Math.random() * possibleWords.length)] : 'جمل';
-        const pSub = round.submissions.find(s => s.playerId === p.playerId);
-        if (pSub) {
-          pSub.answers[category] = fallback;
-        } else {
-          round.submissions.push({
-            playerId: p.playerId,
-            playerName: player?.name || 'Unknown',
-            answers: { [category]: fallback },
-            submittedAt: Date.now(),
-            busComplete: false
-          });
-        }
-      }
-    }
-  }
-} else if (payload.type === 'banish') {
-  if (!player.usedPowerUps.banish && player.powerUps.banish > 0) {
-    player.powerUps.banish--;
-    player.usedPowerUps.banish = true;
-    round.banishedPlayerId = payload.targetPlayerId;
-    round.powerUpUsedInRound = true;
-  }
-}
-    }, "activatePowerUp");
+      // Start/reset the parallel vote timer
+      this.roundManager.setRoundTimer(p.roomId, () => this.handleVoteTimeout(p.roomId), 30000);
+    }, "requestVote");
 
-const room = buffer.get();
-this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
+    const room = buffer.get();
+    this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
   }
 
-vote(ws: WebSocket, targetId: string, category: Category, accepted: boolean) {
-  // Legacy — route to parallel vote
-  const p = this.playerManager.getPlayer(ws);
-  if (!p) return;
-  this.castParallelVote(ws, { requesterId: targetId, category, vote: accepted ? 'yes' : 'no' });
-}
+  castParallelVote(ws: WebSocket, votePayload: { requesterId: string, category: string, vote: 'yes' | 'no' }) {
+    const p = this.playerManager.getPlayer(ws);
+    if (!p) return;
+    const buffer = this.roomManager.getRoomBuffer(p.roomId);
+    if (!buffer) return;
 
-requestVote(ws: WebSocket, payload: any) {
-  const p = this.playerManager.getPlayer(ws);
-  if (!p) return;
-  const buffer = this.roomManager.getRoomBuffer(p.roomId);
-  if (!buffer) return;
+    let allVotesDone = false;
 
-  buffer.transact(draft => {
-    if (!draft.settings?.enableVoting) return;
-
-    const player = draft.players.find(pl => pl.id === p.playerId);
-
-    if (!draft.voteQueue) draft.voteQueue = [];
-
-    const eligibleVoterIds = draft.players
-      .filter(pl => pl.id !== p.playerId && pl.id !== draft.refereeId)
-      .map(pl => pl.id);
-
-    draft.voteQueue.push({
-      requestId: crypto.randomUUID(),
-      requesterId: p.playerId,
-      requesterName: player?.name || 'Unknown',
-      category: payload.category,
-      word: payload.word,
-      eligibleVoterIds,
-      voterIds: [],
-      votes: { yes: 0, no: 0 }
-    });
-
-    // In parallel mode, no currentVote needed — all items in voteQueue are shown simultaneously
-  }, "requestVote");
-
-  const room = buffer.get();
-  this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
-
-  // Start/reset the parallel vote timer if not already running
-  if (room.phase === 'voting' && room.voteQueue && room.voteQueue.length > 0) {
-    const elapsed = Date.now() - (room.voteQueue[0] as any).startTime || 0;
-    if (elapsed < 1000) {
-      this.roundManager.setRoundTimer(room.code, () => this.handleVoteTimeout(room.code), 30000);
-    }
-  }
-}
-
-/**
- * FIX: New parallel voting handler — each vote targets a specific answer in the voteQueue
- * Payload: { requesterId: string, category: string, vote: 'yes' | 'no' }
- */
-castParallelVote(ws: WebSocket, votePayload: { requesterId: string, category: string, vote: 'yes' | 'no' }) {
-  const p = this.playerManager.getPlayer(ws);
-  if (!p) return;
-  const buffer = this.roomManager.getRoomBuffer(p.roomId);
-  if (!buffer) return;
-
-  let allVotesDone = false;
-
-  // Security check: cannot vote for your own word
-  if (votePayload.requesterId === p.playerId) {
-    this.send(ws, { type: 'toast', payload: { message: 'لا يمكنك التصويت على إجابتك!', type: 'error' } });
-    return;
-  }
-
-  buffer.transact(draft => {
-    if (draft.phase !== 'voting') return;
-    if (!draft.voteQueue) return;
-
-    const item = draft.voteQueue.find(
-      (q: any) => q.requesterId === votePayload.requesterId && q.category === votePayload.category
-    ) as any;
-    if (!item) return;
-
-    // FIX: Use snapshotted eligibleVoterIds — late joiners can't affect count
-    const eligibleVoterIds: string[] = item.eligibleVoterIds || [];
-
-    // Must be eligible
-    if (!eligibleVoterIds.includes(p.playerId)) return;
-
-    // Can't vote twice
-    if (!item.voterIds) item.voterIds = [];
-    if (item.voterIds.includes(p.playerId)) return;
-
-    item.voterIds.push(p.playerId);
-    if (!item.votes) item.votes = { yes: 0, no: 0 };
-    if (votePayload.vote === 'yes') item.votes.yes++;
-    else item.votes.no++;
-
-    // Check if this item is resolved (all eligible voted OR strict majority)
-    const total = eligibleVoterIds.length;
-    const { yes, no } = item.votes;
-    if (yes > total / 2 || no > total / 2 || yes + no === total) {
-      // Resolve this vote item
-      const ans = draft.rounds[draft.currentRound]?.validatedAnswers.find(
-        (a: any) => a.playerId === item.requesterId && a.category === item.category
-      );
-      if (ans) {
-        ans.isValid = yes >= no; // التعادل يُحتسب لصالح اللاعب
-        ans.isPendingVote = false;
-        ans.reason = ans.isValid ? 'تم قبوله بالتصويت أو التعادل' : 'تم رفضه (أغلبية)';
-      }
-      // Remove from queue
-      draft.voteQueue = draft.voteQueue.filter((q: any) =>
-        !(q.requesterId === item.requesterId && q.category === item.category)
-      );
-    }
-
-    // Check if ALL votes in queue are done
-    const remaining = draft.voteQueue.filter((q: any) => q.isPendingVote !== false);
-    if (draft.voteQueue.length === 0) {
-      this.roundManager.calculateAnswerScores(draft);
-      allVotesDone = true;
-    }
-  }, "castParallelVote");
-
-  const room = buffer.get();
-  this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
-
-  if (allVotesDone) {
-    this.roundManager.clearTimer(room.code);
-    this.finishRoundPhase(room.code);
-  }
-}
-
-castDemocraticVote(ws: WebSocket, vote: 'yes' | 'no') {
-  const p = this.playerManager.getPlayer(ws);
-  if (!p) return;
-  const buffer = this.roomManager.getRoomBuffer(p.roomId);
-  if (!buffer) return;
-
-  let allVotesDone = false;
-
-  buffer.transact(draft => {
-    if (draft.phase !== 'voting' || !draft.currentVote) return;
-    if (draft.currentVote.voterIds.includes(p.playerId)) return;
-
-    const eligibleVoters = draft.players.filter(pl =>
-      pl.id !== draft.currentVote!.requesterId &&
-      pl.id !== draft.refereeId &&
-      pl.id !== draft.rounds[draft.currentRound]?.banishedPlayerId
-    );
-
-    if (!eligibleVoters.some(ev => ev.id === p.playerId)) return;
-
-    draft.currentVote.voterIds.push(p.playerId);
-    if (vote === 'yes') draft.currentVote.votes.yes++;
-    else draft.currentVote.votes.no++;
-
-    const activeCount = eligibleVoters.length;
-    const { yes, no } = draft.currentVote.votes;
-    if (yes > activeCount / 2 || no > activeCount / 2 || yes + no === activeCount) {
-      this.resolveCurrentVoteInDraft(draft);
-    }
-    if (!draft.currentVote) {
-      allVotesDone = true;
-    }
-  }, "castVote");
-
-  const room = buffer.get();
-  this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
-
-  if (allVotesDone) {
-    this.roundManager.clearTimer(room.code);
-    this.finishRoundPhase(room.code);
-  } else if (room.phase === 'voting' && room.currentVote) {
-    const elapsed = Date.now() - room.currentVote.startTime;
-    if (elapsed < 1000) {
-      this.startVoteTimer(room.code);
-    }
-  }
-}
-
-refereeToggleValidity(ws: WebSocket, payload: any) {
-  const p = this.playerManager.getPlayer(ws);
-  if (!p) return;
-  const buffer = this.roomManager.getRoomBuffer(p.roomId);
-  if (!buffer) return;
-
-  buffer.transact(draft => {
-    if (draft.refereeId !== p.playerId && !draft.players.find(pl => pl.id === p.playerId)?.isHost) {
+    if (votePayload.requesterId === p.playerId) {
+      this.send(ws, { type: 'toast', payload: { message: 'لا يمكنك التصويت على إجابتك!', type: 'error' } });
       return;
     }
 
-    const round = draft.rounds[draft.currentRound];
-    const ans = round.validatedAnswers.find((a: any) => a.playerId === payload.playerId && a.category === payload.category);
+    buffer.transact(draft => {
+      if (draft.phase !== 'voting') return;
+      if (!draft.voteQueue) return;
 
-    if (ans) {
-      ans.isValid = !ans.isValid;
-      ans.reason = ans.isValid ? 'تم القبول من الحكم' : 'تم الرفض من الحكم';
-      this.roundManager.calculateAnswerScores(draft);
+      const item = draft.voteQueue.find(
+        (q: any) => q.requesterId === votePayload.requesterId && q.category === votePayload.category
+      ) as any;
+      if (!item) return;
 
-      const roles = [];
-      if (draft.refereeId === p.playerId) roles.push('REF');
-      if (draft.players.find(pl => pl.id === p.playerId)?.isHost) roles.push('HOST');
-      const actorRole = roles.join('/') || 'USER';
+      const eligibleVoterIds: string[] = item.eligibleVoterIds || [];
+      if (!eligibleVoterIds.includes(p.playerId)) return;
 
-      this.addAuditLogEntry(
-        draft,
-        p.playerId,
-        ans.playerId,
-        'OVERRIDE_VALIDITY',
-        `تعديل صحة الإجابة (${ans.category}): ${ans.isValid ? 'مقبولة' : 'مرفوضة'} (بواسطة ${actorRole})`
+      if (!item.voterIds) item.voterIds = [];
+      if (item.voterIds.includes(p.playerId)) return;
+
+      item.voterIds.push(p.playerId);
+      if (!item.votes) item.votes = { yes: 0, no: 0 };
+      if (votePayload.vote === 'yes') item.votes.yes++;
+      else item.votes.no++;
+
+      const total = eligibleVoterIds.length;
+      const { yes, no } = item.votes;
+      if (yes > total / 2 || no > total / 2 || yes + no === total) {
+        const ans = draft.rounds[draft.currentRound]?.validatedAnswers.find(
+          (a: any) => a.playerId === item.requesterId && a.category === item.category
+        );
+        if (ans) {
+          ans.isValid = yes >= no;
+          ans.isPendingVote = false;
+          ans.reason = ans.isValid ? 'تم قبوله بالتصويت أو التعادل' : 'تم رفضه (أغلبية)';
+        }
+        draft.voteQueue = draft.voteQueue.filter((q: any) =>
+          !(q.requesterId === item.requesterId && q.category === item.category)
+        );
+      }
+
+      if (draft.voteQueue.length === 0) {
+        this.roundManager.calculateAnswerScores(draft);
+        allVotesDone = true;
+      }
+    }, "castParallelVote");
+
+    const room = buffer.get();
+    this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
+
+    if (allVotesDone) {
+      this.roundManager.clearTimer(room.code);
+      this.finishRoundPhase(room.code);
+    }
+  }
+
+  castDemocraticVote(ws: WebSocket, vote: 'yes' | 'no') {
+    const p = this.playerManager.getPlayer(ws);
+    if (!p) return;
+    const buffer = this.roomManager.getRoomBuffer(p.roomId);
+    if (!buffer) return;
+
+    let allVotesDone = false;
+
+    buffer.transact(draft => {
+      if (draft.phase !== 'voting' || !draft.currentVote) return;
+      if (draft.currentVote.voterIds.includes(p.playerId)) return;
+
+      const eligibleVoters = draft.players.filter(pl =>
+        pl.id !== draft.currentVote!.requesterId &&
+        pl.id !== draft.refereeId &&
+        pl.id !== draft.rounds[draft.currentRound]?.banishedPlayerId
       );
 
-      // Run soft validation
-      const warnings = this.validateGameState(draft);
-      if (warnings.length > 0) {
-        this.addAuditLogEntry(draft, 'SYSTEM', undefined, 'SYSTEM_WARNING', warnings.join(' | '));
+      if (!eligibleVoters.some(ev => ev.id === p.playerId)) return;
+
+      draft.currentVote.voterIds.push(p.playerId);
+      if (vote === 'yes') draft.currentVote.votes.yes++;
+      else draft.currentVote.votes.no++;
+
+      const activeCount = eligibleVoters.length;
+      const { yes, no } = draft.currentVote.votes;
+      if (yes > activeCount / 2 || no > activeCount / 2 || yes + no === activeCount) {
+        this.resolveCurrentVoteInDraft(draft);
+      }
+      if (!draft.currentVote) {
+        allVotesDone = true;
+      }
+    }, "castVote");
+
+    const room = buffer.get();
+    this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
+
+    if (allVotesDone) {
+      this.roundManager.clearTimer(room.code);
+      this.finishRoundPhase(room.code);
+    } else if (room.phase === 'voting' && room.currentVote) {
+      const elapsed = Date.now() - room.currentVote.startTime;
+      if (elapsed < 1000) {
+        this.startVoteTimer(room.code);
       }
     }
-  }, "refereeToggleValidity");
-
-  const room = buffer.get();
-  this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
-}
-
-/**
- * FIX: Host can force-resolve all pending parallel votes
- */
-hostResolveVotes(ws: WebSocket) {
-  const p = this.playerManager.getPlayer(ws);
-  if (!p) return;
-  const buffer = this.roomManager.getRoomBuffer(p.roomId);
-  if (!buffer) return;
-
-  const room = buffer.get();
-  if (!room.players.find(pl => pl.id === p.playerId)?.isHost) return;
-
-  buffer.transact(draft => {
-    if (draft.phase !== 'voting') return;
-    // Resolve all remaining queue items
-    for (const item of (draft.voteQueue || []) as any[]) {
-      const ans = draft.rounds[draft.currentRound]?.validatedAnswers.find(
-        (a: any) => a.playerId === item.requesterId && a.category === item.category
-      );
-      if (ans && ans.isPendingVote) {
-        const { yes = 0, no = 0 } = item.votes || {};
-        ans.isValid = yes >= no; // ties → accepted
-        ans.isPendingVote = false;
-        ans.reason = ans.isValid ? 'تم قبوله (قرار الهوست)' : 'تم رفضه (قرار الهوست)';
-      }
-    }
-    draft.voteQueue = [];
-    draft.currentVote = null;
-    this.roundManager.calculateAnswerScores(draft);
-
-    this.addAuditLogEntry(draft, p.playerId, undefined, 'FORCED_RESOLVE_VOTES', 'الهوست قام بإنهاء جميع التصويتات المعلقة يدوياً');
-  }, "hostResolveVotes");
-
-  this.roundManager.clearTimer(room.code);
-  const updated = buffer.get();
-  this.broadcastToRoom(updated.code, { type: 'sync_state', payload: { room: updated } });
-  this.finishRoundPhase(room.code);
-}
-
-/**
- * FIX: Host can kick a player
- */
-kickPlayer(ws: WebSocket, targetPlayerId: string) {
-  const p = this.playerManager.getPlayer(ws);
-  if (!p) return;
-  const buffer = this.roomManager.getRoomBuffer(p.roomId);
-  if (!buffer) return;
-
-  const room = buffer.get();
-  if (!room.players.find(pl => pl.id === p.playerId)?.isHost) return;
-  if (targetPlayerId === p.playerId) return; // Can't kick yourself
-
-  // Remove from room state
-  this.roomManager.removePlayerFromRoom(room.code, targetPlayerId);
-
-  // Find target's WebSocket and disconnect them
-  const targetWs = this.playerManager.getSocket(targetPlayerId);
-  if (targetWs) {
-    this.send(targetWs, { type: 'kicked', payload: { reason: 'تم طردك من الغرفة من قبل المضيف' } });
-    this.playerManager.removePlayer(targetWs);
-    try { targetWs.terminate(); } catch { }
   }
 
-  const updated = buffer.get();
-  this.broadcastToRoom(updated.code, { type: 'player_left', payload: { players: updated.players } });
-}
+  refereeToggleValidity(ws: WebSocket, payload: any) {
+    const p = this.playerManager.getPlayer(ws);
+    if (!p) return;
+    const buffer = this.roomManager.getRoomBuffer(p.roomId);
+    if (!buffer) return;
 
-  private resolveCurrentVoteInDraft(draft: any) {
-  const accepted = draft.currentVote.votes.yes > draft.currentVote.votes.no;
-  const round = draft.rounds[draft.currentRound];
-  const ans = round.validatedAnswers.find((a: any) => a.playerId === draft.currentVote.requesterId && a.category === draft.currentVote.category);
-  if (ans) {
-    ans.isValid = accepted;
-    ans.isPendingVote = false;
-    ans.reason = accepted ? 'تم قبوله بالتصويت' : 'تم رفضه (أغلبية أو تعادل)';
-  }
-  draft.currentVote = null;
-  if (draft.voteQueue && draft.voteQueue.length > 0) {
-    const next = draft.voteQueue.shift();
-    draft.currentVote = { ...next, votes: { yes: 0, no: 0 }, voterIds: [], votesDetails: {}, startTime: Date.now() };
-  } else {
-    this.roundManager.calculateAnswerScores(draft);
-  }
-}
+    buffer.transact(draft => {
+      const isHost = draft.players.find(pl => pl.id === p.playerId)?.isHost;
+      if (draft.refereeId !== p.playerId && !isHost) return;
 
-// FIX: Phase 4 — Referee Quick-Action Override
-refereeOverride(ws: WebSocket, payload: { requestId: string; category: string; accepted: boolean }) {
-  const p = this.playerManager.getPlayer(ws);
-  if (!p) return;
-  const buffer = this.roomManager.getRoomBuffer(p.roomId);
-  if (!buffer) return;
-
-  let allVotesDone = false;
-
-  buffer.transact(draft => {
-    // Must be referee to override (or host acting as referee when enabled)
-    const actingPlayer = draft.players.find(pl => pl.id === p.playerId);
-    if (!actingPlayer || (!actingPlayer.isReferee && !actingPlayer.isHost)) return;
-
-    if (!draft.voteQueue) return;
-
-    const voteItemIndex = draft.voteQueue.findIndex(v => v.requestId === payload.requestId && v.category === payload.category);
-    if (voteItemIndex >= 0) {
-      const item = draft.voteQueue[voteItemIndex] as any;
-
-      // Find the matching answer
-      const ans = draft.rounds[draft.currentRound]?.validatedAnswers.find(
-        (a: any) => a.playerId === item.requesterId && a.category === item.category
-      );
+      const round = draft.rounds[draft.currentRound];
+      const ans = round.validatedAnswers.find((a: any) => a.playerId === payload.playerId && a.category === payload.category);
 
       if (ans) {
-        ans.isValid = payload.accepted;
-        ans.isPendingVote = false;
-        ans.reason = payload.accepted ? 'قبول (قرار الحكم)' : 'رفض (قرار الحكم)';
+        ans.isValid = !ans.isValid;
+        ans.reason = ans.isValid ? 'تم القبول من الحكم' : 'تم الرفض من الحكم';
+        this.roundManager.calculateAnswerScores(draft);
 
         const roles = [];
         if (draft.refereeId === p.playerId) roles.push('REF');
-        if (actingPlayer.isHost) roles.push('HOST');
+        if (isHost) roles.push('HOST');
         const actorRole = roles.join('/') || 'USER';
 
         this.addAuditLogEntry(
           draft,
           p.playerId,
           ans.playerId,
-          'REFEREE_OVERRIDE',
-          `قرار الحكم على (${ans.category}): ${ans.isValid ? 'قبول' : 'رفض'} (بواسطة ${actorRole})`
+          'OVERRIDE_VALIDITY',
+          `تعديل صحة الإجابة (${ans.category}): ${ans.isValid ? 'مقبولة' : 'مرفوضة'} (بواسطة ${actorRole})`
         );
       }
+    }, "refereeToggleValidity");
 
-      // Remove from queue
-      draft.voteQueue.splice(voteItemIndex, 1);
-    }
+    const room = buffer.get();
+    this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
+  }
 
-    // Check if ALL votes in queue are done
-    if (draft.voteQueue.length === 0) {
+  hostResolveVotes(ws: WebSocket) {
+    const p = this.playerManager.getPlayer(ws);
+    if (!p) return;
+    const buffer = this.roomManager.getRoomBuffer(p.roomId);
+    if (!buffer) return;
+
+    const room = buffer.get();
+    if (!room.players.find(pl => pl.id === p.playerId)?.isHost) return;
+
+    buffer.transact(draft => {
+      if (draft.phase !== 'voting') return;
+      for (const item of (draft.voteQueue || []) as any[]) {
+        const ans = draft.rounds[draft.currentRound]?.validatedAnswers.find(
+          (a: any) => a.playerId === item.requesterId && a.category === item.category
+        );
+        if (ans && ans.isPendingVote) {
+          const { yes = 0, no = 0 } = item.votes || {};
+          ans.isValid = yes >= no; // ties → accepted
+          ans.isPendingVote = false;
+          ans.reason = ans.isValid ? 'تم قبوله (قرار الهوست)' : 'تم رفضه (قرار الهوست)';
+        }
+      }
+      draft.voteQueue = [];
+      draft.currentVote = null;
       this.roundManager.calculateAnswerScores(draft);
-      allVotesDone = true;
-    }
-  }, "referee_override");
 
-  const room = buffer.get();
-  this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
+      this.addAuditLogEntry(draft, p.playerId, undefined, 'FORCED_RESOLVE_VOTES', 'الهوست قام بإنهاء جميع التصويتات المعلقة يدوياً');
+    }, "hostResolveVotes");
 
-  if (allVotesDone) {
     this.roundManager.clearTimer(room.code);
+    const updated = buffer.get();
+    this.broadcastToRoom(updated.code, { type: 'sync_state', payload: { room: updated } });
     this.finishRoundPhase(room.code);
   }
-}
 
-// FIX: Phase 4 — Vote Appeal System
-appealAnswer(ws: WebSocket, payload: { category: Category }) {
-  const p = this.playerManager.getPlayer(ws);
-  if (!p) return;
-  const buffer = this.roomManager.getRoomBuffer(p.roomId);
-  if (!buffer) return;
+  kickPlayer(ws: WebSocket, targetPlayerId: string) {
+    const p = this.playerManager.getPlayer(ws);
+    if (!p) return;
+    const buffer = this.roomManager.getRoomBuffer(p.roomId);
+    if (!buffer) return;
 
-  let appealAdded = false;
+    const isHost = buffer.get().players.find(pl => pl.id === p.playerId)?.isHost;
+    if (!isHost) return;
+    if (targetPlayerId === p.playerId) return;
 
-  buffer.transact(draft => {
-    const round = draft.rounds[draft.currentRound];
-    if (!round) return;
+    this.roomManager.removePlayerFromRoom(p.roomId, targetPlayerId);
 
-    const ans = round.validatedAnswers.find(a => a.playerId === p.playerId && a.category === payload.category);
-    // Can only appeal if invalid and not already pending
-    if (!ans || ans.isValid || ans.isPendingVote) return;
-
-    ans.isPendingVote = true;
-    ans.reason = 'استئناف قيد المراجعة';
-
-    if (!draft.voteQueue) draft.voteQueue = [];
-
-    const eligibleVoterIds = draft.players
-      .filter(pl => pl.id !== p.playerId && pl.id !== draft.refereeId)
-      .map(pl => pl.id);
-
-    draft.voteQueue.push({
-      requestId: crypto.randomUUID(),
-      requesterId: p.playerId,
-      requesterName: ans.playerName || 'Unknown',
-      category: payload.category,
-      word: ans.answer,
-      eligibleVoterIds,
-      voterIds: [],
-      votes: { yes: 0, no: 0 }
-    });
-
-    // If phase transitioned out of voting (e.g., results), push it back to voting so players can see it
-    if (draft.phase !== 'voting') {
-      draft.phase = 'voting';
+    const targetWs = this.playerManager.getSocket(targetPlayerId);
+    if (targetWs) {
+      this.send(targetWs, { type: 'toast', payload: { message: 'تم طردك من الغرفة من قبل المضيف', type: 'error' } });
+      this.playerManager.removePlayer(targetWs);
+      try { targetWs.close(); } catch { }
     }
 
-    appealAdded = true;
-  }, "appeal_answer");
+    const updated = buffer.get();
+    this.broadcastToRoom(updated.code, { type: 'sync_state', payload: { room: updated } });
+    this.broadcastToRoom(updated.code, { type: 'player_kicked', payload: { playerId: targetPlayerId } });
+  }
 
-  const room = buffer.get();
-  if (appealAdded) {
+  private resolveCurrentVoteInDraft(draft: any) {
+    const accepted = draft.currentVote.votes.yes > draft.currentVote.votes.no;
+    const round = draft.rounds[draft.currentRound];
+    const ans = round.validatedAnswers.find((a: any) => a.playerId === draft.currentVote.requesterId && a.category === draft.currentVote.category);
+    if (ans) {
+      ans.isValid = accepted;
+      ans.isPendingVote = false;
+      ans.reason = accepted ? 'تم قبوله بالتصويت' : 'تم رفضه (أغلبية أو تعادل)';
+    }
+    draft.currentVote = null;
+    if (draft.voteQueue && draft.voteQueue.length > 0) {
+      const next = draft.voteQueue.shift();
+      draft.currentVote = { ...next, votes: { yes: 0, no: 0 }, voterIds: [], votesDetails: {}, startTime: Date.now() };
+    } else {
+      this.roundManager.calculateAnswerScores(draft);
+    }
+  }
+
+  refereeOverride(ws: WebSocket, payload: { requestId: string; category: string; accepted: boolean }) {
+    const p = this.playerManager.getPlayer(ws);
+    if (!p) return;
+    const buffer = this.roomManager.getRoomBuffer(p.roomId);
+    if (!buffer) return;
+
+    let allVotesDone = false;
+
+    buffer.transact(draft => {
+      const actingPlayer = draft.players.find(pl => pl.id === p.playerId);
+      if (!actingPlayer || (!actingPlayer.isReferee && !actingPlayer.isHost)) return;
+
+      if (!draft.voteQueue) return;
+
+      const voteItemIndex = draft.voteQueue.findIndex(v => v.requestId === payload.requestId && v.category === payload.category);
+      if (voteItemIndex >= 0) {
+        const item = draft.voteQueue[voteItemIndex] as any;
+        const ans = draft.rounds[draft.currentRound]?.validatedAnswers.find(
+          (a: any) => a.playerId === item.requesterId && a.category === item.category
+        );
+
+        if (ans) {
+          ans.isValid = payload.accepted;
+          ans.isPendingVote = false;
+          ans.reason = payload.accepted ? 'قبول (قرار الحكم)' : 'رفض (قرار الحكم)';
+
+          const roles = [];
+          if (draft.refereeId === p.playerId) roles.push('REF');
+          if (actingPlayer.isHost) roles.push('HOST');
+          const actorRole = roles.join('/') || 'USER';
+
+          this.addAuditLogEntry(
+            draft,
+            p.playerId,
+            ans.playerId,
+            'REFEREE_OVERRIDE',
+            `قرار الحكم على (${ans.category}): ${ans.isValid ? 'قبول' : 'رفض'} (بواسطة ${actorRole})`
+          );
+        }
+        draft.voteQueue.splice(voteItemIndex, 1);
+      }
+
+      if (draft.voteQueue.length === 0) {
+        this.roundManager.calculateAnswerScores(draft);
+        allVotesDone = true;
+      }
+    }, "referee_override");
+
+    const room = buffer.get();
     this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
 
-    // Start or reset vote timer for the newly added appeal (if it's the first one, or reset to give them time)
-    this.roundManager.setRoundTimer(room.code, () => this.handleVoteTimeout(room.code), 30000);
+    if (allVotesDone) {
+      this.roundManager.clearTimer(room.code);
+      this.finishRoundPhase(room.code);
+    }
   }
-}
 
-sendReaction(ws: WebSocket, type: ReactionType) {
-  const p = this.playerManager.getPlayer(ws);
-  if (!p) return;
-  this.broadcastToRoom(p.roomId, {
-    type: 'reaction_received',
-    payload: { reaction: { id: crypto.randomUUID(), type, playerId: p.playerId, playerName: '', timestamp: Date.now() } }
-  });
-}
+  // FIX: Phase 4 — Vote Appeal System
+  appealAnswer(ws: WebSocket, payload: { category: Category }) {
+    const p = this.playerManager.getPlayer(ws);
+    if (!p) return;
+    const buffer = this.roomManager.getRoomBuffer(p.roomId);
+    if (!buffer) return;
 
-playAgain(ws: WebSocket) {
-  const p = this.playerManager.getPlayer(ws);
-  if (!p) return;
-  const buffer = this.roomManager.getRoomBuffer(p.roomId);
-  if (!buffer) return;
+    let appealAdded = false;
 
-  // Only host can trigger play again
-  const room = buffer.get();
-  if (!room.players.find(pl => pl.id === p.playerId)?.isHost) return;
+    buffer.transact(draft => {
+      const round = draft.rounds[draft.currentRound];
+      if (!round) return;
 
-  buffer.transact(draft => {
-    draft.currentRound = 0;
-    draft.phase = 'lobby';
-    draft.rounds = [];
-    draft.voteQueue = [];
-    draft.currentVote = null;
-    draft.players.forEach(pl => {
-      pl.score = 0;
-      pl.isReady = false;
-      pl.totalEarnedPoints = 0;
-      pl.busStreak = 0;
-      pl.powerUps = { hint: 0, steal: 0, wildcard: 0, banish: 0 };
-      pl.usedPowerUps = { hint: false, steal: false, wildcard: false, banish: false };
+      const ans = round.validatedAnswers.find(a => a.playerId === p.playerId && a.category === payload.category);
+      // Can only appeal if invalid and not already pending
+      if (!ans || ans.isValid || ans.isPendingVote) return;
+
+      ans.isPendingVote = true;
+      ans.reason = 'استئناف قيد المراجعة';
+
+      if (!draft.voteQueue) draft.voteQueue = [];
+
+      const eligibleVoterIds = draft.players
+        .filter(pl => pl.id !== p.playerId && pl.id !== draft.refereeId)
+        .map(pl => pl.id);
+
+      draft.voteQueue.push({
+        requestId: crypto.randomUUID(),
+        requesterId: p.playerId,
+        requesterName: ans.playerName || 'Unknown',
+        category: payload.category,
+        word: ans.answer,
+        eligibleVoterIds,
+        voterIds: [],
+        votes: { yes: 0, no: 0 }
+      });
+
+      // If phase transitioned out of voting (e.g., results), push it back to voting so players can see it
+      if (draft.phase !== 'voting') {
+        draft.phase = 'voting';
+      }
+
+      appealAdded = true;
+    }, "appeal_answer");
+
+    const room = buffer.get();
+    if (appealAdded) {
+      this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
+
+      // Start or reset vote timer for the newly added appeal (if it's the first one, or reset to give them time)
+      this.roundManager.setRoundTimer(room.code, () => this.handleVoteTimeout(room.code), 30000);
+    }
+  }
+
+  sendReaction(ws: WebSocket, type: ReactionType) {
+    const p = this.playerManager.getPlayer(ws);
+    if (!p) return;
+    this.broadcastToRoom(p.roomId, {
+      type: 'reaction_received',
+      payload: { reaction: { id: crypto.randomUUID(), type, playerId: p.playerId, playerName: '', timestamp: Date.now() } }
     });
-  }, "playAgain");
+  }
 
-  const updated = buffer.get();
-  this.broadcastToRoom(updated.code, { type: 'sync_state', payload: { room: updated } });
-}
+  playAgain(ws: WebSocket) {
+    const p = this.playerManager.getPlayer(ws);
+    if (!p) return;
+    const buffer = this.roomManager.getRoomBuffer(p.roomId);
+    if (!buffer) return;
+
+    // Only host can trigger play again
+    const room = buffer.get();
+    if (!room.players.find(pl => pl.id === p.playerId)?.isHost) return;
+
+    buffer.transact(draft => {
+      draft.currentRound = 0;
+      draft.phase = 'lobby';
+      draft.rounds = [];
+      draft.voteQueue = [];
+      draft.currentVote = null;
+      draft.players.forEach(pl => {
+        pl.score = 0;
+        pl.isReady = false;
+        pl.totalEarnedPoints = 0;
+        pl.busStreak = 0;
+        pl.powerUps = { hint: 0, steal: 0, wildcard: 0, banish: 0 };
+        pl.usedPowerUps = { hint: false, steal: false, wildcard: false, banish: false };
+      });
+    }, "playAgain");
+
+    const updated = buffer.get();
+    this.broadcastToRoom(updated.code, { type: 'sync_state', payload: { room: updated } });
+  }
 
   // Helpers
   private send(ws: WebSocket, message: WSMessage) {
-  if (message.type !== 'ping') console.log(`[GameManager] Sending: ${message.type}`);
-  if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(message));
-}
+    if (message.type !== 'ping') console.log(`[GameManager] Sending: ${message.type}`);
+    if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(message));
+  }
 
-  private broadcastToRoom(roomCode: string, message: WSMessage, exclude ?: WebSocket) {
-  const players = this.playerManager.getAllPlayers();
-  for (const p of players) {
-    if (p.roomId === roomCode && p.ws !== exclude) {
-      this.send(p.ws, message);
+  private broadcastToRoom(roomCode: string, message: WSMessage, exclude?: WebSocket) {
+    const players = this.playerManager.getAllPlayers();
+    for (const p of players) {
+      if (p.roomId === roomCode && p.ws !== exclude) {
+        this.send(p.ws, message);
+      }
     }
   }
-}
 }
 
 // Export singleton
