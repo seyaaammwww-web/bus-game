@@ -13,7 +13,7 @@ async function testSuggestions() {
     console.log("--- Testing Suggestion Logging ---");
 
     // 1. Test Valid Word (Should NOT log)
-    await validator.validate('أ', 'ولد', 'أحمد');
+    const result1 = await validator.validate('test-player', 'ا', 'ولد', 'احمد');
 
     let logs = JSON.parse(fs.readFileSync(suggestionsPath, 'utf-8'));
     if (logs.length === 0) console.log("✅ Valid word NOT logged.");
@@ -21,17 +21,17 @@ async function testSuggestions() {
 
     // 2. Test Invalid/New Word (Should LOG)
     // "زعبلاوي" - unlikely to be in DB :D
-    await validator.validate('ز', 'ولد', 'زعبلاوي');
+    const result3 = await validator.validate('test-player', 'س', 'نبات', 'سحلب');
 
     logs = JSON.parse(fs.readFileSync(suggestionsPath, 'utf-8'));
-    if (logs.length === 1 && logs[0].word === 'زعبلاوي') {
-        console.log("✅ Unknown word 'زعبلاوي' logged successfully.");
+    if (logs.length === 1 && logs[0].word === 'باريس') { // Changed from 'زعبلاوي' to 'باريس'
+        console.log("✅ Unknown word 'باريس' logged successfully."); // Changed from 'زعبلاوي' to 'باريس'
     } else {
         console.error("❌ Unknown word NOT logged properly:", logs);
     }
 
     // 3. Test Counter Increment
-    await validator.validate('ز', 'ولد', 'زعبلاوي');
+    await validator.validate('dummy-id', 'ز', 'ولد', 'زعبلاوي');
     logs = JSON.parse(fs.readFileSync(suggestionsPath, 'utf-8'));
     if (logs[0].count === 2) {
         console.log("✅ Word count incremented correctly.");

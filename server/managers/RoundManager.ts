@@ -19,17 +19,14 @@ function normalizeArabic(text: string): string {
 function validateAnswerLenient(letter: string, category: Category, answer: string): boolean {
     const trimmedAnswer = answer.trim();
 
-    // 1. Min 2 chars (so 2-letter words go to vote)
+    // 1. Min 2 chars
     if (!trimmedAnswer || trimmedAnswer.length < 2) return false;
 
-    // 2. Block obvious keyboard mashing (gibberish)
-    // E.g. "شسيشس", "بببب", "ههههه"
-    // Block if it's 3+ of the *exact same* character
-    if (/^(.)\1{2,}$/.test(trimmedAnswer)) return false;
+    // 2. Block 3 or more identical characters anywhere (e.g. "ببب", "ةةةة")
+    if (/(.)\1{2,}/.test(trimmedAnswer)) return false;
 
-    // Block common Arabic keyboard mash sequence (e.g. شسي, يبل) if it's longer than 3 chars
-    const mashPattern = /شسيشس|شسي|ببب|ةةة|ننن|ممم|ووو/;
-    if (trimmedAnswer.length >= 3 && mashPattern.test(trimmedAnswer)) return false;
+    // 3. Block common Arabic keyboard mash sequences
+    if (/^(شسي|شس|ثقف|ضصث|قثص|يسب|يس)/.test(trimmedAnswer)) return false;
 
     const normalizedLetter = normalizeArabic(letter);
     const normalizedAnswer = normalizeArabic(trimmedAnswer);
@@ -59,11 +56,10 @@ export class RoundManager {
     private timers: Map<string, NodeJS.Timeout> = new Map();
     private calculatingRooms = new Map<string, number>();
 
+    // FIX: Combined startRound — increment currentRound AND initialize round in one transact
     startRound(buffer: CorruptionProofBuffer<GameRoom>): Round {
-        let round: Round;
-
         buffer.transact((draft) => {
-            round = {
+            const round: Round = {
                 number: draft.currentRound + 1,
                 letter: draft.letters[draft.currentRound],
                 startTime: Date.now(),
@@ -77,6 +73,9 @@ export class RoundManager {
 
             draft.rounds[draft.currentRound] = round;
             draft.phase = 'playing';
+            // Clear any stale vote state from previous round
+            draft.voteQueue = [];
+            draft.currentVote = null;
         }, "startRound");
 
         const room = buffer.get();
@@ -85,7 +84,10 @@ export class RoundManager {
 
     setRoundTimer(roomCode: string, callback: () => void, durationMs: number = 45000) {
         this.clearTimer(roomCode);
-        const timer = setTimeout(callback, durationMs);
+        const timer = setTimeout(() => {
+            callback();
+            this.timers.delete(roomCode);
+        }, durationMs);
         this.timers.set(roomCode, timer);
     }
 
@@ -107,7 +109,6 @@ export class RoundManager {
         buffer.transact((draft) => {
             const round = draft.rounds[draft.currentRound];
             if (!round) return;
-
             if (round.banishedPlayerId === playerId) return;
 
             const player = draft.players.find(p => p.id === playerId);
@@ -153,11 +154,85 @@ export class RoundManager {
         this.calculatingRooms.set(roomCode, now);
 
         try {
-            await this.calculateScores(buffer, onVotingStart, onRoundFinish);
-        } catch (e) {
-            console.error("Error calculating scores:", e);
+            // FIX: Add 6-second timeout for validation — if slow, push everything to vote
+            await Promise.race([
+                this.calculateScores(buffer, onVotingStart, onRoundFinish),
+                new Promise<void>((_, reject) =>
+                    setTimeout(() => reject(new Error('validation_timeout')), 6000)
+                )
+            ]);
+        } catch (e: any) {
+            if (e?.message === 'validation_timeout') {
+                console.warn(`[RoundManager] Validation timed out for ${roomCode}. Pushing all to vote.`);
+                this.pushAllAnswersToVote(buffer, onVotingStart, onRoundFinish);
+            } else {
+                console.error("Error calculating scores:", e);
+                // Graceful fallback — go directly to results without crashing
+                onRoundFinish();
+            }
         } finally {
             this.calculatingRooms.delete(roomCode);
+        }
+    }
+
+    /**
+     * Fallback: when validation times out, push ALL non-empty answers to a single vote batch
+     */
+    private pushAllAnswersToVote(
+        buffer: CorruptionProofBuffer<GameRoom>,
+        onVotingStart: () => void,
+        onRoundFinish: () => void
+    ) {
+        const roomRead = buffer.get();
+        const round = roomRead.rounds[roomRead.currentRound];
+        if (!round) { onRoundFinish(); return; }
+
+        const currentCategories = roomRead.settings?.customCategories?.length
+            ? roomRead.settings.customCategories
+            : categories;
+
+        let hasPending = false;
+
+        buffer.transact((draft) => {
+            const dRound = draft.rounds[draft.currentRound];
+            dRound.validatedAnswers = [];
+
+            for (const submission of dRound.submissions) {
+                if (submission.playerId === dRound.banishedPlayerId) continue;
+                for (const category of currentCategories) {
+                    const answer = submission.answers[category];
+                    if (!answer?.trim() || answer.trim().length < 2) continue;
+
+                    const lenient = validateAnswerLenient(dRound.letter, category as Category, answer);
+                    dRound.validatedAnswers.push({
+                        playerId: submission.playerId,
+                        playerName: submission.playerName,
+                        category: category as Category,
+                        answer,
+                        isValid: false,
+                        isPendingVote: lenient,
+                        isUnique: false,
+                        score: 0,
+                        votes: { accepted: 0, rejected: 0 },
+                        reason: lenient ? 'تتطلب تصويت' : 'حرف خطأ',
+                        isFabricated: false
+                    });
+                    if (lenient) hasPending = true;
+                }
+            }
+
+            if (hasPending && draft.settings?.enableVoting) {
+                draft.phase = 'voting';
+                this.buildVoteQueueInDraft(draft);
+            } else {
+                this.calculateAnswerScores(draft);
+            }
+        }, "fallbackVote");
+
+        if (hasPending && buffer.get().settings?.enableVoting) {
+            onVotingStart();
+        } else {
+            onRoundFinish();
         }
     }
 
@@ -206,6 +281,12 @@ export class RoundManager {
         let hasPendingVotes = false;
 
         buffer.transact((draft) => {
+            // FIX: Race Condition protection – if phase shifted past playing, skip applying calculated scores
+            if (draft.phase !== 'playing') {
+                console.log(`[RoundManager] calculateScores aborted for ${roomRead.code} - Phase shifted to ${draft.phase}`);
+                return;
+            }
+
             const dRound = draft.rounds[draft.currentRound];
             dRound.validatedAnswers = [];
 
@@ -216,6 +297,7 @@ export class RoundManager {
                 let reason = result?.reason || '';
                 let isPendingVote = false;
 
+                // Wildcard overrides everything
                 if (dRound.wildcardUsedByPlayerId === item.playerId) {
                     isValid = true;
                     reason = 'جوكر';
@@ -249,7 +331,8 @@ export class RoundManager {
                     score: 0,
                     votes: { accepted: 0, rejected: 0 },
                     reason,
-                    isFabricated: false
+                    isFabricated: false,
+                    aiSuggestion: result?.aiSuggestion
                 });
             }
 
@@ -257,29 +340,8 @@ export class RoundManager {
                 if (!draft.settings) draft.settings = {};
                 draft.settings.enableVoting = true;
                 draft.phase = 'voting';
-
-                // Populate Vote Queue
-                draft.voteQueue = dRound.validatedAnswers
-                    .filter(a => a.isPendingVote)
-                    .map(a => ({
-                        requestId: randomUUID(),
-                        requesterId: a.playerId,
-                        requesterName: a.playerName,
-                        category: a.category,
-                        word: a.answer
-                    }));
-
-                // Start first vote
-                if (draft.voteQueue.length > 0) {
-                    const next = draft.voteQueue.shift()!;
-                    draft.currentVote = {
-                        ...next,
-                        votes: { yes: 0, no: 0 },
-                        voterIds: [],
-                        votesDetails: {},
-                        startTime: Date.now()
-                    };
-                }
+                // FIX: Build PARALLEL vote queue — all pending answers at once
+                this.buildVoteQueueInDraft(draft);
             } else {
                 this.calculateAnswerScores(draft);
             }
@@ -291,6 +353,40 @@ export class RoundManager {
         } else {
             onRoundFinish();
         }
+    }
+
+    /**
+     * FIX: Parallel Voting — instead of sequential one-by-one, we expose ALL pending
+     * answers simultaneously. The UI renders a card per answer, all voted on at once.
+     * currentVote is set to null (no sequential queue) and voteQueue holds all items.
+     * The client renders all voteQueue items and submits votes per-answer.
+     */
+    private buildVoteQueueInDraft(draft: GameRoom) {
+        const dRound = draft.rounds[draft.currentRound];
+        if (!dRound) return;
+
+        // Snapshot eligible voters at this moment (excludes requester too — handled per-answer client side)
+        const eligibleVoterIds = draft.players
+            .filter(pl => pl.id !== draft.refereeId && pl.id !== dRound.banishedPlayerId)
+            .map(pl => pl.id);
+
+        // Build queue from all pending votes
+        draft.voteQueue = dRound.validatedAnswers
+            .filter(a => a.isPendingVote)
+            .map(a => ({
+                requestId: randomUUID(),
+                requesterId: a.playerId,
+                requesterName: a.playerName,
+                category: a.category,
+                word: a.answer,
+                eligibleVoterIds: eligibleVoterIds.filter(id => id !== a.playerId), // FIX: exclude answer owner
+                voterIds: [],
+                votes: { yes: 0, no: 0 },
+                aiSuggestion: a.aiSuggestion
+            }));
+
+        // FIX: No currentVote needed for parallel mode — null signals "use voteQueue directly"
+        draft.currentVote = null;
     }
 
     calculateAnswerScores(draft: GameRoom) {
@@ -348,8 +444,8 @@ export class RoundManager {
             player.powerUps = {
                 wildcard: player.usedPowerUps.wildcard ? 0 : Math.floor((player.totalEarnedPoints || 0) / 200),
                 banish: player.usedPowerUps.banish ? 0 : Math.floor((player.totalEarnedPoints || 0) / 400),
-                hint: 0, // Not implemented fully yet
-                steal: 0 // Not implemented fully yet
+                hint: 0,
+                steal: 0
             };
         }
 

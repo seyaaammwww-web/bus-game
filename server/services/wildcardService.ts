@@ -1,9 +1,18 @@
 import * as fs from 'fs';
+import { promises as fsAsync } from 'fs';
 import * as path from 'path';
 import { arabicWords } from '../../shared/arabicWords';
 import { AdvancedNormalizer } from '../utils/AdvancedNormalizer';
 import { SmartToleranceEngine } from '../utils/SmartToleranceEngine';
 
+// FIX (#3): Serialized async write queue — prevents concurrent write corruption
+let writeQueuePromise: Promise<void> = Promise.resolve();
+function enqueueWrite(fn: () => Promise<void>): Promise<void> {
+    writeQueuePromise = writeQueuePromise.then(() => fn()).catch(err => {
+        console.error('[WriteQueue] Error:', err);
+    });
+    return writeQueuePromise;
+}
 
 interface WildcardDatabase {
     [letter: string]: {
@@ -122,6 +131,15 @@ export class WildcardService {
         const normalized = this.normalizeArabic(letter);
         const key = Object.keys(this.database).find(k => this.normalizeArabic(k) === normalized);
         return key || null;
+    }
+
+    /**
+     * FIX (#17): Expose method to get all words for a category/letter for wildcard powerup
+     */
+    getWords(letter: string, category: string): string[] {
+        const dbKey = this.getDatabaseKey(letter);
+        if (!dbKey) return [];
+        return this.database[dbKey]?.[category] || [];
     }
 
     /**
@@ -397,46 +415,44 @@ export class WildcardService {
     }
 
     /**
-     * Log a word that was not found in the database for manual review/Suggestion
+     * FIX (#3): Log a word not found in DB — async write to avoid blocking event loop
      */
     logSuggestion(letter: string, category: string, word: string): void {
         const suggestionPath = path.join(process.cwd(), 'server/data/suggestions.json');
-        let suggestions: any[] = [];
-
-        try {
-            if (fs.existsSync(suggestionPath)) {
-                const content = fs.readFileSync(suggestionPath, 'utf-8');
-                if (content.trim()) {
-                    try { suggestions = JSON.parse(content); } catch (e) { suggestions = []; }
+        // Fire and forget — errors logged internally
+        enqueueWrite(async () => {
+            let suggestions: any[] = [];
+            try {
+                if (fs.existsSync(suggestionPath)) {
+                    const content = await fsAsync.readFile(suggestionPath, 'utf-8');
+                    if (content.trim()) {
+                        try { suggestions = JSON.parse(content); } catch { suggestions = []; }
+                    }
                 }
+
+                const normalizedWord = this.normalizeArabic(word);
+                const existingIndex = suggestions.findIndex((s: any) =>
+                    this.normalizeArabic(s.word) === normalizedWord &&
+                    s.category === category &&
+                    s.letter === letter
+                );
+
+                if (existingIndex >= 0) {
+                    suggestions[existingIndex].count++;
+                    suggestions[existingIndex].lastSeen = new Date().toISOString();
+                } else {
+                    suggestions.push({
+                        word, normalized: normalizedWord, letter, category,
+                        count: 1,
+                        firstSeen: new Date().toISOString(),
+                        lastSeen: new Date().toISOString()
+                    });
+                }
+
+                await fsAsync.writeFile(suggestionPath, JSON.stringify(suggestions, null, 2), 'utf-8');
+            } catch (error) {
+                console.error('[WildcardService] Failed to log suggestion:', error);
             }
-
-            const normalizedWord = this.normalizeArabic(word);
-
-            const existingIndex = suggestions.findIndex(s =>
-                this.normalizeArabic(s.word) === normalizedWord &&
-                s.category === category &&
-                s.letter === letter
-            );
-
-            if (existingIndex >= 0) {
-                suggestions[existingIndex].count++;
-                suggestions[existingIndex].lastSeen = new Date().toISOString();
-            } else {
-                suggestions.push({
-                    word: word,
-                    normalized: normalizedWord,
-                    letter,
-                    category,
-                    count: 1,
-                    firstSeen: new Date().toISOString(),
-                    lastSeen: new Date().toISOString()
-                });
-            }
-
-            fs.writeFileSync(suggestionPath, JSON.stringify(suggestions, null, 2), 'utf-8');
-        } catch (error) {
-            console.error('[WildcardService] Failed to log suggestion:', error);
-        }
+        });
     }
 }

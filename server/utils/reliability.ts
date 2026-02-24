@@ -1,5 +1,8 @@
 import { createHash } from 'crypto';
+import { produce, enablePatches, produceWithPatches, Patch } from 'immer';
 
+// Enable features if needed in future (like patches for undo/redo)
+enablePatches();
 /**
  * SCOP-v3.5: Anti-Corruption Memory Architecture
  * Ensures state transitions are valid, logged, and recoverable.
@@ -28,9 +31,10 @@ export class CorruptionProofBuffer<T> {
     /**
      * Get a READ-ONLY copy of the current state.
      * Prevents accidental mutation outside of transaction.
+     * FIX (#1): Use immer's produce instead of structuredClone for better performance.
      */
     get(): Readonly<T> {
-        return structuredClone(this.primary);
+        return produce(this.primary, () => { }); // Returns a frozen, identity-preserved copy
     }
 
     /**
@@ -45,17 +49,15 @@ export class CorruptionProofBuffer<T> {
      * Atomic State Transition
      * @param mutator Function that modifies a draft copy of the state
      * @param description specific description of the change for logging
+     * FIX (#1): Used immer's produce to avoid deep cloning the entire state before mutation.
      */
-    transact(mutator: (draft: T) => void, description: string): void {
-        const draft = structuredClone(this.primary);
-
+    transact(
+        mutator: (draft: T) => void,
+        description: string,
+        onPatches?: (patches: Patch[], inversePatches: Patch[]) => void
+    ): void {
         try {
-            mutator(draft); // Apply changes to draft
-
-            // Calculate new checksum
-            const newChecksum = this.calculateChecksum(draft);
-
-            // Verify integrity of current primary before swapping (Double Check)
+            // Verify integrity of current primary before mutating (Double Check)
             const currentChecksum = this.calculateChecksum(this.primary);
             if (this.checksum !== currentChecksum) {
                 console.error(`[MEMORY CORRUPTION DETECTED] Before applying '${description}'. Restoring from shadow.`);
@@ -63,11 +65,21 @@ export class CorruptionProofBuffer<T> {
                 throw new Error(`Memory corruption detected before '${description}'`);
             }
 
+            // Create new immutable state using Immer and extract patches
+            const [nextState, patches, inversePatches] = produceWithPatches(this.primary, mutator);
+
+            // Calculate new checksum
+            const newChecksum = this.calculateChecksum(nextState);
+
             // Commit transaction
-            this.primary = draft;
-            this.shadow = structuredClone(draft);
-            Object.freeze(this.shadow);
+            this.primary = nextState;
+            this.shadow = produce(nextState, () => { }); // Create a frozen shadow copy
             this.checksum = newChecksum;
+
+            // Trigger callback if provided
+            if (onPatches) {
+                onPatches(patches, inversePatches);
+            }
 
             // console.log(`[Transaction] ${description} - New Checksum: ${this.checksum.substring(0, 8)}`);
 
@@ -78,7 +90,7 @@ export class CorruptionProofBuffer<T> {
     }
 
     private restoreFromShadow() {
-        this.primary = structuredClone(this.shadow);
+        this.primary = produce(this.shadow, () => { });
         this.checksum = this.calculateChecksum(this.primary);
     }
 }

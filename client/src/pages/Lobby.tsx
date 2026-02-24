@@ -1,4 +1,4 @@
-import { Copy, Check, Play, Users, Shield, Crown, Sparkles, X, Home, LogOut, Settings } from 'lucide-react';
+import { Copy, Check, Play, Users, Shield, Crown, Sparkles, X, Home, LogOut, Settings, UserX, Wifi, WifiOff } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
@@ -12,7 +12,7 @@ import { Tutorial } from '@/components/Tutorial';
 import { HelpCircle } from 'lucide-react';
 
 export default function Lobby() {
-  const { state, currentPlayer, isHost, setReady, startGame, setReferee, removeReferee, referee, disconnect, updateSettings } = useGame();
+  const { state, currentPlayer, isHost, setReady, startGame, setReferee, removeReferee, referee, disconnect, updateSettings, kickPlayer } = useGame();
   const [copied, setCopied] = useState(false);
   const [showRefereeSelect, setShowRefereeSelect] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -71,6 +71,18 @@ export default function Lobby() {
         </div>
 
         {showTutorial && <Tutorial onClose={() => setShowTutorial(false)} />}
+
+        {/* FIX: Reconnecting indicator */}
+        {state.reconnecting && (
+          <motion.div
+            className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-2 bg-yellow-400 border-[3px] border-yellow-700 rounded-full shadow-lg font-pixel-text text-yellow-900 text-sm font-bold"
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+          >
+            <WifiOff className="w-4 h-4 animate-pulse" />
+            جاري إعادة الاتصال...
+          </motion.div>
+        )}
 
         <motion.div
           className="text-center mb-6"
@@ -234,6 +246,7 @@ export default function Lobby() {
                       animate={{ x: 0, opacity: 1 }}
                       exit={{ x: -50, opacity: 0 }}
                       transition={{ delay: index * 0.1 }}
+                      className="relative"
                     >
                       <PlayerCard
                         player={player}
@@ -241,6 +254,17 @@ export default function Lobby() {
                         isReferee={player.id === room.refereeId}
                         index={index}
                       />
+                      {/* FIX: Kick button for host (can't kick yourself) */}
+                      {isHost && player.id !== state.playerId && (
+                        <button
+                          onClick={() => kickPlayer(player.id)}
+                          className="absolute top-2 left-2 w-7 h-7 bg-red-500 border-2 border-red-800 rounded-md flex items-center justify-center text-white hover:bg-red-600 active:scale-90 transition-all shadow-[2px_2px_0_0_#7f1d1d] z-10"
+                          title={`طرد ${player.name}`}
+                          data-testid={`button-kick-${player.id}`}
+                        >
+                          <UserX className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                     </motion.div>
                   ))}
               </AnimatePresence>

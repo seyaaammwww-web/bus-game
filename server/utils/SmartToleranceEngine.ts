@@ -248,6 +248,11 @@ export class SmartToleranceEngine {
             return true;
         }
 
+        // 6. Stemming match (Remove common suffixes)
+        if (this.isStemMatch(word, dbWord)) {
+            return true;
+        }
+
         return false;
     }
 
@@ -274,6 +279,35 @@ export class SmartToleranceEngine {
         }
 
         return false;
+    }
+
+    /**
+     * Check if two words match after removing common Arabic suffixes (ات، ون، ين، ه)
+     */
+    isStemMatch(word1: string, word2: string): boolean {
+        const norm1 = this.normalizer.normalize(word1);
+        const norm2 = this.normalizer.normalize(word2);
+
+        // Don't stem words that are too short to avoid false positives
+        if (norm1.length <= 3 && norm2.length <= 3) return false;
+
+        const stem1 = this.stemWord(norm1);
+        const stem2 = this.stemWord(norm2);
+
+        // Require at least 2 remaining characters to prevent extreme false positives (e.g. "ب" matching "بات")
+        return stem1 === stem2 && stem1.length >= 2;
+    }
+
+    /**
+     * Strips common plural/feminine endings
+     */
+    private stemWord(word: string): string {
+        let w = word;
+        if (w.endsWith('ات') && w.length >= 5) return w.slice(0, -2);
+        if (w.endsWith('ون') && w.length >= 5) return w.slice(0, -2);
+        if (w.endsWith('ين') && w.length >= 5) return w.slice(0, -2);
+        if (w.endsWith('ه') && w.length >= 4) return w.slice(0, -1); // Taa Marbuta is normalized to 'ه'
+        return w;
     }
 
     /**

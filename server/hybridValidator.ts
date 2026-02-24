@@ -1,4 +1,5 @@
 import { WildcardService } from './services/wildcardService';
+import { GroqService } from './services/groqService';
 import type { Category } from '@shared/schema';
 import dotenv from "dotenv";
 import { SeededRNG } from './utils/reliability';
@@ -9,6 +10,7 @@ interface ValidationResult {
   isValid: boolean;
   reason: string;
   source: 'database' | 'ai' | 'heuristic';
+  aiSuggestion?: boolean;
 }
 
 interface CacheEntry {
@@ -45,9 +47,9 @@ export class HybridValidator {
   /**
    * Validate a single word with optional seed for deterministic behavior.
    * If valid: Returns true.
-   * If invalid: Logs to suggestions.json and returns false.
+   * If invalid: Asks AI for suggestion, logs to suggestions.json, and returns false with aiSuggestion.
    */
-  async validate(letter: string, category: Category, answer: string, seed?: number): Promise<ValidationResult> {
+  async validate(playerId: string, letter: string, category: Category, answer: string, seed?: number): Promise<ValidationResult> {
     this.metrics.totalValidations++;
 
     // Quick cleaning
@@ -65,29 +67,34 @@ export class HybridValidator {
     }
 
     // 2. Not found? 
-    // If we had a probabilistic fallback, we would use seed here.
-    // For now, we just Log and Fail.
+    // Ask AI Assistant for suggestion (Phase 4)
+    let aiSuggestion = false;
+    let fallbackReason = 'Word not found in DB';
 
-    // SCOP-v3.5: If we were to use AI simulation or Fuzzing here, we'd use SeededRNG.
-    if (seed !== undefined) {
-      const rng = new SeededRNG(seed + answer.length);
-      // usage example: if (rng.next() > 0.99) ... random miracle approval?
-      // keeping it strict for now.
+    try {
+      const groqResult = await GroqService.getInstance().enqueueAppeal(playerId, category, letter, trimmed);
+      aiSuggestion = groqResult.isValid;
+      fallbackReason = groqResult.reason;
+      this.metrics.aiHits++;
+    } catch (e) {
+      console.error("[HybridValidator] Error getting AI suggestion:", e);
     }
 
     WildcardService.getInstance().logSuggestion(letter, category, trimmed);
     this.metrics.failsLogged++;
 
     return {
-      isValid: false,
-      reason: 'Word not found in DB',
-      source: 'database'
+      isValid: false, // Always false if not in DB, goes to voting/referee
+      reason: fallbackReason,
+      source: 'ai',
+      aiSuggestion
     };
   }
 
   /**
-   * Validate a batch of words.
-   * Accepts a shared seed for the batch (usually derived from room+round).
+   * FIX (#2): Validate a batch in PARALLEL using Promise.all.
+   * Time = max(single validation) instead of sum(all validations).
+   * This prevents the 6-second timeout from being exceeded unnecessarily.
    */
   async validateBatch(
     items: Array<{ playerId: string, category: Category, letter: string, answer: string }>,
@@ -95,15 +102,14 @@ export class HybridValidator {
   ): Promise<Map<string, ValidationResult>> {
     const results = new Map<string, ValidationResult>();
 
-    // Using the seed, we could shuffle order or effect processing, but validation should be independent.
-    // We pass the seed down to individual validate calls if needed.
-
-    for (const item of items) {
+    // Run all validations concurrently — DB lookups are synchronous (in-memory),
+    // so Promise.all here mainly helps if AI fallback is ever re-enabled.
+    await Promise.all(items.map(async (item) => {
       const key = `${item.playerId}:${item.category}`;
       const itemSeed = seed ? seed + item.playerId.charCodeAt(0) : undefined;
-      const result = await this.validate(item.letter, item.category, item.answer, itemSeed);
+      const result = await this.validate(item.playerId, item.letter, item.category, item.answer, itemSeed);
       results.set(key, result);
-    }
+    }));
 
     return results;
   }

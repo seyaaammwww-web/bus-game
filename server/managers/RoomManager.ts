@@ -63,7 +63,7 @@ export class RoomManager {
 
         // Check constraints
         if (room.phase !== 'lobby') throw new Error('اللعبة بدأت');
-        if (room.players.length >= 8) throw new Error('الغرفة ممتلئة');
+        if (room.players.length >= 50) throw new Error('الغرفة ممتلئة');
         if (room.players.find(p => p.id === playerId)) return room; // Already joined
 
         buffer.transact((draft) => {

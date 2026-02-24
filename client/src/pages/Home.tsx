@@ -114,6 +114,15 @@ export default function Home() {
             >
               {state.error}
             </motion.div>
+            {(state.error?.includes('محاولات') || state.error?.includes('الاتصال')) && (
+              <Button
+                variant="outline"
+                className="mt-4 bg-white/20 hover:bg-white/30 text-white font-pixel-text border-white/40 border-2 shadow-sm"
+                onClick={() => window.location.reload()}
+              >
+                إعادة المحاولة
+              </Button>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

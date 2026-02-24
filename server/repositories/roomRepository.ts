@@ -42,7 +42,7 @@ export class RedisRoomRepository implements IRoomRepository {
 
     async getAllCodes(): Promise<string[]> {
         const keys = await this.redis.keys(`${this.PREFIX}*`);
-        return keys.map(k => k.replace(this.PREFIX, ''));
+        return keys.map((k: string) => k.replace(this.PREFIX, ''));
     }
 
     async exists(roomCode: string): Promise<boolean> {

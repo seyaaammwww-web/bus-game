@@ -1,5 +1,6 @@
 import Groq from "groq-sdk";
 import dotenv from "dotenv";
+import { randomUUID } from "crypto";
 
 dotenv.config();
 
@@ -8,12 +9,12 @@ const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const MODEL_NAME = "llama-3.3-70b-versatile";
 
 interface AppealRequest {
-    id: string; // Unique ID for tracking (e.g. playerId:category:word)
+    id: string; // Unique ID for tracking (e.g. playerId:category)
     playerId: string;
     category: string;
     letter: string;
     word: string;
-    callback: (result: ValidationResult) => void;
+    // Callback is no longer stored here, managed in pendingRequests
 }
 
 interface ValidationResult {
@@ -25,6 +26,7 @@ interface ValidationResult {
 export class GroqService {
     private static instance: GroqService;
     private client: Groq;
+    private fallbackMode: 'auto_accept' | 'voting';
 
     // Rate Limiting (Token Bucket similar logic)
     // Limit: 30 Requests Per Minute (RPM) -> 1 request every 2 seconds
@@ -33,6 +35,7 @@ export class GroqService {
 
     // Batching
     private queue: AppealRequest[] = [];
+    private pendingRequests = new Map<string, Array<(result: ValidationResult) => void>>();
     private batchTimeout: NodeJS.Timeout | null = null;
     private MAX_BATCH_SIZE = 20; // Max items per single AI prompt
     private BATCH_WAIT_MS = 3000; // Wait 3s to aggregate appeals from different players
@@ -42,6 +45,7 @@ export class GroqService {
             console.warn("⚠️ GROQ_API_KEY is missing! AI Service will fallback to auto-accept.");
         }
         this.client = new Groq({ apiKey: GROQ_API_KEY || "dummy_key" });
+        this.fallbackMode = (process.env.AI_FALLBACK_MODE as 'auto_accept' | 'voting') || 'auto_accept';
     }
 
     public static getInstance(): GroqService {
@@ -67,48 +71,45 @@ export class GroqService {
     ): Promise<ValidationResult> {
         const id = `${playerId}:${category}`;
 
-        // 1. Deduplication Check
-        // If this exact appeal is already in the queue, return the existing promise's resolution
-        // We can't easily return the *exact* same promise object unless we store it, 
-        // but we can prevent adding a duplicate task.
-        const existing = this.queue.find(q => q.id === id);
-        if (existing) {
-            console.log(`[GroqService] Duplicate appeal blocked for ${id}`);
-            // Return a new promise that hooks into the existing callback
+        // 1. Deduplication Check: Use pendingRequests Map
+        if (this.pendingRequests.has(id)) {
+            console.log(`[GroqService] Duplicate appeal mapped for ${id}`);
             return new Promise((resolve) => {
-                const originalCallback = existing.callback;
-                existing.callback = (result) => {
-                    originalCallback(result);
-                    resolve(result);
-                };
+                this.pendingRequests.get(id)!.push(resolve);
             });
         }
 
-        return new Promise((resolve) => {
-            this.queue.push({
-                id,
-                playerId,
-                category,
-                letter,
-                word,
-                callback: resolve
-            });
+        // 2. New Request
+        const resolvers: Array<(result: ValidationResult) => void> = [];
+        this.pendingRequests.set(id, resolvers);
 
-            console.log(`[GroqService] Enqueued appeal for "${word}". Queue size: ${this.queue.length}`);
-
-            // Start batch timer if not running
-            if (!this.batchTimeout) {
-                this.batchTimeout = setTimeout(() => this.processBatch(), this.BATCH_WAIT_MS);
-            }
-
-            // If queue is huge, process immediately
-            if (this.queue.length >= this.MAX_BATCH_SIZE) {
-                if (this.batchTimeout) clearTimeout(this.batchTimeout);
-                this.processBatch();
-            }
+        const promise = new Promise<ValidationResult>((resolve) => {
+            resolvers.push(resolve);
         });
-    }
 
+        this.queue.push({
+            id,
+            playerId,
+            category,
+            letter,
+            word
+        });
+
+        console.log(`[GroqService] Enqueued appeal for "${word}". Queue size: ${this.queue.length}`);
+
+        // Start batch timer if not running
+        if (!this.batchTimeout) {
+            this.batchTimeout = setTimeout(() => this.processBatch(), this.BATCH_WAIT_MS);
+        }
+
+        // If queue is huge, process immediately
+        if (this.queue.length >= this.MAX_BATCH_SIZE) {
+            if (this.batchTimeout) clearTimeout(this.batchTimeout);
+            this.processBatch();
+        }
+
+        return promise;
+    }
     private async processBatch() {
         this.batchTimeout = null;
         if (this.queue.length === 0) return;
@@ -131,8 +132,8 @@ export class GroqService {
 
         // 3. Prepare Prompt
         if (!GROQ_API_KEY) {
-            // Fallback Mode
-            this.completeBatch(currentBatch, currentBatch.map(() => ({ isValid: true, reason: "AI Service Unavailable (Auto-Pass)", isFabricated: false })));
+            // Fallback Mode (Configurable)
+            this.handleFallback(currentBatch);
             return;
         }
 
@@ -172,10 +173,23 @@ export class GroqService {
 
         } catch (error) {
             console.error("[GroqService] API Error:", error);
-            // Fallback: Accept only words > 2 chars, or just accept all to be "fun/forgiving"
+            this.handleFallback(currentBatch);
+        }
+    }
+
+    private handleFallback(currentBatch: AppealRequest[]) {
+        if (this.fallbackMode === 'auto_accept') {
             const fallbackResults = currentBatch.map(req => ({
-                isValid: req.word.length > 1,
-                reason: "السيستم مهنج بس حسبتهالك.. حظك حلو",
+                isValid: req.word.length > 2,
+                reason: req.word.length > 2 ? "السيستم مهنج بس حسبتهالك.. حظك حلو" : "الكلمة قصيرة جداً",
+                isFabricated: false
+            }));
+            this.completeBatch(currentBatch, fallbackResults);
+        } else {
+            // 'voting' mode -> Mark as invalid so it gets pushed to voting queue
+            const fallbackResults = currentBatch.map(req => ({
+                isValid: false,
+                reason: "السيرفر متعطل، تم تحويلها لتصويت اللاعبين",
                 isFabricated: false
             }));
             this.completeBatch(currentBatch, fallbackResults);
@@ -185,7 +199,13 @@ export class GroqService {
     private completeBatch(requests: AppealRequest[], results: ValidationResult[]) {
         requests.forEach((req, i) => {
             const result = results[i] || { isValid: true, reason: "Fallback", isFabricated: false };
-            req.callback(result);
+
+            // Resolve all pending promises for this ID
+            const resolvers = this.pendingRequests.get(req.id);
+            if (resolvers) {
+                resolvers.forEach(resolve => resolve(result));
+                this.pendingRequests.delete(req.id);
+            }
         });
     }
 
@@ -227,13 +247,13 @@ export class GroqService {
 
     // Helper for single validation (non-batched view, but uses batch internally)
     public async validateWord(letter: string, category: string, word: string): Promise<ValidationResult> {
-        return this.enqueueAppeal("sys-check-" + Date.now(), category, letter, word);
+        return this.enqueueAppeal(`sys-${randomUUID()}`, category, letter, word);
     }
 
     // Helper for batch validation array (maps to enqueue)
     public async validateBatch(items: Array<{ letter: string, category: string, word: string }>): Promise<ValidationResult[]> {
         const promises = items.map(item =>
-            this.enqueueAppeal("sys-batch-" + Math.random(), item.category, item.letter, item.word)
+            this.enqueueAppeal(`sys-batch-${randomUUID()}`, item.category, item.letter, item.word)
         );
         return Promise.all(promises);
     }

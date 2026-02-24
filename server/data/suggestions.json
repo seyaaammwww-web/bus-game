@@ -1060,5 +1060,50 @@
     "count": 1,
     "firstSeen": "2026-02-21T21:07:01.065Z",
     "lastSeen": "2026-02-21T21:07:01.065Z"
+  },
+  {
+    "word": "ولد0",
+    "normalized": "ولد",
+    "letter": "ص",
+    "category": "ولد",
+    "count": 16,
+    "firstSeen": "2026-02-24T00:52:34.269Z",
+    "lastSeen": "2026-02-24T00:52:34.295Z"
+  },
+  {
+    "word": "بنت0",
+    "normalized": "بنت",
+    "letter": "ص",
+    "category": "بنت",
+    "count": 16,
+    "firstSeen": "2026-02-24T00:52:34.296Z",
+    "lastSeen": "2026-02-24T00:52:36.724Z"
+  },
+  {
+    "word": "بلد8",
+    "normalized": "بلد",
+    "letter": "ص",
+    "category": "بلد",
+    "count": 16,
+    "firstSeen": "2026-02-24T00:52:36.522Z",
+    "lastSeen": "2026-02-24T00:52:36.735Z"
+  },
+  {
+    "word": "حيوان0",
+    "normalized": "حيوان",
+    "letter": "ص",
+    "category": "حيوان",
+    "count": 16,
+    "firstSeen": "2026-02-24T00:52:36.533Z",
+    "lastSeen": "2026-02-24T00:52:36.947Z"
+  },
+  {
+    "word": "جماد0",
+    "normalized": "جماد",
+    "letter": "ص",
+    "category": "جماد",
+    "count": 16,
+    "firstSeen": "2026-02-24T00:52:36.949Z",
+    "lastSeen": "2026-02-24T00:52:36.969Z"
   }
 ]

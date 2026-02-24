@@ -55,6 +55,7 @@ export interface Player {
   powerUps: PowerUps;
   usedPowerUps: UsedPowerUps; // Track one-time usage
   totalEarnedPoints: number;
+  draftAnswers?: RoundAnswers; // Delta Sync support for live typing
 }
 
 // Answers for a round
@@ -93,7 +94,7 @@ export interface ValidatedAnswer {
   isFabricated?: boolean;
   isPendingVote?: boolean;
   voterIds?: string[]; // Track who voted to prevent double voting
-  voterSet?: Set<string>; // O(1) lookup for atomic vote checking
+  aiSuggestion?: boolean; // TBD by AI Assistant
 }
 
 // Round state
@@ -135,12 +136,16 @@ export interface VoteRequest {
   requesterName: string;
   category: Category;
   word: string;
+  // FIX: Parallel vote tracking — snapshotted at vote creation time
+  eligibleVoterIds?: string[];
+  voterIds?: string[];
+  votes?: { yes: number; no: number };
+  aiSuggestion?: boolean;
 }
 
 export interface ActiveVote extends VoteRequest {
   votes: { yes: number; no: number };
   voterIds: string[]; // Who voted in this session
-  votesDetails?: Record<string, 'yes' | 'no'>;
   startTime: number;
 }
 
@@ -186,6 +191,7 @@ export interface Reaction {
 export type WSMessageType =
   | 'create_room'
   | 'join_room'
+  | 'rejoin_room'
   | 'join_public_room'
   | 'room_created'
   | 'room_joined'
@@ -234,7 +240,15 @@ export type WSMessageType =
   | 'vote_session_start' // Individual word vote start
   | 'vote_session_result'
   | 'referee_toggle_validity'
-  | 'ping';
+  | 'referee_override' // Referee Quick-Action override
+  | 'ping'
+  // FIX: New message types for parallel voting and host controls
+  | 'pong'
+  | 'cast_parallel_vote'
+  | 'host_resolve_votes'
+  | 'kick_player'
+  | 'kicked'
+  | 'patch_update';
 
 export interface WSMessage {
   type: WSMessageType;

@@ -58,8 +58,8 @@ export function ActiveGamePlayerGrid({ players, currentPlayerId, submissions, ti
                             </div>
                         )}
 
-                        {/* Typing Indicator (Simulation) */}
-                        {!hasSubmitted && !isMe && Math.random() > 0.7 && (
+                        {/* Real Typing Indicator (Driven by Delta Sync Patches) */}
+                        {!hasSubmitted && !isMe && (player.draftAnswers && Object.values(player.draftAnswers).some((v: any) => v.trim() !== '')) && (
                             <div className="absolute bottom-2 left-2 flex gap-0.5">
                                 <motion.div animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0 }} className="w-1 h-1 bg-gray-400 rounded-full" />
                                 <motion.div animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }} className="w-1 h-1 bg-gray-400 rounded-full" />
