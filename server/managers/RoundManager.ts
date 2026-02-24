@@ -65,6 +65,7 @@ export class RoundManager {
                 startTime: Date.now(),
                 endTime: Date.now() + 45000,
                 isRush: false,
+                isComplete: false,
                 submissions: [],
                 validatedAnswers: [],
                 votingComplete: false,

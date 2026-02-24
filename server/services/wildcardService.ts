@@ -37,7 +37,6 @@ export class WildcardService {
     private static instance: WildcardService;
     private database: WildcardDatabase = {};
     private synonyms: SynonymsConfig = { jamad_synonyms: {}, jamad_categories: {} };
-    private usedAnswers = new Map<string, Set<string>>(); // Track used answers per letter+category
 
     // Performance Optimization: Cache validation results
     private validationCache = new Map<string, boolean>();
@@ -156,18 +155,15 @@ export class WildcardService {
             let categoryAnswers = letterData[category];
             if (!categoryAnswers || categoryAnswers.length === 0) continue;
 
-            const usedKey = `${dbKey}:${category}`;
-            if (!this.usedAnswers.has(usedKey)) this.usedAnswers.set(usedKey, new Set());
+            let availableAnswers = categoryAnswers;
 
-            const used = this.usedAnswers.get(usedKey)!;
-            let availableAnswers = categoryAnswers.filter(ans => !used.has(ans));
 
             // Advanced Filtering for Quality
             // 1. No spaces (single words only)
             // 2. No starting numbers
             // 3. Reasonable length
             // 4. No special chars meant for explanations (parentheses)
-            availableAnswers = availableAnswers.filter(a =>
+            availableAnswers = availableAnswers.filter((a: string) =>
                 !a.includes(' ') &&
                 !/^\d/.test(a) &&
                 a.length <= 15 &&
@@ -175,22 +171,11 @@ export class WildcardService {
             );
 
             if (availableAnswers.length === 0) {
-                // Relax filter if too strict? Or just recycle?
-                // Try recycling original list first
-                used.clear();
-                availableAnswers = categoryAnswers.filter(a =>
-                    !a.includes(' ') &&
-                    !/^\d/.test(a)
-                );
-
-                // If still empty, fall back to anything
-                if (availableAnswers.length === 0) {
-                    availableAnswers = categoryAnswers;
-                }
+                // If filtered list is empty, fall back to anything
+                availableAnswers = categoryAnswers;
             }
 
             const randomAnswer = availableAnswers[Math.floor(Math.random() * availableAnswers.length)];
-            used.add(randomAnswer);
             answers[category] = randomAnswer;
         }
         return answers;

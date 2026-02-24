@@ -158,6 +158,7 @@ interface GameContextType {
   refereeToggleValidity: (playerId: string, category: Category) => void;
   refereeOverride: (requestId: string, category: string, accepted: boolean) => void;
   hostAdjustScore: (playerId: string, delta: number) => void;
+  sendMessage: (type: string, payload: any) => void;
 }
 
 const GameContext = createContext<GameContextType | null>(null);
@@ -501,6 +502,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       refereeToggleValidity,
       refereeOverride,
       hostAdjustScore,
+      sendMessage,
     }}>
       {children}
     </GameContext.Provider>

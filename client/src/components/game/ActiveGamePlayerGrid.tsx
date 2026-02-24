@@ -47,6 +47,16 @@ export function ActiveGamePlayerGrid({ players, currentPlayerId, submissions, ti
                             )}
                         </div>
 
+                        {/* Player Content */}
+                        <PixelAvatar
+                            src={player.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${player.id}`}
+                            size="sm"
+                            className="border-2 border-[#4c1d95] mb-1 z-10 bg-white"
+                        />
+                        <p className="font-pixel-text text-sm mt-1 truncate max-w-[80px] text-center text-[#2e1065] font-bold leading-tight">
+                            {player.name}
+                        </p>
+
 
 
 

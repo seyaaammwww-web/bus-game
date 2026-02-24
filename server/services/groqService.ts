@@ -69,7 +69,8 @@ export class GroqService {
         letter: string,
         word: string
     ): Promise<ValidationResult> {
-        const id = `${playerId}:${category}`;
+        // Fix: Include the string 'word' to correctly distinguish different words in the same category
+        const id = `${playerId}:${category}:${word}`;
 
         // 1. Deduplication Check: Use pendingRequests Map
         if (this.pendingRequests.has(id)) {

@@ -114,6 +114,10 @@ export interface Round {
   banishedPlayerId?: string | null;
   banishedByPlayerId?: string | null;
   resultsCommitted?: boolean;
+  busAnswer?: string;
+  isComplete: boolean;
+  busPlayerId?: string | null;
+  voteEndTime?: number;
 }
 
 // Referee deduction
@@ -257,8 +261,10 @@ export type WSMessageType =
   | 'cast_parallel_vote'
   | 'host_adjust_score'
   | 'host_resolve_votes'
+  | 'host_end_round'
   | 'kick_player'
   | 'kicked'
+  | 'player_kicked'
   | 'patch_update';
 
 export interface WSMessage {

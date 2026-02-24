@@ -127,67 +127,39 @@ export class SmartQueue {
 }
 
 /**
- * نظام بث الطلبات: يجمع طلبات متعددة ويرسلها معاً لتقليل عدد الاتصالات
+ * نظام بث الطلبات المحدث: يجمع طلبات متعددة ويرسلها معاً لتقليل عدد الاتصالات (تم إصلاح تعهدات المعالجة).
  */
 export class BatchProcessor<T, R> {
-  private batch: T[] = [];
-  private batchSize: number;
-  private batchTimeout: number;
+  private pendingItems: Array<{ item: T; resolve: (value: R) => void; reject: (reason?: any) => void }> = [];
   private timer: NodeJS.Timeout | null = null;
-  private processor: (items: T[]) => Promise<R[]>;
 
   constructor(
-    processor: (items: T[]) => Promise<R[]>,
-    batchSize: number = 50,
-    batchTimeout: number = 100
-  ) {
-    this.processor = processor;
-    this.batchSize = batchSize;
-    this.batchTimeout = batchTimeout;
-  }
+    private processor: (items: T[]) => Promise<R[]>,
+    private batchSize: number = 50,
+    private batchTimeout: number = 100
+  ) { }
 
-  /**
-   * أضف عنصراً للدفعة
-   */
-  async add(item: T): Promise<R | null> {
-    return new Promise((resolve) => {
-      this.batch.push(item);
-
-      if (this.batch.length >= this.batchSize) {
-        // دفعة ممتلئة - معالجة فورية
-        this.flush().then(results => {
-          resolve(results[results.length - 1] || null);
-        });
+  async add(item: T): Promise<R> {
+    return new Promise((resolve, reject) => {
+      this.pendingItems.push({ item, resolve, reject });
+      if (this.pendingItems.length >= this.batchSize) {
+        this.flush();
       } else if (!this.timer) {
-        // انتظر قليلاً لتجميع المزيد
-        this.timer = setTimeout(() => {
-          this.flush();
-        }, this.batchTimeout);
+        this.timer = setTimeout(() => this.flush(), this.batchTimeout);
       }
     });
   }
 
-  /**
-   * معالجة الدفعة الحالية فوراً
-   */
-  async flush(): Promise<R[]> {
-    if (this.timer) {
-      clearTimeout(this.timer);
-      this.timer = null;
-    }
-
-    if (this.batch.length === 0) {
-      return [];
-    }
-
-    const itemsToProcess = this.batch;
-    this.batch = [];
-
+  async flush(): Promise<void> {
+    if (this.timer) clearTimeout(this.timer);
+    this.timer = null;
+    const items = this.pendingItems;
+    this.pendingItems = [];
     try {
-      return await this.processor(itemsToProcess);
+      const results = await this.processor(items.map(p => p.item));
+      items.forEach((p, i) => p.resolve(results[i]));
     } catch (error) {
-      console.error("[BatchProcessor] Error processing batch:", error);
-      return [];
+      items.forEach(p => p.reject(error));
     }
   }
 }

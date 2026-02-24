@@ -16,7 +16,7 @@ interface HostControlsProps {
 }
 
 export const HostControls: React.FC<HostControlsProps> = ({ type, targetPlayer }) => {
-    const { isHost, hostAdjustScore, kickPlayer, hostResolveVotes, state } = useGame();
+    const { isHost, hostAdjustScore, kickPlayer, hostResolveVotes, state, sendMessage } = useGame();
 
     if (!isHost) return null;
 
@@ -85,6 +85,16 @@ export const HostControls: React.FC<HostControlsProps> = ({ type, targetPlayer }
 
         return (
             <div className="flex flex-wrap gap-2 items-center">
+                {state.room?.phase === 'playing' && (
+                    <Button
+                        onClick={() => sendMessage?.('host_end_round', {})}
+                        variant="destructive"
+                        size="sm"
+                        className="h-8 text-xs font-pixel shadow-md border-b-2 border-red-800"
+                    >
+                        إنهاء الجولة
+                    </Button>
+                )}
                 {hasPendingVotes && (
                     <Button
                         onClick={hostResolveVotes}

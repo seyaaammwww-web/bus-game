@@ -16,8 +16,10 @@ function VotingItemCard({ item, currentPlayer, castParallelVote, refereeOverride
     const noPercent = totalVotes > 0 ? (noVotes / totalVotes) * 100 : 50;
     const canOverride = isReferee || isHost;
 
+    const canVote = !hasVoted && !isRequester && currentPlayer;
+
     const handleVote = (vote: 'yes' | 'no') => {
-        if (!hasVoted && !isRequester) {
+        if (canVote) {
             castParallelVote(item.requesterId, item.category, vote);
         }
     };
@@ -130,8 +132,29 @@ export function VotingOverlay() {
     const room = state.room;
     const voteQueue = room?.voteQueue || [];
 
-    // Derive timer from state.timeLeft if it's the voting phase
-    const timeLeft = state.timeLeft || 0;
+    // FIX (#6): Pull true voteEndTime calculated via server instead of static legacy state
+    const [voteTimeLeft, setVoteTimeLeft] = useState(0);
+
+    useEffect(() => {
+        if (room?.phase !== 'voting' || !room?.rounds[room.currentRound]?.voteEndTime) {
+            setVoteTimeLeft(0);
+            return;
+        }
+
+        const interval = setInterval(() => {
+            const end = room.rounds[room.currentRound].voteEndTime!;
+            const remaining = Math.max(0, Math.ceil((end - Date.now()) / 1000));
+            setVoteTimeLeft(remaining);
+
+            if (remaining <= 0) clearInterval(interval);
+        }, 1000);
+
+        // Initial setup
+        const remaining = Math.max(0, Math.ceil((room.rounds[room.currentRound].voteEndTime! - Date.now()) / 1000));
+        setVoteTimeLeft(remaining);
+
+        return () => clearInterval(interval);
+    }, [room?.phase, room?.currentRound, room?.rounds]);
 
     if (!room || room.phase !== 'voting' || voteQueue.length === 0) return null;
 
@@ -164,7 +187,7 @@ export function VotingOverlay() {
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Timer timeLeft={timeLeft} isRush={timeLeft <= 5} maxTime={30} />
+                            <Timer timeLeft={voteTimeLeft} isRush={voteTimeLeft <= 5} maxTime={30} />
                             <span className="text-[10px] bg-amber-400 text-amber-900 font-pixel-text font-bold px-2 py-0.5 rounded-full border border-amber-600">
                                 {voteQueue.length} إجابات
                             </span>
