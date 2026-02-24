@@ -99,4 +99,21 @@ app.use((req, res, next) => {
       log(`serving on port ${port}`);
     },
   );
+
+  // Graceful shutdown — stop accepting connections and clean up timers
+  const gracefulShutdown = (signal: string) => {
+    log(`Received ${signal}, shutting down gracefully...`);
+    httpServer.close(() => {
+      log('All connections closed. Exiting.');
+      process.exit(0);
+    });
+    // Force-exit fallback if connections don't drain within 10 s
+    setTimeout(() => {
+      log('Could not drain connections in time — forcing exit.');
+      process.exit(1);
+    }, 10000).unref(); // .unref() so this timer doesn't block the event loop itself
+  };
+
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 })();

@@ -278,23 +278,91 @@ export interface WSMessage {
 
 // Schemas for validation
 export const createRoomSchema = z.object({
-  playerName: z.string().min(2).max(20)
+  playerName: z.string().min(1).max(20).trim()
 });
 
 export const joinRoomSchema = z.object({
   roomCode: z.string().length(4),
-  playerName: z.string().min(2).max(20)
+  playerName: z.string().min(1).max(20).trim()
+});
+
+export const rejoinRoomSchema = z.object({
+  roomCode: z.string().length(4),
+  playerId: z.string().uuid()
 });
 
 export const submitAnswersSchema = z.object({
-  answers: z.record(z.string())
+  answers: z.record(z.string().max(100))
+});
+
+export const draftUpdateSchema = z.object({
+  answers: z.record(z.string().max(100))
 });
 
 export const voteSchema = z.object({
   playerId: z.string(),
-  category: z.enum(categories),
+  category: z.string(),
   accepted: z.boolean()
 });
+
+export const castParallelVoteSchema = z.object({
+  requesterId: z.string(),
+  category: z.string().min(1).max(30),
+  vote: z.enum(['yes', 'no'])
+});
+
+export const requestVoteSchema = z.object({
+  playerId: z.string(),
+  category: z.string().min(1),
+  word: z.string().min(1).max(100)
+});
+
+export const kickPlayerSchema = z.object({
+  playerId: z.string()
+});
+
+export const hostAdjustScoreSchema = z.object({
+  targetPlayerId: z.string(),
+  delta: z.number().int().min(-1000).max(1000)
+});
+
+export const refereeToggleValiditySchema = z.object({
+  playerId: z.string(),
+  category: z.string().min(1)
+});
+
+export const refereeOverrideSchema = z.object({
+  requestId: z.string(),
+  category: z.string().min(1),
+  accepted: z.boolean()
+});
+
+export const appealAnswerSchema = z.object({
+  playerId: z.string(),
+  category: z.string().min(1),
+  word: z.string().min(1).max(100)
+});
+
+export const activatePowerUpSchema = z.object({
+  type: z.enum(['hint', 'steal', 'wildcard', 'banish']),
+  targetPlayerId: z.string().optional()
+});
+
+export const sendReactionSchema = z.object({
+  reactionType: z.string().min(1).max(20)
+});
+
+export const setRefereeSchema = z.object({
+  playerId: z.string()
+});
+
+export const updateSettingsSchema = z.object({
+  maxRounds: z.number().int().min(1).max(20).optional(),
+  roundDuration: z.number().int().min(30).max(300).optional(),
+  customCategories: z.array(z.string().min(1).max(20)).max(10).optional(),
+  votingEnabled: z.boolean().optional(),
+  refereeEnabled: z.boolean().optional(),
+}).passthrough(); // allow extra settings fields
 
 export type CreateRoomInput = z.infer<typeof createRoomSchema>;
 export type JoinRoomInput = z.infer<typeof joinRoomSchema>;

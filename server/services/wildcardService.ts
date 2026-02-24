@@ -409,6 +409,7 @@ export class WildcardService {
      */
     logSuggestion(letter: string, category: string, word: string): void {
         const suggestionPath = path.join(process.cwd(), 'server/data/suggestions.json');
+        const MAX_SUGGESTIONS = 5000; // Cap file size to prevent unbounded growth
         // Fire and forget — errors logged internally
         enqueueWrite(async () => {
             let suggestions: any[] = [];
@@ -439,10 +440,19 @@ export class WildcardService {
                     });
                 }
 
+                // Trim oldest entries if over cap
+                if (suggestions.length > MAX_SUGGESTIONS) {
+                    suggestions.sort((a: any, b: any) =>
+                        new Date(a.lastSeen).getTime() - new Date(b.lastSeen).getTime()
+                    );
+                    suggestions = suggestions.slice(suggestions.length - MAX_SUGGESTIONS);
+                }
+
                 await fsAsync.writeFile(suggestionPath, JSON.stringify(suggestions, null, 2), 'utf-8');
             } catch (error) {
                 console.error('[WildcardService] Failed to log suggestion:', error);
             }
         });
     }
+
 }

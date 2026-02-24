@@ -38,8 +38,14 @@ export class CorruptionProofBuffer<T> {
     }
 
     /**
-     * Unsafe get: returns direct reference. USE ONLY FOR READS THAT MUST BE FAST.
-     * DO NOT MUTATE.
+     * Unsafe get: returns a **direct mutable reference** to the current primary state.
+     *
+     * ⚠️  CONTRACT: Callers MUST treat this as strictly read-only.
+     *     Any mutation outside a `transact()` call will corrupt the checksum
+     *     and cause the next transaction to roll back from shadow.
+     *
+     * Use only for hot read-only paths where the immutable copy from `get()` would
+     * add measurable overhead (e.g. inside tight broadcast loops).
      */
     getUnsafe(): Readonly<T> {
         return this.primary;

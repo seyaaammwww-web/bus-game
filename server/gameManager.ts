@@ -1,6 +1,13 @@
 
 import { WebSocket } from 'ws';
+import { z } from 'zod';
 import type { WSMessage, RoundAnswers, Category, PowerUpType, ReactionType, GameRoom } from '../shared/schema';
+import {
+  createRoomSchema, joinRoomSchema, rejoinRoomSchema, submitAnswersSchema, draftUpdateSchema,
+  castParallelVoteSchema, requestVoteSchema, kickPlayerSchema, hostAdjustScoreSchema,
+  refereeToggleValiditySchema, refereeOverrideSchema, appealAnswerSchema,
+  activatePowerUpSchema, sendReactionSchema, setRefereeSchema, updateSettingsSchema
+} from '../shared/schema';
 import { RoomManager } from './managers/RoomManager';
 import { PlayerManager } from './managers/PlayerManager';
 import { RoundManager } from './managers/RoundManager';
@@ -25,6 +32,37 @@ export class GameManager {
   private heartbeatInterval: NodeJS.Timeout | null = null;
   private lastVoteTime: Map<string, number> = new Map();
   private VOTE_COOLDOWN_MS: number = 1000;
+
+  // Per-IP room creation rate limiting (5 rooms per 10 min)
+  private readonly roomCreationLimits = new Map<string, { count: number; resetTime: number }>();
+  private readonly ROOM_CREATION_LIMIT = 5;
+  private readonly ROOM_CREATION_WINDOW_MS = 10 * 60 * 1000;
+
+  private getClientIp(ws: WebSocket): string {
+    return (ws as any)._socket?.remoteAddress || 'unknown';
+  }
+
+  private checkRoomCreationLimit(ws: WebSocket): boolean {
+    const ip = this.getClientIp(ws);
+    const now = Date.now();
+    const record = this.roomCreationLimits.get(ip);
+    if (!record || now > record.resetTime) {
+      this.roomCreationLimits.set(ip, { count: 1, resetTime: now + this.ROOM_CREATION_WINDOW_MS });
+      return true;
+    }
+    if (record.count >= this.ROOM_CREATION_LIMIT) return false;
+    record.count++;
+    return true;
+  }
+
+  private validatePayload<T>(schema: z.ZodSchema<T>, payload: unknown): T | null {
+    const result = schema.safeParse(payload);
+    if (!result.success) {
+      console.warn('[Validation] Invalid payload:', result.error.flatten());
+      return null;
+    }
+    return result.data;
+  }
 
   private checkRateLimit(ws: WebSocket): boolean {
     const now = Date.now();
@@ -162,53 +200,104 @@ export class GameManager {
       return;
     }
 
+    const invalid = () => this.send(ws, { type: 'error', payload: { message: 'بيانات غير صالحة' } });
+
     console.log(`[GameManager] Received: ${message.type}`);
     try {
       switch (message.type) {
-        case 'create_room': this.createRoom(ws, message.payload.playerName); break;
-        case 'join_room': this.joinRoom(ws, message.payload.roomCode, message.payload.playerName); break;
-        case 'rejoin_room': this.rejoinRoom(ws, message.payload.roomCode, message.payload.playerId); break;
-        case 'join_public_room': this.joinPublicRoom(ws, message.payload.playerName); break;
+        case 'create_room': {
+          const p = this.validatePayload(createRoomSchema, message.payload);
+          if (!p) return invalid();
+          this.createRoom(ws, p.playerName);
+          break;
+        }
+        case 'join_room': {
+          const p = this.validatePayload(joinRoomSchema, message.payload);
+          if (!p) return invalid();
+          this.joinRoom(ws, p.roomCode, p.playerName);
+          break;
+        }
+        case 'rejoin_room': {
+          const p = this.validatePayload(rejoinRoomSchema, message.payload);
+          if (!p) return invalid();
+          this.rejoinRoom(ws, p.roomCode, p.playerId);
+          break;
+        }
+        case 'join_public_room': {
+          const p = this.validatePayload(createRoomSchema, message.payload); // same shape
+          if (!p) return invalid();
+          this.joinPublicRoom(ws, p.playerName);
+          break;
+        }
         case 'player_ready': this.setReady(ws); break;
         case 'start_game': this.startGame(ws); break;
-        case 'submit_answers': this.submitAnswers(ws, message.payload.answers); break;
+        case 'submit_answers': {
+          const p = this.validatePayload(submitAnswersSchema, message.payload);
+          if (!p) return invalid();
+          this.submitAnswers(ws, p.answers);
+          break;
+        }
         case 'bus_complete': this.triggerBusComplete(ws); break;
-        case 'vote': this.vote(ws, message.payload.playerId, message.payload.category, message.payload.accepted); break;
         case 'next_round': this.nextRound(ws); break;
         case 'play_again': this.playAgain(ws); break;
-        case 'set_referee': this.setReferee(ws, message.payload.playerId); break;
+        case 'set_referee': {
+          const p = this.validatePayload(setRefereeSchema, message.payload);
+          if (!p) return invalid();
+          this.setReferee(ws, p.playerId);
+          break;
+        }
         case 'remove_referee': this.removeReferee(ws); break;
         case 'referee_approve': this.refereeApprove(ws); break;
-        case 'update_settings': this.updateSettings(ws, message.payload); break;
-        case 'draft_update': this.handleDraftUpdate(ws, message.payload.answers); break;
-        case 'activate_powerup': this.activatePowerUp(ws, message.payload); break;
-        case 'send_reaction': this.sendReaction(ws, message.payload.reactionType); break;
-        case 'request_vote': this.requestVote(ws, message.payload); break;
-        case 'vote_cast':
-        case 'cast_democratic_vote':
-          this.castDemocraticVote(ws, message.payload.vote || message.payload);
+        case 'update_settings': {
+          const p = this.validatePayload(updateSettingsSchema, message.payload);
+          if (!p) return invalid();
+          this.updateSettings(ws, p);
           break;
-        // FIX: Handle parallel vote cast (per-answer voting)
-        case 'cast_parallel_vote':
-          if (!message.payload || typeof message.payload.requesterId !== 'string' ||
-            typeof message.payload.category !== 'string' ||
-            !['yes', 'no'].includes(message.payload.vote)) {
-            this.send(ws, { type: 'error', payload: { message: 'بيانات التصويت غير صالحة' } });
-            return;
-          }
-          this.castParallelVote(ws, message.payload);
+        }
+        case 'draft_update': {
+          const p = this.validatePayload(draftUpdateSchema, message.payload);
+          if (!p) return invalid();
+          this.handleDraftUpdate(ws, p.answers);
           break;
-        // FIX (#3): Phase 3 Player Appeal
+        }
+        case 'activate_powerup': {
+          const p = this.validatePayload(activatePowerUpSchema, message.payload);
+          if (!p) return invalid();
+          this.activatePowerUp(ws, p);
+          break;
+        }
+        case 'send_reaction': {
+          const p = this.validatePayload(sendReactionSchema, message.payload);
+          if (!p) return invalid();
+          this.sendReaction(ws, p.reactionType as ReactionType);
+          break;
+        }
+        case 'request_vote': {
+          const p = this.validatePayload(requestVoteSchema, message.payload);
+          if (!p) return invalid();
+          this.requestVote(ws, p);
+          break;
+        }
+        // Sequential voting removed — parallel only
+        case 'cast_parallel_vote': {
+          const p = this.validatePayload(castParallelVoteSchema, message.payload);
+          if (!p) return invalid();
+          this.castParallelVote(ws, p);
+          break;
+        }
         case 'player_appeal':
           this.handlePlayerAppeal(ws, message.payload);
           break;
-        case 'referee_toggle_validity': this.refereeToggleValidity(ws, message.payload); break;
-        // FIX: Handle pong responses to update lastPong timestamp
+        case 'referee_toggle_validity': {
+          const p = this.validatePayload(refereeToggleValiditySchema, message.payload);
+          if (!p) return invalid();
+          this.refereeToggleValidity(ws, p);
+          break;
+        }
         case 'pong':
           this.playerManager.recordPong(ws);
           break;
-        // FIX (#9): Handle host prematurely ending a stuck round
-        case 'host_end_round':
+        case 'host_end_round': {
           const hostP = this.playerManager.getPlayer(ws);
           if (hostP) {
             const buffer = this.roomManager.getRoomBuffer(hostP.roomId);
@@ -217,26 +306,37 @@ export class GameManager {
             }
           }
           break;
-        // FIX: Host can force-resolve all pending votes
+        }
         case 'host_resolve_votes':
           this.hostResolveVotes(ws);
           break;
-        case 'kick_player':
-          this.kickPlayer(ws, message.payload.playerId);
+        case 'kick_player': {
+          const p = this.validatePayload(kickPlayerSchema, message.payload);
+          if (!p) return invalid();
+          this.kickPlayer(ws, p.playerId);
           break;
-        case 'host_adjust_score':
-          this.hostAdjustScore(ws, message.payload);
+        }
+        case 'host_adjust_score': {
+          const p = this.validatePayload(hostAdjustScoreSchema, message.payload);
+          if (!p) return invalid();
+          this.hostAdjustScore(ws, p);
           break;
+        }
         case 'referee_deduct':
           this.refereeDeduct(ws, message.payload);
           break;
-        // FIX: Phase 4 Referee Override and Appeal
-        case 'referee_override':
-          this.refereeOverride(ws, message.payload);
+        case 'referee_override': {
+          const p = this.validatePayload(refereeOverrideSchema, message.payload);
+          if (!p) return invalid();
+          this.refereeOverride(ws, p);
           break;
-        case 'appeal_answer':
-          this.appealAnswer(ws, message.payload);
+        }
+        case 'appeal_answer': {
+          const p = this.validatePayload(appealAnswerSchema, message.payload);
+          if (!p) return invalid();
+          this.appealAnswer(ws, p);
           break;
+        }
       }
     } catch (e: any) {
       console.error(`[GameManager] Error handling ${message.type}:`, e);
@@ -333,6 +433,12 @@ export class GameManager {
   // ==========================================
 
   createRoom(ws: WebSocket, playerName: string): void {
+    // Per-IP rate limit: max 5 rooms per 10 minutes
+    if (!this.checkRoomCreationLimit(ws)) {
+      this.send(ws, { type: 'error', payload: { message: 'لقد أنشأت عدداً كبيراً من الغرف مؤخراً، انتظر قليلاً' } });
+      return;
+    }
+
     // FIX: Validate player name before doing anything
     const name = (playerName || '').trim();
     if (!name || name.length < 1) {
