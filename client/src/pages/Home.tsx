@@ -13,6 +13,7 @@ import { HelpCircle } from 'lucide-react';
 import { RetroQuote } from '@/components/ui/RetroQuote';
 import { PixelReveal } from '@/components/ui/PixelReveal';
 import { Text3D } from '@/components/ui/Text3D';
+import WorkOSBackground from '@/components/WorkOSBackground';
 
 
 
@@ -57,12 +58,16 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden relative text-white">
 
-      {/* Mobile Pixel Rain Background */}
-      {isMobileView && (
+      {/* Backgrounds */}
+      {isMobileView ? (
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-40 mobile-juicy-bg">
           <div className="pixel-rain pixel-rain-1"></div>
           <div className="pixel-rain pixel-rain-2"></div>
           <div className="pixel-rain pixel-rain-3"></div>
+        </div>
+      ) : (
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+          <WorkOSBackground />
         </div>
       )}
 
@@ -84,7 +89,7 @@ export default function Home() {
         transition={{ type: 'spring', stiffness: isMobileView ? 100 : 200, damping: 20 }}
         className="text-center mb-12 relative z-10"
       >
-        <div className={`logo-container mb-2 ${!isMobileView ? 'animate-slow-float' : ''}`}>
+        <div className={`logo-container mb-2 animate-slow-float`}>
           {/* Logo with shine effect - uses CSS mask to constrain glow to logo shape */}
           <img
             src="/assets/logo.png"

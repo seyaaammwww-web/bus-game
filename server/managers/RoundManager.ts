@@ -59,6 +59,11 @@ export class RoundManager {
     // FIX: Combined startRound — increment currentRound AND initialize round in one transact
     startRound(buffer: CorruptionProofBuffer<GameRoom>): Round {
         buffer.transact((draft) => {
+            // RM3: Guard against out-of-bounds letters access
+            if (draft.currentRound >= draft.letters.length) {
+                throw new Error(`Invalid round index ${draft.currentRound} — only ${draft.letters.length} letters available`);
+            }
+
             const round: Round = {
                 number: draft.currentRound + 1,
                 letter: draft.letters[draft.currentRound],

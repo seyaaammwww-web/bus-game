@@ -57,21 +57,20 @@ export default function Results() {
     }
   }, [isFinal]);
 
+  // FIX: Countdown must stay in sync with server nextRoundAt, not drift independently
   useEffect(() => {
     if (isFinal) return;
-    if (room.nextRoundAt) {
-      const remaining = Math.max(0, Math.ceil((room.nextRoundAt - Date.now()) / 1000));
-      setCountdown(remaining);
-    }
-    const timer = setInterval(() => {
-      setCountdown(prev => {
-        if (prev > 1) {
-          playCountdownSound();
-          return prev - 1;
-        }
-        return prev;
-      });
-    }, 1000);
+
+    const tick = () => {
+      if (room.nextRoundAt) {
+        const remaining = Math.max(0, Math.ceil((room.nextRoundAt - Date.now()) / 1000));
+        setCountdown(remaining);
+        if (remaining > 0) playCountdownSound();
+      }
+    };
+
+    tick(); // Fire immediately
+    const timer = setInterval(tick, 1000);
     return () => clearInterval(timer);
   }, [isFinal, room.nextRoundAt]);
 
@@ -424,12 +423,24 @@ export default function Results() {
           )
         }
 
-        {/* End Game Button for Final Screen */}
+        {/* End Game Buttons */}
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.5 }}
+          className="space-y-3"
         >
+          {isHost && isFinal && (
+            <Button
+              onClick={playAgain}
+              size="lg"
+              className="w-full h-16 text-xl font-bold bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title"
+              data-testid="button-play-again"
+            >
+              <RotateCcw className="w-6 h-6 ml-2" />
+              العب مرة أخرى
+            </Button>
+          )}
           <Button
             onClick={disconnect}
             size="lg"
@@ -440,6 +451,7 @@ export default function Results() {
             العودة للرئيسية
           </Button>
         </motion.div>
+
 
 
         {
@@ -534,6 +546,17 @@ export default function Results() {
                 </div>
               )}
             </>
+          )}
+          {/* Host manual Next Round in standard mode (no timer, no referee, no voting) */}
+          {!isFinal && isHost && !room.nextRoundAt && !room.refereeId && !room.settings?.enableVoting && room.phase === 'results' && (
+            <Button
+              onClick={nextRound}
+              size="lg"
+              className="w-full h-16 text-xl font-bold mt-3 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title"
+              data-testid="button-next-round"
+            >
+              الجولة التالية ←
+            </Button>
           )}
         </motion.div>
       </div>

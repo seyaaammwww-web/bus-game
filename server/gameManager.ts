@@ -7,6 +7,7 @@ import { RoundManager } from './managers/RoundManager';
 import { CorruptionProofBuffer } from './utils/reliability';
 import { StateOrchestrator } from './persistence/StateOrchestrator';
 import { WildcardService } from './services/wildcardService';
+import { getRandomLetters } from '../shared/arabicWords';
 
 export class GameManager {
   private roomManager: RoomManager;
@@ -244,8 +245,14 @@ export class GameManager {
   }
 
   handleDisconnect(ws: WebSocket): void {
+    // GM1: Explicit cleanup of WeakMap entry on disconnect
+    this.rateLimits.delete(ws);
+
     const playerInfo = this.playerManager.removePlayer(ws);
     if (!playerInfo) return;
+
+    // GM3: Clean up lastVoteTime entry when player leaves
+    this.lastVoteTime.delete(playerInfo.playerId);
 
     this.roomManager.removePlayerFromRoom(playerInfo.roomId, playerInfo.playerId);
 
@@ -604,6 +611,9 @@ export class GameManager {
   }
 
   private nextRoundByRoomCode(roomCode: string) {
+    // GM6: Always clear any pending timers before advancing to prevent double-fire
+    this.roundManager.clearTimer(roomCode);
+
     const buffer = this.roomManager.getRoomBuffer(roomCode);
     if (!buffer) return;
 
@@ -613,7 +623,6 @@ export class GameManager {
       return;
     }
 
-    // FIX: Increment currentRound in the SAME transact as startRound processes it
     buffer.transact(draft => {
       draft.currentRound++;
     }, "nextRoundInc");
@@ -876,6 +885,8 @@ export class GameManager {
           `تعديل النقاط: ${oldScore} -> ${newScore} (الفرق: ${delta > 0 ? '+' : ''}${delta})`
         );
 
+        draft.nextRoundAt = undefined;
+
         // Run soft validation
         const warnings = this.validateGameState(draft);
         if (warnings.length > 0) {
@@ -883,6 +894,7 @@ export class GameManager {
         }
       }
     }, 'host_adjust_score');
+    this.roundManager.clearTimer(p.roomId);
     const room = buffer.get();
     this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
   }
@@ -905,6 +917,7 @@ export class GameManager {
         ans.isValid = false;
         ans.reason = payload.reason || 'تم الرفض بواسطة الحكم/المضيف';
         this.roundManager.calculateAnswerScores(draft);
+        draft.nextRoundAt = undefined;
 
         this.addAuditLogEntry(
           draft,
@@ -916,6 +929,7 @@ export class GameManager {
       }
     }, "refereeDeduct");
 
+    this.roundManager.clearTimer(p.roomId);
     this.broadcastToRoom(p.roomId, { type: 'sync_state', payload: { room: buffer.get() } });
   }
 
@@ -1070,12 +1084,13 @@ export class GameManager {
     }
     this.lastVoteTime.set(p.playerId, now);
 
-    let allVotesDone = false;
-
     if (votePayload.requesterId === p.playerId) {
       this.send(ws, { type: 'toast', payload: { message: 'لا يمكنك التصويت على إجابتك!', type: 'error' } });
       return;
     }
+
+    // GM4: Capture the finish decision inside the transaction so it's based on committed state
+    let shouldFinish = false;
 
     buffer.transact(draft => {
       if (draft.phase !== 'voting') return;
@@ -1104,25 +1119,25 @@ export class GameManager {
           (a: any) => a.playerId === item.requesterId && a.category === item.category
         );
         if (ans) {
-          ans.isValid = yes >= no;
+          ans.isValid = yes > no;
           ans.isPendingVote = false;
-          ans.reason = ans.isValid ? 'تم قبوله بالتصويت أو التعادل' : 'تم رفضه (أغلبية)';
+          ans.reason = ans.isValid ? 'تم قبوله (أغلبية)' : 'تم رفضه (تعادل أو أغلبية رفض)';
         }
         draft.voteQueue = draft.voteQueue.filter((q: any) =>
           !(q.requesterId === item.requesterId && q.category === item.category)
         );
       }
 
-      if (draft.voteQueue.length === 0) {
+      if (draft.voteQueue.length === 0 && draft.phase === 'voting') {
         this.roundManager.calculateAnswerScores(draft);
-        allVotesDone = true;
+        shouldFinish = true; // GM4: set flag inside transaction
       }
     }, "castParallelVote");
 
     const room = buffer.get();
     this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
 
-    if (allVotesDone) {
+    if (shouldFinish) {
       this.roundManager.clearTimer(room.code);
       this.finishRoundPhase(room.code);
     }
@@ -1230,6 +1245,11 @@ export class GameManager {
 
     const room = buffer.get();
     this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
+
+    // BUG FIX #6: If referee cleared the last pending vote, finish the round
+    if (room.phase === 'voting' && (!room.voteQueue || room.voteQueue.length === 0)) {
+      this.finishRoundPhase(room.code);
+    }
   }
 
   kickPlayer(ws: WebSocket, targetPlayerId: string) {
@@ -1258,7 +1278,8 @@ export class GameManager {
 
     const targetWs = this.playerManager.getSocket(targetPlayerId);
     if (targetWs) {
-      this.send(targetWs, { type: 'toast', payload: { message: 'تم طردك من الغرفة من قبل المضيف', type: 'error' } });
+      // BUG FIX #2: Send 'kicked' (not just toast) so client redirects the kicked player to home
+      this.send(targetWs, { type: 'kicked', payload: { reason: 'تم طردك من الغرفة من قبل المضيف' } });
       this.playerManager.removePlayer(targetWs);
       try { targetWs.close(); } catch { }
     }
@@ -1338,7 +1359,8 @@ export class GameManager {
         draft.voteQueue.splice(voteItemIndex, 1);
       }
 
-      if (draft.voteQueue.length === 0) {
+      // BUG FIX #8: Only finish round if we're still in voting phase to prevent double-commit
+      if (draft.voteQueue.length === 0 && draft.phase === 'voting') {
         allVotesDone = true;
       }
     }, "referee_override");
@@ -1425,12 +1447,20 @@ export class GameManager {
     const room = buffer.get();
     if (!room.players.find(pl => pl.id === p.playerId)?.isHost) return;
 
+    this.roundManager.clearTimer(p.roomId);
+
     buffer.transact(draft => {
       draft.currentRound = 0;
       draft.phase = 'lobby';
       draft.rounds = [];
       draft.voteQueue = [];
       draft.currentVote = null;
+      draft.nextRoundAt = undefined;
+      draft.auditLog = [];
+
+      // BUG FIX #3: Use getRandomLetters to get truly fresh letters, not a shuffle of the same pool
+      draft.letters = getRandomLetters(draft.totalRounds);
+
       draft.players.forEach(pl => {
         pl.score = 0;
         pl.isReady = false;

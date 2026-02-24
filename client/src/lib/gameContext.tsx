@@ -141,7 +141,6 @@ interface GameContextType {
   referee: Player | null;
   updateSettings: (settings: any) => void;
   requestVote: (playerId: string, category: string, word: string) => void;
-  castDemocraticVote: (vote: 'yes' | 'no') => void;
   // FIX: New parallel vote cast (per-answer)
   castParallelVote: (requesterId: string, category: string, vote: 'yes' | 'no') => void;
   // FIX: Host can force resolve all votes
@@ -187,9 +186,36 @@ export function GameProvider({ children }: { children: ReactNode }) {
         // FIX: Save session for reconnection
         saveSession(message.payload.playerId, message.payload.room.code);
         break;
+      case 'player_submitted':
+        // GC2: Look up actual player name instead of using empty string
+        if (state.room && message.payload?.playerId) {
+          const submittingPlayer = state.room.players.find(p => p.id === message.payload.playerId);
+          const updatedRounds = state.room.rounds.map((r, i) => {
+            if (i !== state.room!.currentRound) return r;
+            const alreadySubmitted = r.submissions.some(s => s.playerId === message.payload.playerId);
+            if (alreadySubmitted) return r;
+            return {
+              ...r,
+              submissions: [
+                ...r.submissions,
+                {
+                  playerId: message.payload.playerId,
+                  playerName: submittingPlayer?.name || '',
+                  answers: {},
+                  submittedAt: Date.now(),
+                  busComplete: false,
+                }
+              ]
+            };
+          });
+          dispatch({ type: 'SET_ROOM', room: { ...state.room, rounds: updatedRounds } });
+        }
+        break;
+
       case 'player_joined':
       case 'player_left':
       case 'player_ready':
+
         dispatch({ type: 'UPDATE_PLAYERS', players: message.payload.players });
         break;
       case 'round_start':
@@ -250,11 +276,21 @@ export function GameProvider({ children }: { children: ReactNode }) {
         dispatch({ type: 'SET_RUSH', isRush: false });
         break;
       case 'toast':
-        console.log('[Toast]', message.payload.message);
+        // FIX: Show server toast messages in the UI (was only console.log before)
+        if (typeof message.payload?.message === 'string') {
+          // Use a custom event so Toaster can pick it up without hook dependency here
+          window.dispatchEvent(new CustomEvent('game-toast', { detail: message.payload }));
+        }
         break;
       case 'appeal_result':
-        console.log(message.payload.success ? '[Appeal ✅]' : '[Appeal ❌]', message.payload.message);
+        window.dispatchEvent(new CustomEvent('game-toast', {
+          detail: {
+            message: message.payload.success ? '✅ ' + (message.payload.message || 'تم قبول الاستئناف') : '❌ ' + (message.payload.message || 'تم رفض الاستئناف'),
+            type: message.payload.success ? 'success' : 'error'
+          }
+        }));
         break;
+
       // FIX: Handle being kicked
       case 'kicked':
         clearSession();
@@ -357,21 +393,19 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const createRoom = useCallback((playerName: string) => {
     const ws = connect();
     const doCreate = () => {
-      dispatch({ type: 'SET_CONNECTED', connected: true });
       ws.send(JSON.stringify({ type: 'create_room', payload: { playerName } }));
     };
     if (ws.readyState === WebSocket.OPEN) doCreate();
-    else ws.onopen = doCreate;
+    else ws.addEventListener('open', doCreate, { once: true });
   }, [connect]);
 
   const joinRoom = useCallback((roomCode: string, playerName: string) => {
     const ws = connect();
     const doJoin = () => {
-      dispatch({ type: 'SET_CONNECTED', connected: true });
       ws.send(JSON.stringify({ type: 'join_room', payload: { roomCode: roomCode.toUpperCase(), playerName } }));
     };
     if (ws.readyState === WebSocket.OPEN) doJoin();
-    else ws.onopen = doJoin;
+    else ws.addEventListener('open', doJoin, { once: true });
   }, [connect]);
 
   const setReady = useCallback(() => { sendMessage('player_ready', { playerId: state.playerId }); }, [sendMessage, state.playerId]);
@@ -394,8 +428,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const sendReaction = useCallback((reactionType: ReactionType) => { sendMessage('send_reaction', { reactionType }); }, [sendMessage]);
   const updateSettings = useCallback((settings: any) => { sendMessage('update_settings', settings); }, [sendMessage]);
   const requestVote = useCallback((playerId: string, category: string, word: string) => { sendMessage('request_vote', { playerId, category, word }); }, [sendMessage]);
-  const castDemocraticVote = useCallback((vote: 'yes' | 'no') => { sendMessage('cast_democratic_vote', { vote }); }, [sendMessage]);
-  // FIX: New parallel vote
+  // Sequential voting removed — use castParallelVote only
   const castParallelVote = useCallback((requesterId: string, category: string, vote: 'yes' | 'no') => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({
@@ -432,18 +465,32 @@ export function GameProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'RESET' });
   }, []);
 
-  // Timer effect
+  // GC1: Fix stale closure — use a ref to always read latest timeLeft
+  const timeLeftRef = useRef(state.timeLeft);
   useEffect(() => {
-    if (state.room?.phase === 'playing' && state.timeLeft > 0) {
+    timeLeftRef.current = state.timeLeft;
+  }, [state.timeLeft]);
+
+  // Timer effect — only re-created when phase changes, never on every tick
+  useEffect(() => {
+    if (state.room?.phase === 'playing') {
       timerRef.current = setInterval(() => {
-        dispatch({ type: 'SET_TIME_LEFT', timeLeft: state.timeLeft - 1 });
+        const current = timeLeftRef.current;
+        if (current > 0) {
+          dispatch({ type: 'SET_TIME_LEFT', timeLeft: current - 1 });
+        } else {
+          clearInterval(timerRef.current!);
+          timerRef.current = null;
+        }
       }, 1000);
-    } else if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
+    } else {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
     }
     return () => { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; } };
-  }, [state.room?.phase, state.timeLeft]);
+  }, [state.room?.phase]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -492,7 +539,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
       referee,
       updateSettings,
       requestVote,
-      castDemocraticVote,
       castParallelVote,
       hostResolveVotes,
       kickPlayer,

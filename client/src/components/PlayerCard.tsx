@@ -54,7 +54,7 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
           isCurrentPlayer ? "w-14 h-14 border-[#7c3aed] bg-[#7c3aed]" : "w-12 h-12 border-black bg-gray-100"
         )}>
           {/* Background Pattern */}
-          <div className={`absolute inset-0 opacity-20 ${isCurrentPlayer ? 'bg-[url("/patterns/pixel-dots.png")]' : ''}`} />
+          <div className={`absolute inset-0 opacity-20 ${isCurrentPlayer ? 'bg-primary/10' : ''}`} />
 
           {/* Letter */}
           <span className={cn(

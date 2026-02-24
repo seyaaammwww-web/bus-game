@@ -21,8 +21,9 @@ export default function Lobby() {
   const [customCats, setCustomCats] = useState(categories);
 
   const room = state.room!;
-  const allReady = room.players.every(p => p.isReady);
-  const canStart = isHost && allReady && room.players.length >= 1;
+  const otherPlayers = room.players.filter(p => p.id !== state.playerId);
+  const otherPlayersReady = otherPlayers.length === 0 || otherPlayers.every(p => p.isReady);
+  const canStart = isHost && otherPlayersReady;
 
   const copyCode = async () => {
     await navigator.clipboard.writeText(room.code);
@@ -56,7 +57,7 @@ export default function Lobby() {
             className="text-white hover:bg-white/10"
             data-testid="button-exit-lobby"
           >
-          </Button>
+            <LogOut className="w-5 h-5" /></Button>
 
           <div className="flex gap-2">
             <Button
@@ -352,7 +353,7 @@ export default function Lobby() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3 }}
         >
-          {!currentPlayer?.isReady && (
+          {!currentPlayer?.isReady && !isHost && (
             <motion.div
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             >
@@ -399,7 +400,7 @@ export default function Lobby() {
                 data-testid="button-start-game"
               >
                 <Play className="w-6 h-6 ml-2 absolute right-4" />
-                {allReady ? 'ابدأ اللعبة!' : 'في انتظار اللاعبين...'}
+                {otherPlayersReady ? 'ابدأ اللعبة!' : 'في انتظار اللاعبين...'}
               </Button>
             </motion.div>
           )}

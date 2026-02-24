@@ -1,40 +1,33 @@
 import { WildcardService } from './services/wildcardService';
-import { GroqService } from './services/groqService';
 import type { Category } from '@shared/schema';
-import dotenv from "dotenv";
 import { SeededRNG } from './utils/reliability';
 
-dotenv.config();
+// ============================================================
+// AI validation has been INTENTIONALLY DISABLED.
+// Groq is no longer in the validation path.
+// Validation = local word database (WildcardService) only.
+// Uncertain answers go to parallel player voting.
+// Groq is still used ONLY for the Wildcard power-up generator.
+// ============================================================
 
 interface ValidationResult {
   isValid: boolean;
   reason: string;
-  source: 'database' | 'ai' | 'heuristic';
-  aiSuggestion?: boolean;
-}
-
-interface CacheEntry {
-  result: ValidationResult;
-  timestamp: number;
+  source: 'database' | 'heuristic';
 }
 
 export class HybridValidator {
   private static instance: HybridValidator;
 
-  private cache = new Map<string, CacheEntry>();
-  // private maxCacheSize = 10000;
-  // private cacheTTL = 24 * 60 * 60 * 1000; 
-
   private metrics = {
     totalValidations: 0,
     dbHits: 0,
-    aiHits: 0,
-    failsLogged: 0,
+    dbMisses: 0,
     startTime: Date.now()
   };
 
   private constructor() {
-    console.log("[HybridValidator] Initialized in Manual/Voting Mode (AI Disabled).");
+    console.log("[HybridValidator] Initialized — Database-only mode. AI disabled.");
   }
 
   static getInstance(): HybridValidator {
@@ -45,56 +38,39 @@ export class HybridValidator {
   }
 
   /**
-   * Validate a single word with optional seed for deterministic behavior.
-   * If valid: Returns true.
-   * If invalid: Asks AI for suggestion, logs to suggestions.json, and returns false with aiSuggestion.
+   * Validate a single word.
+   * - Found in database → valid
+   * - Not found → invalid (goes to voting/referee for uncertain answers)
+   * No AI calls are made.
    */
-  async validate(playerId: string, letter: string, category: Category, answer: string, seed?: number): Promise<ValidationResult> {
+  validate(playerId: string, letter: string, category: Category, answer: string, _seed?: number): ValidationResult {
     this.metrics.totalValidations++;
 
-    // Quick cleaning
     const trimmed = answer.trim();
     if (!trimmed || trimmed.length < 2) {
-      return { isValid: false, reason: 'Too short', source: 'heuristic' };
+      return { isValid: false, reason: 'قصير جداً', source: 'heuristic' };
     }
 
-    // 1. Check Local DB (Deterministic by definition of static DB)
     const isValid = WildcardService.getInstance().validateWord(letter, category, trimmed);
 
     if (isValid) {
       this.metrics.dbHits++;
-      return { isValid: true, reason: 'Found in Database', source: 'database' };
+      return { isValid: true, reason: 'موجودة في القاموس', source: 'database' };
     }
 
-    // 2. Not found? 
-    // Ask AI Assistant for suggestion (Phase 4)
-    let aiSuggestion = false;
-    let fallbackReason = 'Word not found in DB';
-
-    try {
-      const groqResult = await GroqService.getInstance().enqueueAppeal(playerId, category, letter, trimmed);
-      aiSuggestion = groqResult.isValid;
-      fallbackReason = groqResult.reason;
-      this.metrics.aiHits++;
-    } catch (e) {
-      console.error("[HybridValidator] Error getting AI suggestion:", e);
-    }
-
+    this.metrics.dbMisses++;
+    // Log unknown words for future database expansion
     WildcardService.getInstance().logSuggestion(letter, category, trimmed);
-    this.metrics.failsLogged++;
 
     return {
-      isValid: false, // Always false if not in DB, goes to voting/referee
-      reason: fallbackReason,
-      source: 'ai',
-      aiSuggestion
+      isValid: false,
+      reason: 'غير موجودة في القاموس',
+      source: 'database',
     };
   }
 
   /**
-   * FIX (#2): Validate a batch in PARALLEL using Promise.all.
-   * Time = max(single validation) instead of sum(all validations).
-   * This prevents the 6-second timeout from being exceeded unnecessarily.
+   * Validate a batch synchronously — much faster now without AI calls.
    */
   async validateBatch(
     items: Array<{ playerId: string, category: Category, letter: string, answer: string }>,
@@ -102,14 +78,12 @@ export class HybridValidator {
   ): Promise<Map<string, ValidationResult>> {
     const results = new Map<string, ValidationResult>();
 
-    // Run all validations concurrently — DB lookups are synchronous (in-memory),
-    // so Promise.all here mainly helps if AI fallback is ever re-enabled.
-    await Promise.all(items.map(async (item) => {
+    for (const item of items) {
       const key = `${item.playerId}:${item.category}`;
       const itemSeed = seed ? seed + item.playerId.charCodeAt(0) : undefined;
-      const result = await this.validate(item.playerId, item.letter, item.category, item.answer, itemSeed);
+      const result = this.validate(item.playerId, item.letter, item.category, item.answer, itemSeed);
       results.set(key, result);
-    }));
+    }
 
     return results;
   }
@@ -119,11 +93,6 @@ export class HybridValidator {
     return {
       ...this.metrics,
       uptimeSeconds: Math.floor(uptime / 1000),
-      suggestionsLogged: this.metrics.failsLogged
     };
-  }
-
-  clearCache(): void {
-    this.cache.clear();
   }
 }

@@ -1,89 +1,87 @@
 import { motion } from 'framer-motion';
-import { Gavel } from 'lucide-react';
+import { Gavel, Eye } from 'lucide-react';
+import { useGame } from '@/lib/gameContext';
 
 export default function RefereeWaiting() {
+    const { state } = useGame();
+    const room = state.room;
+    const currentRound = room?.rounds[room?.currentRound || 0];
+    const letter = currentRound?.letter || room?.letters?.[room?.currentRound || 0] || '?';
+    const submittedCount = currentRound?.submissions?.length || 0;
+    const totalPlayers = (room?.players?.length || 0) - 1; // exclude referee
+
     return (
-        <div className="min-h-screen flex items-center justify-center overflow-hidden relative">
-            {/* Centered spinning 3D 8-bit gavel icon */}
+        <div className="min-h-screen flex flex-col items-center justify-center overflow-hidden relative p-6 text-center">
+
+            {/* Animated gavel */}
             <motion.div
-                className="relative"
-                animate={{
-                    rotate: 360
-                }}
-                transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "linear"
-                }}
+                className="relative mb-8"
+                animate={{ rotate: [0, -15, 15, -10, 10, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 1 }}
             >
-                {/* 3D layered effect - shadow layers */}
-                <div className="absolute inset-0 translate-x-2 translate-y-2 opacity-30">
-                    <div className="w-32 h-32 bg-gradient-to-br from-amber-900 to-amber-950 rounded-2xl"
-                        style={{
-                            clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)',
-                            imageRendering: 'pixelated'
-                        }}
-                    />
+                <div className="w-28 h-28 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl flex items-center justify-center shadow-[4px_4px_0_0_#92400e] border-4 border-amber-300">
+                    <Gavel className="w-14 h-14 text-amber-950" strokeWidth={2.5} />
                 </div>
-                <div className="absolute inset-0 translate-x-1 translate-y-1 opacity-50">
-                    <div className="w-32 h-32 bg-gradient-to-br from-amber-800 to-amber-900 rounded-2xl"
-                        style={{
-                            clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)',
-                            imageRendering: 'pixelated'
-                        }}
-                    />
-                </div>
-
-                {/* Main icon container with 3D effect */}
-                <motion.div
-                    className="relative w-32 h-32 bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 rounded-2xl flex items-center justify-center shadow-2xl border-4 border-amber-300"
-                    style={{
-                        imageRendering: 'pixelated',
-                        boxShadow: '0 8px 32px rgba(251, 191, 36, 0.4), inset 0 2px 8px rgba(255, 255, 255, 0.3), inset 0 -2px 8px rgba(0, 0, 0, 0.3)'
-                    }}
-                    animate={{
-                        scale: [1, 1.05, 1]
-                    }}
-                    transition={{
-                        duration: 1.5,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                    }}
-                >
-                    {/* Pixel art style highlights */}
-                    <div className="absolute top-2 left-2 w-8 h-8 bg-amber-200 opacity-40 rounded"
-                        style={{ imageRendering: 'pixelated' }}
-                    />
-
-                    {/* Gavel icon */}
-                    <Gavel
-                        className="w-16 h-16 text-amber-950 relative z-10"
-                        strokeWidth={2.5}
-                        style={{
-                            filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))'
-                        }}
-                    />
-                </motion.div>
-
-                {/* Glowing pulse effect */}
+                {/* Glow */}
                 <motion.div
                     className="absolute inset-0 rounded-2xl"
-                    style={{
-                        background: 'radial-gradient(circle, rgba(251, 191, 36, 0.3) 0%, transparent 70%)',
-                        filter: 'blur(20px)'
-                    }}
-                    animate={{
-                        opacity: [0.5, 0.8, 0.5],
-                        scale: [1, 1.2, 1]
-                    }}
-                    transition={{
-                        duration: 2,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                    }}
+                    style={{ background: 'radial-gradient(circle, rgba(251,191,36,0.4) 0%, transparent 70%)', filter: 'blur(16px)' }}
+                    animate={{ opacity: [0.4, 0.9, 0.4], scale: [1, 1.2, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
                 />
             </motion.div>
+
+            {/* Title */}
+            <motion.h1
+                className="text-3xl font-pixel-title text-white mb-2 drop-shadow-lg"
+                animate={{ opacity: [0.8, 1, 0.8] }}
+                transition={{ duration: 2, repeat: Infinity }}
+            >
+                أنت الحكم!
+            </motion.h1>
+
+            <p className="text-[#e9d5ff] font-pixel-text text-base mb-6 max-w-xs">
+                انتظر اللاعبين حتى ينتهوا من الإجابة، ثم ستراجع إجاباتهم
+            </p>
+
+            {/* Round info */}
+            <div className="flex gap-4 mb-8">
+                <div className="bg-[#4c1d95] border-2 border-[#7c3aed] rounded-xl px-5 py-3 shadow-[3px_3px_0_0_#2e1065]">
+                    <p className="text-[10px] font-pixel-text text-[#e9d5ff] mb-1">الحرف</p>
+                    <p className="text-3xl font-pixel-title text-amber-300">{letter}</p>
+                </div>
+                <div className="bg-[#4c1d95] border-2 border-[#7c3aed] rounded-xl px-5 py-3 shadow-[3px_3px_0_0_#2e1065]">
+                    <p className="text-[10px] font-pixel-text text-[#e9d5ff] mb-1">أرسلوا</p>
+                    <p className="text-3xl font-pixel-title text-emerald-300">{submittedCount} / {totalPlayers}</p>
+                </div>
+                <div className="bg-[#4c1d95] border-2 border-[#7c3aed] rounded-xl px-5 py-3 shadow-[3px_3px_0_0_#2e1065]">
+                    <p className="text-[10px] font-pixel-text text-[#e9d5ff] mb-1">الجولة</p>
+                    <p className="text-3xl font-pixel-title text-white">{(room?.currentRound || 0) + 1} / {room?.totalRounds || '?'}</p>
+                </div>
+            </div>
+
+            {/* Player status */}
+            {room && room.players.filter(p => p.id !== room.refereeId).length > 0 && (
+                <div className="w-full max-w-sm bg-[#FFFDD1] border-[3px] border-[#4c1d95] rounded-xl p-4 shadow-[4px_4px_0_0_#2e1065]">
+                    <div className="flex items-center gap-2 mb-3">
+                        <Eye className="w-4 h-4 text-[#7c3aed]" />
+                        <span className="font-pixel-text text-sm font-bold text-[#4c1d95]">حالة اللاعبين</span>
+                    </div>
+                    <div className="space-y-2">
+                        {room.players.filter(p => p.id !== room.refereeId).map(player => {
+                            const hasSubmitted = currentRound?.submissions?.some(s => s.playerId === player.id);
+                            return (
+                                <div key={player.id} className="flex items-center justify-between">
+                                    <span className="font-pixel-text text-sm text-[#4c1d95] font-bold">{player.name}</span>
+                                    <span className={`text-xs font-pixel-text font-bold px-2 py-0.5 rounded-full ${hasSubmitted ? 'bg-emerald-100 text-emerald-700 border border-emerald-400' : 'bg-slate-100 text-slate-500 border border-slate-300'}`}>
+                                        {hasSubmitted ? 'أرسل ✓' : 'يكتب...'}
+                                    </span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
-

@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import { useToast } from "@/hooks/use-toast"
 import {
   Toast,
@@ -9,7 +10,22 @@ import {
 } from "@/components/ui/toast"
 
 export function Toaster() {
-  const { toasts } = useToast()
+  const { toasts, toast } = useToast()
+
+  // Wire server-sent toast events from gameContext
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (!detail?.message) return;
+      toast({
+        title: detail.message,
+        variant: detail.type === 'error' ? 'destructive' : 'default',
+        duration: 3000,
+      });
+    };
+    window.addEventListener('game-toast', handler);
+    return () => window.removeEventListener('game-toast', handler);
+  }, [toast]);
 
   return (
     <ToastProvider>

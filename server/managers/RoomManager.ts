@@ -98,9 +98,9 @@ export class RoomManager {
         }
 
         buffer.transact((draft) => {
+            // RMgr1: Guard — cannot join a public room that's already in progress
             if (draft.phase !== 'lobby') {
-                // Reset if game ended? Or handle new public room logic (advanced)
-                // For now, simple check
+                throw new Error('اللعبة بدأت بالفعل، انتظر الجولة القادمة');
             }
 
             const isFirst = draft.players.length === 0;
