@@ -17,9 +17,11 @@ function VotingItemCard({ item, currentPlayer, castParallelVote, refereeOverride
     const canOverride = isReferee || isHost;
 
     const canVote = !hasVoted && !isRequester && currentPlayer;
+    const [isVoting, setIsVoting] = useState(false); // V3: Prevent double-tap
 
     const handleVote = (vote: 'yes' | 'no') => {
-        if (canVote) {
+        if (canVote && !isVoting) {
+            setIsVoting(true);
             castParallelVote(item.requesterId, item.category, vote);
         }
     };

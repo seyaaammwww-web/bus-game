@@ -65,7 +65,7 @@ export default function Results() {
       if (room.nextRoundAt) {
         const remaining = Math.max(0, Math.ceil((room.nextRoundAt - Date.now()) / 1000));
         setCountdown(remaining);
-        if (remaining > 0) playCountdownSound();
+        if (remaining > 0 && remaining <= 5) playCountdownSound(); // R2: only last 5s
       }
     };
 

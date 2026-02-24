@@ -101,7 +101,8 @@ export default function Game() {
 
   // Debounced draft sync to server
   useEffect(() => {
-    if (hasSubmitted || state.timeLeft <= 0 || state.room?.phase !== 'playing') return;
+    // G1: Don't send drafts if banished or already submitted
+    if (hasSubmitted || isBanished || state.timeLeft <= 0 || state.room?.phase !== 'playing') return;
 
     const timer = setTimeout(() => {
       // Only send if there's at least one non-empty answer
@@ -112,7 +113,7 @@ export default function Game() {
     }, 500); // 500ms debounce for better reliability
 
     return () => clearTimeout(timer);
-  }, [answers, hasSubmitted, state.timeLeft, state.room?.phase, sendDraftUpdate]);
+  }, [answers, hasSubmitted, isBanished, state.timeLeft, state.room?.phase, sendDraftUpdate]);
 
   const letter = currentRound?.letter || room.letters[room.currentRound];
 
@@ -139,11 +140,13 @@ export default function Game() {
       return () => clearTimeout(timer);
     } else if (countdown === 0) {
       playCountdownFinalSound();
-      setTimeout(() => {
+      // G2: Store timeout ref so it can be cleaned up if component unmounts
+      const hideTimer = setTimeout(() => {
         setShowCountdown(false);
         playRoundStart();
         inputRefs.current[currentCategories[0]]?.focus();
       }, 500);
+      return () => clearTimeout(hideTimer);
     }
   }, [countdown, showCountdown]);
 
