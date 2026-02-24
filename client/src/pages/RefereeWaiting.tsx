@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Gavel, Eye } from 'lucide-react';
+import { Gavel, Eye, CheckCircle } from 'lucide-react';
 import { useGame } from '@/lib/gameContext';
 
 export default function RefereeWaiting() {
@@ -8,7 +8,10 @@ export default function RefereeWaiting() {
     const currentRound = room?.rounds[room?.currentRound || 0];
     const letter = currentRound?.letter || room?.letters?.[room?.currentRound || 0] || '?';
     const submittedCount = currentRound?.submissions?.length || 0;
-    const totalPlayers = (room?.players?.length || 0) - 1; // exclude referee
+    // LOGIC-4 FIX: Always filter by refereeId instead of assuming -1
+    // BUG-R3 FIX: Also exclude banished player from total count so submitted/total is accurate
+    const banishedId = currentRound?.banishedPlayerId;
+    const totalPlayers = room?.players?.filter(p => p.id !== room.refereeId && p.id !== banishedId).length || 0;
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center overflow-hidden relative p-6 text-center">
@@ -73,9 +76,13 @@ export default function RefereeWaiting() {
                             return (
                                 <div key={player.id} className="flex items-center justify-between">
                                     <span className="font-pixel-text text-sm text-[#4c1d95] font-bold">{player.name}</span>
-                                    <span className={`text-xs font-pixel-text font-bold px-2 py-0.5 rounded-full ${hasSubmitted ? 'bg-emerald-100 text-emerald-700 border border-emerald-400' : 'bg-slate-100 text-slate-500 border border-slate-300'}`}>
-                                        {hasSubmitted ? 'أرسل ✓' : 'يكتب...'}
-                                    </span>
+                                    {hasSubmitted ? (
+                                        <span className="flex items-center gap-1 text-xs font-pixel-text font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-400">
+                                            <CheckCircle className="w-3 h-3" /> أرسل
+                                        </span>
+                                    ) : (
+                                        <span className="text-xs font-pixel-text font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-300">يكتب...</span>
+                                    )}
                                 </div>
                             );
                         })}

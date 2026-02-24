@@ -44,7 +44,9 @@ export default function Results() {
 
   const room = state.room!;
   const isFinal = room.phase === 'final';
-  const sortedPlayers = [...room.players].sort((a, b) => b.score - a.score);
+  // LOGIC-5 FIX: Filter referee from the leaderboard — they didn't play, so they should not appear in standings
+  const activePlayers = room.players.filter(p => p.id !== room.refereeId);
+  const sortedPlayers = [...activePlayers].sort((a, b) => b.score - a.score);
   const winner = sortedPlayers[0];
 
   useEffect(() => {
@@ -60,6 +62,8 @@ export default function Results() {
   // FIX: Countdown must stay in sync with server nextRoundAt, not drift independently
   useEffect(() => {
     if (isFinal) return;
+    // LOGIC-6 FIX: Don't run countdown during voting — wait until results phase
+    if (room.phase === 'voting') return;
 
     const tick = () => {
       if (room.nextRoundAt) {
@@ -72,7 +76,7 @@ export default function Results() {
     tick(); // Fire immediately
     const timer = setInterval(tick, 1000);
     return () => clearInterval(timer);
-  }, [isFinal, room.nextRoundAt]);
+  }, [isFinal, room.nextRoundAt, room.phase]);
 
   const gameStats = useMemo(() => {
     if (!isFinal || room.rounds.length === 0) return null;
@@ -324,8 +328,8 @@ export default function Results() {
                             <span className="text-lg font-bold text-[#4c1d95] font-pixel-title tabular-nums">{player.score}</span>
                           </div>
 
-                          {/* Host Controls for Score Adjustment */}
-                          {isHost && (
+                          {/* Host Controls for Score Adjustment — hide for referee players */}
+                          {isHost && player.id !== room.refereeId && (
                             <div className="flex items-center gap-1 ml-1 border-l-2 border-[#4c1d95]/10 pl-2 scale-75 transform origin-right">
                               <HostControls type="player_row" targetPlayer={player} />
                             </div>
@@ -347,12 +351,7 @@ export default function Results() {
             </div>
           )}
 
-          {/* Overall Host Controls (Force Resolve, etc.) */}
-          {isHost && (
-            <div className="mb-6 flex justify-center">
-              <HostControls type="overall" />
-            </div>
-          )}
+
         </motion.div>
 
         {!isFinal && (
@@ -475,8 +474,8 @@ export default function Results() {
                   currentPlayerId={state.playerId!}
                   isReferee={isReferee}
                   isHost={isHost}
-                  onRefereeToggle={refereeToggleUnique}
-                  onRefereeDeduct={(pid, cat) => refereeDeduct(pid, cat, 'رفض الحكم')}
+                  onRefereeToggle={room.phase === 'referee_review' ? refereeToggleUnique : undefined}
+                  onRefereeDeduct={room.phase === 'referee_review' ? (pid, cat) => refereeDeduct(pid, cat, 'رفض الحكم') : undefined}
                 />
               </div>
             </motion.div>
@@ -507,7 +506,7 @@ export default function Results() {
               ) : (
                 /* Case 2: Waiting for Referee (No Timer) */
                 <div className="w-full p-4 bg-[#4c1d95]/80 rounded-2xl text-center border-[3px] border-[#FFFDD1] shadow-lg backdrop-blur-sm">
-                  {isReferee ? (
+                  {isReferee && (room.phase === 'referee_review' || room.phase === 'results') ? (
                     <div className="space-y-2">
                       <p className="text-[#FFFDD1] font-bold font-pixel-text text-lg animate-pulse">
                         الوقت متوقف للمراجعة
@@ -535,11 +534,24 @@ export default function Results() {
                         الاستمرار للجولة التالية
                       </Button>
                     </div>
+                  ) : isHost ? (
+                    // BUG-10 FIX: Host in standard mode (no timer, no referee, no voting) always sees a Next Round button
+                    <div className="space-y-2">
+                      <Button
+                        onClick={() => nextRound()}
+                        size="lg"
+                        className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
+                        data-testid="button-next-round"
+                      >
+                        {room.currentRound >= room.totalRounds - 1 ? 'إنهاء اللعبة' : 'الجولة التالية ←'}
+                      </Button>
+                    </div>
                   ) : (
                     <div className="flex flex-col items-center gap-2">
                       <Timer className="w-8 h-8 text-[#FFFDD1] animate-spin-slow" />
                       <p className="text-[#FFFDD1] font-bold font-pixel-text text-xl">
-                        {room.settings?.enableVoting ? 'في انتظار المضيف...' : 'في انتظار اعتماد الحكم...'}
+                        {/* BUG-R2 FIX: Only show referee message when a referee actually exists */}
+                        {room.refereeId ? 'في انتظار اعتماد الحكم...' : 'في انتظار المضيف...'}
                       </p>
                     </div>
                   )}
@@ -547,19 +559,9 @@ export default function Results() {
               )}
             </>
           )}
-          {/* Host manual Next Round in standard mode (no timer, no referee, no voting) */}
-          {!isFinal && isHost && !room.nextRoundAt && !room.refereeId && !room.settings?.enableVoting && room.phase === 'results' && (
-            <Button
-              onClick={nextRound}
-              size="lg"
-              className="w-full h-16 text-xl font-bold mt-3 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title"
-              data-testid="button-next-round"
-            >
-              الجولة التالية ←
-            </Button>
-          )}
+          {/* Next Round button is now handled inside the room.nextRoundAt block above (BUG-10 fix) */}
         </motion.div>
       </div>
-    </div>
+    </div >
   );
 }

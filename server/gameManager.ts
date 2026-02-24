@@ -120,6 +120,18 @@ export class GameManager {
 
     const buffer = this.roomManager.getRoomBuffer(roomId);
     if (buffer) {
+      // FIX: If the timed-out player was the host, reassign host to another player
+      buffer.transact(draft => {
+        if (draft.hostId === playerId && draft.players.length > 0) {
+          const newHost = draft.players.find(p => p.id !== playerId);
+          if (newHost) {
+            draft.hostId = newHost.id;
+            newHost.isHost = true;
+            console.log(`[GameManager] Host reassigned to ${newHost.name} after timeout.`);
+          }
+        }
+      }, 'host_reassign_on_timeout');
+
       const room = buffer.get();
       if (room.players.length > 0) {
         this.broadcastToRoom(room.code, { type: 'player_left', payload: { players: room.players } });
@@ -359,7 +371,18 @@ export class GameManager {
     const buffer = this.roomManager.getRoomBuffer(playerInfo.roomId);
     if (buffer) {
       // FIX (#12): Clean up eligibleVoterIds and orphaned vote requests when player leaves
+      let shouldFinishVoting = false;
       buffer.transact(draft => {
+        // FIX: If the disconnected player was the host, reassign to another player
+        if (draft.hostId === playerInfo.playerId && draft.players.length > 0) {
+          const newHost = draft.players.find(p => p.id !== playerInfo.playerId);
+          if (newHost) {
+            draft.hostId = newHost.id;
+            newHost.isHost = true;
+            console.log(`[GameManager] Host reassigned to ${newHost.name} after disconnect.`);
+          }
+        }
+
         if (draft.voteQueue) {
           // Remove any vote items that belong to this player (their answer was pending)
           draft.voteQueue = draft.voteQueue.filter((v: any) => v.requesterId !== playerInfo.playerId);
@@ -392,12 +415,45 @@ export class GameManager {
             }
           });
         }
+
+        // FIX-AUTO-4: After cleanup, check if voting is now completable
+        if (draft.phase === 'voting' && draft.voteQueue) {
+          // Auto-resolve items that now have 0 eligible voters
+          draft.voteQueue = draft.voteQueue.filter((v: any) => {
+            if ((v.eligibleVoterIds?.length || 0) === 0) {
+              const ans = draft.rounds[draft.currentRound]?.validatedAnswers.find(
+                (a: any) => a.playerId === v.requesterId && a.category === v.category
+              );
+              if (ans) {
+                ans.isValid = false;
+                ans.isPendingVote = false;
+                ans.reason = 'رفض تلقائي — لا ناخبين متبقين';
+              }
+              return false;
+            }
+            return true;
+          });
+
+          const stillPending = draft.rounds[draft.currentRound]?.validatedAnswers
+            .some((a: any) => a.isPendingVote);
+          if (draft.voteQueue.length === 0 && !stillPending) {
+            this.roundManager.calculateAnswerScores(draft);
+            shouldFinishVoting = true;
+          }
+        }
       }, `player_left:${playerInfo.playerId}`);
 
 
       const room = buffer.get();
       if (room.players.length > 0) {
         this.broadcastToRoom(room.code, { type: 'player_left', payload: { players: room.players } });
+      }
+
+      // FIX-AUTO-4: If disconnect emptied the voteQueue, finish the round now
+      if (shouldFinishVoting) {
+        this.roundManager.clearTimer(room.code);
+        this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
+        this.finishRoundPhase(room.code);
       }
     }
   }
@@ -536,7 +592,20 @@ export class GameManager {
     if (!buffer) return;
 
     const room = buffer.get();
-    if (!room.players.find(pl => pl.id === p.playerId)?.isHost) return;
+    // FIX: Phase guard — can only start from lobby, prevents re-starting mid-game
+    if (room.phase !== 'lobby') {
+      this.send(ws, { type: 'error', payload: { message: 'اللعبة جارية بالفعل' } });
+      return;
+    }
+    const host = room.players.find(pl => pl.id === p.playerId);
+    if (!host?.isHost) return;
+
+    // D4 FIX: Ensure all other players are ready
+    const otherPlayers = room.players.filter(pl => pl.id !== p.playerId && pl.id !== room.refereeId);
+    if (otherPlayers.length > 0 && !otherPlayers.every(pl => pl.isReady)) {
+      this.send(ws, { type: 'error', payload: { message: 'مش كل اللاعبين جاهزين' } });
+      return;
+    }
 
     const round = this.roundManager.startRound(buffer);
 
@@ -690,7 +759,10 @@ export class GameManager {
         const round = draft.rounds[draft.currentRound];
         if (round) round.powerUpUsedInRound = false;
 
-        if (draft.phase === 'playing' && draft.refereeId) {
+        // FIX-AUTO-1: Must check both 'playing' AND 'voting' phases for referee_review routing.
+        // When voting+referee combo is used, phase='voting' after votes finish — not 'playing'.
+        const canGoToRefereeReview = (draft.phase === 'playing' || draft.phase === 'voting') && !!draft.refereeId;
+        if (canGoToRefereeReview) {
           draft.phase = 'referee_review';
         } else {
           if (round?.resultsCommitted) return;
@@ -820,7 +892,9 @@ export class GameManager {
           const val = Math.max(3, Math.min(20, Number(settings.totalRounds)));
           if (!isNaN(val)) {
             draft.totalRounds = val;
-            draft.letters = Array.from({ length: val }, (_, i) => draft.letters[i] || 'س');
+            // FIX-AUTO-2: Fill new slots with proper random letters, not the literal character 'س'
+            const freshLetters = getRandomLetters(val);
+            draft.letters = Array.from({ length: val }, (_, i) => draft.letters[i] || freshLetters[i]);
           }
         }
       }
@@ -887,6 +961,17 @@ export class GameManager {
   refereeApprove(ws: WebSocket) {
     const p = this.playerManager.getPlayer(ws);
     if (!p) return;
+    const buffer = this.roomManager.getRoomBuffer(p.roomId);
+    if (!buffer) return;
+
+    const room = buffer.get();
+    // FIX: Only the referee or the host can approve results
+    const isRef = room.refereeId === p.playerId;
+    const isHost = room.players.find(pl => pl.id === p.playerId)?.isHost;
+    if (!isRef && !isHost) {
+      this.send(ws, { type: 'error', payload: { message: 'فقط الحكم أو المضيف يمكنه اعتماد النتائج' } });
+      return;
+    }
     this.finishRoundPhase(p.roomId);
   }
 
@@ -898,7 +983,9 @@ export class GameManager {
 
     buffer.transact(draft => {
       const round = draft.rounds[draft.currentRound];
-      if (!round || round.powerUpUsedInRound) return;
+      if (!round) return;
+      // D1 FIX: Lift global powerUpUsedInRound restriction.
+      // Players are only limited by their own usage flag.
       if (round.banishedPlayerId === p.playerId) return;
 
       const player = draft.players.find(pl => pl.id === p.playerId);
@@ -908,7 +995,9 @@ export class GameManager {
         if (!player.usedPowerUps.wildcard && player.powerUps.wildcard > 0) {
           player.powerUps.wildcard--;
           player.usedPowerUps.wildcard = true;
-          round.wildcardUsedByPlayerId = p.playerId;
+          // D2 FIX: Support multiple wildcard users
+          if (!round.wildcardUsedByPlayerIds) round.wildcardUsedByPlayerIds = [];
+          round.wildcardUsedByPlayerIds.push(p.playerId);
           round.powerUpUsedInRound = true;
 
           // FIX (#17): Pick a random unused word from DB for the player
@@ -981,6 +1070,17 @@ export class GameManager {
     if (!isHost) return;
 
     buffer.transact(draft => {
+      // Mark all pending answers as valid (force-accept)
+      const round = draft.rounds[draft.currentRound];
+      if (round?.validatedAnswers) {
+        round.validatedAnswers.forEach((ans: any) => {
+          if (ans.isPendingVote) {
+            ans.isValid = true;
+            ans.isPendingVote = false;
+            ans.reason = 'تم القبول بقرار المضيف';
+          }
+        });
+      }
       draft.voteQueue = [];
       draft.currentVote = null;
 
@@ -990,6 +1090,16 @@ export class GameManager {
 
     const room = buffer.get();
     this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
+
+    // BUG-8 FIX: Send confirmation toast to host
+    const hostWs = this.playerManager.getSocket(room.hostId);
+    if (hostWs) {
+      this.send(hostWs, { type: 'toast', payload: { message: '✅ تم قبول جميع الإجابات المتنازع عليها', type: 'success' } });
+    }
+
+    // FIX: After force-resolving all votes, finish round phase
+    this.roundManager.clearTimer(room.code);
+    this.finishRoundPhase(room.code);
   }
 
   /** Host can adjust a player's score by delta */
@@ -1007,6 +1117,10 @@ export class GameManager {
         const oldScore = player.score ?? 0;
         const newScore = Math.max(0, oldScore + delta);
         player.score = newScore;
+
+        // BUG-1 FIX: Persist manual adjustment so recalculatePlayerTotals doesn't erase it.
+        // We accumulate all host adjustments in a separate field.
+        player.manualScoreAdjustment = (player.manualScoreAdjustment || 0) + (newScore - oldScore);
 
         this.addAuditLogEntry(
           draft,
@@ -1175,7 +1289,12 @@ export class GameManager {
         return;
       }
 
+      // FIX-AUTO-3: Prevent duplicate vote items for the same player+category
       if (!draft.voteQueue) draft.voteQueue = [];
+      const alreadyQueued = draft.voteQueue.some(
+        (q: any) => q.requesterId === p.playerId && q.category === payload.category
+      );
+      if (alreadyQueued) return;
 
       const eligibleVoterIds = draft.players
         .filter(pl => pl.id !== p.playerId && pl.id !== draft.refereeId)
@@ -1247,7 +1366,13 @@ export class GameManager {
 
       const total = eligibleVoterIds.length;
       const { yes, no } = item.votes;
-      if (yes > total / 2 || no > total / 2 || yes + no === total) {
+
+      // FIX: Only resolve when strict majority OR all eligible voters voted.
+      // With small groups (1-2 players), 'yes > total/2' fires on first vote
+      // which is correct for 1 eligible voter. But we must ensure the queue
+      // is truly empty (no pending answers remain) before finishing.
+      const strictMajority = Math.floor(total / 2) + 1;
+      if (yes >= strictMajority || no >= strictMajority || yes + no === total) {
         const ans = draft.rounds[draft.currentRound]?.validatedAnswers.find(
           (a: any) => a.playerId === item.requesterId && a.category === item.category
         );
@@ -1261,7 +1386,11 @@ export class GameManager {
         );
       }
 
-      if (draft.voteQueue.length === 0 && draft.phase === 'voting') {
+      // FIX: Only finish when the queue is empty AND no answer still marked isPendingVote.
+      // Guards against finishing mid-session if new vote items are dynamically added.
+      const stillPending = draft.rounds[draft.currentRound]?.validatedAnswers
+        .some((a: any) => a.isPendingVote);
+      if (draft.voteQueue.length === 0 && !stillPending && draft.phase === 'voting') {
         this.roundManager.calculateAnswerScores(draft);
         shouldFinish = true; // GM4: set flag inside transaction
       }
@@ -1379,7 +1508,8 @@ export class GameManager {
     const room = buffer.get();
     this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
 
-    // BUG FIX #6: If referee cleared the last pending vote, finish the round
+    // BUG-2 FIX: Only finish if we were actually in voting phase and queue is now empty.
+    // This prevents accidental finishRoundPhase when toggling validity in 'results' or 'referee_review' phase.
     if (room.phase === 'voting' && (!room.voteQueue || room.voteQueue.length === 0)) {
       this.finishRoundPhase(room.code);
     }
@@ -1397,7 +1527,8 @@ export class GameManager {
 
     this.roomManager.removePlayerFromRoom(p.roomId, targetPlayerId);
 
-    // Fix: Remove orphaned votes from kicked player
+    // Fix: Remove orphaned votes from kicked player and check if voting can now resolve
+    let shouldFinishVoting = false;
     buffer.transact(draft => {
       if (draft.voteQueue) {
         draft.voteQueue = draft.voteQueue.filter((v: any) => v.requesterId !== targetPlayerId);
@@ -1405,7 +1536,38 @@ export class GameManager {
           if (v.eligibleVoterIds) {
             v.eligibleVoterIds = v.eligibleVoterIds.filter((id: string) => id !== targetPlayerId);
           }
+          // Also retract any already-cast vote from the kicked player
+          if (v.voterIds?.includes(targetPlayerId)) {
+            v.voterIds = v.voterIds.filter((id: string) => id !== targetPlayerId);
+            if (v.voteMap?.[targetPlayerId]) {
+              if (v.voteMap[targetPlayerId] === 'yes' && v.votes?.yes > 0) v.votes.yes--;
+              else if (v.voteMap[targetPlayerId] === 'no' && v.votes?.no > 0) v.votes.no--;
+              delete v.voteMap[targetPlayerId];
+            }
+          }
         });
+
+        // FIX: If voting is now unresolvable (no eligible voters left on remaining items), auto-resolve
+        if (draft.phase === 'voting' && draft.voteQueue.length > 0) {
+          draft.voteQueue = draft.voteQueue.filter((v: any) => {
+            const eligible = v.eligibleVoterIds?.length || 0;
+            if (eligible === 0) {
+              // No one can vote — auto-reject
+              const ans = draft.rounds[draft.currentRound]?.validatedAnswers.find(
+                (a: any) => a.playerId === v.requesterId && a.category === v.category
+              );
+              if (ans) { ans.isValid = false; ans.isPendingVote = false; ans.reason = 'لا يوجد ناخبون (تم طرد الجميع)'; }
+              return false;
+            }
+            return true;
+          });
+        }
+
+        // If voting queue is now empty, mark for finish
+        if (draft.phase === 'voting' && draft.voteQueue.length === 0) {
+          this.roundManager.calculateAnswerScores(draft);
+          shouldFinishVoting = true;
+        }
       }
     }, "kickPlayerCleanup");
 
@@ -1420,6 +1582,11 @@ export class GameManager {
     const updated = buffer.get();
     this.broadcastToRoom(updated.code, { type: 'sync_state', payload: { room: updated } });
     this.broadcastToRoom(updated.code, { type: 'player_kicked', payload: { playerId: targetPlayerId } });
+
+    if (shouldFinishVoting) {
+      this.roundManager.clearTimer(updated.code);
+      this.finishRoundPhase(updated.code);
+    }
   }
 
   private resolveCurrentVoteInDraft(draft: any) {
@@ -1590,6 +1757,8 @@ export class GameManager {
       draft.currentVote = null;
       draft.nextRoundAt = undefined;
       draft.auditLog = [];
+      // FIX: Clear referee state on play again — old referee would otherwise persist
+      draft.refereeId = undefined;
 
       // BUG FIX #3: Use getRandomLetters to get truly fresh letters, not a shuffle of the same pool
       draft.letters = getRandomLetters(draft.totalRounds);
@@ -1601,6 +1770,11 @@ export class GameManager {
         pl.busStreak = 0;
         pl.powerUps = { hint: 0, steal: 0, wildcard: 0, banish: 0 };
         pl.usedPowerUps = { hint: false, steal: false, wildcard: false, banish: false };
+        // FIX: Clear referee and draft state
+        pl.isReferee = false;
+        pl.draftAnswers = undefined;
+        // BUG-1 FIX: Reset manual score adjustments for new game
+        pl.manualScoreAdjustment = 0;
       });
     }, "playAgain");
 
@@ -1624,6 +1798,7 @@ export class GameManager {
   }
 
   // FIX (#3): Phase 3 Score Utilities
+  // BUG-1 FIX: After recalculating from rounds, add back any manual host adjustments
   private recalculatePlayerTotals(draft: GameRoom) {
     // Reset all player scores
     draft.players.forEach(p => {
@@ -1642,6 +1817,13 @@ export class GameManager {
           }
         }
       });
+    });
+
+    // Re-apply any manual host score adjustments on top of round-calculated scores
+    draft.players.forEach(p => {
+      if (p.manualScoreAdjustment) {
+        p.score = Math.max(0, p.score + p.manualScoreAdjustment);
+      }
     });
   }
 

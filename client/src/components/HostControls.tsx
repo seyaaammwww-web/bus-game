@@ -26,35 +26,39 @@ export const HostControls: React.FC<HostControlsProps> = ({ type, targetPlayer }
         return (
             <div className="flex items-center gap-1 ml-auto">
                 <TooltipProvider>
-                    {/* Score -10 */}
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7 text-red-400 hover:text-red-600 hover:bg-red-500/10"
-                                onClick={() => hostAdjustScore(targetPlayer.id, -10)}
-                            >
-                                <Minus className="w-3.5 h-3.5" />
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent className="bg-slate-900 border-slate-700 text-[10px] font-pixel">-10 نقطة</TooltipContent>
-                    </Tooltip>
+                    {/* Score -10: hide if targeting yourself */}
+                    {!isMe && (
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7 text-red-400 hover:text-red-600 hover:bg-red-500/10"
+                                    onClick={() => hostAdjustScore(targetPlayer.id, -10)}
+                                >
+                                    <Minus className="w-3.5 h-3.5" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent className="bg-slate-900 border-slate-700 text-[10px] font-pixel">-10 نقطة</TooltipContent>
+                        </Tooltip>
+                    )}
 
-                    {/* Score +10 */}
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7 text-emerald-400 hover:text-emerald-600 hover:bg-emerald-500/10"
-                                onClick={() => hostAdjustScore(targetPlayer.id, 10)}
-                            >
-                                <Plus className="w-3.5 h-3.5" />
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent className="bg-slate-900 border-slate-700 text-[10px] font-pixel">+10 نقطة</TooltipContent>
-                    </Tooltip>
+                    {/* Score +10: hide if targeting yourself */}
+                    {!isMe && (
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7 text-emerald-400 hover:text-emerald-600 hover:bg-emerald-500/10"
+                                    onClick={() => hostAdjustScore(targetPlayer.id, 10)}
+                                >
+                                    <Plus className="w-3.5 h-3.5" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent className="bg-slate-900 border-slate-700 text-[10px] font-pixel">+10 نقطة</TooltipContent>
+                        </Tooltip>
+                    )}
 
                     {/* Kick */}
                     {!isMe && (

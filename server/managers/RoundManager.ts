@@ -137,7 +137,7 @@ export class RoundManager {
                 ? draft.players.filter(p => p.id !== draft.refereeId && p.id !== round.banishedPlayerId).length
                 : draft.players.filter(p => p.id !== round.banishedPlayerId).length;
 
-            if (round.submissions.length === activePlayers) {
+            if (round.submissions.length >= activePlayers) {
                 isComplete = true;
             }
         }, "handleSubmission");
@@ -220,7 +220,7 @@ export class RoundManager {
                         isUnique: false,
                         score: 0,
                         votes: { accepted: 0, rejected: 0 },
-                        reason: lenient ? 'تتطلب تصويت' : 'حرف خطأ',
+                        reason: lenient ? 'تتطلب تصويت (فشل AI)' : 'حرف خطأ',
                         isFabricated: false
                     });
                     if (lenient) hasPending = true;
@@ -313,8 +313,9 @@ export class RoundManager {
                 let reason = result?.reason || '';
                 let isPendingVote = false;
 
-                // Wildcard overrides everything
-                if (dRound.wildcardUsedByPlayerId === item.playerId) {
+                // D2: Wildcard overrides everything
+                const isWildcard = dRound.wildcardUsedByPlayerIds?.includes(item.playerId);
+                if (isWildcard) {
                     isValid = true;
                     reason = 'جوكر';
                 }
@@ -353,11 +354,23 @@ export class RoundManager {
             }
 
             if (hasPendingVotes) {
-                if (!draft.settings) draft.settings = {};
-                draft.settings.enableVoting = true;
-                draft.phase = 'voting';
-                // FIX: Build PARALLEL vote queue — all pending answers at once
-                this.buildVoteQueueInDraft(draft);
+                // LOGIC-3 FIX: Don't force-enable voting. If host disabled it, keep it disabled
+                // and treat pending-vote answers as invalid instead.
+                if (draft.settings?.enableVoting) {
+                    draft.phase = 'voting';
+                    // FIX: Build PARALLEL vote queue — all pending answers at once
+                    this.buildVoteQueueInDraft(draft);
+                } else {
+                    // Voting is disabled — mark all pending answers as invalid
+                    dRound.validatedAnswers.forEach(a => {
+                        if (a.isPendingVote) {
+                            a.isPendingVote = false;
+                            a.isValid = false;
+                            a.reason = 'غير موجودة في القاموس';
+                        }
+                    });
+                    this.calculateAnswerScores(draft);
+                }
             } else {
                 this.calculateAnswerScores(draft);
             }

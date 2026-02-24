@@ -1,4 +1,4 @@
-import { Copy, Check, Play, Users, Shield, Crown, Sparkles, X, Home, LogOut, Settings, UserX, Wifi, WifiOff } from 'lucide-react';
+import { Copy, Check, Play, Users, Shield, Crown, Sparkles, X, Home, LogOut, Settings, UserX, Wifi, WifiOff, Minus, Plus, Gavel } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
@@ -176,11 +176,11 @@ export default function Lobby() {
               </motion.span>
             </div>
             <div className="space-y-3">
-              {/* Round Count Picker (Host only) */}
+              {/* Round Count Picker (Host only) — STYLE-1 FIX: use retro Button components */}
               {isHost && (
                 <div className="flex items-center justify-between p-3 bg-white/50 rounded-lg border-2 border-[#4c1d95]/20">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-[#4c1d95] rounded-lg flex items-center justify-center text-white font-pixel-title text-sm">
+                    <div className="w-8 h-8 bg-[#4c1d95] rounded-lg flex items-center justify-center text-white font-pixel-title text-sm shadow-[2px_2px_0_0_#2e1065]">
                       {room.totalRounds}
                     </div>
                     <div>
@@ -188,47 +188,62 @@ export default function Lobby() {
                       <p className="text-[10px] text-[#4c1d95]/70 font-pixel-text">بين 3 و 20 جولة</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <button
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
                       onClick={() => updateSettings({ totalRounds: Math.max(3, room.totalRounds - 1) })}
-                      className="w-8 h-8 bg-white border-[2px] border-[#4c1d95] rounded-lg text-[#4c1d95] font-pixel-title text-lg flex items-center justify-center hover:bg-[#4c1d95] hover:text-white active:scale-90 transition-all shadow-[2px_2px_0_0_#2e1065]"
-                    >−</button>
-                    <span className="w-8 text-center font-pixel-title text-[#4c1d95] text-base">{room.totalRounds}</span>
-                    <button
+                      disabled={room.totalRounds <= 3}
+                      className="w-9 h-9 border-[2px] border-[#4c1d95] text-[#4c1d95] hover:bg-[#4c1d95] hover:text-white shadow-[2px_2px_0_0_#2e1065] active:translate-y-[1px] active:shadow-none transition-all rounded-lg"
+                    >
+                      <Minus className="w-4 h-4" />
+                    </Button>
+                    <span className="w-8 text-center font-pixel-title text-[#4c1d95] text-base font-bold">{room.totalRounds}</span>
+                    <Button
+                      variant="outline"
+                      size="icon"
                       onClick={() => updateSettings({ totalRounds: Math.min(20, room.totalRounds + 1) })}
-                      className="w-8 h-8 bg-[#4c1d95] border-[2px] border-[#2e1065] rounded-lg text-white font-pixel-title text-lg flex items-center justify-center hover:bg-[#7c3aed] active:scale-90 transition-all shadow-[2px_2px_0_0_#2e1065]"
-                    >+</button>
+                      disabled={room.totalRounds >= 20}
+                      className="w-9 h-9 bg-[#4c1d95] border-[2px] border-[#2e1065] text-white hover:bg-[#7c3aed] shadow-[2px_2px_0_0_#2e1065] active:translate-y-[1px] active:shadow-none transition-all rounded-lg"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
               )}
 
-              {/* Voting Toggle (New) */}
+              {/* Voting Toggle — STYLE-3 FIX: full-width retro toggle with visual feedback */}
               {isHost ? (
-                <div className="flex items-center justify-between p-3 bg-white/50 rounded-lg border-2 border-[#4c1d95]/20">
+                <button
+                  onClick={() => updateSettings({ enableVoting: !room.settings?.enableVoting })}
+                  className={`w-full flex items-center justify-between p-3 rounded-lg border-[3px] transition-all active:translate-y-[1px] active:shadow-none ${room.settings?.enableVoting
+                      ? 'bg-[#7c3aed]/10 border-[#7c3aed] shadow-[0_3px_0_0_#4c1d95]'
+                      : 'bg-white/50 border-[#4c1d95]/20 shadow-[0_2px_0_0_#4c1d95]/10'
+                    }`}
+                >
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-[#7c3aed] rounded-lg flex items-center justify-center text-white">
-                      <Users className="w-5 h-5" />
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white transition-colors ${room.settings?.enableVoting ? 'bg-[#7c3aed]' : 'bg-[#4c1d95]/40'
+                      }`}>
+                      <Gavel className="w-4 h-4" />
                     </div>
-                    <div>
+                    <div className="text-right">
                       <p className="font-bold text-[#4c1d95] font-pixel-text text-sm">التحكيم الديمقراطي</p>
                       <p className="text-[10px] text-[#4c1d95]/70 font-pixel-text">
-                        {referee ? <span className="text-red-500 font-bold">سيلغي الحكم الحالي</span> : "اللاعبين يصوتوا على الإجابات"}
+                        {referee ? <span className="text-red-500 font-bold">سيلغي الحكم الحالي</span> : 'اللاعبين يصوتوا على الإجابات'}
                       </p>
                     </div>
                   </div>
-                  <Button
-                    size="sm"
-                    variant={room.settings?.enableVoting ? "default" : "outline"}
-                    onClick={() => updateSettings({ enableVoting: !room.settings?.enableVoting })}
-                    className={`h-8 font-bold font-pixel-text ${room.settings?.enableVoting ? 'bg-[#7c3aed]' : 'text-[#4c1d95]'}`}
-                  >
+                  <div className={`px-3 py-1 rounded-full border-[2px] font-bold font-pixel-text text-xs transition-colors ${room.settings?.enableVoting
+                      ? 'bg-[#7c3aed] border-[#4c1d95] text-white shadow-[0_2px_0_0_#2e1065]'
+                      : 'bg-white border-[#4c1d95]/30 text-[#4c1d95]/50'
+                    }`}>
                     {room.settings?.enableVoting ? 'مفعل' : 'معطل'}
-                  </Button>
-                </div>
+                  </div>
+                </button>
               ) : (
                 room.settings?.enableVoting && (
                   <div className="flex items-center gap-2 p-2 bg-[#7c3aed]/10 rounded-lg border border-[#7c3aed]/30 justify-center mb-2">
-                    <Users className="w-4 h-4 text-[#7c3aed]" />
+                    <Gavel className="w-4 h-4 text-[#7c3aed]" />
                     <span className="text-xs font-bold text-[#4c1d95] font-pixel-text">نظام التحكيم الديمقراطي مفعل</span>
                   </div>
                 )
@@ -256,9 +271,12 @@ export default function Lobby() {
                         isReferee={player.id === room.refereeId}
                         index={index}
                       />
-                      <div className="absolute top-2 left-2 z-10 scale-90">
-                        <HostControls type="player_row" targetPlayer={player} />
-                      </div>
+                      {/* STYLE-2 FIX: In lobby, only show Kick button — score adjustments are meaningless here (all scores = 0) */}
+                      {isHost && player.id !== state.playerId && (
+                        <div className="absolute top-2 left-2 z-10 scale-90">
+                          <HostControls type="player_row" targetPlayer={player} />
+                        </div>
+                      )}
                     </motion.div>
                   ))}
               </AnimatePresence>
@@ -319,18 +337,19 @@ export default function Lobby() {
                   >
                     <p className="text-base text-[#4c1d95] mb-3 font-pixel-text font-bold">اختر واحد من اللاعبين:</p>
                     <div className="grid grid-cols-2 gap-2">
-                      {room.players.map((player) => (
-                        <Button
-                          key={player.id}
-                          variant="outline"
-                          className="justify-start gap-2 h-12 border-2 border-[#4c1d95] text-[#4c1d95] font-pixel-text font-bold"
-                          onClick={() => handleSetReferee(player.id)}
-                          data-testid={`button-select-referee-${player.id}`}
-                        >
-                          {player.isHost && <Crown className="w-4 h-4 text-orange-500" />}
-                          <span className="truncate text-base">{player.name}</span>
-                        </Button>
-                      ))}
+                      {room.players
+                        .filter((player) => !player.isHost) // BUG-11 FIX: Host cannot be their own referee
+                        .map((player) => (
+                          <Button
+                            key={player.id}
+                            variant="outline"
+                            className="justify-start gap-2 h-12 border-2 border-[#4c1d95] text-[#4c1d95] font-pixel-text font-bold"
+                            onClick={() => handleSetReferee(player.id)}
+                            data-testid={`button-select-referee-${player.id}`}
+                          >
+                            <span className="truncate text-base">{player.name}</span>
+                          </Button>
+                        ))}
                     </div>
                     <Button
                       variant="ghost"

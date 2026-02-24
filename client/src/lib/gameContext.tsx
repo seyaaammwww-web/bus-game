@@ -176,6 +176,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const reconnectAttemptRef = useRef(0);
   const reconnectTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isIntentionalDisconnectRef = useRef(false);
+  // BUG-5 FIX: Always-current state ref to avoid stale closures in handleMessage
+  const stateRef = useRef(state);
+  useEffect(() => { stateRef.current = state; }, [state]);
 
   const handleMessage = useCallback((message: any) => {
     switch (message.type) {
@@ -187,11 +190,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
         saveSession(message.payload.playerId, message.payload.room.code);
         break;
       case 'player_submitted':
-        // GC2: Look up actual player name instead of using empty string
-        if (state.room && message.payload?.playerId) {
-          const submittingPlayer = state.room.players.find(p => p.id === message.payload.playerId);
-          const updatedRounds = state.room.rounds.map((r, i) => {
-            if (i !== state.room!.currentRound) return r;
+        // BUG-5 FIX: use stateRef.current to avoid stale closure reading null room
+        if (stateRef.current.room && message.payload?.playerId) {
+          const submittingPlayer = stateRef.current.room.players.find(p => p.id === message.payload.playerId);
+          const updatedRounds = stateRef.current.room.rounds.map((r, i) => {
+            if (i !== stateRef.current.room!.currentRound) return r;
             const alreadySubmitted = r.submissions.some(s => s.playerId === message.payload.playerId);
             if (alreadySubmitted) return r;
             return {
@@ -208,7 +211,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
               ]
             };
           });
-          dispatch({ type: 'SET_ROOM', room: { ...state.room, rounds: updatedRounds } });
+          dispatch({ type: 'SET_ROOM', room: { ...stateRef.current.room, rounds: updatedRounds } });
         }
         break;
 

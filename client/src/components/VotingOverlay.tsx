@@ -16,8 +16,14 @@ function VotingItemCard({ item, currentPlayer, castParallelVote, refereeOverride
     const noPercent = totalVotes > 0 ? (noVotes / totalVotes) * 100 : 50;
     const canOverride = isReferee || isHost;
 
-    const canVote = !hasVoted && !isRequester && currentPlayer;
+    // PHANTOM-6 FIX: Referee/host cannot both vote AND override — they only get override controls
+    const canVote = !hasVoted && !isRequester && !isReferee && !isHost && !!currentPlayer;
     const [isVoting, setIsVoting] = useState(false); // V3: Prevent double-tap
+
+    // BUG-12 FIX: Reset isVoting if the vote was registered server-side (hasVoted flipped to true)
+    useEffect(() => {
+        if (hasVoted) setIsVoting(false);
+    }, [hasVoted]);
 
     const handleVote = (vote: 'yes' | 'no') => {
         if (canVote && !isVoting) {
@@ -25,6 +31,9 @@ function VotingItemCard({ item, currentPlayer, castParallelVote, refereeOverride
             castParallelVote(item.requesterId, item.category, vote);
         }
     };
+
+    // Is this player even eligible to vote on this item?
+    const isEligible = (item.eligibleVoterIds || []).includes(currentPlayer?.id || '');
 
     return (
         <motion.div
@@ -70,7 +79,7 @@ function VotingItemCard({ item, currentPlayer, castParallelVote, refereeOverride
                 {canOverride ? (
                     <div className="flex flex-col gap-2">
                         <div className="text-center font-pixel-text text-[10px] text-amber-700 font-bold flex items-center justify-center gap-1">
-                            <ShieldAlert className="w-3 h-3" /> صلاحيات الحكم
+                            <ShieldAlert className="w-3 h-3" /> {isReferee ? 'قرار الحكم' : 'تحكم المضيف'}
                         </div>
                         <div className="flex gap-2">
                             <button
@@ -90,7 +99,13 @@ function VotingItemCard({ item, currentPlayer, castParallelVote, refereeOverride
                 ) : isRequester ? (
                     <div className="text-center py-2 bg-[#4c1d95]/10 rounded border border-dashed border-[#7c3aed]">
                         <Loader2 className="w-4 h-4 text-[#7c3aed] animate-spin mx-auto mb-1" />
-                        <p className="font-pixel-text text-[9px] text-[#4c1d95]/80">إجابتك تحت التصويت...</p>
+                        <p className="font-pixel-text text-[9px] text-[#4c1d95]/80">
+                            إجابتك تحت التصويت ({yesVotes} نعم / {noVotes} لا)
+                        </p>
+                    </div>
+                ) : !isEligible ? (
+                    <div className="text-center py-2 bg-gray-50 rounded border border-gray-200">
+                        <p className="font-pixel-text text-[9px] text-gray-400">لا يحق لك التصويت على هذه الإجابة</p>
                     </div>
                 ) : hasVoted ? (
                     <div className="text-center py-2 bg-emerald-50 rounded border border-emerald-300">
@@ -158,7 +173,31 @@ export function VotingOverlay() {
         return () => clearInterval(interval);
     }, [room?.phase, room?.currentRound, room?.rounds]);
 
-    if (!room || room.phase !== 'voting' || voteQueue.length === 0) return null;
+    if (!room || room.phase !== 'voting') return null;
+
+    // BUG-4 FIX: When queue is empty but still in voting phase, show a processing state
+    if (voteQueue.length === 0) {
+        return (
+            <AnimatePresence>
+                <motion.div
+                    key="voting-processing"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/85 backdrop-blur-sm p-4"
+                >
+                    <motion.div
+                        initial={{ scale: 0.9, y: 20 }}
+                        animate={{ scale: 1, y: 0 }}
+                        className="w-full max-w-sm retro-overlay p-6 text-center"
+                    >
+                        <Loader2 className="w-10 h-10 text-amber-300 animate-spin mx-auto mb-3" />
+                        <p className="font-pixel-title text-amber-200 text-base">جاري معالجة النتائج...</p>
+                    </motion.div>
+                </motion.div>
+            </AnimatePresence>
+        );
+    }
 
     return (
         <AnimatePresence>

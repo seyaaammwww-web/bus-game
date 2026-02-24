@@ -24,8 +24,9 @@ interface ResultsTableProps {
     currentPlayerId: string;
     isReferee: boolean;
     isHost?: boolean;
-    onRefereeToggle: (playerId: string, category: string) => void;
-    onRefereeDeduct: (playerId: string, category: string) => void;
+    // PHANTOM-3: Optional — only provided during referee_review phase
+    onRefereeToggle?: (playerId: string, category: string) => void;
+    onRefereeDeduct?: (playerId: string, category: string) => void;
 }
 
 export function ResultsTable({
@@ -182,8 +183,8 @@ export function ResultsTable({
                                                     )
                                                 )}
 
-                                                {/* Host / Referee Toggle Button */}
-                                                {canOverride && answer && (
+                                                {/* Host / Referee Toggle Button — only shown when callbacks are wired up (referee_review phase) */}
+                                                {canOverride && answer && onRefereeToggle && (
                                                     <button
                                                         onClick={() => onRefereeToggle(submission.playerId, cat)}
                                                         className="p-1 rounded bg-black/10 hover:bg-black/20 transition-colors mt-1"

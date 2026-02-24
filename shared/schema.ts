@@ -56,6 +56,8 @@ export interface Player {
   usedPowerUps: UsedPowerUps; // Track one-time usage
   totalEarnedPoints: number;
   draftAnswers?: RoundAnswers; // Delta Sync support for live typing
+  // BUG-1 FIX: Accumulates host manual +/- adjustments so they survive recalculatePlayerTotals
+  manualScoreAdjustment?: number;
 }
 
 // Answers for a round
@@ -110,8 +112,8 @@ export interface Round {
   votingComplete: boolean;
   activePowerUp?: ActivePowerUp | null;
   powerUpUsedInRound?: boolean;
-  wildcardUsedByPlayerId?: string | null;
-  wildcardAnswers?: Record<string, string>; // Generated answers for wildcard user
+  wildcardUsedByPlayerIds?: string[]; // Multiple players can use wildcard in one round
+  wildcardAnswers?: Record<string, string>; // Legacy field (shared generation if needed) or per-player generated elsewhere
   banishedPlayerId?: string | null;
   banishedByPlayerId?: string | null;
   resultsCommitted?: boolean;
