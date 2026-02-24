@@ -127,8 +127,8 @@ export function TicketCard({ category, word, playerName, onVote, disabled, timeL
                 {/* Footer — timer dots */}
                 <div className="w-full border-t-[3px] border-[#00f0ff]/30 pt-4">
                     <div className="flex justify-between w-full mb-3 px-2">
-                        <span className="text-[#ff0055] font-pixel-text text-[10px] [text-shadow:0_0_5px_#ff0055]">❌ اسحب يسار</span>
-                        <span className="text-[#00ffaa] font-pixel-text text-[10px] [text-shadow:0_0_5px_#00ffaa]">يمين قبول ✅</span>
+                        <span className="text-[#ff0055] font-pixel-text text-[10px] [text-shadow:0_0_5px_#ff0055]">رفض - اسحب يسار</span>
+                        <span className="text-[#00ffaa] font-pixel-text text-[10px] [text-shadow:0_0_5px_#00ffaa]">يمين - قبول</span>
                     </div>
                     <div className="flex justify-center gap-1.5">
                         {Array.from({ length: 15 }).map((_, i) => (

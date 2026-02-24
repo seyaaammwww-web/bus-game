@@ -64,9 +64,9 @@ export function WildcardOverlay({ isActive, playerName, message }: WildcardOverl
                 <Wand2 className="w-16 h-16 text-amber-500" />
               </motion.div>
 
-              <h3 className="text-2xl font-bold text-amber-600 mb-2">استخدمت الجوكر! 🃏</h3>
+              <h3 className="text-2xl font-bold text-amber-600 mb-2">استخدمت الجوكر!</h3>
               <p className="text-gray-700 font-semibold text-lg mb-2">
-                ✨ تم ملء جميع الخانات بإجابات صحيحة! ✨
+                تم ملء جميع الخانات بإجابات صحيحة!
               </p>
               <p className="text-gray-600 text-sm leading-relaxed">
                 {message || 'تم تقديم إجاباتك تلقائياً. استمتع بالمزايا!'}

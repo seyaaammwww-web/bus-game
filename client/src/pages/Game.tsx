@@ -382,7 +382,7 @@ export default function Game() {
               <div className="flex flex-col">
                 <span className="font-bold text-xl font-pixel-text">{activePowerUpNotification.playerName}</span>
                 <span className="text-lg opacity-90 font-pixel-text">
-                  {activePowerUpNotification.type === 'wildcard' ? 'استخدم الجوكر! 🃏' : 'استخدم مساعدة!'}
+                  {activePowerUpNotification.type === 'wildcard' ? 'استخدم الجوكر!' : 'استخدم مساعدة!'}
                 </span>
               </div>
             </motion.div>

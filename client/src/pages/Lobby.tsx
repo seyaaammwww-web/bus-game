@@ -210,7 +210,7 @@ export default function Lobby() {
                     <div>
                       <p className="font-bold text-[#4c1d95] font-pixel-text text-sm">التحكيم الديمقراطي</p>
                       <p className="text-[10px] text-[#4c1d95]/70 font-pixel-text">
-                        {referee ? <span className="text-red-500 font-bold">⚠️ سيلغي الحكم الحالي</span> : "اللاعبين يصوتوا على الإجابات"}
+                        {referee ? <span className="text-red-500 font-bold">سيلغي الحكم الحالي</span> : "اللاعبين يصوتوا على الإجابات"}
                       </p>
                     </div>
                   </div>
@@ -220,7 +220,7 @@ export default function Lobby() {
                     onClick={() => updateSettings({ enableVoting: !room.settings?.enableVoting })}
                     className={`h-8 font-bold font-pixel-text ${room.settings?.enableVoting ? 'bg-[#7c3aed]' : 'text-[#4c1d95]'}`}
                   >
-                    {room.settings?.enableVoting ? 'مفعل ✅' : 'معطل ❌'}
+                    {room.settings?.enableVoting ? 'مفعل' : 'معطل'}
                   </Button>
                 </div>
               ) : (

@@ -180,7 +180,7 @@ export default function Results() {
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
               >
-                🏆 نهاية اللعبة!
+                نهاية اللعبة!
               </motion.h1>
 
               {/* Top-3 Podium */}
@@ -204,7 +204,7 @@ export default function Results() {
                         size="sm"
                         className="border-[3px] border-slate-400 shadow-[2px_2px_0_0_#475569]"
                       />
-                      <span className="text-xl my-0.5">🥈</span>
+                      <span className="text-xl my-0.5">2</span>
                       <p className="text-xs font-pixel-text text-white font-bold truncate max-w-[72px] leading-tight">{sortedPlayers[1].name}</p>
                       <p className="text-xs font-pixel-title text-slate-200 leading-tight">{sortedPlayers[1].score}</p>
                       {/* Podium bar */}
@@ -232,7 +232,7 @@ export default function Results() {
                         />
                       </div>
                     </motion.div>
-                    <span className="text-2xl my-0.5">🥇</span>
+                    <span className="text-2xl my-0.5">1</span>
                     <p className="text-sm font-pixel-text text-white font-bold truncate max-w-[90px] leading-tight">{winner.name}</p>
                     <p className="text-sm font-pixel-title text-amber-200 leading-tight">{winner.score} نقطة</p>
                     {/* Podium bar — tallest */}
@@ -252,7 +252,7 @@ export default function Results() {
                         size="sm"
                         className="border-[3px] border-orange-400 shadow-[2px_2px_0_0_#9a3412]"
                       />
-                      <span className="text-xl my-0.5">🥉</span>
+                      <span className="text-xl my-0.5">3</span>
                       <p className="text-xs font-pixel-text text-white font-bold truncate max-w-[72px] leading-tight">{sortedPlayers[2].name}</p>
                       <p className="text-xs font-pixel-title text-orange-200 leading-tight">{sortedPlayers[2].score}</p>
                       {/* Podium bar — shortest */}
@@ -280,7 +280,7 @@ export default function Results() {
                     {sortedPlayers.map((player, index) => {
                       const isMe = player.id === state.playerId;
                       const isRef = player.id === room.refereeId;
-                      const medals = ['🥇', '🥈', '🥉'];
+                      const medals = ['1', '2', '3'];
                       return (
                         <motion.div
                           key={player.id}
@@ -435,7 +435,7 @@ export default function Results() {
           >
             <div className="bg-[#4c1d95] text-[#FFFDD1] px-4 py-3 border-b-4 border-[#2e1065] rounded-t-lg">
               <div className="flex items-center gap-2">
-                <span className="text-xl">📝</span>
+                <span className="text-xl"></span>
                 <span className="font-pixel-title text-lg tracking-wide">نتائج الجولة</span>
               </div>
             </div>
@@ -481,14 +481,14 @@ export default function Results() {
                   {isReferee ? (
                     <div className="space-y-2">
                       <p className="text-[#FFFDD1] font-bold font-pixel-text text-lg animate-pulse">
-                        🕐 الوقت متوقف للمراجعة
+                        الوقت متوقف للمراجعة
                       </p>
                       <Button
                         onClick={() => room.phase === 'results' ? nextRound() : refereeApprove()}
                         size="lg"
                         className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
                       >
-                        {room.phase === 'results' ? '➡️ بدء الجولة التالية' : '✅ اعتماد النتيجة وبدء الجولة'}
+                        {room.phase === 'results' ? '➡️ بدء الجولة التالية' : 'اعتماد النتيجة وبدء الجولة'}
                       </Button>
                     </div>
                   ) : room.settings?.enableVoting && isHost ? (

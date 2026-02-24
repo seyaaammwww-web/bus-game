@@ -35,7 +35,7 @@ function SquarePowerUp({ type, title, cost, icon: Icon, status, onActivate }: Sq
         if (isLocked) {
             playErrorSound();
             toast({
-                title: "رصيدك غير كافي! ❌",
+                title: "رصيدك غير كافي!",
                 description: `محتاج ${cost} نقطة عشان تستخدم ${title}`,
                 variant: "destructive",
             });

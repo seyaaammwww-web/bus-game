@@ -62,7 +62,7 @@ export function BanishOverlay({
                 >
                   <UserX className="w-8 h-8 text-white" />
                 </motion.div>
-                <h2 className="text-2xl font-bold text-white">اختر من تطرده! 🚫</h2>
+                <h2 className="text-2xl font-bold text-white">اختر من تطرده!</h2>
               </div>
 
               <p className="text-red-100 text-sm mt-2 relative z-10">
@@ -134,7 +134,7 @@ export function BanishOverlay({
               transition={{ duration: 2, repeat: Infinity }}
               className="bg-red-50 border-t border-red-200 px-6 py-3 text-center text-xs text-red-600 font-semibold"
             >
-              ⚠️ هذا الطرد من الجولة الحالية فقط!
+              هذا الطرد من الجولة الحالية فقط!
             </motion.div>
           </motion.div>
         </motion.div>

@@ -51,77 +51,77 @@ export function FunMessages({ messages }: FunMessagesProps) {
 // Fun messages for different events
 export const funMessages = {
   correctAnswer: [
-    { emoji: '✅', text: 'إجابة صحيحة!' },
-    { emoji: '🎉', text: 'عبقري!' },
-    { emoji: '⭐', text: 'أنت النجم!' },
-    { emoji: '💯', text: 'مثالي!' },
-    { emoji: '🔥', text: 'نار! نار!' },
+    { emoji: '', text: 'إجابة صحيحة!' },
+    { emoji: '', text: 'عبقري!' },
+    { emoji: '', text: 'أنت النجم!' },
+    { emoji: '', text: 'مثالي!' },
+    { emoji: '', text: 'نار! نار!' },
   ],
-  
+
   wrongAnswer: [
-    { emoji: '❌', text: 'الجواب خاطئ' },
-    { emoji: '😅', text: 'حاول مرة أخرى' },
-    { emoji: '🤔', text: 'هممم...' },
-    { emoji: '😬', text: 'آوض!' },
-    { emoji: '🎪', text: 'للأسف!' },
+    { emoji: '', text: 'الجواب خاطئ' },
+    { emoji: '', text: 'حاول مرة أخرى' },
+    { emoji: '', text: 'هممم...' },
+    { emoji: '', text: 'آوض!' },
+    { emoji: '', text: 'للأسف!' },
   ],
 
   busComplete: [
-    { emoji: '🚌', text: 'اكتمل الخط!' },
-    { emoji: '⚡', text: 'سرعة فائقة!' },
-    { emoji: '💨', text: 'الجميع معاً!' },
-    { emoji: '🏁', text: 'النهاية المثالية!' },
-    { emoji: '🎊', text: 'انفجار سعادة!' },
+    { emoji: '', text: 'اكتمل الخط!' },
+    { emoji: '', text: 'سرعة فائقة!' },
+    { emoji: '', text: 'الجميع معاً!' },
+    { emoji: '', text: 'النهاية المثالية!' },
+    { emoji: '', text: 'انفجار سعادة!' },
   ],
 
   freezeActivated: [
-    { emoji: '🧊', text: 'مجمد! يتحرك بنصف السرعة' },
-    { emoji: '❄️', text: 'برد قارس!' },
-    { emoji: '⛸️', text: 'سكة جليدية!' },
-    { emoji: '🥶', text: 'فقد الشعور!' },
+    { emoji: '', text: 'مجمد! يتحرك بنصف السرعة' },
+    { emoji: '', text: 'برد قارس!' },
+    { emoji: '', text: 'سكة جليدية!' },
+    { emoji: '', text: 'فقد الشعور!' },
   ],
 
   wildcardUsed: [
-    { emoji: '✨', text: 'جوكر سحري!' },
-    { emoji: '🎴', text: 'الجميع ملؤوا!' },
-    { emoji: '🪄', text: 'عصا السحر تتحدث!' },
-    { emoji: '⭐', text: 'نجم هابط!' },
+    { emoji: '', text: 'جوكر سحري!' },
+    { emoji: '', text: 'الجميع ملؤوا!' },
+    { emoji: '', text: 'عصا السحر تتحدث!' },
+    { emoji: '', text: 'نجم هابط!' },
   ],
 
   banishActivated: [
-    { emoji: '💀', text: 'تم الطرد من اللعبة!' },
-    { emoji: '👻', text: 'طاردك شبح!' },
-    { emoji: '🚫', text: 'خارج اللعبة!' },
-    { emoji: '🌪️', text: 'تم إزالتك!' },
+    { emoji: '', text: 'تم الطرد من اللعبة!' },
+    { emoji: '', text: 'طاردك شبح!' },
+    { emoji: '', text: 'خارج اللعبة!' },
+    { emoji: '', text: 'تم إزالتك!' },
   ],
 
   powerUpUnlocked: [
-    { emoji: '🎁', text: 'مساعدة جديدة!' },
-    { emoji: '🏆', text: 'أنت تستحق!' },
-    { emoji: '⚡', text: 'قوة جديدة!' },
-    { emoji: '💎', text: 'كنز!' },
+    { emoji: '', text: 'مساعدة جديدة!' },
+    { emoji: '', text: 'أنت تستحق!' },
+    { emoji: '', text: 'قوة جديدة!' },
+    { emoji: '', text: 'كنز!' },
   ],
 
   roundWin: [
-    { emoji: '👑', text: 'أنت الملك!' },
-    { emoji: '🥇', text: 'المركز الأول!' },
-    { emoji: '🎖️', text: 'بطل!' },
-    { emoji: '🌟', text: 'نجم الجولة!' },
-    { emoji: '🚀', text: 'انطلاق للقمة!' },
+    { emoji: '', text: 'أنت الملك!' },
+    { emoji: '', text: 'المركز الأول!' },
+    { emoji: '', text: 'بطل!' },
+    { emoji: '', text: 'نجم الجولة!' },
+    { emoji: '', text: 'انطلاق للقمة!' },
   ],
 
   lastChance: [
-    { emoji: '⚠️', text: 'آخر فرصة!' },
-    { emoji: '⏱️', text: 'الوقت ينفد!' },
-    { emoji: '🔔', text: 'استيقظ!' },
-    { emoji: '🎯', text: 'ركز الآن!' },
+    { emoji: '', text: 'آخر فرصة!' },
+    { emoji: '', text: 'الوقت ينفد!' },
+    { emoji: '', text: 'استيقظ!' },
+    { emoji: '', text: 'ركز الآن!' },
   ],
 
   tie: [
-    { emoji: '🤝', text: 'تعادل! تصفية!' },
-    { emoji: '⚖️', text: 'متساويان!' },
-    { emoji: '🎪', text: 'نفس النقاط!' },
-    { emoji: '🔄', text: 'تكرار!' },
+    { emoji: '', text: 'تعادل! تصفية!' },
+    { emoji: '', text: 'متساويان!' },
+    { emoji: '', text: 'نفس النقاط!' },
+    { emoji: '', text: 'تكرار!' },
   ],
 };
 

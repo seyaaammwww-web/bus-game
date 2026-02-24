@@ -73,13 +73,13 @@ function VotingItemCard({ item, currentPlayer, castParallelVote, refereeOverride
                                 onClick={() => refereeOverride(item.requestId, item.category, false)}
                                 className="flex-1 bg-gradient-to-b from-red-500 to-red-600 text-white font-pixel-title text-xs py-2 rounded border-2 border-red-800 shadow-[0_3px_0_0_#7f1d1d] active:translate-y-1 active:shadow-none"
                             >
-                                ❌ حسم: رفض
+                                حسم: رفض
                             </button>
                             <button
                                 onClick={() => refereeOverride(item.requestId, item.category, true)}
                                 className="flex-1 bg-gradient-to-b from-emerald-500 to-emerald-600 text-white font-pixel-title text-xs py-2 rounded border-2 border-emerald-800 shadow-[0_3px_0_0_#065f46] active:translate-y-1 active:shadow-none"
                             >
-                                ✅ حسم: قبول
+                                حسم: قبول
                             </button>
                         </div>
                     </div>
@@ -90,7 +90,7 @@ function VotingItemCard({ item, currentPlayer, castParallelVote, refereeOverride
                     </div>
                 ) : hasVoted ? (
                     <div className="text-center py-2 bg-emerald-50 rounded border border-emerald-300">
-                        <p className="font-pixel-text text-[10px] text-emerald-700 font-bold">✅ تم تسجيل صوتك</p>
+                        <p className="font-pixel-text text-[10px] text-emerald-700 font-bold">تم تسجيل صوتك</p>
                     </div>
                 ) : (
                     <div className="flex gap-2">

@@ -7,9 +7,9 @@ import { playClickSound, playErrorSound } from '@/lib/sounds';
 
 // --- Constants & Config ---
 const TEXTS = {
-    lockedTitle: "محتاج نقط أكتر! ❌",
+    lockedTitle: "محتاج نقط أكتر!",
     lockedDesc: "تحتاج {cost} نقطة لتفعيل {title}",
-    disabledTitle: "غير متاح حالياً 🔒",
+    disabledTitle: "غير متاح حالياً",
     disabledDesc: "البطاقة غير متاحة للاستخدام الآن",
     usedLabel: "تم"
 } as const;
