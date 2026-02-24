@@ -95,6 +95,7 @@ export interface ValidatedAnswer {
   isPendingVote?: boolean;
   voterIds?: string[]; // Track who voted to prevent double voting
   aiSuggestion?: boolean; // TBD by AI Assistant
+  appealedBy?: string[]; // FIX (#3): Phase 3 - Player Appeal System Flags
 }
 
 // Round state
@@ -265,7 +266,10 @@ export type WSMessageType =
   | 'kick_player'
   | 'kicked'
   | 'player_kicked'
-  | 'patch_update';
+  | 'patch_update'
+  // FIX (#3): Phase 3 Player Appeal
+  | 'player_appeal'
+  | 'appeal_notification';
 
 export interface WSMessage {
   type: WSMessageType;

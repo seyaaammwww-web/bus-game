@@ -1,9 +1,10 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Check, X, Shield, Users, Trophy, MessageSquarePlus } from 'lucide-react';
+import { Check, X, Shield, Users, Trophy, MessageSquarePlus, Flag } from 'lucide-react';
 import { PixelAvatar } from '@/components/ui/PixelAvatar';
 import { cn } from '@/lib/utils';
+import { useGame } from '@/lib/gameContext'; // FIX (#3): Phase 3 - Player Appeals
 import { categories, type Category } from '@shared/schema';
 
 // Helper for category icons/colors (Reusing logic for consistency)
@@ -36,6 +37,7 @@ export function ResultsTable({
     onRefereeToggle,
     onRefereeDeduct
 }: ResultsTableProps) {
+    const { sendAppeal } = useGame();
     const canOverride = isReferee || isHost;
 
     return (
@@ -141,6 +143,13 @@ export function ResultsTable({
                                                 {cat}
                                             </div>
 
+                                            {/* FIX (#3): Phase 3 Host Appeal Visual Badge */}
+                                            {validation?.appealedBy && validation.appealedBy.length > 0 && (
+                                                <div className="absolute top-1 right-1" title={`تم الاستئناف بواسطة ${validation.appealedBy.length} لاعبين`}>
+                                                    <Flag className="w-4 h-4 text-yellow-500 fill-yellow-500 animate-pulse" />
+                                                </div>
+                                            )}
+
                                             {/* The Answer */}
                                             <div className="flex-1 text-center md:w-full">
                                                 {answer ? (
@@ -180,6 +189,23 @@ export function ResultsTable({
                                                         title="تعديل احتساب الكلمة"
                                                     >
                                                         <Shield className="w-3 h-3 text-[#4c1d95]" />
+                                                    </button>
+                                                )}
+
+                                                {/* FIX (#3): Phase 3 Player Appeal Control */}
+                                                {!canOverride && answer && submission.playerId !== currentPlayerId && (
+                                                    <button
+                                                        onClick={() => sendAppeal(submission.playerId, cat)}
+                                                        disabled={validation?.appealedBy?.includes(currentPlayerId)}
+                                                        className={cn(
+                                                            "p-1 rounded mt-1 transition-colors",
+                                                            validation?.appealedBy?.includes(currentPlayerId)
+                                                                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                                                                : "bg-yellow-100 hover:bg-yellow-200 text-yellow-600"
+                                                        )}
+                                                        title={validation?.appealedBy?.includes(currentPlayerId) ? "لقد قمت بإبلاغ هذه الكلمة" : "إبلاغ المضيف عن هذه الإجابة"}
+                                                    >
+                                                        <Flag className="w-3 h-3" />
                                                     </button>
                                                 )}
                                             </div>

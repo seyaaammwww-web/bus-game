@@ -159,6 +159,7 @@ interface GameContextType {
   refereeOverride: (requestId: string, category: string, accepted: boolean) => void;
   hostAdjustScore: (playerId: string, delta: number) => void;
   sendMessage: (type: string, payload: any) => void;
+  sendAppeal: (targetPlayerId: string, category: string) => void;
 }
 
 const GameContext = createContext<GameContextType | null>(null);
@@ -460,6 +461,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const isReferee = state.room?.refereeId === state.playerId;
   const referee = state.room?.players.find(p => p.id === state.room?.refereeId) || null;
 
+  const sendAppeal = useCallback((targetPlayerId: string, category: string) => {
+    sendMessage('player_appeal', { targetPlayerId, category });
+  }, [sendMessage]);
+
   return (
     <GameContext.Provider value={{
       state,
@@ -503,6 +508,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       refereeOverride,
       hostAdjustScore,
       sendMessage,
+      sendAppeal,
     }}>
       {children}
     </GameContext.Provider>

@@ -1,6 +1,6 @@
 
 import { WebSocket } from 'ws';
-import type { WSMessage, RoundAnswers, Category, PowerUpType, ReactionType } from '../shared/schema';
+import type { WSMessage, RoundAnswers, Category, PowerUpType, ReactionType, GameRoom } from '../shared/schema';
 import { RoomManager } from './managers/RoomManager';
 import { PlayerManager } from './managers/PlayerManager';
 import { RoundManager } from './managers/RoundManager';
@@ -196,6 +196,10 @@ export class GameManager {
             return;
           }
           this.castParallelVote(ws, message.payload);
+          break;
+        // FIX (#3): Phase 3 Player Appeal
+        case 'player_appeal':
+          this.handlePlayerAppeal(ws, message.payload);
           break;
         case 'referee_toggle_validity': this.refereeToggleValidity(ws, message.payload); break;
         // FIX: Handle pong responses to update lastPong timestamp
@@ -1210,8 +1214,19 @@ export class GameManager {
           'OVERRIDE_VALIDITY',
           `تعديل صحة الإجابة (${ans.category}): ${ans.isValid ? 'مقبولة' : 'مرفوضة'} (بواسطة ${actorRole})`
         );
+
+        // FIX (#3): Phase 3 Real-time Totals Recalculation
+        this.recalculatePlayerTotals(draft);
+
+        // Cancel auto-next round progression
+        if (draft.nextRoundAt) {
+          draft.nextRoundAt = undefined;
+        }
       }
     }, "refereeToggleValidity");
+
+    // Clear UI timer immediately
+    this.roundManager.clearTimer(p.roomId);
 
     const room = buffer.get();
     this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
@@ -1309,6 +1324,13 @@ export class GameManager {
             'REFEREE_OVERRIDE',
             `قرار الحكم على (${ans.category}): ${ans.isValid ? 'قبول' : 'رفض'} (بواسطة ${actorRole})`
           );
+
+          // FIX (#3): Phase 3 Real-time Score Re-calculations
+          this.recalculatePlayerTotals(draft);
+
+          if (draft.nextRoundAt) {
+            draft.nextRoundAt = undefined;
+          }
         }
         draft.voteQueue.splice(voteItemIndex, 1);
       }
@@ -1434,6 +1456,67 @@ export class GameManager {
         this.send(p.ws, message);
       }
     }
+  }
+
+  // FIX (#3): Phase 3 Score Utilities
+  private recalculatePlayerTotals(draft: GameRoom) {
+    // Reset all player scores
+    draft.players.forEach(p => {
+      p.score = 0;
+      p.totalEarnedPoints = 0;
+    });
+
+    // Sum all rounds structurally
+    draft.rounds.forEach(round => {
+      round.validatedAnswers.forEach(ans => {
+        if (ans.isValid) {
+          const player = draft.players.find(p => p.id === ans.playerId);
+          if (player) {
+            player.score += ans.score || 0;
+            player.totalEarnedPoints += ans.score || 0;
+          }
+        }
+      });
+    });
+  }
+
+  private handlePlayerAppeal(ws: WebSocket, payload: { targetPlayerId: string; category: string }) {
+    const p = this.playerManager.getPlayer(ws);
+    if (!p) return;
+    const buffer = this.roomManager.getRoomBuffer(p.roomId);
+    if (!buffer) return;
+
+    buffer.transact(draft => {
+      if (!draft.rounds[draft.currentRound]) return;
+
+      const round = draft.rounds[draft.currentRound];
+      const answer = round.validatedAnswers.find(
+        a => a.playerId === payload.targetPlayerId && a.category === payload.category
+      );
+      if (!answer) return;
+
+      if (!answer.appealedBy) answer.appealedBy = [];
+      if (!answer.appealedBy.includes(p.playerId)) {
+        answer.appealedBy.push(p.playerId);
+      }
+    }, "player_appeal");
+
+    const room = buffer.get();
+    const hostSocket = this.playerManager.getSocket(room.hostId);
+
+    // Extract actual player name from room data since ConnectedPlayer lacks it
+    const appealingPlayer = room.players.find(pl => pl.id === p.playerId);
+
+    if (hostSocket && room.hostId !== p.playerId) {
+      this.send(hostSocket, {
+        type: 'toast',
+        payload: {
+          message: `🔔 استئناف من ${appealingPlayer?.name || 'لاعب'} على إجابة ${payload.category}`,
+          type: 'info'
+        }
+      });
+    }
+    this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
   }
 }
 
