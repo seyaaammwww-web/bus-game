@@ -78,6 +78,21 @@ export default function Results() {
     return () => clearInterval(timer);
   }, [isFinal, room.nextRoundAt, room.phase]);
 
+  // FIX-AUTO-ADVANCE: Auto-advance when countdown reaches 0 and host hasn't clicked yet
+  useEffect(() => {
+    if (isFinal || countdown > 0 || room.phase === 'voting') return;
+    if (!isHost) return; // Only host can auto-advance
+    
+    // Auto-advance after countdown finishes
+    const timer = setTimeout(() => {
+      if (countdown === 0) {
+        nextRound();
+      }
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, [countdown, isFinal, room.phase, isHost, nextRound]);
+
   const gameStats = useMemo(() => {
     if (!isFinal || room.rounds.length === 0) return null;
     const playerStats = new Map<string, any>();
