@@ -241,7 +241,7 @@ export const VotingOverlay = memo(function VotingOverlay() {
                     className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/85 backdrop-blur-sm p-4"
                     role="status"
                     aria-live="polite"
-                    aria-label="جاري معالجة نتائج التصويت"
+                    aria-label="معالجة التصويت"
                 >
                     <motion.div
                         initial={{ scale: 0.9, y: 20 }}
@@ -253,7 +253,7 @@ export const VotingOverlay = memo(function VotingOverlay() {
                             transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
                             className="w-10 h-10 border-4 border-amber-300/30 border-t-amber-300 rounded-full mx-auto mb-3"
                         />
-                        <p className="font-pixel-title text-amber-200 text-base">جاري معالجة النتائج...</p>
+                        <p className="font-pixel-title text-amber-200 text-base">معالجة...</p>
                         <p className="font-pixel-text text-amber-200/60 text-xs mt-2">يرجى الانتظار</p>
                     </motion.div>
                 </motion.div>

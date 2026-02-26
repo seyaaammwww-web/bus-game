@@ -397,7 +397,7 @@ export default function Game() {
           playerName={currentRound?.activePowerUp?.playerName}
         />
 
-        <WildcardOverlay isActive={wildcardActive} playerName={currentPlayer?.name} message="تم ملء جميع الخانات بإجابات صحيحة!" />
+        <WildcardOverlay isActive={wildcardActive} playerName={currentPlayer?.name} message="إجابات صحيحة!" />
 
         <BanishOverlay
           isOpen={banishOverlay}
@@ -500,7 +500,7 @@ export default function Game() {
                 animate={{ opacity: [0.8, 1, 0.8] }}
                 transition={{ repeat: Infinity, duration: 2 }}
               >
-                في انتظار باقي اللاعبين...
+                في الانتظار...
               </motion.p>
             </motion.div>
           )
