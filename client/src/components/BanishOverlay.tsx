@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserX, X } from 'lucide-react';
 import type { Player } from '@shared/schema';
+import { memo, useCallback } from 'react';
 
 interface BanishOverlayProps {
   isOpen: boolean;
@@ -9,12 +10,16 @@ interface BanishOverlayProps {
   onClose: () => void;
 }
 
-export function BanishOverlay({
+export const BanishOverlay = memo(function BanishOverlay({
   isOpen,
   players,
   onSelectPlayer,
   onClose
 }: BanishOverlayProps) {
+  const handleSelectPlayer = useCallback((playerId: string) => {
+    onSelectPlayer(playerId);
+    onClose();
+  }, [onSelectPlayer, onClose]);
 
   return (
     <AnimatePresence>
@@ -96,8 +101,7 @@ export function BanishOverlay({
                     whileHover={{ scale: 1.05, x: 5 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => {
-                      onSelectPlayer(player.id);
-                      onClose();
+                      handleSelectPlayer(player.id);
                     }}
                     className="w-full p-4 bg-gradient-to-r from-red-50 to-orange-50 hover:from-red-100 hover:to-orange-100 border-2 border-red-200 hover:border-red-400 rounded-xl transition-all text-left group"
                   >
@@ -151,4 +155,4 @@ export function BanishOverlay({
       )}
     </AnimatePresence>
   );
-}
+});

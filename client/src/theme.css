@@ -51,10 +51,14 @@
     --color-secondary-light: #fcd34d;
 
     /* Background Colors */
+    /* Enhanced gradients with more vibrant transitions */
     --color-bg-main: linear-gradient(135deg, #4c1d95 0%, #7c3aed 50%, #8b5cf6 100%);
+    --color-bg-main-alt: linear-gradient(to bottom, #7c3aed, #9f7aea);
     --color-bg-card: #ffffff;
-    --color-bg-card-hover: #faf5ff;
-    --color-bg-overlay: rgba(46, 16, 101, 0.9);
+    --color-bg-card-hover: #fafbff;
+    --color-bg-card-active: #f5f3ff;
+    --color-bg-overlay: rgba(46, 16, 101, 0.92);
+    --color-bg-subtle: rgba(124, 58, 237, 0.05);
 
     /* Text Colors */
     --color-text-primary: #4c1d95;
@@ -70,12 +74,19 @@
     --color-warning: #f59e0b;
     --color-warning-bg: #fffbeb;
 
-    /* Category Colors */
-    --color-cat-boy: #3b82f6;
-    --color-cat-girl: #ec4899;
-    --color-cat-country: #10b981;
-    --color-cat-animal: #f59e0b;
-    --color-cat-object: #8b5cf6;
+    /* Category Colors - Enhanced */
+    --color-cat-boy: #2563eb;
+    --color-cat-girl: #db2777;
+    --color-cat-country: #059669;
+    --color-cat-animal: #d97706;
+    --color-cat-object: #7c3aed;
+    
+    /* Enhanced shadows for depth */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 8px 24px rgba(124, 58, 237, 0.15);
+    --shadow-xl: 0 12px 32px rgba(76, 29, 149, 0.2);
+    --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.05);
 
     /* ================================================
      📐 SPACING & SIZING - المسافات والأحجام
@@ -479,4 +490,88 @@ body {
     color: var(--color-text-white);
     font-size: var(--font-size-sm);
     font-weight: 700;
+}
+
+/* ================================================
+   ✨ ENHANCED ANIMATIONS & EFFECTS
+   ================================================ */
+
+/* Smooth transitions for all interactive elements */
+button, a, .interactive {
+    transition: all var(--transition-base);
+}
+
+/* Enhanced button hover effects */
+button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+button:active:not(:disabled) {
+    transform: translateY(0px);
+}
+
+/* Card elevation on hover */
+.card, [role="card"] {
+    transition: all var(--transition-base);
+}
+
+.card:hover, [role="card"]:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+/* Input focus effects */
+input:focus, textarea:focus, select:focus {
+    box-shadow: 0 0 0 3px var(--color-primary), 0 0 0 6px rgba(124, 58, 237, 0.1);
+    transform: scale(1.01);
+}
+
+/* Smooth color transitions */
+.text-transition {
+    transition: color var(--transition-base);
+}
+
+/* Loading animation */
+@keyframes subtle-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.pulse-subtle {
+    animation: subtle-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Smooth fade in */
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.fade-in {
+    animation: fade-in var(--transition-slow);
+}
+
+/* Glow effect for important elements */
+@keyframes glow {
+    0%, 100% { 
+        box-shadow: 0 0 5px rgba(124, 58, 237, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(124, 58, 237, 0.8);
+    }
+}
+
+.glow {
+    animation: glow 2s ease-in-out infinite;
+}
+
+/* Smooth scale animation */
+@keyframes scale-up {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.scale-up {
+    animation: scale-up var(--transition-base);
 }

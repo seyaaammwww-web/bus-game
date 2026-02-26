@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Wand2, Sparkles } from 'lucide-react';
+import { memo } from 'react';
 
 interface WildcardOverlayProps {
   isActive: boolean;
@@ -7,7 +8,7 @@ interface WildcardOverlayProps {
   message?: string;
 }
 
-export function WildcardOverlay({ isActive, playerName, message }: WildcardOverlayProps) {
+export const WildcardOverlay = memo(function WildcardOverlay({ isActive, playerName, message }: WildcardOverlayProps) {
   return (
     <AnimatePresence>
       {isActive && (
@@ -144,4 +145,4 @@ export function WildcardOverlay({ isActive, playerName, message }: WildcardOverl
       )}
     </AnimatePresence>
   );
-}
+});

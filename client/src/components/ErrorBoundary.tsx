@@ -1,6 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { errorLogger, ErrorSeverity } from '@/lib/errorLogger';
 
 interface Props {
     children?: ReactNode;
@@ -9,6 +10,7 @@ interface Props {
 interface State {
     hasError: boolean;
     error?: Error;
+    errorId?: string;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
@@ -22,11 +24,27 @@ export class ErrorBoundary extends Component<Props, State> {
     }
 
     public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+        // Log error with detailed information
+        const errorLog = errorLogger.log(
+            `Application Error: ${error.message}`,
+            ErrorSeverity.CRITICAL,
+            {
+                component: 'ErrorBoundary',
+                stack: error.stack || errorInfo.componentStack || undefined,
+                context: {
+                    componentStack: errorInfo.componentStack,
+                },
+            }
+        );
+
+        // Update state with error ID for user reference
+        this.setState({ errorId: errorLog.id });
+
         console.error('Uncaught error in application:', error, errorInfo);
     }
 
     private handleReset = () => {
-        this.setState({ hasError: false, error: undefined });
+        this.setState({ hasError: false, error: undefined, errorId: '' });
         window.location.href = '/'; // Hard reload to home to clear any corrupted state
     };
 
@@ -44,6 +62,20 @@ export class ErrorBoundary extends Component<Props, State> {
                         <p className="text-xl text-[#e9d5ff]/80 font-pixel-text mb-8">
                             يبدو أن الأوتوبيس عطلان شوية. ما تقلقش، هنرجعك المحطة وتصلح كل حاجة.
                         </p>
+
+                        {this.state.errorId && (
+                            <p className="text-xs text-[#e9d5ff]/50 mb-4 font-mono break-all">
+                                رقم الخطأ: {this.state.errorId}
+                            </p>
+                        )}
+
+                        {this.state.error?.message && (
+                            <div className="bg-red-500/10 border border-red-500/30 rounded p-3 mb-6 text-left">
+                                <p className="text-xs text-red-200 font-mono overflow-auto max-h-32">
+                                    {this.state.error.message}
+                                </p>
+                            </div>
+                        )}
 
                         <div className="flex flex-col gap-4">
                             <Button

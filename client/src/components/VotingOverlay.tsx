@@ -2,10 +2,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ThumbsUp, ThumbsDown, Gavel, Loader2, Bot, ShieldAlert } from 'lucide-react';
 import { useGame } from '@/lib/gameContext';
 import { Timer } from '@/components/Timer';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, memo, useCallback } from 'react';
+import { votingRateLimiter } from '@/lib/security';
+import { errorLogger, ErrorSeverity, getUserErrorMessage } from '@/lib/errorLogger';
 
-// Sub-component for each vote item
-function VotingItemCard({ item, currentPlayer, castParallelVote, refereeOverride, isReferee, isHost }: any) {
+// Sub-component for each vote item - memoized for performance
+const VotingItemCard = memo(function VotingItemCard({ item, currentPlayer, castParallelVote, refereeOverride, isReferee, isHost }: any) {
     const isRequester = item.requesterId === currentPlayer?.id;
     const voterIds = item.voterIds || [];
     const hasVoted = voterIds.includes(currentPlayer?.id || '');
@@ -27,8 +29,32 @@ function VotingItemCard({ item, currentPlayer, castParallelVote, refereeOverride
 
     const handleVote = (vote: 'yes' | 'no') => {
         if (canVote && !isVoting) {
+            // Check rate limit
+            const playerId = currentPlayer?.id || '';
+            if (!votingRateLimiter.isAllowed(`vote_${playerId}`)) {
+                errorLogger.log(
+                    'تصويت بسرعة كبيرة',
+                    ErrorSeverity.LOW,
+                    { component: 'VotingOverlay', context: { playerId, vote } }
+                );
+                return;
+            }
+
             setIsVoting(true);
-            castParallelVote(item.requesterId, item.category, vote);
+            try {
+                castParallelVote(item.requesterId, item.category, vote);
+            } catch (error) {
+                errorLogger.log(
+                    'خطأ في تسجيل الصوت',
+                    ErrorSeverity.MEDIUM,
+                    {
+                        component: 'VotingOverlay',
+                        context: { playerId, vote },
+                        stack: error instanceof Error ? error.stack : undefined,
+                    }
+                );
+                setIsVoting(false);
+            }
         }
     };
 
@@ -145,15 +171,27 @@ function VotingItemCard({ item, currentPlayer, castParallelVote, refereeOverride
             </div>
         </motion.div>
     );
-}
+}, (prevProps, nextProps) => {
+    // Custom comparison for memo optimization
+    return prevProps.item === nextProps.item &&
+        prevProps.currentPlayer === nextProps.currentPlayer &&
+        prevProps.isReferee === nextProps.isReferee &&
+        prevProps.isHost === nextProps.isHost;
+});
 
-export function VotingOverlay() {
+export const VotingOverlay = memo(function VotingOverlay() {
     const { state, castParallelVote, refereeOverride, currentPlayer, isReferee, isHost } = useGame();
     const room = state.room;
     const voteQueue = room?.voteQueue || [];
 
     // FIX (#6): Pull true voteEndTime calculated via server instead of static legacy state
     const [voteTimeLeft, setVoteTimeLeft] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    // Memoize callbacks to prevent unnecessary re-renders
+    const memoizedCastVote = useCallback(castParallelVote, [castParallelVote]);
+    const memoizedRefereOverride = useCallback(refereeOverride, [refereeOverride]);
 
     useEffect(() => {
         if (room?.phase !== 'voting' || !room?.rounds[room.currentRound]?.voteEndTime) {
@@ -166,7 +204,10 @@ export function VotingOverlay() {
             const remaining = Math.max(0, Math.ceil((end - Date.now()) / 1000));
             setVoteTimeLeft(remaining);
 
-            if (remaining <= 0) clearInterval(interval);
+            if (remaining <= 0) {
+                clearInterval(interval);
+                setIsLoading(true); // Show loading state when voting ends
+            }
         }, 1000);
 
         // Initial setup
@@ -176,10 +217,20 @@ export function VotingOverlay() {
         return () => clearInterval(interval);
     }, [room?.phase, room?.currentRound, room?.rounds]);
 
+    // Handle errors
+    useEffect(() => {
+        if (voteQueue.length === 0 && room?.phase === 'voting') {
+            setIsLoading(true);
+        } else {
+            setIsLoading(false);
+            setError(null);
+        }
+    }, [voteQueue.length, room?.phase]);
+
     if (!room || room.phase !== 'voting') return null;
 
     // BUG-4 FIX: When queue is empty but still in voting phase, show a processing state
-    if (voteQueue.length === 0) {
+    if (isLoading) {
         return (
             <AnimatePresence>
                 <motion.div
@@ -188,14 +239,22 @@ export function VotingOverlay() {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/85 backdrop-blur-sm p-4"
+                    role="status"
+                    aria-live="polite"
+                    aria-label="جاري معالجة نتائج التصويت"
                 >
                     <motion.div
                         initial={{ scale: 0.9, y: 20 }}
                         animate={{ scale: 1, y: 0 }}
                         className="w-full max-w-sm retro-overlay p-6 text-center"
                     >
-                        <Loader2 className="w-10 h-10 text-amber-300 animate-spin mx-auto mb-3" />
+                        <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+                            className="w-10 h-10 border-4 border-amber-300/30 border-t-amber-300 rounded-full mx-auto mb-3"
+                        />
                         <p className="font-pixel-title text-amber-200 text-base">جاري معالجة النتائج...</p>
+                        <p className="font-pixel-text text-amber-200/60 text-xs mt-2">يرجى الانتظار</p>
                     </motion.div>
                 </motion.div>
             </AnimatePresence>
@@ -210,6 +269,12 @@ export function VotingOverlay() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/85 backdrop-blur-sm p-4"
+                role="dialog"
+                aria-modal="true"
+                aria-label="نافذة التصويت"
+                onKeyDown={(e) => {
+                    if (e.key === 'Escape') e.preventDefault(); // Prevent closing during voting
+                }}
             >
                 <motion.div
                     initial={{ scale: 0.9, y: 20 }}
@@ -238,6 +303,18 @@ export function VotingOverlay() {
                         </div>
                     </div>
 
+                    {/* Error display */}
+                    {error && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="bg-red-100 border-b border-red-300 px-3 py-2"
+                        >
+                            <p className="text-red-700 text-xs font-pixel-text">{error}</p>
+                        </motion.div>
+                    )}
+
                     {/* ── Scrollable list of vote items ── */}
                     <div className="flex-1 overflow-y-auto p-3 custom-scrollbar">
                         <AnimatePresence>
@@ -246,8 +323,8 @@ export function VotingOverlay() {
                                     key={`${item.requestId}-${item.category}`}
                                     item={item}
                                     currentPlayer={currentPlayer}
-                                    castParallelVote={castParallelVote}
-                                    refereeOverride={refereeOverride}
+                                    castParallelVote={memoizedCastVote}
+                                    refereeOverride={memoizedRefereOverride}
                                     isReferee={isReferee}
                                     isHost={isHost}
                                 />
@@ -258,4 +335,4 @@ export function VotingOverlay() {
             </motion.div>
         </AnimatePresence>
     );
-}
+});
