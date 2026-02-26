@@ -336,7 +336,7 @@ export default function Home() {
                         animate={{ opacity: [1, 0.5, 1] }}
                         transition={{ repeat: Infinity, duration: 1 }}
                       >
-                        جاري الانضمام...
+                        جاري...
                       </motion.span>
                     ) : (
                       'انضم للغرفة'

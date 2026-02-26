@@ -551,7 +551,7 @@ export default function Results() {
                       <Timer className="w-8 h-8 text-[#FFFDD1] animate-spin-slow" />
                       <p className="text-[#FFFDD1] font-bold font-pixel-text text-xl">
                         {/* BUG-R2 FIX: Only show referee message when a referee actually exists */}
-                        {room.refereeId ? 'في انتظار اعتماد الحكم...' : 'في انتظار المضيف...'}
+                        في الانتظار...
                       </p>
                     </div>
                   )}
