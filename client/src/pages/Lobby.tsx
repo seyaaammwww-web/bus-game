@@ -99,8 +99,8 @@ export default function Lobby() {
             <Sparkles className="w-6 h-6 text-[#7c3aed]" />
             <span className="font-bold text-lg text-[#4c1d95] font-pixel-text">غرفة الانتظار</span>
           </motion.div>
-          <h1 className="text-5xl font-pixel-title mb-3 text-white font-bold">في انتظار اللاعبين...</h1>
-          <p className="text-3xl text-[#e9d5ff] font-bold font-pixel-text">ادعي أصحابك وعيلتك!</p>
+          <h1 className="text-5xl font-pixel-title mb-3 text-white font-bold">في الانتظار...</h1>
+          <p className="text-3xl text-[#e9d5ff] font-bold font-pixel-text">ادعي أصحابك!</p>
         </motion.div>
 
         <motion.div
@@ -402,7 +402,7 @@ export default function Lobby() {
                 <Check className="w-8 h-8 text-[#7c3aed] mx-auto mb-2" />
               </motion.div>
               <p className="font-bold text-[#4c1d95] font-pixel-text">أنت جاهز!</p>
-              <p className="text-sm text-[#7c3aed] font-bold font-pixel-text">في انتظار باقي اللاعبين...</p>
+              <p className="text-sm text-[#7c3aed] font-bold font-pixel-text">في الانتظار...</p>
             </motion.div>
           )}
 
@@ -419,7 +419,7 @@ export default function Lobby() {
                 data-testid="button-start-game"
               >
                 <Play className="w-6 h-6 ml-2 absolute right-4" />
-                {otherPlayersReady ? 'ابدأ اللعبة!' : 'في انتظار اللاعبين...'}
+                {otherPlayersReady ? 'ابدأ!' : 'انتظر'}
               </Button>
             </motion.div>
           )}
