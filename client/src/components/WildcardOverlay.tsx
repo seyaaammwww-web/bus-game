@@ -16,6 +16,16 @@ export function WildcardOverlay({ isActive, playerName, message }: WildcardOverl
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-40 bg-amber-500/5 pointer-events-none flex items-center justify-center overflow-hidden backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Wildcard Activated"
+          tabIndex={0}
+          onKeyDown={e => {
+            if (e.key === 'Escape') {
+              // Optionally trigger close if overlay is closable
+              e.stopPropagation();
+            }
+          }}
         >
           {/* Sparkle particles background */}
           <div className="absolute inset-0 bg-gradient-to-b from-amber-200/10 via-transparent to-amber-200/10 opacity-30"></div>

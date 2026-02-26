@@ -38,6 +38,9 @@ function VotingItemCard({ item, currentPlayer, castParallelVote, refereeOverride
     return (
         <motion.div
             layout
+            role="group"
+            aria-label={`Voting item for ${item.category}`}
+            tabIndex={0}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}

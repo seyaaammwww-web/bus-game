@@ -25,6 +25,16 @@ export function BanishOverlay({
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
           onClick={onClose}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Banish Player Selection"
+          tabIndex={0}
+          onKeyDown={e => {
+            if (e.key === 'Escape') {
+              onClose();
+              e.stopPropagation();
+            }
+          }}
         >
           {/* Main card */}
           <motion.div

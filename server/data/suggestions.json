@@ -1105,5 +1105,50 @@
     "count": 16,
     "firstSeen": "2026-02-24T00:52:36.949Z",
     "lastSeen": "2026-02-24T00:52:36.969Z"
+  },
+  {
+    "word": "أحمد",
+    "normalized": "احمد",
+    "letter": "ب",
+    "category": "ولد",
+    "count": 1,
+    "firstSeen": "2026-02-26T20:06:08.475Z",
+    "lastSeen": "2026-02-26T20:06:08.475Z"
+  },
+  {
+    "word": "أمل",
+    "normalized": "امل",
+    "letter": "ب",
+    "category": "بنت",
+    "count": 1,
+    "firstSeen": "2026-02-26T20:06:08.476Z",
+    "lastSeen": "2026-02-26T20:06:08.476Z"
+  },
+  {
+    "word": "مصر",
+    "normalized": "مصر",
+    "letter": "ب",
+    "category": "بلد",
+    "count": 1,
+    "firstSeen": "2026-02-26T20:06:08.478Z",
+    "lastSeen": "2026-02-26T20:06:08.478Z"
+  },
+  {
+    "word": "أسد",
+    "normalized": "اسد",
+    "letter": "ب",
+    "category": "حيوان",
+    "count": 1,
+    "firstSeen": "2026-02-26T20:06:08.479Z",
+    "lastSeen": "2026-02-26T20:06:08.479Z"
+  },
+  {
+    "word": "كرسي",
+    "normalized": "كرسي",
+    "letter": "ب",
+    "category": "جماد",
+    "count": 1,
+    "firstSeen": "2026-02-26T20:06:08.480Z",
+    "lastSeen": "2026-02-26T20:06:08.480Z"
   }
 ]
