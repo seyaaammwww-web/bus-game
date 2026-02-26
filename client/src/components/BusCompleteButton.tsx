@@ -27,8 +27,8 @@ export function BusCompleteButton({ onPress, disabled }: BusCompleteButtonProps)
             // Show hint if clicked while not ready
             import('@/hooks/use-toast').then(({ toast }) => {
               toast({
-                title: "بدري!",
-                description: "ملى الخانات!",
+                title: "إملأ الخانات كلها!",
+                description: "",
                 variant: "destructive",
                 duration: 2000
               });
