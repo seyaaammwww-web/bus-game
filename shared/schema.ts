@@ -50,6 +50,7 @@ export interface Player {
   isHost: boolean;
   isReady: boolean;
   isReferee?: boolean;
+  isOffline?: boolean; // Support player reconnects
   busStreak: number;
   avatar?: string;
   powerUps: PowerUps;

@@ -65,16 +65,26 @@ export default function Results() {
     // LOGIC-6 FIX: Don't run countdown during voting — wait until results phase
     if (room.phase === 'voting') return;
 
-    const tick = () => {
-      if (room.nextRoundAt) {
-        const remaining = Math.max(0, Math.ceil((room.nextRoundAt - Date.now()) / 1000));
-        setCountdown(remaining);
-        if (remaining > 0 && remaining <= 5) playCountdownSound(); // R2: only last 5s
-      }
-    };
+    if (!room.nextRoundAt) return;
 
-    tick(); // Fire immediately
-    const timer = setInterval(tick, 1000);
+    // BUG-3 FIX: Drift protection. Use a local countdown rather than strictly calculating
+    // from Date.now() every frame, which can result in 0 or negative numbers if client clock skews.
+    const initialTime = Math.max(0, Math.ceil((room.nextRoundAt - Date.now()) / 1000));
+    setCountdown(initialTime > 20 ? 20 : Math.min(initialTime, 20));
+
+    const timer = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        if (prev <= 6) { // when prev drops to 5,4,3,2,1
+          playCountdownSound();
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
     return () => clearInterval(timer);
   }, [isFinal, room.nextRoundAt, room.phase]);
 
@@ -492,16 +502,29 @@ export default function Results() {
             <>
               {/* Case 1: Countdown Running (Approved or Auto) */}
               {room.nextRoundAt ? (
-                <div className="w-full h-20 bg-gradient-to-r from-[#7c3aed]/20 to-[#8b5cf6]/20 rounded-2xl flex items-center justify-center gap-5 border-[3px] border-[#4c1d95] shadow-[3px_3px_0_0_#2e1065] font-pixel-text text-xl font-bold">
-                  <span className="text-white text-xl">الجولة التالية في</span>
-                  <motion.span
-                    key={countdown}
-                    initial={{ scale: 1.5, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className="w-14 h-14 bg-gradient-to-br from-white to-[#faf5ff] text-[#4c1d95] rounded-full flex items-center justify-center font-bold shadow-lg border-2 border-[#4c1d95] font-pixel-title text-2xl"
-                  >
-                    {countdown}
-                  </motion.span>
+                <div className="flex flex-col gap-2">
+                  <div className="w-full h-20 bg-gradient-to-r from-[#7c3aed]/20 to-[#8b5cf6]/20 rounded-2xl flex items-center justify-center gap-5 border-[3px] border-[#4c1d95] shadow-[3px_3px_0_0_#2e1065] font-pixel-text text-xl font-bold">
+                    <span className="text-white text-xl">الجولة التالية في</span>
+                    <motion.span
+                      key={countdown}
+                      initial={{ scale: 1.5, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="w-14 h-14 bg-gradient-to-br from-white to-[#faf5ff] text-[#4c1d95] rounded-full flex items-center justify-center font-bold shadow-lg border-2 border-[#4c1d95] font-pixel-title text-2xl"
+                    >
+                      {countdown}
+                    </motion.span>
+                  </div>
+                  {/* BUG-3b FIX: Allow Host to skip the auto-timer wait */}
+                  {isHost && (
+                    <Button
+                      onClick={() => nextRound()}
+                      size="lg"
+                      className="w-full h-12 text-sm font-bold bg-[#4c1d95] hover:bg-[#5b21b6] shadow-[2px_2px_0_0_#2e1065] border-[2px] border-[#2e1065] text-white font-pixel-title transition-all active:translate-y-1 active:shadow-none mt-2"
+                      data-testid="button-skip-timer"
+                    >
+                      تخطي الانتظار وبدء الجولة
+                    </Button>
+                  )}
                 </div>
               ) : (
                 /* Case 2: Waiting for Referee (No Timer) */

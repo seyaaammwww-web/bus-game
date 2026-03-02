@@ -231,6 +231,17 @@ export class RoundManager {
                 draft.phase = 'voting';
                 this.buildVoteQueueInDraft(draft);
             } else {
+                // BUG FIX: If voting is disabled, clear the isPendingVote flag 
+                // and mark them invalid so clients don't get stuck rendering pending UI.
+                if (hasPending) {
+                    dRound.validatedAnswers.forEach(a => {
+                        if (a.isPendingVote) {
+                            a.isPendingVote = false;
+                            a.isValid = false;
+                            a.reason = 'غير موجودة في القاموس';
+                        }
+                    });
+                }
                 this.calculateAnswerScores(draft);
             }
         }, "fallbackVote");

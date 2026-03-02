@@ -100,6 +100,9 @@ export default function Game() {
   const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   // Debounced draft sync to server
+  // BUG-2 FIX: Store last sent draft to avoid spamming the network with identical packets every second because timeLeft changed
+  const lastSentDraftRef = useRef<string>('');
+
   useEffect(() => {
     // G1: Don't send drafts if banished or already submitted
     if (hasSubmitted || isBanished || state.timeLeft <= 0 || state.room?.phase !== 'playing') return;
@@ -108,7 +111,11 @@ export default function Game() {
       // Only send if there's at least one non-empty answer
       const hasContent = Object.values(answers).some(a => a && a.trim().length > 0);
       if (hasContent) {
-        sendDraftUpdate(answers);
+        const currentDraftString = JSON.stringify(answers);
+        if (currentDraftString !== lastSentDraftRef.current) {
+          sendDraftUpdate(answers);
+          lastSentDraftRef.current = currentDraftString;
+        }
       }
     }, 500); // 500ms debounce for better reliability
 
@@ -129,8 +136,15 @@ export default function Game() {
     currentCategories.forEach(c => initial[c] = '');
     setAnswers(initial);
     setHasSubmitted(false);
-    setShowCountdown(true);
-    setCountdown(3);
+
+    // BUG-1 FIX: If we join or reconnect late into a round, skip the forced countdown to save precious time
+    if (state.timeLeft < 42 && state.room?.phase === 'playing') {
+      setShowCountdown(false);
+      setCountdown(0);
+    } else {
+      setShowCountdown(true);
+      setCountdown(3);
+    }
   }, [room.currentRound]);
 
   useEffect(() => {

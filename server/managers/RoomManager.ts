@@ -113,17 +113,25 @@ export class RoomManager {
         return buffer.get();
     }
 
-    removePlayerFromRoom(roomCode: string, playerId: string) {
+    removePlayerFromRoom(roomCode: string, playerId: string, hardDelete: boolean = false) {
         const buffer = this.rooms.get(roomCode);
         if (!buffer) return;
 
         buffer.transact((draft) => {
-            draft.players = draft.players.filter(p => p.id !== playerId);
+            if (hardDelete || draft.phase === 'lobby') {
+                draft.players = draft.players.filter(p => p.id !== playerId);
+            } else {
+                const player = draft.players.find(p => p.id === playerId);
+                if (player) {
+                    player.isOffline = true;
+                }
+            }
 
             // Handle Host Migration
-            if (draft.players.length > 0 && draft.hostId === playerId) {
-                draft.hostId = draft.players[0].id;
-                draft.players[0].isHost = true;
+            const onlinePlayers = draft.players.filter(p => !p.isOffline);
+            if (onlinePlayers.length > 0 && draft.hostId === playerId) {
+                draft.hostId = onlinePlayers[0].id;
+                onlinePlayers[0].isHost = true;
             }
         }, "removePlayer");
 

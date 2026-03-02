@@ -98,6 +98,14 @@ export class GameManager {
           this.send(p.ws, { type: 'ping', payload: { timestamp: Date.now() } });
         }
       }
+
+      // Garbage collect expired IP room creation limits
+      const now = Date.now();
+      for (const [ip, record] of this.roomCreationLimits.entries()) {
+        if (now > record.resetTime) {
+          this.roomCreationLimits.delete(ip);
+        }
+      }
     }, 10000);
   }
 
@@ -120,23 +128,13 @@ export class GameManager {
 
     const buffer = this.roomManager.getRoomBuffer(roomId);
     if (buffer) {
-      // FIX: If the timed-out player was the host, reassign host to another player
-      buffer.transact(draft => {
-        if (draft.hostId === playerId && draft.players.length > 0) {
-          const newHost = draft.players.find(p => p.id !== playerId);
-          if (newHost) {
-            draft.hostId = newHost.id;
-            newHost.isHost = true;
-            console.log(`[GameManager] Host reassigned to ${newHost.name} after timeout.`);
-          }
-        }
-      }, 'host_reassign_on_timeout');
-
       const room = buffer.get();
       if (room.players.length > 0) {
         this.broadcastToRoom(room.code, { type: 'player_left', payload: { players: room.players } });
       }
     }
+
+    this.cleanupPlayerVotes(roomId, playerId);
   }
 
   // ==========================================
@@ -356,6 +354,74 @@ export class GameManager {
     }
   }
 
+  private cleanupPlayerVotes(roomId: string, playerId: string) {
+    const buffer = this.roomManager.getRoomBuffer(roomId);
+    if (!buffer) return;
+
+    let shouldFinishVoting = false;
+    buffer.transact(draft => {
+      if (draft.voteQueue) {
+        // Remove any vote items that belong to this player (their answer was pending)
+        draft.voteQueue = draft.voteQueue.filter((v: any) => v.requesterId !== playerId);
+
+        draft.voteQueue.forEach((v: any) => {
+          // Remove from eligible list
+          if (v.eligibleVoterIds) {
+            v.eligibleVoterIds = v.eligibleVoterIds.filter((id: string) => id !== playerId);
+          }
+
+          if (v.voterIds && v.voterIds.includes(playerId)) {
+            v.voterIds = v.voterIds.filter((id: string) => id !== playerId);
+            if (v.voteMap && v.voteMap[playerId]) {
+              const direction = v.voteMap[playerId];
+              if (direction === 'yes' && v.votes?.yes > 0) v.votes.yes--;
+              else if (direction === 'no' && v.votes?.no > 0) v.votes.no--;
+              delete v.voteMap[playerId];
+            } else if (v.votes) {
+              const newTotal = v.eligibleVoterIds?.length ?? 0;
+              const currentTotal = (v.votes.yes ?? 0) + (v.votes.no ?? 0);
+              if (currentTotal > newTotal) {
+                if ((v.votes.no ?? 0) > 0) v.votes.no = Math.max(0, (v.votes.no ?? 0) - 1);
+                else v.votes.yes = Math.max(0, (v.votes.yes ?? 0) - 1);
+              }
+            }
+          }
+        });
+      }
+
+      if (draft.phase === 'voting' && draft.voteQueue) {
+        draft.voteQueue = draft.voteQueue.filter((v: any) => {
+          if ((v.eligibleVoterIds?.length || 0) === 0) {
+            const ans = draft.rounds[draft.currentRound]?.validatedAnswers.find(
+              (a: any) => a.playerId === v.requesterId && a.category === v.category
+            );
+            if (ans) {
+              ans.isValid = false;
+              ans.isPendingVote = false;
+              ans.reason = 'رفض تلقائي — لا ناخبين متبقين';
+            }
+            return false;
+          }
+          return true;
+        });
+
+        const stillPending = draft.rounds[draft.currentRound]?.validatedAnswers
+          .some((a: any) => a.isPendingVote);
+        if (draft.voteQueue.length === 0 && !stillPending) {
+          this.roundManager.calculateAnswerScores(draft);
+          shouldFinishVoting = true;
+        }
+      }
+    }, `cleanupPlayerVotes:${playerId}`);
+
+    if (shouldFinishVoting) {
+      const room = buffer.get();
+      this.roundManager.clearTimer(room.code);
+      this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
+      this.finishRoundPhase(room.code);
+    }
+  }
+
   handleDisconnect(ws: WebSocket): void {
     // GM1: Explicit cleanup of WeakMap entry on disconnect
     this.rateLimits.delete(ws);
@@ -370,92 +436,13 @@ export class GameManager {
 
     const buffer = this.roomManager.getRoomBuffer(playerInfo.roomId);
     if (buffer) {
-      // FIX (#12): Clean up eligibleVoterIds and orphaned vote requests when player leaves
-      let shouldFinishVoting = false;
-      buffer.transact(draft => {
-        // FIX: If the disconnected player was the host, reassign to another player
-        if (draft.hostId === playerInfo.playerId && draft.players.length > 0) {
-          const newHost = draft.players.find(p => p.id !== playerInfo.playerId);
-          if (newHost) {
-            draft.hostId = newHost.id;
-            newHost.isHost = true;
-            console.log(`[GameManager] Host reassigned to ${newHost.name} after disconnect.`);
-          }
-        }
-
-        if (draft.voteQueue) {
-          // Remove any vote items that belong to this player (their answer was pending)
-          draft.voteQueue = draft.voteQueue.filter((v: any) => v.requesterId !== playerInfo.playerId);
-
-          draft.voteQueue.forEach((v: any) => {
-            // Remove from eligible list
-            if (v.eligibleVoterIds) {
-              v.eligibleVoterIds = v.eligibleVoterIds.filter((id: string) => id !== playerInfo.playerId);
-            }
-
-            // Retract any vote they already cast — keeps yes+no <= eligibleVoterIds.length
-            // so the "all voted" condition can still trigger correctly
-            if (v.voterIds && v.voterIds.includes(playerInfo.playerId)) {
-              v.voterIds = v.voterIds.filter((id: string) => id !== playerInfo.playerId);
-              // Precise retraction using voteMap if available
-              if (v.voteMap && v.voteMap[playerInfo.playerId]) {
-                const direction = v.voteMap[playerInfo.playerId];
-                if (direction === 'yes' && v.votes?.yes > 0) v.votes.yes--;
-                else if (direction === 'no' && v.votes?.no > 0) v.votes.no--;
-                delete v.voteMap[playerInfo.playerId];
-              } else if (v.votes) {
-                // Fallback heuristic: decrement minority side
-                const newTotal = v.eligibleVoterIds?.length ?? 0;
-                const currentTotal = (v.votes.yes ?? 0) + (v.votes.no ?? 0);
-                if (currentTotal > newTotal) {
-                  if ((v.votes.no ?? 0) > 0) v.votes.no = Math.max(0, (v.votes.no ?? 0) - 1);
-                  else v.votes.yes = Math.max(0, (v.votes.yes ?? 0) - 1);
-                }
-              }
-            }
-          });
-        }
-
-        // FIX-AUTO-4: After cleanup, check if voting is now completable
-        if (draft.phase === 'voting' && draft.voteQueue) {
-          // Auto-resolve items that now have 0 eligible voters
-          draft.voteQueue = draft.voteQueue.filter((v: any) => {
-            if ((v.eligibleVoterIds?.length || 0) === 0) {
-              const ans = draft.rounds[draft.currentRound]?.validatedAnswers.find(
-                (a: any) => a.playerId === v.requesterId && a.category === v.category
-              );
-              if (ans) {
-                ans.isValid = false;
-                ans.isPendingVote = false;
-                ans.reason = 'رفض تلقائي — لا ناخبين متبقين';
-              }
-              return false;
-            }
-            return true;
-          });
-
-          const stillPending = draft.rounds[draft.currentRound]?.validatedAnswers
-            .some((a: any) => a.isPendingVote);
-          if (draft.voteQueue.length === 0 && !stillPending) {
-            this.roundManager.calculateAnswerScores(draft);
-            shouldFinishVoting = true;
-          }
-        }
-      }, `player_left:${playerInfo.playerId}`);
-
-
       const room = buffer.get();
       if (room.players.length > 0) {
         this.broadcastToRoom(room.code, { type: 'player_left', payload: { players: room.players } });
       }
-
-      // FIX-AUTO-4: If disconnect emptied the voteQueue, finish the round now
-      if (shouldFinishVoting) {
-        this.roundManager.clearTimer(room.code);
-        this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
-        this.finishRoundPhase(room.code);
-      }
     }
+
+    this.cleanupPlayerVotes(playerInfo.roomId, playerInfo.playerId);
   }
 
   // FIX (#5): Missing Session Reconnection Logic
@@ -468,6 +455,11 @@ export class GameManager {
     const room = buffer.getUnsafe();
     const player = room.players.find(p => p.id === playerId);
     if (!player) return this.send(ws, { type: 'error', payload: { message: 'اللاعب غير موجود في هذه الغرفة' } });
+
+    buffer.transact(draft => {
+      const p = draft.players.find(pl => pl.id === playerId);
+      if (p) p.isOffline = false;
+    }, "rejoinRoom Offline Clear");
 
     // Remove old socket if exists
     const oldSocket = this.playerManager.getSocket(playerId);
@@ -658,6 +650,10 @@ export class GameManager {
 
     let startedRush = false;
     buffer.transact(draft => {
+      // BUG-4 FIX: Crucial guard! If we are no longer playing (e.g. they submitted at the very last
+      // millisecond and phase shifted to voting/results), DO NOT start rush mode and overwrite timers
+      if (draft.phase !== 'playing') return;
+
       const round = draft.rounds[draft.currentRound];
       if (!round || round.isRush) return;
       if (round.banishedPlayerId === p.playerId) return;
@@ -848,6 +844,16 @@ export class GameManager {
 
     const room = buffer.get();
     this.broadcastToRoom(room.code, { type: 'game_end', payload: { room } });
+
+    // FIX: Auto-restart public rooms after 15 seconds
+    if (room.isPublicRoom) {
+      this.roundManager.setRoundTimer(roomCode, () => {
+        const check = this.roomManager.getRoomBuffer(roomCode)?.get();
+        if (check && check.phase === 'final') {
+          this.forcePlayAgain(roomCode);
+        }
+      }, 15000);
+    }
   }
 
   // ==========================================
@@ -1737,17 +1743,11 @@ export class GameManager {
     });
   }
 
-  playAgain(ws: WebSocket) {
-    const p = this.playerManager.getPlayer(ws);
-    if (!p) return;
-    const buffer = this.roomManager.getRoomBuffer(p.roomId);
+  forcePlayAgain(roomCode: string) {
+    const buffer = this.roomManager.getRoomBuffer(roomCode);
     if (!buffer) return;
 
-    // Only host can trigger play again
-    const room = buffer.get();
-    if (!room.players.find(pl => pl.id === p.playerId)?.isHost) return;
-
-    this.roundManager.clearTimer(p.roomId);
+    this.roundManager.clearTimer(roomCode);
 
     buffer.transact(draft => {
       draft.currentRound = 0;
@@ -1757,11 +1757,11 @@ export class GameManager {
       draft.currentVote = null;
       draft.nextRoundAt = undefined;
       draft.auditLog = [];
-      // FIX: Clear referee state on play again — old referee would otherwise persist
       draft.refereeId = undefined;
-
-      // BUG FIX #3: Use getRandomLetters to get truly fresh letters, not a shuffle of the same pool
       draft.letters = getRandomLetters(draft.totalRounds);
+
+      // FIX: Filter out offline players during restart
+      draft.players = draft.players.filter(pl => !pl.isOffline);
 
       draft.players.forEach(pl => {
         pl.score = 0;
@@ -1770,16 +1770,35 @@ export class GameManager {
         pl.busStreak = 0;
         pl.powerUps = { hint: 0, steal: 0, wildcard: 0, banish: 0 };
         pl.usedPowerUps = { hint: false, steal: false, wildcard: false, banish: false };
-        // FIX: Clear referee and draft state
         pl.isReferee = false;
         pl.draftAnswers = undefined;
-        // BUG-1 FIX: Reset manual score adjustments for new game
         pl.manualScoreAdjustment = 0;
       });
-    }, "playAgain");
+
+      // Fix host migration in case original host offline
+      if (draft.players.length > 0) {
+        if (!draft.players.find(p => p.isHost)) {
+          draft.hostId = draft.players[0].id;
+          draft.players[0].isHost = true;
+        }
+      }
+    }, "forcePlayAgain");
 
     const updated = buffer.get();
     this.broadcastToRoom(updated.code, { type: 'sync_state', payload: { room: updated } });
+  }
+
+  playAgain(ws: WebSocket) {
+    const p = this.playerManager.getPlayer(ws);
+    if (!p) return;
+    const buffer = this.roomManager.getRoomBuffer(p.roomId);
+    if (!buffer) return;
+
+    const room = buffer.get();
+    // Allow anyone to click play again in a public room
+    if (!room.isPublicRoom && !room.players.find(pl => pl.id === p.playerId)?.isHost) return;
+
+    this.forcePlayAgain(p.roomId);
   }
 
   // Helpers

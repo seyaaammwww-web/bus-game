@@ -22,8 +22,8 @@ export default function Lobby() {
 
   const room = state.room!;
   const otherPlayers = room.players.filter(p => p.id !== state.playerId);
-  const otherPlayersReady = otherPlayers.length === 0 || otherPlayers.every(p => p.isReady);
-  const canStart = isHost && otherPlayersReady;
+  const otherPlayersReady = otherPlayers.length > 0 && otherPlayers.every(p => p.isReady);
+  const canStart = isHost && otherPlayersReady && room.players.length > 1;
 
   const copyCode = async () => {
     await navigator.clipboard.writeText(room.code);
@@ -217,8 +217,8 @@ export default function Lobby() {
                 <button
                   onClick={() => updateSettings({ enableVoting: !room.settings?.enableVoting })}
                   className={`w-full flex items-center justify-between p-3 rounded-lg border-[3px] transition-all active:translate-y-[1px] active:shadow-none ${room.settings?.enableVoting
-                      ? 'bg-[#7c3aed]/10 border-[#7c3aed] shadow-[0_3px_0_0_#4c1d95]'
-                      : 'bg-white/50 border-[#4c1d95]/20 shadow-[0_2px_0_0_#4c1d95]/10'
+                    ? 'bg-[#7c3aed]/10 border-[#7c3aed] shadow-[0_3px_0_0_#4c1d95]'
+                    : 'bg-white/50 border-[#4c1d95]/20 shadow-[0_2px_0_0_#4c1d95]/10'
                     }`}
                 >
                   <div className="flex items-center gap-2">
@@ -234,8 +234,8 @@ export default function Lobby() {
                     </div>
                   </div>
                   <div className={`px-3 py-1 rounded-full border-[2px] font-bold font-pixel-text text-xs transition-colors ${room.settings?.enableVoting
-                      ? 'bg-[#7c3aed] border-[#4c1d95] text-white shadow-[0_2px_0_0_#2e1065]'
-                      : 'bg-white border-[#4c1d95]/30 text-[#4c1d95]/50'
+                    ? 'bg-[#7c3aed] border-[#4c1d95] text-white shadow-[0_2px_0_0_#2e1065]'
+                    : 'bg-white border-[#4c1d95]/30 text-[#4c1d95]/50'
                     }`}>
                     {room.settings?.enableVoting ? 'مفعل' : 'معطل'}
                   </div>

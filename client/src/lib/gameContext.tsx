@@ -394,6 +394,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const createRoom = useCallback((playerName: string) => {
+    clearSession();
     const ws = connect();
     const doCreate = () => {
       ws.send(JSON.stringify({ type: 'create_room', payload: { playerName } }));
@@ -403,6 +404,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [connect]);
 
   const joinRoom = useCallback((roomCode: string, playerName: string) => {
+    clearSession();
     const ws = connect();
     const doJoin = () => {
       ws.send(JSON.stringify({ type: 'join_room', payload: { roomCode: roomCode.toUpperCase(), playerName } }));

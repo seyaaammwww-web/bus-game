@@ -36,6 +36,12 @@ export default function Home() {
     return () => window.removeEventListener('click', handleInteraction);
   }, []);
 
+  useEffect(() => {
+    if (state.error && isLoading) {
+      setIsLoading(false);
+    }
+  }, [state.error]);
+
   const handleCreate = () => {
     if (playerName.trim().length >= 2) {
       setIsLoading(true);
@@ -208,47 +214,49 @@ export default function Home() {
                 </motion.div>
                 <CardDescription className="font-pixel-text text-xl mt-2">أنشئ غرفة وادعي أصحابك</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <motion.div
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <label className="text-3xl font-bold mb-3 block font-pixel-title">اسمك</label>
-                  <Input
-                    type="text"
-                    placeholder="اكتب اسمك هنا"
-                    value={playerName}
-                    onChange={(e) => setPlayerName(e.target.value)}
-                    maxLength={20}
-                    className="h-20 text-2xl font-pixel-text font-bold"
-                    data-testid="input-player-name"
-                  />
-                </motion.div>
-                <motion.div
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  <Button
-                    variant="primary"
-                    className="w-full h-20 text-3xl font-bold font-pixel-title shine-effect relative overflow-hidden"
-                    onClick={handleCreate}
-                    disabled={playerName.trim().length < 2 || isLoading}
-                    data-testid="button-create-confirm"
+              <CardContent>
+                <form onSubmit={(e) => { e.preventDefault(); handleCreate(); }} className="space-y-4">
+                  <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.2 }}
                   >
-                    {isLoading ? (
-                      <motion.span
-                        animate={{ opacity: [1, 0.5, 1] }}
-                        transition={{ repeat: Infinity, duration: 1 }}
-                      >
-                        جاري...
-                      </motion.span>
-                    ) : (
-                      'أنشئ الغرفة'
-                    )}
-                  </Button>
-                </motion.div>
+                    <label className="text-3xl font-bold mb-3 block font-pixel-title">اسمك</label>
+                    <Input
+                      type="text"
+                      placeholder="اكتب اسمك هنا"
+                      value={playerName}
+                      onChange={(e) => setPlayerName(e.target.value)}
+                      maxLength={20}
+                      className="h-20 text-2xl font-pixel-text font-bold"
+                      data-testid="input-player-name"
+                    />
+                  </motion.div>
+                  <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <Button
+                      type="submit"
+                      variant="primary"
+                      className="w-full h-20 text-3xl font-bold font-pixel-title shine-effect relative overflow-hidden"
+                      disabled={playerName.trim().length < 2 || isLoading}
+                      data-testid="button-create-confirm"
+                    >
+                      {isLoading ? (
+                        <motion.span
+                          animate={{ opacity: [1, 0.5, 1] }}
+                          transition={{ repeat: Infinity, duration: 1 }}
+                        >
+                          جاري...
+                        </motion.span>
+                      ) : (
+                        'أنشئ الغرفة'
+                      )}
+                    </Button>
+                  </motion.div>
+                </form>
               </CardContent>
             </RetroCard>
           </motion.div>
@@ -286,63 +294,65 @@ export default function Home() {
                 </motion.div>
                 <CardDescription className="font-pixel-text text-xl mt-2">اكتب كود الغرفة من صاحبك</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <motion.div
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <label className="text-3xl font-bold mb-3 block font-pixel-title">اسمك</label>
-                  <Input
-                    type="text"
-                    placeholder="اكتب اسمك هنا"
-                    value={playerName}
-                    onChange={(e) => setPlayerName(e.target.value)}
-                    maxLength={20}
-                    className="h-20 text-2xl font-pixel-text font-bold"
-                    data-testid="input-player-name-join"
-                  />
-                </motion.div>
-                <motion.div
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  <label className="text-3xl font-bold mb-3 block font-pixel-title">كود الغرفة</label>
-                  <Input
-                    type="text"
-                    placeholder="XXXX"
-                    value={roomCode}
-                    onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
-                    maxLength={4}
-                    className="text-center text-5xl tracking-widest font-bold h-20 font-pixel-title"
-                    data-testid="input-room-code"
-                  />
-                </motion.div>
-                <motion.div
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.4 }}
-                >
-                  <Button
-                    variant="retro"
-                    className="w-full h-14 text-xl font-bold font-pixel-title shine-effect relative overflow-hidden"
-                    onClick={handleJoin}
-                    disabled={playerName.trim().length < 2 || roomCode.length !== 4 || isLoading}
-                    data-testid="button-join-confirm"
+              <CardContent>
+                <form onSubmit={(e) => { e.preventDefault(); handleJoin(); }} className="space-y-4">
+                  <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.2 }}
                   >
-                    {isLoading ? (
-                      <motion.span
-                        animate={{ opacity: [1, 0.5, 1] }}
-                        transition={{ repeat: Infinity, duration: 1 }}
-                      >
-                        جاري...
-                      </motion.span>
-                    ) : (
-                      'انضم للغرفة'
-                    )}
-                  </Button>
-                </motion.div>
+                    <label className="text-3xl font-bold mb-3 block font-pixel-title">اسمك</label>
+                    <Input
+                      type="text"
+                      placeholder="اكتب اسمك هنا"
+                      value={playerName}
+                      onChange={(e) => setPlayerName(e.target.value)}
+                      maxLength={20}
+                      className="h-20 text-2xl font-pixel-text font-bold"
+                      data-testid="input-player-name-join"
+                    />
+                  </motion.div>
+                  <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <label className="text-3xl font-bold mb-3 block font-pixel-title">كود الغرفة</label>
+                    <Input
+                      type="text"
+                      placeholder="XXXX"
+                      value={roomCode}
+                      onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
+                      maxLength={4}
+                      className="text-center text-5xl tracking-widest font-bold h-20 font-pixel-title"
+                      data-testid="input-room-code"
+                    />
+                  </motion.div>
+                  <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                  >
+                    <Button
+                      type="submit"
+                      variant="retro"
+                      className="w-full h-14 text-xl font-bold font-pixel-title shine-effect relative overflow-hidden"
+                      disabled={playerName.trim().length < 2 || roomCode.length !== 4 || isLoading}
+                      data-testid="button-join-confirm"
+                    >
+                      {isLoading ? (
+                        <motion.span
+                          animate={{ opacity: [1, 0.5, 1] }}
+                          transition={{ repeat: Infinity, duration: 1 }}
+                        >
+                          جاري...
+                        </motion.span>
+                      ) : (
+                        'انضم للغرفة'
+                      )}
+                    </Button>
+                  </motion.div>
+                </form>
               </CardContent>
             </RetroCard>
           </motion.div>
