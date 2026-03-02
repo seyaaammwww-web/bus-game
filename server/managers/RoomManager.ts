@@ -130,6 +130,10 @@ export class RoomManager {
             // Handle Host Migration
             const onlinePlayers = draft.players.filter(p => !p.isOffline);
             if (onlinePlayers.length > 0 && draft.hostId === playerId) {
+                // P1-1 FIX: Clear old host flag FIRST to prevent dual-host
+                const oldHost = draft.players.find(p => p.id === playerId);
+                if (oldHost) oldHost.isHost = false;
+
                 draft.hostId = onlinePlayers[0].id;
                 onlinePlayers[0].isHost = true;
             }
@@ -176,7 +180,7 @@ export class RoomManager {
                     console.log(`[RoomManager] Cleaned up room ${code}`);
                 }
             }
-        }, 60 * 60 * 1000);
+        }, 5 * 60 * 1000); // P2-9 FIX: 5 min instead of 60 min for faster memory reclamation
     }
 
     // Persistence Helpers

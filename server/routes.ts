@@ -17,7 +17,8 @@ export async function registerRoutes(
   console.log("=== END DEBUG ===");
 
   // Create WebSocket server
-  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+  // P1-3 FIX: Limit payload size to 64KB and disable compression to prevent abuse
+  const wss = new WebSocketServer({ server: httpServer, path: '/ws', maxPayload: 64 * 1024, perMessageDeflate: false });
 
   wss.on('connection', (ws: WebSocket) => {
     console.log('New WebSocket connection');

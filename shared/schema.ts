@@ -359,6 +359,18 @@ export const setRefereeSchema = z.object({
   playerId: z.string()
 });
 
+// P1-4 FIX: Schemas for previously unvalidated payloads
+export const playerAppealPayloadSchema = z.object({
+  targetPlayerId: z.string(),
+  category: z.string().min(1).max(50)
+});
+
+export const refereeDeductPayloadSchema = z.object({
+  playerId: z.string(),
+  category: z.string().min(1).max(50),
+  reason: z.string().max(200)
+});
+
 export const updateSettingsSchema = z.object({
   maxRounds: z.number().int().min(1).max(20).optional(),
   roundDuration: z.number().int().min(30).max(300).optional(),

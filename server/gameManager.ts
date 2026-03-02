@@ -6,7 +6,8 @@ import {
   createRoomSchema, joinRoomSchema, rejoinRoomSchema, submitAnswersSchema, draftUpdateSchema,
   castParallelVoteSchema, requestVoteSchema, kickPlayerSchema, hostAdjustScoreSchema,
   refereeToggleValiditySchema, refereeOverrideSchema, appealAnswerSchema,
-  activatePowerUpSchema, sendReactionSchema, setRefereeSchema, updateSettingsSchema
+  activatePowerUpSchema, sendReactionSchema, setRefereeSchema, updateSettingsSchema,
+  playerAppealPayloadSchema, refereeDeductPayloadSchema
 } from '../shared/schema';
 import { RoomManager } from './managers/RoomManager';
 import { PlayerManager } from './managers/PlayerManager';
@@ -27,7 +28,11 @@ export class GameManager {
   private readonly RATE_LIMIT_COUNT = 50;
   private readonly RATE_LIMIT_WINDOW_MS = 10000;
 
-  private causalityLog: Map<string, Array<{ tick: number, event: string }>> = new Map();
+  // P2-10 FIX: Room→Socket index for O(1) broadcasts
+  private roomSocketIndex: Map<string, Set<WebSocket>> = new Map();
+
+  // P2-11 FIX: Idempotency key to prevent double finishRoundPhase
+  private finishedRounds: Set<string> = new Set();
 
   private heartbeatInterval: NodeJS.Timeout | null = null;
   private lastVoteTime: Map<string, number> = new Map();
@@ -295,9 +300,13 @@ export class GameManager {
           this.castParallelVote(ws, p);
           break;
         }
-        case 'player_appeal':
-          this.handlePlayerAppeal(ws, message.payload);
+        case 'player_appeal': {
+          // P1-4 FIX: Validate payload with Zod schema
+          const appealP = this.validatePayload(playerAppealPayloadSchema, message.payload);
+          if (!appealP) return invalid();
+          this.handlePlayerAppeal(ws, appealP);
           break;
+        }
         case 'referee_toggle_validity': {
           const p = this.validatePayload(refereeToggleValiditySchema, message.payload);
           if (!p) return invalid();
@@ -332,9 +341,13 @@ export class GameManager {
           this.hostAdjustScore(ws, p);
           break;
         }
-        case 'referee_deduct':
-          this.refereeDeduct(ws, message.payload);
+        case 'referee_deduct': {
+          // P1-4 FIX: Validate payload with Zod schema
+          const deductP = this.validatePayload(refereeDeductPayloadSchema, message.payload);
+          if (!deductP) return invalid();
+          this.refereeDeduct(ws, deductP);
           break;
+        }
         case 'referee_override': {
           const p = this.validatePayload(refereeOverrideSchema, message.payload);
           if (!p) return invalid();
@@ -429,6 +442,9 @@ export class GameManager {
     const playerInfo = this.playerManager.removePlayer(ws);
     if (!playerInfo) return;
 
+    // P2-10 FIX: Remove from room→socket index
+    this.removeSocketFromRoomIndex(playerInfo.roomId, ws);
+
     // GM3: Clean up lastVoteTime entry when player leaves
     this.lastVoteTime.delete(playerInfo.playerId);
 
@@ -470,6 +486,7 @@ export class GameManager {
 
     // Assign new socket to this player id
     this.playerManager.addPlayer(ws, room.code, playerId);
+    this.addSocketToRoomIndex(room.code, ws);
 
     // Sync state
     this.send(ws, { type: 'room_joined', payload: { room: buffer.get(), playerId } });
@@ -500,6 +517,7 @@ export class GameManager {
     try {
       const { room } = this.roomManager.createRoom(hostId, name);
       this.playerManager.addPlayer(ws, room.code, hostId);
+      this.addSocketToRoomIndex(room.code, ws);
 
       this.send(ws, {
         type: 'room_created',
@@ -530,6 +548,7 @@ export class GameManager {
     try {
       const room = this.roomManager.joinRoom(normCode, playerId, name);
       this.playerManager.addPlayer(ws, room.code, playerId);
+      this.addSocketToRoomIndex(room.code, ws);
 
       this.send(ws, { type: 'room_joined', payload: { room, playerId } });
       this.broadcastToRoom(room.code, { type: 'player_joined', payload: { players: room.players } }, ws);
@@ -549,6 +568,7 @@ export class GameManager {
     try {
       const room = this.roomManager.joinPublicRoom(playerId, name);
       this.playerManager.addPlayer(ws, room.code, playerId);
+      this.addSocketToRoomIndex(room.code, ws);
 
       this.send(ws, { type: 'room_joined', payload: { room, playerId } });
       this.broadcastToRoom(room.code, { type: 'player_joined', payload: { players: room.players } }, ws);
@@ -749,6 +769,19 @@ export class GameManager {
     try {
       const buffer = this.roomManager.getRoomBuffer(roomCode);
       if (!buffer) return;
+
+      // P2-11 FIX: Idempotency — prevent double finishRoundPhase for same round
+      const roundKey = `${roomCode}:${buffer.get().currentRound}`;
+      if (this.finishedRounds.has(roundKey)) {
+        console.log(`[FinishRoundPhase] Already processed ${roundKey}, skipping.`);
+        return;
+      }
+      this.finishedRounds.add(roundKey);
+      // Evict old entries to prevent memory leak (keep last 200)
+      if (this.finishedRounds.size > 200) {
+        const first = this.finishedRounds.values().next().value;
+        if (first) this.finishedRounds.delete(first);
+      }
 
       let autoStart = false;
       buffer.transact(draft => {
@@ -990,6 +1023,8 @@ export class GameManager {
     buffer.transact(draft => {
       const round = draft.rounds[draft.currentRound];
       if (!round) return;
+      // P1-5 FIX: Only allow power-ups during playing phase
+      if (draft.phase !== 'playing') return;
       // D1 FIX: Lift global powerUpUsedInRound restriction.
       // Players are only limited by their own usage flag.
       if (round.banishedPlayerId === p.playerId) return;
@@ -1052,9 +1087,18 @@ export class GameManager {
         }
       } else if (payload.type === 'banish') {
         if (!player.usedPowerUps.banish && player.powerUps.banish > 0) {
+          // P2-7 FIX: Validate banish target exists and is not host/referee/self
+          const targetId = payload.targetPlayerId;
+          if (!targetId) return;
+          const targetPlayer = draft.players.find(pl => pl.id === targetId);
+          if (!targetPlayer) return;
+          if (targetPlayer.isHost) return;
+          if (draft.refereeId === targetId) return;
+          if (targetId === p.playerId) return;
+
           player.powerUps.banish--;
           player.usedPowerUps.banish = true;
-          round.banishedPlayerId = payload.targetPlayerId;
+          round.banishedPlayerId = targetId;
           round.powerUpUsedInRound = true;
         }
       }
@@ -1687,11 +1731,20 @@ export class GameManager {
     const buffer = this.roomManager.getRoomBuffer(p.roomId);
     if (!buffer) return;
 
+    // P1-2 FIX: Never allow appeals during final phase — prevents phase regression
+    if (buffer.get().phase === 'final') {
+      this.send(ws, { type: 'error', payload: { message: 'لا يمكن الاستئناف بعد انتهاء اللعبة' } });
+      return;
+    }
+
     let appealAdded = false;
 
     buffer.transact(draft => {
       const round = draft.rounds[draft.currentRound];
       if (!round) return;
+
+      // P1-2 FIX: Only allow appeals during voting, results, or referee_review
+      if (draft.phase !== 'voting' && draft.phase !== 'results' && draft.phase !== 'referee_review') return;
 
       const ans = round.validatedAnswers.find(a => a.playerId === p.playerId && a.category === payload.category);
       // Can only appeal if invalid and not already pending
@@ -1717,7 +1770,6 @@ export class GameManager {
         votes: { yes: 0, no: 0 }
       });
 
-      // If phase transitioned out of voting (e.g., results), push it back to voting so players can see it
       if (draft.phase !== 'voting') {
         draft.phase = 'voting';
       }
@@ -1728,8 +1780,6 @@ export class GameManager {
     const room = buffer.get();
     if (appealAdded) {
       this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
-
-      // Start or reset vote timer for the newly added appeal (if it's the first one, or reset to give them time)
       this.roundManager.setRoundTimer(room.code, () => this.handleVoteTimeout(room.code), 30000);
     }
   }
@@ -1807,11 +1857,31 @@ export class GameManager {
     if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(message));
   }
 
+  // P2-10 FIX: O(1) broadcast using room→socket index instead of scanning all players
   private broadcastToRoom(roomCode: string, message: WSMessage, exclude?: WebSocket) {
-    const players = this.playerManager.getAllPlayers();
-    for (const p of players) {
-      if (p.roomId === roomCode && p.ws !== exclude) {
-        this.send(p.ws, message);
+    const roomSockets = this.roomSocketIndex.get(roomCode);
+    if (!roomSockets) return;
+    const messageStr = JSON.stringify(message);
+    for (const ws of roomSockets) {
+      if (ws !== exclude && ws.readyState === WebSocket.OPEN) {
+        ws.send(messageStr);
+      }
+    }
+  }
+
+  private addSocketToRoomIndex(roomCode: string, ws: WebSocket) {
+    if (!this.roomSocketIndex.has(roomCode)) {
+      this.roomSocketIndex.set(roomCode, new Set());
+    }
+    this.roomSocketIndex.get(roomCode)!.add(ws);
+  }
+
+  private removeSocketFromRoomIndex(roomCode: string, ws: WebSocket) {
+    const roomSockets = this.roomSocketIndex.get(roomCode);
+    if (roomSockets) {
+      roomSockets.delete(ws);
+      if (roomSockets.size === 0) {
+        this.roomSocketIndex.delete(roomCode);
       }
     }
   }

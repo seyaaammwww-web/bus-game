@@ -425,7 +425,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const setReferee = useCallback((playerId: string) => { sendMessage('set_referee', { playerId }); }, [sendMessage]);
   const removeReferee = useCallback(() => { sendMessage('remove_referee', {}); }, [sendMessage]);
   const refereeDeduct = useCallback((playerId: string, category: Category, reason: string) => { sendMessage('referee_deduct', { playerId, category, reason }); }, [sendMessage]);
-  const refereeToggleUnique = useCallback((playerId: string, category: Category) => { sendMessage('referee_toggle_unique', { playerId, category }); }, [sendMessage]);
+  // P1-6 FIX: Was 'referee_toggle_unique' which the server doesn't handle — must match server handler
+  const refereeToggleUnique = useCallback((playerId: string, category: Category) => { sendMessage('referee_toggle_validity', { playerId, category }); }, [sendMessage]);
   const refereeToggleValidity = useCallback((playerId: string, category: Category) => { sendMessage('referee_toggle_validity', { playerId, category }); }, [sendMessage]);
   const refereeApprove = useCallback(() => { sendMessage('referee_approve', {}); }, [sendMessage]);
   const nextRound = useCallback(() => { sendMessage('next_round', {}); }, [sendMessage]);

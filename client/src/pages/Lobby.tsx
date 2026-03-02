@@ -338,6 +338,7 @@ export default function Lobby() {
                     <p className="text-base text-[#4c1d95] mb-3 font-pixel-text font-bold">اختر واحد من اللاعبين:</p>
                     <div className="grid grid-cols-2 gap-2">
                       {room.players
+                        .filter(p => !p.isHost) // P2-8 FIX: Exclude host from referee selection
                         .map((player) => (
                           <Button
                             key={player.id}
