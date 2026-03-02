@@ -22,8 +22,8 @@ export default function Lobby() {
 
   const room = state.room!;
   const otherPlayers = room.players.filter(p => p.id !== state.playerId);
-  const otherPlayersReady = otherPlayers.length > 0 && otherPlayers.every(p => p.isReady);
-  const canStart = isHost && otherPlayersReady && room.players.length > 1;
+  const otherPlayersReady = otherPlayers.length === 0 || otherPlayers.every(p => p.isReady);
+  const canStart = isHost && otherPlayersReady;
 
   const copyCode = async () => {
     await navigator.clipboard.writeText(room.code);
@@ -338,7 +338,6 @@ export default function Lobby() {
                     <p className="text-base text-[#4c1d95] mb-3 font-pixel-text font-bold">اختر واحد من اللاعبين:</p>
                     <div className="grid grid-cols-2 gap-2">
                       {room.players
-                        .filter((player) => !player.isHost) // BUG-11 FIX: Host cannot be their own referee
                         .map((player) => (
                           <Button
                             key={player.id}
