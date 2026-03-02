@@ -46,8 +46,8 @@ export class StateOrchestrator {
             // For now, let's assume I'll add `getAllRoomBuffers()` to RoomManager.
 
             const rooms: GameRoom[] = [];
-            // @ts-ignore - access private for now or add getter
-            for (const buffer of this.roomManager.rooms.values()) {
+            // PERSIST-1 FIX: Use public accessor instead of @ts-ignore
+            for (const buffer of this.roomManager.getAllBuffers()) {
                 rooms.push(buffer.get());
             }
 
@@ -80,13 +80,8 @@ export class StateOrchestrator {
 
             // Restore
             for (const roomData of state.rooms) {
-                // Validate/Sanitize if needed
-                // Re-hydrate CorruptionProofBuffer
-                // We need to inject into RoomManager
-                // Again, need access method
-
-                // @ts-ignore
-                this.roomManager.rooms.set(roomData.code, new CorruptionProofBuffer(roomData));
+                // PERSIST-1 & V3-19 FIX: Use proper method to restore rooms without @ts-ignore
+                this.roomManager.restoreRoom(roomData);
             }
 
             console.log(`[Persistence] Restored ${state.rooms.length} rooms from snapshot.`);

@@ -135,75 +135,70 @@ export function PowerUpMenu() {
             </Button>
 
             <AnimatePresence>
-                {isOpen && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" style={{ zIndex: 9999 }}>
-                        {/* We use Portal to escape stacking context of parent motion divs */}
-                        {createPortal(
-                            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                                <motion.div
-                                    initial={{ scale: 0.8, opacity: 0 }}
-                                    animate={{ scale: 1, opacity: 1 }}
-                                    exit={{ scale: 0.8, opacity: 0 }}
-                                    transition={{ type: "spring", duration: 0.3 }}
-                                    className="relative w-full max-w-lg z-[10000]"
+                {isOpen && createPortal(
+                    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.8, opacity: 0 }}
+                            transition={{ type: "spring", duration: 0.3 }}
+                            className="relative w-full max-w-lg z-[10000]"
+                        >
+                            <RetroCard className="border-[4px] shadow-2xl relative overflow-visible">
+                                {/* Close Button */}
+                                <button
+                                    onClick={() => setIsOpen(false)}
+                                    className="absolute -top-5 -left-5 bg-red-500 text-white p-2 rounded-lg border-[3px] border-[#7f1d1d] shadow-[3px_3px_0_0_#4a0404] hover:scale-105 active:scale-95 transition-transform z-50"
                                 >
-                                    <RetroCard className="border-[4px] shadow-2xl relative overflow-visible">
-                                        {/* Close Button */}
-                                        <button
-                                            onClick={() => setIsOpen(false)}
-                                            className="absolute -top-5 -left-5 bg-red-500 text-white p-2 rounded-lg border-[3px] border-[#7f1d1d] shadow-[3px_3px_0_0_#4a0404] hover:scale-105 active:scale-95 transition-transform z-50"
-                                        >
-                                            <X className="w-6 h-6 stroke-[3]" />
-                                        </button>
+                                    <X className="w-6 h-6 stroke-[3]" />
+                                </button>
 
-                                        <div className="text-center mb-6">
-                                            <h2 className="text-3xl font-pixel-title text-[#4c1d95] mb-2 flex items-center justify-center gap-2">
-                                                <Zap className="w-8 h-8 text-yellow-500 fill-yellow-500" />
-                                                المساعدات
-                                            </h2>
-                                            <p className="font-pixel-text text-lg text-muted-foreground">اختار مساعدة عشان تكسب الجولة!</p>
-                                        </div>
+                                <div className="text-center mb-6">
+                                    <h2 className="text-3xl font-pixel-title text-[#4c1d95] mb-2 flex items-center justify-center gap-2">
+                                        <Zap className="w-8 h-8 text-yellow-500 fill-yellow-500" />
+                                        المساعدات
+                                    </h2>
+                                    <p className="font-pixel-text text-lg text-muted-foreground">اختار مساعدة عشان تكسب الجولة!</p>
+                                </div>
 
-                                        <div className="flex justify-center gap-4 md:gap-8 p-4">
-                                            <SquarePowerUp
-                                                type="wildcard"
-                                                title="جوكر"
-                                                cost={600}
-                                                icon={Crown}
-                                                status={getStatus(600, currentPlayer?.usedPowerUps?.wildcard || false)}
-                                                onActivate={() => {
-                                                    activatePowerUp('wildcard');
-                                                    setIsOpen(false);
-                                                }}
-                                            />
+                                <div className="flex justify-center gap-4 md:gap-8 p-4">
+                                    <SquarePowerUp
+                                        type="wildcard"
+                                        title="جوكر"
+                                        cost={200}
+                                        icon={Crown}
+                                        status={getStatus(200, currentPlayer?.usedPowerUps?.wildcard || false)}
+                                        onActivate={() => {
+                                            activatePowerUp('wildcard');
+                                            setIsOpen(false);
+                                        }}
+                                    />
 
-                                            <SquarePowerUp
-                                                type="banish"
-                                                title="طرد"
-                                                cost={350}
-                                                icon={Skull}
-                                                status={getStatus(350, currentPlayer?.usedPowerUps?.banish || false)}
-                                                onActivate={() => {
-                                                    setBanishOverlay(true);
-                                                    setIsOpen(false);
-                                                }}
-                                            />
-                                        </div>
+                                    <SquarePowerUp
+                                        type="banish"
+                                        title="طرد"
+                                        cost={400}
+                                        icon={Skull}
+                                        status={getStatus(400, currentPlayer?.usedPowerUps?.banish || false)}
+                                        onActivate={() => {
+                                            setBanishOverlay(true);
+                                            setIsOpen(false);
+                                        }}
+                                    />
+                                </div>
 
-                                        <div className="mt-4 text-center">
-                                            <div className="inline-flex items-center gap-2 bg-[#4c1d95] text-white px-4 py-2 rounded-lg font-pixel-text border-2 border-[#2e1065]">
-                                                <span>رصيدك الحالي:</span>
-                                                <span className="text-yellow-400 font-bold text-xl">{currentPlayer?.totalEarnedPoints || 0}</span>
-                                                <Zap className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                                            </div>
-                                        </div>
+                                <div className="mt-4 text-center">
+                                    <div className="inline-flex items-center gap-2 bg-[#4c1d95] text-white px-4 py-2 rounded-lg font-pixel-text border-2 border-[#2e1065]">
+                                        <span>رصيدك الحالي:</span>
+                                        <span className="text-yellow-400 font-bold text-xl">{currentPlayer?.totalEarnedPoints || 0}</span>
+                                        <Zap className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                                    </div>
+                                </div>
 
-                                    </RetroCard>
-                                </motion.div>
-                            </div>,
-                            document.body
-                        )}
-                    </div>
+                            </RetroCard>
+                        </motion.div>
+                    </div>,
+                    document.body
                 )}
             </AnimatePresence>
         </>

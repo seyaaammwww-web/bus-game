@@ -10,7 +10,13 @@ const PUBLIC_ROOM_CODE = 'PLAY';
 export class RoomManager {
     private rooms: Map<string, CorruptionProofBuffer<GameRoom>> = new Map();
 
-    constructor() {
+    // PERSIST-1 FIX: Public accessor so StateOrchestrator doesn't need @ts-ignore
+    public getAllBuffers(): CorruptionProofBuffer<GameRoom>[] {
+        return Array.from(this.rooms.values());
+    }
+
+    // V3-14 FIX: Constructor accepts callback to notify GameManager of room deletion
+    constructor(private onRoomDeleted?: (code: string) => void) {
         this.startCleanupInterval();
     }
 
@@ -156,13 +162,14 @@ export class RoomManager {
         };
     }
 
-    private generateRoomCode(): string {
+    private generateRoomCode(depth: number = 0): string {
+        if (depth > 20) throw new Error("Could not generate unique room code after 20 attempts");
         const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
         let code = '';
         for (let i = 0; i < 4; i++) {
             code += chars[Math.floor(Math.random() * chars.length)];
         }
-        return this.rooms.has(code) ? this.generateRoomCode() : code;
+        return this.rooms.has(code) ? this.generateRoomCode(depth + 1) : code;
     }
 
 
@@ -171,12 +178,13 @@ export class RoomManager {
             const now = Date.now();
             for (const [code, buffer] of this.rooms.entries()) {
                 const room = buffer.get();
-                // Remove if empty for > 10 min OR created > 24h
-                const isEmpty = room.players.length === 0;
+                // V3-10 FIX: Check if room only has offline players, not just if array is completely empty
+                const isEmpty = room.players.filter(p => !p.isOffline).length === 0;
                 const isOld = now - room.createdAt > 24 * 60 * 60 * 1000;
 
                 if ((isEmpty && now - room.createdAt > 10 * 60 * 1000) || isOld) {
                     this.rooms.delete(code);
+                    if (this.onRoomDeleted) this.onRoomDeleted(code); // V3-14 FIX: Invoke cleanup callback
                     console.log(`[RoomManager] Cleaned up room ${code}`);
                 }
             }

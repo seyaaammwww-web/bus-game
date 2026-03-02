@@ -79,6 +79,8 @@ export async function registerRoutes(
   });
 
   app.post('/api/groq/validate', async (req, res) => {
+    // V3-12 FIX: Secure debug endpoint
+    if (process.env.NODE_ENV === 'production') return res.status(403).json({ error: 'Forbidden' });
     try {
       const { letter, category, word } = req.body;
       const groq = GroqService.getInstance();
@@ -108,6 +110,8 @@ export async function registerRoutes(
 
   // Database Debug Endpoint
   app.get('/api/debug/db', (_req, res) => {
+    // V3-12 FIX: Secure debug endpoint
+    if (process.env.NODE_ENV === 'production') return res.status(403).json({ error: 'Forbidden' });
     try {
       const { WildcardService } = require("./services/wildcardService");
       const stats = WildcardService.getInstance().getStats();

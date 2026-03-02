@@ -174,6 +174,7 @@ export class GroqService {
 
         } catch (error) {
             console.error("[GroqService] API Error:", error);
+            // GROQ-1 FIX: Always resolve pending promises via fallback to prevent hangs
             this.handleFallback(currentBatch);
         }
     }

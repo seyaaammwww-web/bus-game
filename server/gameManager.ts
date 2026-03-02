@@ -1,7 +1,7 @@
 
 import { WebSocket } from 'ws';
 import { z } from 'zod';
-import type { WSMessage, RoundAnswers, Category, PowerUpType, ReactionType, GameRoom } from '../shared/schema';
+import type { WSMessage, RoundAnswers, Category, PowerUpType, ReactionType, GameRoom, GamePhase } from '../shared/schema';
 import {
   createRoomSchema, joinRoomSchema, rejoinRoomSchema, submitAnswersSchema, draftUpdateSchema,
   castParallelVoteSchema, requestVoteSchema, kickPlayerSchema, hostAdjustScoreSchema,
@@ -16,6 +16,21 @@ import { CorruptionProofBuffer } from './utils/reliability';
 import { StateOrchestrator } from './persistence/StateOrchestrator';
 import { WildcardService } from './services/wildcardService';
 import { getRandomLetters } from '../shared/arabicWords';
+
+// V3 State Machine: Guard against invalid phase transitions
+function canTransition(from: GamePhase, to: GamePhase): boolean {
+  if (from === to) return true;
+  const transitions: Record<GamePhase, GamePhase[]> = {
+    lobby: ['playing'],
+    playing: ['ai_processing', 'voting', 'results', 'referee_review', 'final'],
+    ai_processing: ['voting', 'results', 'referee_review', 'final'],
+    voting: ['results', 'referee_review', 'final'],
+    results: ['referee_review', 'playing', 'final', 'lobby'],
+    referee_review: ['results', 'playing', 'final', 'lobby'],
+    final: ['lobby']
+  };
+  return transitions[from]?.includes(to) ?? false;
+}
 
 export class GameManager {
   private roomManager: RoomManager;
@@ -33,6 +48,9 @@ export class GameManager {
 
   // P2-11 FIX: Idempotency key to prevent double finishRoundPhase
   private finishedRounds: Set<string> = new Set();
+
+  // V3-4 FIX: Idempotency key to prevent double endRound processing race
+  private endedRounds: Set<string> = new Set();
 
   private heartbeatInterval: NodeJS.Timeout | null = null;
   private lastVoteTime: Map<string, number> = new Map();
@@ -82,7 +100,10 @@ export class GameManager {
   }
 
   constructor() {
-    this.roomManager = new RoomManager();
+    // V3-14 FIX: Pass callback to clean up socket index when RoomManager deletes a stale room
+    this.roomManager = new RoomManager((code) => {
+      this.roomSocketIndex.delete(code);
+    });
 
     // FIX: PlayerManager now takes a timeout callback to remove dead players from rooms
     this.playerManager = new PlayerManager((playerId, roomId) => {
@@ -129,6 +150,11 @@ export class GameManager {
    */
   private handlePlayerTimeout(playerId: string, roomId: string) {
     console.log(`[GameManager] Player ${playerId} timed out (no pong).`);
+
+    // GAP-1 FIX: Remove dead socket from index BEFORE removing from PlayerManager
+    const ws = this.playerManager.getSocket(playerId);
+    if (ws) this.removeSocketFromRoomIndex(roomId, ws);
+
     this.roomManager.removePlayerFromRoom(roomId, playerId);
 
     const buffer = this.roomManager.getRoomBuffer(roomId);
@@ -186,7 +212,9 @@ export class GameManager {
         }
 
         // Remove resolved items safely
-        draft.voteQueue = draft.voteQueue.filter((item: any) => !resolvedItems.includes(item));
+        draft.voteQueue = draft.voteQueue.filter((item: any) =>
+          !resolvedItems.some(r => r.requesterId === item.requesterId && r.category === item.category)
+        );
 
         if (draft.voteQueue.length === 0) {
           this.roundManager.calculateAnswerScores(draft);
@@ -480,6 +508,8 @@ export class GameManager {
     // Remove old socket if exists
     const oldSocket = this.playerManager.getSocket(playerId);
     if (oldSocket) {
+      // GAP-3 FIX: Remove old socket from index BEFORE removing from PlayerManager
+      this.removeSocketFromRoomIndex(room.code, oldSocket);
       this.playerManager.removePlayer(oldSocket);
       try { oldSocket.close(); } catch { }
     }
@@ -488,9 +518,8 @@ export class GameManager {
     this.playerManager.addPlayer(ws, room.code, playerId);
     this.addSocketToRoomIndex(room.code, ws);
 
-    // Sync state
+    // SESSION-2 FIX: Send only room_joined (it already contains full state)
     this.send(ws, { type: 'room_joined', payload: { room: buffer.get(), playerId } });
-    this.send(ws, { type: 'sync_state', payload: { room: buffer.get() } });
   }
 
   // ==========================================
@@ -698,9 +727,23 @@ export class GameManager {
   }
 
   private endRound(roomCode: string) {
-    this.roundManager.clearTimer(roomCode);
     const buffer = this.roomManager.getRoomBuffer(roomCode);
     if (!buffer) return;
+
+    // V3-4 CRITICAL GUARD: Prevent double-processing via race conditions
+    const room = buffer.get();
+    const roundKey = `${roomCode}:${room.currentRound}`;
+    if (this.endedRounds.has(roundKey)) {
+      console.log(`[endRound] Round ${roundKey} already ended, skipping`);
+      return;
+    }
+    this.endedRounds.add(roundKey);
+    if (this.endedRounds.size > 50) {
+      const first = this.endedRounds.values().next().value;
+      if (first) this.endedRounds.delete(first);
+    }
+
+    this.roundManager.clearTimer(roomCode);
 
     // Draft Rescue Logic
     buffer.transact(draft => {
@@ -730,8 +773,8 @@ export class GameManager {
       }
     }, "endRound_rescue");
 
-    const room = buffer.get();
-    this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
+    const updatedRoom = buffer.get();
+    this.broadcastToRoom(updatedRoom.code, { type: 'sync_state', payload: { room: updatedRoom } });
 
     this.roundManager.processRoundWithAI(buffer, () => {
       // On Voting Start (parallel mode)
@@ -838,6 +881,15 @@ export class GameManager {
     if (!buffer) return;
     const room = buffer.get();
     if (!room.players.find(pl => pl.id === p.playerId)?.isHost) return;
+
+    // V3-2 CRITICAL GUARD: Only allow next round from results or referee_review phase
+    if (room.phase !== 'results' && room.phase !== 'referee_review') {
+      this.send(ws, {
+        type: 'error',
+        payload: { message: 'يمكنك الانتقال للجولة التالية فقط بعد عرض النتائج' }
+      });
+      return;
+    }
 
     this.nextRoundByRoomCode(p.roomId);
   }
@@ -1004,6 +1056,11 @@ export class GameManager {
     if (!buffer) return;
 
     const room = buffer.get();
+    // FLOW-1 FIX: Only allow approval during referee_review phase
+    if (room.phase !== 'referee_review') {
+      this.send(ws, { type: 'error', payload: { message: 'لا يمكن الموافقة إلا أثناء مراجعة الحكم' } });
+      return;
+    }
     // FIX: Only the referee or the host can approve results
     const isRef = room.refereeId === p.playerId;
     const isHost = room.players.find(pl => pl.id === p.playerId)?.isHost;
@@ -1033,6 +1090,9 @@ export class GameManager {
       if (!player) return;
 
       if (payload.type === 'wildcard') {
+        const category = payload.category as string;
+        if (!category) return; // V3-8 FIX: Prevent consuming wildcard without a category
+
         if (!player.usedPowerUps.wildcard && player.powerUps.wildcard > 0) {
           player.powerUps.wildcard--;
           player.usedPowerUps.wildcard = true;
@@ -1275,52 +1335,9 @@ export class GameManager {
     });
   }
 
-  /** Host can override final ranking order */
-  hostOverrideRanking(ws: WebSocket, payload: { orderedPlayerIds: string[] }) {
-    const p = this.playerManager.getPlayer(ws);
-    if (!p) return;
-    const buffer = this.roomManager.getRoomBuffer(p.roomId);
-    if (!buffer) return;
-    const isHost = buffer.get().players.find(pl => pl.id === p.playerId)?.isHost;
-    if (!isHost) return;
-    const { orderedPlayerIds } = payload;
-    buffer.transact(draft => {
-      const newOrder: typeof draft.players = [];
-      for (const pid of orderedPlayerIds) {
-        const player = draft.players.find(pl => pl.id === pid);
-        if (player) newOrder.push(player);
-      }
-      // Append any missing players at the end
-      for (const pl of draft.players) {
-        if (!orderedPlayerIds.includes(pl.id)) newOrder.push(pl);
-      }
-      draft.players = newOrder;
 
-      this.addAuditLogEntry(
-        draft,
-        p.playerId,
-        undefined,
-        'OVERRIDE_RANKING',
-        `المضيف قام بتعديل ترتيب اللاعبين يدوياً`
-      );
-
-      // Run soft validation
-      const warnings = this.validateGameState(draft);
-      if (warnings.length > 0) {
-        this.addAuditLogEntry(draft, 'SYSTEM', undefined, 'SYSTEM_WARNING', warnings.join(' | '));
-      }
-    }, 'host_override_ranking');
-    const room = buffer.get();
-    this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
-  }
-
-  /** Host can kick a player out of the room */
-
-  vote(ws: WebSocket, targetId: string, category: string, accepted: boolean) {
-    const p = this.playerManager.getPlayer(ws);
-    if (!p) return;
-    this.castParallelVote(ws, { requesterId: targetId, category: category as any, vote: accepted ? 'yes' : 'no' });
-  }
+  // DEAD-1: Removed hostOverrideRanking (no message type routes here)
+  // DEAD-1: Removed vote wrapper (no message type routes here)
 
   requestVote(ws: WebSocket, payload: any) {
     const p = this.playerManager.getPlayer(ws);
@@ -1455,53 +1472,8 @@ export class GameManager {
     }
   }
 
-  castDemocraticVote(ws: WebSocket, vote: 'yes' | 'no') {
-    const p = this.playerManager.getPlayer(ws);
-    if (!p) return;
-    const buffer = this.roomManager.getRoomBuffer(p.roomId);
-    if (!buffer) return;
 
-    let allVotesDone = false;
-
-    buffer.transact(draft => {
-      if (draft.phase !== 'voting' || !draft.currentVote) return;
-      if (draft.currentVote.voterIds.includes(p.playerId)) return;
-
-      const eligibleVoters = draft.players.filter(pl =>
-        pl.id !== draft.currentVote!.requesterId &&
-        pl.id !== draft.refereeId &&
-        pl.id !== draft.rounds[draft.currentRound]?.banishedPlayerId
-      );
-
-      if (!eligibleVoters.some(ev => ev.id === p.playerId)) return;
-
-      draft.currentVote.voterIds.push(p.playerId);
-      if (vote === 'yes') draft.currentVote.votes.yes++;
-      else draft.currentVote.votes.no++;
-
-      const activeCount = eligibleVoters.length;
-      const { yes, no } = draft.currentVote.votes;
-      if (yes > activeCount / 2 || no > activeCount / 2 || yes + no === activeCount) {
-        this.resolveCurrentVoteInDraft(draft);
-      }
-      if (!draft.currentVote) {
-        allVotesDone = true;
-      }
-    }, "castVote");
-
-    const room = buffer.get();
-    this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
-
-    if (allVotesDone) {
-      this.roundManager.clearTimer(room.code);
-      this.finishRoundPhase(room.code);
-    } else if (room.phase === 'voting' && room.currentVote) {
-      const elapsed = Date.now() - room.currentVote.startTime;
-      if (elapsed < 1000) {
-        this.startVoteTimer(room.code);
-      }
-    }
-  }
+  // DEAD-1: Removed castDemocraticVote (sequential voting removed, no message type routes here)
 
   refereeToggleValidity(ws: WebSocket, payload: any) {
     const p = this.playerManager.getPlayer(ws);
@@ -1510,6 +1482,9 @@ export class GameManager {
     if (!buffer) return;
 
     buffer.transact(draft => {
+      // V3-11 FIX: Only allow validity toggles during voting, results, or referee_review
+      if (draft.phase !== 'voting' && draft.phase !== 'results' && draft.phase !== 'referee_review') return;
+
       const isHost = draft.players.find(pl => pl.id === p.playerId)?.isHost;
       if (draft.refereeId !== p.playerId && !isHost) return;
 
@@ -1625,6 +1600,8 @@ export class GameManager {
     if (targetWs) {
       // BUG FIX #2: Send 'kicked' (not just toast) so client redirects the kicked player to home
       this.send(targetWs, { type: 'kicked', payload: { reason: 'تم طردك من الغرفة من قبل المضيف' } });
+      // GAP-2 FIX: Remove kicked player's socket from index BEFORE closing
+      this.removeSocketFromRoomIndex(p.roomId, targetWs);
       this.playerManager.removePlayer(targetWs);
       try { targetWs.close(); } catch { }
     }
@@ -1770,7 +1747,9 @@ export class GameManager {
         votes: { yes: 0, no: 0 }
       });
 
-      if (draft.phase !== 'voting') {
+      // V3-3 FIX: Only set phase to voting if we're NOT already in results/referee_review
+      // This prevents phase regression when someone appeals from the results screen
+      if (draft.phase !== 'voting' && draft.phase !== 'results' && draft.phase !== 'referee_review') {
         draft.phase = 'voting';
       }
 
@@ -1798,6 +1777,15 @@ export class GameManager {
     if (!buffer) return;
 
     this.roundManager.clearTimer(roomCode);
+
+    // V3-6 FIX: Clean roomSocketIndex for offline players before removing them
+    const roomBefore = buffer.get();
+    roomBefore.players.forEach(pl => {
+      if (pl.isOffline) {
+        const ws = this.playerManager.getSocket(pl.id);
+        if (ws) this.removeSocketFromRoomIndex(roomCode, ws);
+      }
+    });
 
     buffer.transact(draft => {
       draft.currentRound = 0;
@@ -1846,6 +1834,8 @@ export class GameManager {
 
     const room = buffer.get();
     // Allow anyone to click play again in a public room
+    // V3-5 CRITICAL GUARD: Private rooms can only be restarted from the final phase
+    if (!room.isPublicRoom && room.phase !== 'final') return;
     if (!room.isPublicRoom && !room.players.find(pl => pl.id === p.playerId)?.isHost) return;
 
     this.forcePlayAgain(p.roomId);
