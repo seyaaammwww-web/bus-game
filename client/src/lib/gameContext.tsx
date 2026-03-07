@@ -115,9 +115,8 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         return { ...state, room: applyPatches(state.room, action.patches) };
       } catch (e) {
         console.error("Failed to apply patches", e);
-        // FIX: Notify user instead of silently failing
-        toast({ title: "خطأ", description: "حدث خطأ في مزامنة البيانات، يرجى إعادة تحميل الصفحة", variant: "destructive" });
-        return { ...state, error: "حدث خطأ في مزامنة البيانات" };
+        // Don't call toast() here — reducers must be pure. Just return state unchanged.
+        return state;
       }
     case 'RESET':
       return initialState;

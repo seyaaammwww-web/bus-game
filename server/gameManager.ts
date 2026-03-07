@@ -1174,14 +1174,14 @@ export class GameManager {
         // ✅ Check if already used
         if (player.usedPowerUps.wildcard) {
           console.log(`[PowerUp] Player ${player.name} already used wildcard`);
-          this.send(ws, { type: 'error', payload: { message: 'استخدمت هذه القدرة بالفعل!' } });
+          this.send(ws, { type: 'toast', payload: { message: 'استخدمت هذه القدرة بالفعل!', type: 'error' } });
           return;
         }
 
         // ✅ Check if player has enough points
         if (player.totalEarnedPoints < cost) {
           console.log(`[PowerUp] Player ${player.name} doesn't have enough points (${player.totalEarnedPoints} < ${cost})`);
-          this.send(ws, { type: 'error', payload: { message: `تحتاج لـ ${cost} نقطة لاستخدام هذه القدرة` } });
+          this.send(ws, { type: 'toast', payload: { message: `تحتاج لـ ${cost} نقطة لاستخدام هذه القدرة`, type: 'error' } });
           return;
         }
 
@@ -1263,13 +1263,13 @@ export class GameManager {
 
         if (player.usedPowerUps.banish) {
           console.log(`[PowerUp] Player ${player.name} already used banish`);
-          this.send(ws, { type: 'error', payload: { message: 'استخدمت هذه القدرة بالفعل!' } });
+          this.send(ws, { type: 'toast', payload: { message: 'استخدمت هذه القدرة بالفعل!', type: 'error' } });
           return;
         }
 
         if (player.totalEarnedPoints < cost) {
           console.log(`[PowerUp] Player ${player.name} doesn't have enough points (${player.totalEarnedPoints} < ${cost})`);
-          this.send(ws, { type: 'error', payload: { message: `تحتاج لـ ${cost} نقطة لاستخدام هذه القدرة` } });
+          this.send(ws, { type: 'toast', payload: { message: `تحتاج لـ ${cost} نقطة لاستخدام هذه القدرة`, type: 'error' } });
           return;
         }
 
@@ -1279,11 +1279,11 @@ export class GameManager {
         const targetPlayer = draft.players.find(pl => pl.id === targetId);
         if (!targetPlayer) return;
         if (targetPlayer.isHost) {
-          this.send(ws, { type: 'error', payload: { message: 'لا يمكنك طرد مدير الغرفة!' } });
+          this.send(ws, { type: 'toast', payload: { message: 'لا يمكنك طرد مدير الغرفة!', type: 'error' } });
           return;
         }
         if (draft.refereeId === targetId) {
-          this.send(ws, { type: 'error', payload: { message: 'لا يمكنك طرد الحكم!' } });
+          this.send(ws, { type: 'toast', payload: { message: 'لا يمكنك طرد الحكم!', type: 'error' } });
           return;
         }
         if (targetId === p.playerId) return;
