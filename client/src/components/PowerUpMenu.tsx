@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, Crown, Skull, X, Lock } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { RetroCard } from '@/components/ui/RetroCard';
 import { useGame } from '@/lib/gameContext';
 import { cn } from '@/lib/utils';
@@ -201,28 +200,19 @@ export function PowerUpMenu() {
 
     return (
         <>
-            <Button
-                onClick={toggleOpen}
-                className="retro-action-btn h-10 md:h-14 px-4 md:px-6 flex items-center justify-center gap-2 font-pixel-title relative overflow-hidden bg-gradient-to-b from-[#fbbf24] to-[#f59e0b] text-[#78350f] group rounded-xl !shadow-[3px_3px_0_0_#78350f] !border-[#78350f] hover:brightness-110"
+            <button
+                type="button"
+                onClick={() => {
+                    console.log('[PowerUpMenu] Button clicked, isOpen:', isOpen);
+                    playClickSound();
+                    setIsOpen(!isOpen);
+                }}
+                className="h-10 md:h-14 px-4 md:px-6 flex items-center justify-center gap-2 font-pixel-title relative overflow-hidden bg-gradient-to-b from-[#fbbf24] to-[#f59e0b] text-[#78350f] rounded-xl border-[3px] border-[#78350f] shadow-[3px_3px_0_0_#78350f] hover:brightness-110 active:translate-y-[2px] active:shadow-[1px_1px_0_0_#78350f] transition-all cursor-pointer"
+                style={{ zIndex: 50 }}
             >
-                {/* Shimmer Effect */}
-                <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-12 w-[40%] pointer-events-none"
-                    animate={{ left: ['-100%', '200%'] }}
-                    transition={{ repeat: Infinity, duration: 3, ease: "linear", repeatDelay: 1 }}
-                />
-
-                <div className="relative z-10 flex items-center justify-center">
-                    <Zap className="w-5 h-5 md:w-6 md:h-6 fill-current" />
-                </div>
-
-                <div className="relative z-10 flex items-center justify-center mt-1">
-                    <span className="text-base md:text-xl">مساعدات</span>
-                </div>
-
-                <div className="absolute right-1 top-1 w-1 h-1 bg-white/60 rounded-full animate-pulse" />
-                <div className="absolute left-2 bottom-1 w-1.5 h-1.5 bg-white/30 rounded-full animate-pulse delay-700" />
-            </Button>
+                <Zap className="w-5 h-5 md:w-6 md:h-6 fill-current" />
+                <span className="text-base md:text-xl">مساعدات</span>
+            </button>
 
             <AnimatePresence>
                 {isOpen && createPortal(
