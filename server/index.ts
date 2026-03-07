@@ -6,12 +6,6 @@ import { createServer } from "http";
 const app = express();
 const httpServer = createServer(app);
 
-// P2-13 FIX: Suppress noisy and potentially blocking console logs in production
-if (process.env.NODE_ENV === "production") {
-  console.log = () => { };
-  console.debug = () => { };
-  console.info = () => { };
-}
 
 declare module "http" {
   interface IncomingMessage {
