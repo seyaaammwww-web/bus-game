@@ -15,7 +15,9 @@ export const selectUserSchema = createInsertSchema(users);
 
 // Game Types
 export const categories = ['ولد', 'بنت', 'بلد', 'حيوان', 'جماد'] as const;
-export type Category = typeof categories[number] | string; // Allow custom categories
+export type Category = typeof categories[number];
+export type CustomCategory = string & { readonly __brand: 'CustomCategory' };
+export type GameCategory = Category | CustomCategory;
 
 // Power-ups system
 export type PowerUpType = 'hint' | 'steal' | 'wildcard' | 'banish';
@@ -145,7 +147,7 @@ export interface VoteRequest {
   category: Category;
   word: string;
   // FIX: Parallel vote tracking — snapshotted at vote creation time
-  eligibleVoterIds?: string[];
+  eligibleVoterIds: string[]; // Made strictly required
   voterIds?: string[];
   votes?: { yes: number; no: number };
   aiSuggestion?: boolean;
@@ -188,9 +190,23 @@ export interface GameRoom {
 
   settings?: {
     customCategories?: string[];
-    enableVoting?: boolean; // New Toggle
+    votingEnabled?: boolean; // Renamed to match the schema
   };
   auditLog?: AuditEntry[];
+  lastActivityAt?: number;
+}
+
+export enum WSErrorCode {
+  INVALID_PAYLOAD = 'INVALID_PAYLOAD',
+  ROOM_NOT_FOUND = 'ROOM_NOT_FOUND',
+  PLAYER_NOT_FOUND = 'PLAYER_NOT_FOUND',
+  NOT_AUTHORIZED = 'NOT_AUTHORIZED',
+  ROOM_FULL = 'ROOM_FULL',
+  GAME_IN_PROGRESS = 'GAME_IN_PROGRESS',
+  INVALID_PHASE = 'INVALID_PHASE',
+  RATE_LIMITED = 'RATE_LIMITED',
+  UNKNOWN_TYPE = 'UNKNOWN_TYPE',
+  INTERNAL_ERROR = 'INTERNAL_ERROR',
 }
 
 // Reaction types
@@ -274,10 +290,79 @@ export type WSMessageType =
   | 'player_appeal'
   | 'appeal_notification';
 
-export interface WSMessage {
+// Request Envelope for correlation
+export interface WSMessageEnvelope<T = unknown> {
+  id: string;          // UUID for correlation
   type: WSMessageType;
-  payload: any;
+  payload: T;
+  timestamp: number;
+  ackRequired?: boolean;
 }
+
+export type WSMessage =
+  | { type: 'create_room'; payload: CreateRoomInput }
+  | { type: 'join_room'; payload: JoinRoomInput }
+  | { type: 'rejoin_room'; payload: { roomCode: string; playerId: string } }
+  | { type: 'join_public_room'; payload: CreateRoomInput }
+  | { type: 'room_created'; payload: { room: any; playerId: string } } // Refine later
+  | { type: 'room_joined'; payload: { room: any; playerId: string } } // Refine later
+  | { type: 'player_joined'; payload: { players: any[] } } // Refine later
+  | { type: 'player_left'; payload: { players: any[] } } // Refine later
+  | { type: 'player_ready'; payload: undefined | null | any }
+  | { type: 'player_submitted'; payload: { playerId: string; submissionsCount: number; totalPlayers: number } }
+  | { type: 'set_referee'; payload: { playerId: string } }
+  | { type: 'remove_referee'; payload: undefined | null | any }
+  | { type: 'start_game'; payload: undefined | null | any }
+  | { type: 'round_start'; payload: { room: any } } // Refine later
+  | { type: 'submit_answers'; payload: SubmitAnswersInput }
+  | { type: 'bus_complete'; payload: { playerId?: string } | undefined | null | any }
+  | { type: 'rush_mode'; payload: { room: any } } // Refine later
+  | { type: 'round_end'; payload: { room: any } } // Refine later
+  | { type: 'voting_start'; payload: { room: any; validatedAnswers: any[] } } // Refine later
+  | { type: 'vote'; payload: VoteInput }
+  | { type: 'voting_complete'; payload: { room: any } } // Refine later
+  | { type: 'referee_review_start'; payload: { room: any } } // Refine later
+  | { type: 'referee_deduct'; payload: { playerId: string; category: string; reason: string } }
+  | { type: 'referee_approve'; payload: undefined | null | any }
+  | { type: 'round_results'; payload: { room: any } } // Refine later
+  | { type: 'next_round'; payload: undefined | null | any }
+  | { type: 'game_end'; payload: { room: any } } // Refine later
+  | { type: 'error'; payload: { message: string; code?: string } }
+  | { type: 'sync_state'; payload: { room: any } } // Refine later
+  | { type: 'play_again'; payload: undefined | null | any }
+  | { type: 'send_reaction'; payload: { reactionType: string } }
+  | { type: 'reaction_received'; payload: { reaction: any } } // Refine later
+  | { type: 'draft_update'; payload: { answers: Record<string, string> } }
+  | { type: 'update_settings'; payload: any } // Refine later
+  | { type: 'referee_toggle_unique'; payload: { playerId: string; category: string } }
+  | { type: 'activate_powerup'; payload: { type: string; targetPlayerId?: string } }
+  | { type: 'powerup_activated'; payload: { activation: any } } // Refine later
+  | { type: 'wildcard_activated'; payload: { playerId: string; category: string } }
+  | { type: 'player_banished'; payload: { playerId: string; duration: number } } // Refine later
+  | { type: 'vote_update'; payload: { request: any } } // Refine later
+  | { type: 'waiting_for_freeze_player'; payload: { targetPlayerId: string } }
+  | { type: 'appeal_answer'; payload: { playerId: string; category: string; word: string } }
+  | { type: 'appeal_result'; payload: { result: any } } // Refine later
+  | { type: 'toast'; payload: { message: string; type?: string } }
+  | { type: 'request_vote'; payload: { playerId: string; category: string; word: string } }
+  | { type: 'vote_cast'; payload: { vote: any } } // Refine later
+  | { type: 'cast_democratic_vote'; payload: { vote: any } } // Refine later
+  | { type: 'vote_session_start'; payload: { session: any } } // Refine later
+  | { type: 'vote_session_result'; payload: { result: any } } // Refine later
+  | { type: 'referee_toggle_validity'; payload: { playerId: string; category: string } }
+  | { type: 'referee_override'; payload: { requestId: string; category: string; accepted: boolean } }
+  | { type: 'ping'; payload: { timestamp: number } }
+  | { type: 'pong'; payload: undefined | null | any }
+  | { type: 'cast_parallel_vote'; payload: { requesterId: string; category: string; vote: 'yes' | 'no' } }
+  | { type: 'host_adjust_score'; payload: { targetPlayerId: string; delta: number } }
+  | { type: 'host_resolve_votes'; payload: undefined | null | any }
+  | { type: 'host_end_round'; payload: undefined | null | any }
+  | { type: 'kick_player'; payload: { playerId: string } }
+  | { type: 'kicked'; payload: { reason: string } }
+  | { type: 'player_kicked'; payload: { playerId: string } }
+  | { type: 'patch_update'; payload: { patches: any[] } }
+  | { type: 'player_appeal'; payload: { targetPlayerId: string; category: string } }
+  | { type: 'appeal_notification'; payload: { appeal: any } };
 
 // Schemas for validation
 export const createRoomSchema = z.object({
@@ -383,6 +468,15 @@ export type CreateRoomInput = z.infer<typeof createRoomSchema>;
 export type JoinRoomInput = z.infer<typeof joinRoomSchema>;
 export type SubmitAnswersInput = z.infer<typeof submitAnswersSchema>;
 export type VoteInput = z.infer<typeof voteSchema>;
+export type RequestVoteInput = z.infer<typeof requestVoteSchema>;
+export type CastParallelVoteInput = z.infer<typeof castParallelVoteSchema>;
+export type RefereeDeductInput = z.infer<typeof refereeDeductPayloadSchema>;
+export type RefereeOverrideInput = z.infer<typeof refereeOverrideSchema>;
+export type RefereeToggleValidityInput = z.infer<typeof refereeToggleValiditySchema>;
+export type PlayerAppealInput = z.infer<typeof playerAppealPayloadSchema>;
+export type AppealAnswerInput = z.infer<typeof appealAnswerSchema>;
+export type UpdateSettingsInput = z.infer<typeof updateSettingsSchema>;
+export type RejoinRoomInput = z.infer<typeof rejoinRoomSchema>;
 
 // Legacy user types (keeping for compatibility)
 export interface User {

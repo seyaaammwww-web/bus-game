@@ -37,8 +37,8 @@ async function simulateFullGame() {
         gameManager.handleMessage(p1 as any, { type: 'join_room', payload: { roomCode, playerName: 'P1' } });
         gameManager.handleMessage(p2 as any, { type: 'join_room', payload: { roomCode, playerName: 'P2' } });
 
-        // Enable Voting
-        gameManager.handleMessage(host as any, { type: 'update_settings', payload: { enableVoting: true } });
+        // Host updates settings (disable referee, enable voting)
+        gameManager.handleMessage(host as any, { type: 'update_settings', payload: { votingEnabled: true } });
 
         // Ready Up
         [host, p1, p2].forEach(ws => gameManager.handleMessage(ws as any, { type: 'player_ready', payload: {} }));

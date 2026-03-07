@@ -54,7 +54,7 @@ function validateAnswerLenient(letter: string, category: Category, answer: strin
 
 export class RoundManager {
     private timers: Map<string, NodeJS.Timeout> = new Map();
-    private calculatingRooms = new Map<string, number>();
+    private calculatingRooms = new Set<string>();
 
     // FIX: Combined startRound — increment currentRound AND initialize round in one transact
     startRound(buffer: CorruptionProofBuffer<GameRoom>): Round {
@@ -153,11 +153,12 @@ export class RoundManager {
     ): Promise<void> {
         const roomCode = buffer.get().code;
 
-        // Prevent Re-entry / Race
-        const now = Date.now();
-        const existing = this.calculatingRooms.get(roomCode);
-        if (existing && (now - existing) < 30000) return;
-        this.calculatingRooms.set(roomCode, now);
+        // Prevent Re-entry / Race using Set
+        if (this.calculatingRooms.has(roomCode)) {
+            console.log(`[RoundManager] Already processing ${roomCode}, skipping`);
+            return;
+        }
+        this.calculatingRooms.add(roomCode);
 
         try {
             // FIX: Add 6-second timeout for validation — if slow, push everything to vote
@@ -227,7 +228,7 @@ export class RoundManager {
                 }
             }
 
-            if (hasPending && draft.settings?.enableVoting) {
+            if (hasPending && draft.settings?.votingEnabled) {
                 draft.phase = 'voting';
                 this.buildVoteQueueInDraft(draft);
             } else {
@@ -246,7 +247,7 @@ export class RoundManager {
             }
         }, "fallbackVote");
 
-        if (hasPending && buffer.get().settings?.enableVoting) {
+        if (hasPending && buffer.get().settings?.votingEnabled) {
             onVotingStart();
         } else {
             onRoundFinish();
@@ -334,7 +335,7 @@ export class RoundManager {
                 if (!isValid && !isPendingVote && item.answer.trim().length >= 2) {
                     const lenient = validateAnswerLenient(dRound.letter, item.category as Category, item.answer);
                     if (lenient) {
-                        if (draft.settings?.enableVoting) {
+                        if (draft.settings?.votingEnabled) {
                             isPendingVote = true;
                             reason = 'تتطلب تصويت';
                             hasPendingVotes = true;
@@ -367,7 +368,7 @@ export class RoundManager {
             if (hasPendingVotes) {
                 // LOGIC-3 FIX: Don't force-enable voting. If host disabled it, keep it disabled
                 // and treat pending-vote answers as invalid instead.
-                if (draft.settings?.enableVoting) {
+                if (draft.settings?.votingEnabled) {
                     draft.phase = 'voting';
                     // FIX: Build PARALLEL vote queue — all pending answers at once
                     this.buildVoteQueueInDraft(draft);

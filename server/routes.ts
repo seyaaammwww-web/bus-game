@@ -5,6 +5,15 @@ import { gameManager } from "./gameManager";
 import { HybridValidator } from "./hybridValidator";
 import { GroqService } from "./services/groqService";
 import { WildcardService } from "./services/wildcardService";
+import { WSErrorCode } from "../shared/schema";
+
+// Connection tracking for metrics
+const connectionMetrics = {
+  totalConnections: 0,
+  activeConnections: 0,
+  messagesProcessed: 0,
+  errorsLogged: 0,
+};
 
 export async function registerRoutes(
   httpServer: Server,
@@ -20,36 +29,81 @@ export async function registerRoutes(
   // P1-3 FIX: Limit payload size to 64KB and disable compression to prevent abuse
   const wss = new WebSocketServer({ server: httpServer, path: '/ws', maxPayload: 64 * 1024, perMessageDeflate: false });
 
-  wss.on('connection', (ws: WebSocket) => {
-    console.log('New WebSocket connection');
+  wss.on('connection', (ws: WebSocket, req) => {
+    connectionMetrics.totalConnections++;
+    connectionMetrics.activeConnections++;
+
+    // Attach connection metadata
+    (ws as any).id = require('crypto').randomUUID();
+    (ws as any).connectedAt = Date.now();
+
+    // Extract and attach client IP (for proxy support)
+    const forwarded = req.headers['x-forwarded-for'];
+    if (forwarded) {
+      (ws as any).forwardedFor = Array.isArray(forwarded) ? forwarded[0] : forwarded;
+    }
+
+    console.log(`[WS] New connection: ${(ws as any).id} from ${(ws as any).forwardedFor || 'direct'}`);
 
     ws.on('message', (data: Buffer) => {
+      connectionMetrics.messagesProcessed++;
+
       try {
-        const message = JSON.parse(data.toString());
+        let message;
+        try {
+          message = JSON.parse(data.toString());
+        } catch (parseError) {
+          ws.send(JSON.stringify({
+            type: 'error',
+            payload: { code: WSErrorCode.INVALID_PAYLOAD, message: 'Invalid JSON format' }
+          }));
+          return;
+        }
+
+        if (!message.type || typeof message.type !== 'string') {
+          ws.send(JSON.stringify({
+            type: 'error',
+            payload: { code: WSErrorCode.INVALID_PAYLOAD, message: 'Message must have a "type" field' }
+          }));
+          return;
+        }
+
         gameManager.handleMessage(ws, message);
-      } catch (error) {
-        console.error('Failed to parse message:', error);
+
+      } catch (error: any) {
+        connectionMetrics.errorsLogged++;
+        console.error('[WS] Message handling error:', error);
+
         ws.send(JSON.stringify({
           type: 'error',
-          payload: { message: 'Invalid message format' }
+          payload: { code: WSErrorCode.INTERNAL_ERROR, message: error.message || 'Internal server error' }
         }));
       }
     });
 
-    ws.on('close', () => {
-      console.log('WebSocket connection closed');
+    ws.on('close', (code, reason) => {
+      connectionMetrics.activeConnections--;
+      console.log(`[WS] Connection closed: ${(ws as any).id} (code: ${code}, reason: ${reason || 'none'})`);
       gameManager.handleDisconnect(ws);
     });
 
     ws.on('error', (error) => {
-      console.error('WebSocket error:', error);
+      connectionMetrics.errorsLogged++;
+      console.error(`[WS] Connection error: ${(ws as any).id}`, error);
       gameManager.handleDisconnect(ws);
     });
   });
 
   // Health check endpoint
   app.get('/api/health', (_req, res) => {
-    res.json({ status: 'ok' });
+    res.json({
+      status: 'ok',
+      connections: {
+        active: connectionMetrics.activeConnections,
+        total: connectionMetrics.totalConnections,
+      },
+      messages: connectionMetrics.messagesProcessed,
+    });
   });
 
   // Groq Health Endpoint
@@ -103,8 +157,11 @@ export async function registerRoutes(
   // Validator metrics endpoint
   app.get('/api/metrics', (_req, res) => {
     res.json({
+      websocket: connectionMetrics,
       validator: WildcardService.getInstance().getStats(),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      memory: process.memoryUsage()
     });
   });
 

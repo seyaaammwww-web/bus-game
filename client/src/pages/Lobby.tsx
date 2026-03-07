@@ -8,6 +8,8 @@ import { categories } from '@shared/schema';
 import { PlayerCard } from '@/components/PlayerCard';
 import { useGame } from '@/lib/gameContext';
 import { RetroCard } from '@/components/ui/RetroCard';
+import { BouncyCard } from '@/components/ui/BouncyCard';
+import { JuicyButton } from '@/components/ui/JuicyButton';
 import { Tutorial } from '@/components/Tutorial';
 import { HelpCircle } from 'lucide-react';
 import { HostControls } from '@/components/HostControls';
@@ -161,7 +163,7 @@ export default function Lobby() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          <RetroCard className="mb-6">
+          <BouncyCard className="mb-6">
             <div className="flex flex-row items-center justify-between gap-2 pb-4 border-b-2 border-[#4c1d95]/10 mb-3">
               <h2 className="text-xl flex items-center gap-2 font-pixel-title text-[#4c1d95] font-bold">
                 <Users className="w-6 h-6 text-[#7c3aed]" />
@@ -215,14 +217,14 @@ export default function Lobby() {
               {/* Voting Toggle — STYLE-3 FIX: full-width retro toggle with visual feedback */}
               {isHost ? (
                 <button
-                  onClick={() => updateSettings({ enableVoting: !room.settings?.enableVoting })}
-                  className={`w-full flex items-center justify-between p-3 rounded-lg border-[3px] transition-all active:translate-y-[1px] active:shadow-none ${room.settings?.enableVoting
+                  onClick={() => updateSettings({ votingEnabled: !room.settings?.votingEnabled })}
+                  className={`w-full flex items-center justify-between p-3 rounded-lg border-[3px] transition-all active:translate-y-[1px] active:shadow-none ${room.settings?.votingEnabled
                     ? 'bg-[#7c3aed]/10 border-[#7c3aed] shadow-[0_3px_0_0_#4c1d95]'
                     : 'bg-white/50 border-[#4c1d95]/20 shadow-[0_2px_0_0_#4c1d95]/10'
                     }`}
                 >
                   <div className="flex items-center gap-2">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white transition-colors ${room.settings?.enableVoting ? 'bg-[#7c3aed]' : 'bg-[#4c1d95]/40'
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white transition-colors ${room.settings?.votingEnabled ? 'bg-[#7c3aed]' : 'bg-[#4c1d95]/40'
                       }`}>
                       <Gavel className="w-4 h-4" />
                     </div>
@@ -233,15 +235,15 @@ export default function Lobby() {
                       </p>
                     </div>
                   </div>
-                  <div className={`px-3 py-1 rounded-full border-[2px] font-bold font-pixel-text text-xs transition-colors ${room.settings?.enableVoting
+                  <div className={`px-3 py-1 rounded-full border-[2px] font-bold font-pixel-text text-xs transition-colors ${room.settings?.votingEnabled
                     ? 'bg-[#7c3aed] border-[#4c1d95] text-white shadow-[0_2px_0_0_#2e1065]'
                     : 'bg-white border-[#4c1d95]/30 text-[#4c1d95]/50'
                     }`}>
-                    {room.settings?.enableVoting ? 'مفعل' : 'معطل'}
+                    {room.settings?.votingEnabled ? 'مفعل' : 'معطل'}
                   </div>
                 </button>
               ) : (
-                room.settings?.enableVoting && (
+                room.settings?.votingEnabled && (
                   <div className="flex items-center gap-2 p-2 bg-[#7c3aed]/10 rounded-lg border border-[#7c3aed]/30 justify-center mb-2">
                     <Gavel className="w-4 h-4 text-[#7c3aed]" />
                     <span className="text-xs font-bold text-[#4c1d95] font-pixel-text">نظام التحكيم الديمقراطي مفعل</span>
@@ -281,7 +283,7 @@ export default function Lobby() {
                   ))}
               </AnimatePresence>
             </div>
-          </RetroCard>
+          </BouncyCard>
         </motion.div>
 
         {isHost && room.players.length >= 1 && (
@@ -322,7 +324,7 @@ export default function Lobby() {
                     className="h-10 border-2 border-[#4c1d95] text-[#4c1d95] font-pixel-text font-bold text-base"
                     data-testid="button-choose-referee"
                   >
-                    {room.settings?.enableVoting ? <span className="text-xs text-red-500 ml-2">(سيلغي التصويت)</span> : 'اختر حكم'}
+                    {room.settings?.votingEnabled ? <span className="text-xs text-red-500 ml-2">(سيلغي التصويت)</span> : 'اختر حكم'}
                   </Button>
                 )}
               </div>
@@ -376,16 +378,16 @@ export default function Lobby() {
             <motion.div
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             >
-              <Button
+              <JuicyButton
                 variant="primary"
-                size="lg"
-                className="w-full h-16 text-xl font-pixel-title shine-effect relative overflow-hidden"
+                fullWidth={true}
+                className="h-16 text-xl"
                 onClick={setReady}
                 data-testid="button-ready"
               >
                 <Check className="w-6 h-6 ml-2 absolute right-4" />
                 أنا جاهز!
-              </Button>
+              </JuicyButton>
             </motion.div>
           )}
 
@@ -410,17 +412,17 @@ export default function Lobby() {
             <motion.div
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             >
-              <Button
-                size="lg"
-                variant={canStart ? "secondary" : "default"}
-                className={`w-full h-16 text-lg font-pixel-title relative overflow-hidden ${!canStart ? 'opacity-50 cursor-not-allowed bg-gray-400 border-gray-600' : 'shine-effect'}`}
+              <JuicyButton
+                variant={canStart ? "success" : "primary"}
+                fullWidth={true}
+                className={`h-16 text-lg`}
                 onClick={startGame}
                 disabled={!canStart}
                 data-testid="button-start-game"
               >
                 <Play className="w-6 h-6 ml-2 absolute right-4" />
                 {otherPlayersReady ? 'ابدأ!' : 'في الانتظار...'}
-              </Button>
+              </JuicyButton>
             </motion.div>
           )}
         </motion.div>

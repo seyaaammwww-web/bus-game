@@ -1512,12 +1512,14 @@ input:focus, textarea:focus, select:focus {
   transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
 }
 
-/* Enhanced focus-visible state */
+/* Enhanced focus-visible state (Retro Focus Rings) */
 button:focus-visible,
 [role="button"]:focus-visible,
 input:focus-visible,
-select:focus-visible {
-  outline: none;
+select:focus-visible,
+a:focus-visible {
+  outline: 3px dashed #7c3aed;
+  outline-offset: 4px;
   box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.3),
               0 0 0 6px rgba(124, 58, 237, 0.1);
   transform: scale(1.01);
@@ -1545,10 +1547,13 @@ select:focus-visible {
 
 /* Accessibility - Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  * {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 

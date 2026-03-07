@@ -44,7 +44,7 @@ export class RoomManager {
             voteQueue: [],
             currentVote: null,
             settings: {
-                enableVoting: false,
+                votingEnabled: false,
                 customCategories: []
             }
         };
@@ -97,7 +97,7 @@ export class RoomManager {
                 letters: getRandomLetters(10),
                 createdAt: Date.now(),
                 isPublicRoom: true,
-                settings: { enableVoting: false }
+                settings: { votingEnabled: false }
             };
             buffer = new CorruptionProofBuffer(room);
             this.rooms.set(PUBLIC_ROOM_CODE, buffer);
@@ -178,17 +178,29 @@ export class RoomManager {
             const now = Date.now();
             for (const [code, buffer] of this.rooms.entries()) {
                 const room = buffer.get();
-                // V3-10 FIX: Check if room only has offline players, not just if array is completely empty
-                const isEmpty = room.players.filter(p => !p.isOffline).length === 0;
-                const isOld = now - room.createdAt > 24 * 60 * 60 * 1000;
+                const lastActivity = room.lastActivityAt || room.createdAt;
 
-                if ((isEmpty && now - room.createdAt > 10 * 60 * 1000) || isOld) {
+                const isEmpty = room.players.filter(p => !p.isOffline).length === 0;
+
+                const shouldCleanupEmpty = isEmpty && (now - lastActivity > 10 * 60 * 1000);
+                const isStale = now - lastActivity > 24 * 60 * 60 * 1000;
+
+                if (shouldCleanupEmpty || isStale) {
                     this.rooms.delete(code);
-                    if (this.onRoomDeleted) this.onRoomDeleted(code); // V3-14 FIX: Invoke cleanup callback
-                    console.log(`[RoomManager] Cleaned up room ${code}`);
+                    if (this.onRoomDeleted) this.onRoomDeleted(code);
+                    console.log(`[RoomManager] Cleaned up room ${code} (empty: ${shouldCleanupEmpty}, stale: ${isStale})`);
                 }
             }
-        }, 5 * 60 * 1000); // P2-9 FIX: 5 min instead of 60 min for faster memory reclamation
+        }, 5 * 60 * 1000);
+    }
+
+    updateActivity(roomCode: string): void {
+        const buffer = this.rooms.get(roomCode);
+        if (buffer) {
+            buffer.transact(draft => {
+                draft.lastActivityAt = Date.now();
+            }, "updateActivity");
+        }
     }
 
     // Persistence Helpers

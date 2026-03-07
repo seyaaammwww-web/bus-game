@@ -14,6 +14,8 @@ import { BanishNotification } from '@/components/BanishNotification';
 import { PowerUpMenu } from '@/components/PowerUpMenu';
 import { VotingOverlay } from '@/components/VotingOverlay';
 import { Confetti } from '@/components/Confetti';
+import { GameScore } from '@/components/ui/GameScore';
+import { ImpactFrame } from '@/components/ui/ImpactFrame';
 import { useGame } from '@/lib/gameContext';
 import { categories, type Category, type RoundAnswers } from '@shared/schema';
 import { AlertTriangle, Send, User, Users, Globe, PawPrint, Box, LogOut, Zap, Eye, Trophy, Flame, Sparkles, Crown, Skull, Pyramid, Gavel } from 'lucide-react';
@@ -97,6 +99,7 @@ export default function Game() {
   const [showCountdown, setShowCountdown] = useState(true);
   const [countdown, setCountdown] = useState(3);
   const [wildcardActive, setWildcardActive] = useState(false);
+  const [busCompleteTriggered, setBusCompleteTriggered] = useState(false);
   const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   // Debounced draft sync to server
@@ -145,6 +148,7 @@ export default function Game() {
       setShowCountdown(true);
       setCountdown(3);
     }
+    setBusCompleteTriggered(false);
   }, [room.currentRound]);
 
   useEffect(() => {
@@ -211,6 +215,7 @@ export default function Game() {
       if (!allFilled) return;
 
       playClickSound();
+      setBusCompleteTriggered(true);
       handleSubmit();
       triggerBusComplete();
     }
@@ -261,6 +266,13 @@ export default function Game() {
           <div className="pixel-rain pixel-rain-3"></div>
         </div>
       )}
+
+      {/* JUICY: Impact Frame for Bus Complete */}
+      <ImpactFrame
+        show={busCompleteTriggered}
+        text="أتوبيس كومبليت!"
+        duration={2000}
+      />
 
       <AnimatePresence>
         {showCountdown && (
@@ -331,9 +343,13 @@ export default function Game() {
           <div className="flex items-center justify-between px-2 mt-4">
             <PowerUpMenu />
 
-            <div className="bg-gradient-to-r from-amber-400 to-yellow-500 text-[#2e1065] px-4 py-1.5 rounded-full border-[3px] border-[#4c1d95] font-bold text-xs shadow-sm font-pixel-text">
-              جولة {room.currentRound + 1} / {room.totalRounds}
-            </div>
+            <GameScore
+              score={room.currentRound + 1}
+              maxScore={room.totalRounds}
+              size="sm"
+              showLabel={false}
+              hideProgressBar={true}
+            />
           </div>
         </motion.div>
 
@@ -357,9 +373,13 @@ export default function Game() {
               <LogOut className="w-5 h-5" />
             </Button>
 
-            <div className="bg-gradient-to-r from-amber-400 to-yellow-500 text-[#2e1065] px-5 py-2 rounded-full border-[3px] border-[#4c1d95] font-bold text-lg shadow-[3px_3px_0_0_#2e1065] font-pixel-text whitespace-nowrap">
-              جولة {room.currentRound + 1} / {room.totalRounds}
-            </div>
+            <GameScore
+              score={room.currentRound + 1}
+              maxScore={room.totalRounds}
+              size="md"
+              showLabel={false}
+              hideProgressBar={true}
+            />
 
             <div className="scale-75 origin-right">
               <LetterDisplay letter={letter} />
@@ -450,17 +470,17 @@ export default function Game() {
                     "bg-white border-2 border-[#4c1d95] shadow-[3px_3px_0px_0px_#2e1065] rounded-xl overflow-hidden hover:-translate-y-1 hover:shadow-[5px_5px_0px_0px_#2e1065] transition-all duration-200",
                     isLastOdd && "w-[calc(50%-6px)] md:w-full"
                   )}>
-                    <div className={`${categoryColors[category]} py-1.5 px-2 border-b-2 border-[#4c1d95] flex items-center justify-center gap-1.5`}>
+                    <div className={`${categoryColors[category as Category]} py-1.5 px-2 border-b-2 border-[#4c1d95] flex items-center justify-center gap-1.5`}>
                       <Icon className="w-3.5 h-3.5 text-white" />
                       <span className="font-bold text-white font-pixel-text text-xs md:text-sm whitespace-nowrap">{category}</span>
                     </div>
                     <div className="p-2 bg-gradient-to-b from-white to-gray-50">
                       <Input
-                        ref={(el) => { inputRefs.current[category] = el; }}
+                        ref={(el) => { inputRefs.current[category as Category] = el; }}
                         type="text"
-                        value={answers[category]}
-                        onChange={(e) => updateAnswer(category, e.target.value)}
-                        onKeyDown={(e) => handleKeyDown(category, e)}
+                        value={answers[category as Category]}
+                        onChange={(e) => updateAnswer(category as Category, e.target.value)}
+                        onKeyDown={(e) => handleKeyDown(category as Category, e)}
                         disabled={hasSubmitted || isBanished}
                         placeholder="..."
                         onFocus={(e) => {
@@ -470,7 +490,7 @@ export default function Game() {
                             }, 300);
                           }
                         }}
-                        className={`text-center text-sm md:text-lg h-9 md:h-12 border-2 border-[#e5e7eb] focus:border-[#7c3aed] focus:ring-0 focus:shadow-[0_0_0_2px_rgba(124,58,237,0.1)] transition-all font-pixel-text font-bold bg-white text-[#4c1d95] placeholder:text-gray-300 rounded-lg ${hasSubmitted || isBanished ? 'opacity-60 grayscale' : ''} ${answers[category]?.trim().length > 0 ? 'input-locked scale-100' : ''}`}
+                        className={`text-center text-sm md:text-lg h-9 md:h-12 border-2 border-[#e5e7eb] focus:border-[#7c3aed] focus:ring-0 focus:shadow-[0_0_0_2px_rgba(124,58,237,0.1)] transition-all font-pixel-text font-bold bg-white text-[#4c1d95] placeholder:text-gray-300 rounded-lg ${hasSubmitted || isBanished ? 'opacity-60 grayscale' : ''} ${answers[category as Category]?.trim().length > 0 ? 'input-locked scale-100' : ''}`}
                         data-testid={`input-${category}`}
                       />
                     </div>

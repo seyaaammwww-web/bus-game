@@ -21,7 +21,7 @@ async function testSuggestions() {
 
     // 2. Test Invalid/New Word (Should LOG)
     // "زعبلاوي" - unlikely to be in DB :D
-    const result3 = await validator.validate('test-player', 'س', 'نبات', 'سحلب');
+    const result3 = await validator.validate('test-player', 'س', 'نبات' as any, 'سحلب');
 
     logs = JSON.parse(fs.readFileSync(suggestionsPath, 'utf-8'));
     if (logs.length === 1 && logs[0].word === 'باريس') { // Changed from 'زعبلاوي' to 'باريس'

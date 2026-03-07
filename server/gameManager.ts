@@ -62,7 +62,21 @@ export class GameManager {
   private readonly ROOM_CREATION_WINDOW_MS = 10 * 60 * 1000;
 
   private getClientIp(ws: WebSocket): string {
-    return (ws as any)._socket?.remoteAddress || 'unknown';
+    const forwarded = (ws as any).forwardedFor || (ws as any)['x-forwarded-for'];
+    if (forwarded) {
+      return forwarded.split(',')[0].trim();
+    }
+    const socket = (ws as any)._socket;
+    if (socket?.remoteAddress) {
+      return socket.remoteAddress;
+    }
+    const connId = (ws as any).id;
+    if (connId) {
+      return `conn:${connId}`;
+    }
+    const newId = require('crypto').randomUUID();
+    (ws as any).id = newId;
+    return `conn:${newId}`;
   }
 
   private checkRoomCreationLimit(ws: WebSocket): boolean {
@@ -100,9 +114,18 @@ export class GameManager {
   }
 
   constructor() {
-    // V3-14 FIX: Pass callback to clean up socket index when RoomManager deletes a stale room
+    // V3-14 & P1-1 FIX: Extended callback for deep room cleanup
     this.roomManager = new RoomManager((code) => {
+      const prefix = code + ':';
+      this.endedRounds.forEach(key => {
+        if (key.startsWith(prefix)) this.endedRounds.delete(key);
+      });
+      this.finishedRounds.forEach(key => {
+        if (key.startsWith(prefix)) this.finishedRounds.delete(key);
+      });
       this.roomSocketIndex.delete(code);
+      this.roundManager.clearTimer(code);
+      console.log(`[GameManager] Cleaned up all tracking for room ${code}`);
     });
 
     // FIX: PlayerManager now takes a timeout callback to remove dead players from rooms
@@ -243,7 +266,7 @@ export class GameManager {
       return;
     }
 
-    const invalid = () => this.send(ws, { type: 'error', payload: { message: 'بيانات غير صالحة' } });
+    const invalid = () => this.send(ws, { type: 'error', payload: { code: 'INVALID_PAYLOAD', message: 'بيانات غير صالحة' } });
 
     console.log(`[GameManager] Received: ${message.type}`);
     try {
@@ -385,7 +408,13 @@ export class GameManager {
         case 'appeal_answer': {
           const p = this.validatePayload(appealAnswerSchema, message.payload);
           if (!p) return invalid();
-          this.appealAnswer(ws, p);
+          this.appealAnswer(ws, { ...p, category: p.category as any });
+          break;
+        }
+        default: {
+          const unknownType = (message as any).type;
+          console.warn(`[GameManager] Unknown message type: ${unknownType}`);
+          this.send(ws, { type: 'error', payload: { code: 'UNKNOWN_TYPE', message: `نوع رسالة غير معروف: ${unknownType}` } });
           break;
         }
       }
@@ -827,6 +856,8 @@ export class GameManager {
       }
 
       let autoStart = false;
+      let currentRound = 0;
+      let totalRounds = 0;
       buffer.transact(draft => {
         const round = draft.rounds[draft.currentRound];
         if (round) round.powerUpUsedInRound = false;
@@ -834,6 +865,13 @@ export class GameManager {
         // FIX-AUTO-1: Must check both 'playing' AND 'voting' phases for referee_review routing.
         // When voting+referee combo is used, phase='voting' after votes finish — not 'playing'.
         const canGoToRefereeReview = (draft.phase === 'playing' || draft.phase === 'voting') && !!draft.refereeId;
+        const targetPhase = canGoToRefereeReview ? 'referee_review' : 'results';
+
+        if (!canTransition(draft.phase, targetPhase)) {
+          console.error(`[finishRoundPhase] Invalid transition: ${draft.phase} → ${targetPhase}`);
+          return;
+        }
+
         if (canGoToRefereeReview) {
           draft.phase = 'referee_review';
         } else {
@@ -842,24 +880,27 @@ export class GameManager {
           draft.phase = 'results';
           this.roundManager.commitRoundResults(draft);
 
-          if (!draft.refereeId && !draft.settings?.enableVoting) {
+          if (!draft.refereeId && !draft.settings?.votingEnabled) {
             draft.nextRoundAt = Date.now() + 20000;
             autoStart = true;
           }
         }
+
+        currentRound = draft.currentRound;
+        totalRounds = draft.totalRounds;
       }, "finishRoundPhase");
 
       const room = buffer.get();
       this.broadcastToRoom(room.code, { type: 'round_results', payload: { room } });
 
-      if (autoStart && room.currentRound < room.totalRounds - 1) {
+      if (autoStart && currentRound < totalRounds - 1) {
         this.roundManager.setRoundTimer(room.code, () => {
           const check = this.roomManager.getRoomBuffer(room.code)?.get();
-          if (check && check.phase === 'results' && check.currentRound === room.currentRound) {
+          if (check && check.phase === 'results' && check.currentRound === currentRound) {
             this.nextRoundByRoomCode(room.code);
           }
         }, 20000);
-      } else if (room.currentRound >= room.totalRounds - 1) {
+      } else if (currentRound >= totalRounds - 1) {
         this.roundManager.setRoundTimer(room.code, () => {
           const check = this.roomManager.getRoomBuffer(room.code)?.get();
           if (check && check.phase === 'results') {
@@ -990,11 +1031,11 @@ export class GameManager {
         }
       }
 
-      if (settings.enableVoting !== undefined) {
+      if (settings.votingEnabled !== undefined) {
         if (!draft.settings) draft.settings = {};
-        draft.settings.enableVoting = settings.enableVoting;
+        draft.settings.votingEnabled = settings.votingEnabled;
 
-        if (settings.enableVoting && draft.refereeId) {
+        if (settings.votingEnabled && draft.refereeId) {
           draft.refereeId = undefined;
           draft.players.forEach(pl => pl.isReferee = false);
           if (draft.phase === 'referee_review') {
@@ -1026,7 +1067,7 @@ export class GameManager {
       draft.voteQueue = [];
       draft.currentVote = null;
       if (!draft.settings) draft.settings = {};
-      draft.settings.enableVoting = false;
+      draft.settings.votingEnabled = false;
     }, "setReferee");
 
     const room = buffer.get();
@@ -1265,6 +1306,9 @@ export class GameManager {
       const isRef = draft.refereeId === p.playerId;
       if (!isHost && !isRef) return;
 
+      // FIX (#2): Added defensive guard to prevent vote modification if parallel voting is entirely disabled
+      if (!draft.settings?.votingEnabled) return;
+
       const round = draft.rounds[draft.currentRound];
       if (!round) return;
       const ans = round.validatedAnswers.find(a => a.playerId === payload.playerId && a.category === payload.category);
@@ -1346,7 +1390,7 @@ export class GameManager {
     if (!buffer) return;
 
     buffer.transact(draft => {
-      if (!draft.settings?.enableVoting) return;
+      if (!draft.settings?.votingEnabled) return;
 
       const player = draft.players.find((pl: any) => pl.id === p.playerId);
       const round = draft.rounds[draft.currentRound];

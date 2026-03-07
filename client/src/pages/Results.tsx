@@ -7,6 +7,8 @@ import { useGame } from '@/lib/gameContext';
 import { categories, type Category } from '@shared/schema';
 import { playSuccessSound, playCountdownSound, playBonusSound } from '@/lib/sounds';
 import { RetroCard } from '@/components/ui/RetroCard';
+import { BouncyCard } from '@/components/ui/BouncyCard';
+import { JuicyButton } from '@/components/ui/JuicyButton';
 import { PixelAvatar } from '@/components/ui/PixelAvatar';
 import { RetroQuote } from '@/components/ui/RetroQuote';
 import { LetterDisplay } from '@/components/LetterDisplay';
@@ -283,7 +285,7 @@ export default function Results() {
                 transition={{ delay: 0.8 }}
                 className="mb-6"
               >
-                <RetroCard>
+                <BouncyCard delay={0.8} hoverEffect={false}>
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-7 h-7 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-lg flex items-center justify-center shadow-[2px_2px_0_0_#78350f]">
                       <Trophy className="w-4 h-4 text-white" />
@@ -348,7 +350,7 @@ export default function Results() {
                       );
                     })}
                   </div>
-                </RetroCard>
+                </BouncyCard>
               </motion.div>
             </>
           ) : (
@@ -370,7 +372,7 @@ export default function Results() {
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
-            <RetroCard className="mb-4">
+            <BouncyCard className="mb-4" hoverEffect={false}>
               <div className="flex items-center gap-2 mb-3 font-pixel-title text-[#4c1d95] text-base">
                 <div className="w-7 h-7 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-lg flex items-center justify-center">
                   <Trophy className="w-4 h-4 text-white" />
@@ -422,7 +424,7 @@ export default function Results() {
                   })}
                 </AnimatePresence>
               </div>
-            </RetroCard>
+            </BouncyCard>
           </motion.div>
         )}
 
@@ -440,25 +442,27 @@ export default function Results() {
           className="space-y-3"
         >
           {isHost && isFinal && (
-            <Button
+            <JuicyButton
+              variant="success"
               onClick={playAgain}
-              size="lg"
-              className="w-full h-16 text-xl font-bold bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title"
+              fullWidth={true}
+              className="h-16 text-xl"
               data-testid="button-play-again"
             >
               <RotateCcw className="w-6 h-6 ml-2" />
               العب مرة أخرى
-            </Button>
+            </JuicyButton>
           )}
-          <Button
+          <JuicyButton
+            variant="danger"
             onClick={disconnect}
-            size="lg"
-            className="w-full h-16 text-xl font-bold bg-gradient-to-r from-[#7c3aed] to-[#8b5cf6] hover:from-[#6d28d9] hover:to-[#7c3aed] text-white shadow-[4px_4px_0_0_#2e1065] border-[3px] border-[#4c1d95] font-pixel-title"
+            fullWidth={true}
+            className="h-16 text-xl"
             data-testid="button-end-game"
           >
             <Home className="w-6 h-6 ml-2" />
             العودة للرئيسية
-          </Button>
+          </JuicyButton>
         </motion.div>
 
 
@@ -484,8 +488,8 @@ export default function Results() {
                   currentPlayerId={state.playerId!}
                   isReferee={isReferee}
                   isHost={isHost}
-                  onRefereeToggle={room.phase === 'referee_review' ? refereeToggleUnique : undefined}
-                  onRefereeDeduct={room.phase === 'referee_review' ? (pid, cat) => refereeDeduct(pid, cat, 'رفض الحكم') : undefined}
+                  onRefereeToggle={room.phase === 'referee_review' ? (pid, cat) => refereeToggleUnique(pid, cat as Category) : undefined}
+                  onRefereeDeduct={room.phase === 'referee_review' ? (pid, cat) => refereeDeduct(pid, cat as Category, 'رفض الحكم') : undefined}
                 />
               </div>
             </motion.div>
@@ -516,14 +520,15 @@ export default function Results() {
                   </div>
                   {/* BUG-3b FIX: Allow Host to skip the auto-timer wait */}
                   {isHost && (
-                    <Button
+                    <JuicyButton
                       onClick={() => nextRound()}
-                      size="lg"
-                      className="w-full h-12 text-sm font-bold bg-[#4c1d95] hover:bg-[#5b21b6] shadow-[2px_2px_0_0_#2e1065] border-[2px] border-[#2e1065] text-white font-pixel-title transition-all active:translate-y-1 active:shadow-none mt-2"
+                      variant="primary"
+                      fullWidth={true}
+                      className="h-12 text-sm mt-2 font-pixel-title"
                       data-testid="button-skip-timer"
                     >
                       تخطي الانتظار وبدء الجولة
-                    </Button>
+                    </JuicyButton>
                   )}
                 </div>
               ) : (
@@ -534,40 +539,43 @@ export default function Results() {
                       <p className="text-[#FFFDD1] font-bold font-pixel-text text-lg animate-pulse">
                         الوقت متوقف للمراجعة
                       </p>
-                      <Button
+                      <JuicyButton
                         onClick={() => room.phase === 'results' ? nextRound() : refereeApprove()}
-                        size="lg"
-                        className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
+                        variant="success"
+                        fullWidth={true}
+                        className="h-14 text-lg font-pixel-title"
                       >
                         {room.phase === 'results' ? '➡️ بدء الجولة التالية' : 'اعتماد النتيجة وبدء الجولة'}
-                      </Button>
+                      </JuicyButton>
                     </div>
-                  ) : room.settings?.enableVoting && isHost ? (
+                  ) : room.settings?.votingEnabled && isHost ? (
                     // Host Control for Voting Mode
                     <div className="space-y-2">
                       <p className="text-[#FFFDD1] font-bold font-pixel-text text-lg">
                         وضع التصويت مفعل
                       </p>
-                      <Button
+                      <JuicyButton
                         onClick={() => nextRound()}
-                        size="lg"
-                        className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
+                        variant="success"
+                        fullWidth={true}
+                        className="h-14 text-lg font-pixel-title"
                         data-testid="button-next-round"
                       >
                         الاستمرار للجولة التالية
-                      </Button>
+                      </JuicyButton>
                     </div>
                   ) : isHost ? (
                     // BUG-10 FIX: Host in standard mode (no timer, no referee, no voting) always sees a Next Round button
                     <div className="space-y-2">
-                      <Button
+                      <JuicyButton
                         onClick={() => nextRound()}
-                        size="lg"
-                        className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
+                        variant="success"
+                        fullWidth={true}
+                        className="h-14 text-lg"
                         data-testid="button-next-round"
                       >
                         {room.currentRound >= room.totalRounds - 1 ? 'إنهاء اللعبة' : 'الجولة التالية ←'}
-                      </Button>
+                      </JuicyButton>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center gap-2">

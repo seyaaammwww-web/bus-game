@@ -6,6 +6,7 @@ import { PixelAvatar } from '@/components/ui/PixelAvatar';
 import { cn } from '@/lib/utils';
 import { useGame } from '@/lib/gameContext'; // FIX (#3): Phase 3 - Player Appeals
 import { categories, type Category } from '@shared/schema';
+import { ValidationStamp } from '@/components/ui/ValidationStamp';
 
 // Helper for category icons/colors (Reusing logic for consistency)
 import { User, Box, Globe, PawPrint } from 'lucide-react';
@@ -153,10 +154,10 @@ export function ResultsTable({
                                             )}
 
                                             {/* The Answer */}
-                                            <div className="flex-1 text-center md:w-full">
+                                            <div className="flex-1 text-center md:w-full relative">
                                                 {answer ? (
                                                     <span className={cn(
-                                                        "font-bold text-sm md:text-base break-words block",
+                                                        "font-bold text-sm md:text-base break-words block relative z-10",
                                                         isValid ? "text-[#15803d]" : "text-[#b91c1c] line-through decoration-2 decoration-red-300"
                                                     )}>
                                                         {answer}
@@ -164,6 +165,14 @@ export function ResultsTable({
                                                 ) : (
                                                     <span className="text-gray-300 text-xs font-pixel-text">-</span>
                                                 )}
+
+                                                {/* JUICY: Validation Stamp */}
+                                                <ValidationStamp
+                                                    isValid={isValid || false}
+                                                    show={answer !== undefined && answer !== "" && isReferee}
+                                                    size="sm"
+                                                    position="center"
+                                                />
                                             </div>
 
                                             {/* Score Badge */}
