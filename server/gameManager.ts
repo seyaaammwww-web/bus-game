@@ -1131,59 +1131,91 @@ export class GameManager {
       if (!player) return;
 
       if (payload.type === 'wildcard') {
-        const category = payload.category as string;
-        if (!category) return; // V3-8 FIX: Prevent consuming wildcard without a category
-
         const cost = 200; // Expected from POWER_UP_COSTS.wildcard
-        if (!player.usedPowerUps.wildcard && player.totalEarnedPoints >= cost) {
-          player.totalEarnedPoints -= cost;
-          player.usedPowerUps.wildcard = true;
-          // D2 FIX: Support multiple wildcard users
-          if (!round.wildcardUsedByPlayerIds) round.wildcardUsedByPlayerIds = [];
-          round.wildcardUsedByPlayerIds.push(p.playerId);
-          round.powerUpUsedInRound = true;
 
-          // FIX (#17): Pick a random unused word from DB for the player
-          const letter = draft.letters[draft.currentRound];
-          if (category) {
-            const possibleWords = WildcardService.getInstance().getWords(letter, category);
-            const usedAnswers = round.submissions.flatMap(sub =>
-              sub.answers[category] ? [sub.answers[category]] : []
-            );
+        // ✅ Check if already used
+        if (player.usedPowerUps.wildcard) {
+          console.log(`[PowerUp] Player ${player.name} already used wildcard`);
+          return;
+        }
 
-            // Filter out already used words to ensure uniqueness
-            const freshWords = possibleWords.filter(w => !usedAnswers.includes(w));
-            const chosen = freshWords.length > 0 ? freshWords[Math.floor(Math.random() * freshWords.length)] : possibleWords[0];
+        // ✅ Check if player has enough points
+        if (player.totalEarnedPoints < cost) {
+          console.log(`[PowerUp] Player ${player.name} doesn't have enough points (${player.totalEarnedPoints} < ${cost})`);
+          return;
+        }
 
-            if (chosen) {
-              const submission = round.submissions.find(s => s.playerId === p.playerId);
-              if (submission) {
-                submission.answers[category] = chosen;
-              } else {
-                round.submissions.push({
-                  playerId: p.playerId,
-                  playerName: player?.name || 'Unknown',
-                  answers: { [category]: chosen },
-                  submittedAt: Date.now(),
-                  busComplete: false
-                });
-              }
-            } else {
-              // Fallback if no fresh words available
-              const fallback = possibleWords.length > 0 ? possibleWords[Math.floor(Math.random() * possibleWords.length)] : 'جمل';
-              const submission = round.submissions.find(s => s.playerId === p.playerId);
-              if (submission) {
-                submission.answers[category] = fallback;
-              } else {
-                round.submissions.push({
-                  playerId: p.playerId,
-                  playerName: player?.name || 'Unknown',
-                  answers: { [category]: fallback },
-                  submittedAt: Date.now(),
-                  busComplete: false
-                });
-              }
+        // ✅ Get category from payload or auto-select
+        let category = payload.category as string;
+        if (!category) {
+          // Auto-select first empty category
+          const currentCategories = draft.settings?.customCategories?.length
+            ? draft.settings.customCategories
+            : ['ولد', 'بنت', 'بلد', 'حيوان', 'جماد'];
+
+          const submission = round.submissions.find(s => s.playerId === p.playerId);
+          for (const cat of currentCategories) {
+            if (!submission?.answers[cat] || submission.answers[cat].trim() === '') {
+              category = cat;
+              break;
             }
+          }
+
+          if (!category) {
+            category = currentCategories[0]; // Fallback
+          }
+        }
+
+        // Deduct points and mark as used
+        player.totalEarnedPoints -= cost;
+        player.usedPowerUps.wildcard = true;
+
+        // Track wildcard usage
+        if (!round.wildcardUsedByPlayerIds) round.wildcardUsedByPlayerIds = [];
+        round.wildcardUsedByPlayerIds.push(p.playerId);
+        round.powerUpUsedInRound = true;
+
+        // Generate word for the category
+        const letter = draft.letters[draft.currentRound];
+        const possibleWords = WildcardService.getInstance().getWords(letter, category);
+
+        // Find or create submission
+        let submission = round.submissions.find(s => s.playerId === p.playerId);
+
+        if (possibleWords.length > 0) {
+          const usedAnswers = round.submissions.flatMap(sub =>
+            sub.answers[category] ? [sub.answers[category]] : []
+          );
+
+          // Filter out already used words to ensure uniqueness
+          const freshWords = possibleWords.filter(w => !usedAnswers.includes(w));
+          const chosen = freshWords.length > 0 ? freshWords[Math.floor(Math.random() * freshWords.length)] : possibleWords[0];
+
+          if (submission) {
+            submission.answers[category] = chosen;
+          } else {
+            round.submissions.push({
+              playerId: p.playerId,
+              playerName: player.name,
+              answers: { [category]: chosen },
+              submittedAt: Date.now(),
+              busComplete: false
+            });
+          }
+
+          console.log(`[PowerUp] Wildcard activated for ${player.name}: ${category} -> ${chosen}`);
+        } else {
+          // Fallback if no specific word available
+          if (submission) {
+            submission.answers[category] = 'جمل'; // fallback word
+          } else {
+            round.submissions.push({
+              playerId: p.playerId,
+              playerName: player?.name || 'Unknown',
+              answers: { [category]: 'جمل' },
+              submittedAt: Date.now(),
+              busComplete: false
+            });
           }
         }
       } else if (payload.type === 'banish') {
@@ -1202,12 +1234,26 @@ export class GameManager {
           player.usedPowerUps.banish = true;
           round.banishedPlayerId = targetId;
           round.powerUpUsedInRound = true;
+
+          console.log(`[PowerUp] Banish activated: ${player.name} -> ${targetPlayer.name}`);
         }
       }
     }, "activatePowerUp");
 
     const room = buffer.get();
     this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
+
+    // ✅ Send confirmation toast to the player
+    const playerWs = this.playerManager.getSocket(p.playerId);
+    if (playerWs) {
+      this.send(playerWs, {
+        type: 'toast',
+        payload: {
+          message: '✅ تم تفعيل المساعدة بنجاح!',
+          type: 'success'
+        }
+      });
+    }
   }
 
   // ---------- Host Control Methods ----------

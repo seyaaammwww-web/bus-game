@@ -147,7 +147,7 @@ interface GameContextType {
   hostResolveVotes: () => void;
   // FIX: Host can kick a player
   kickPlayer: (playerId: string) => void;
-  activatePowerUp: (type: PowerUpType, targetId?: string) => void;
+  activatePowerUp: (type: PowerUpType, targetId?: string, category?: string) => void;
   activePowerUpNotification: { type: PowerUpType; playerName: string } | null;
   isBanished: boolean;
   banishedBy: string | null;
@@ -459,8 +459,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const hostResolveVotes = useCallback(() => { sendMessage('host_resolve_votes', {}); }, [sendMessage]);
   // FIX: Host kick
   const kickPlayer = useCallback((playerId: string) => { sendMessage('kick_player', { playerId }); }, [sendMessage]);
-  const activatePowerUp = useCallback((type: PowerUpType, targetId?: string) => {
-    sendMessage('activate_powerup', targetId ? { type, targetPlayerId: targetId } : { type });
+  const activatePowerUp = useCallback((type: PowerUpType, targetId?: string, category?: string) => {
+    const payload: any = { type };
+    if (targetId) payload.targetPlayerId = targetId;
+    if (category) payload.category = category;
+    sendMessage('activate_powerup', payload);
   }, [sendMessage]);
 
   const disconnect = useCallback(() => {

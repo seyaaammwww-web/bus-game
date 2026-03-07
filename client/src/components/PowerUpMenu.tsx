@@ -8,7 +8,7 @@ import { useGame } from '@/lib/gameContext';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import { playClickSound, playErrorSound } from '@/lib/sounds';
-import { POWER_UP_COSTS } from '@shared/schema';
+import { POWER_UP_COSTS, categories } from '@shared/schema';
 
 interface SquarePowerUpProps {
     type: 'wildcard' | 'banish';
@@ -92,8 +92,67 @@ function SquarePowerUp({ type, title, cost, icon: Icon, status, onActivate }: Sq
     );
 }
 
+// ✅ NEW: Category Selection Overlay for Wildcard
+function WildcardCategoryOverlay({
+    isOpen,
+    onClose,
+    onSelect
+}: {
+    isOpen: boolean;
+    onClose: () => void;
+    onSelect: (category: string) => void;
+}) {
+    if (!isOpen) return null;
+
+    return (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[10001] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+        >
+            <motion.div
+                initial={{ scale: 0.9, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.9, y: 20 }}
+                className="bg-gradient-to-b from-white to-[#faf5ff] p-6 border-[4px] border-[#4c1d95] shadow-[6px_6px_0_0_#2e1065] max-w-md w-full"
+            >
+                <h3 className="text-2xl font-pixel-title text-[#4c1d95] mb-4 text-center">
+                    اختر الفئة للجوكر
+                </h3>
+                <p className="font-pixel-text text-[#7c3aed] mb-4 text-center text-sm">
+                    سيتم توليد كلمة صحيحة تلقائياً
+                </p>
+
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                    {categories.map((cat) => (
+                        <button
+                            key={cat}
+                            onClick={() => {
+                                onSelect(cat);
+                                onClose();
+                            }}
+                            className="p-4 bg-gradient-to-b from-amber-200 to-amber-300 border-[3px] border-[#78350f] text-[#78350f] font-pixel-title text-lg hover:brightness-110 active:translate-y-[2px] transition-all shadow-[3px_3px_0_0_#78350f]"
+                        >
+                            {cat}
+                        </button>
+                    ))}
+                </div>
+
+                <button
+                    onClick={onClose}
+                    className="w-full py-2 bg-gray-200 border-[2px] border-gray-400 text-gray-700 font-pixel-text hover:bg-gray-300 transition-colors"
+                >
+                    إلغاء
+                </button>
+            </motion.div>
+        </motion.div>
+    );
+}
+
 export function PowerUpMenu() {
     const [isOpen, setIsOpen] = useState(false);
+    const [showWildcardOverlay, setShowWildcardOverlay] = useState(false);
     const { currentPlayer, activatePowerUp, currentRound, setBanishOverlay } = useGame();
 
     const toggleOpen = () => {
@@ -108,6 +167,12 @@ export function PowerUpMenu() {
 
         const points = currentPlayer?.totalEarnedPoints || 0;
         return points >= cost ? 'available' : 'locked';
+    };
+
+    const handleWildcardSelect = (category: string) => {
+        // ✅ FIX: Send category with the power-up activation
+        activatePowerUp('wildcard', undefined, category);
+        setIsOpen(false);
     };
 
     return (
@@ -170,8 +235,8 @@ export function PowerUpMenu() {
                                         icon={Crown}
                                         status={getStatus(POWER_UP_COSTS.wildcard, currentPlayer?.usedPowerUps?.wildcard || false)}
                                         onActivate={() => {
-                                            activatePowerUp('wildcard');
-                                            setIsOpen(false);
+                                            // ✅ FIX: Show category selection overlay first
+                                            setShowWildcardOverlay(true);
                                         }}
                                     />
 
@@ -199,6 +264,18 @@ export function PowerUpMenu() {
                             </RetroCard>
                         </motion.div>
                     </div>,
+                    document.body
+                )}
+            </AnimatePresence>
+
+            {/* ✅ NEW: Wildcard Category Selection Overlay */}
+            <AnimatePresence>
+                {showWildcardOverlay && createPortal(
+                    <WildcardCategoryOverlay
+                        isOpen={showWildcardOverlay}
+                        onClose={() => setShowWildcardOverlay(false)}
+                        onSelect={handleWildcardSelect}
+                    />,
                     document.body
                 )}
             </AnimatePresence>
