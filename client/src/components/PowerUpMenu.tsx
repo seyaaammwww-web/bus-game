@@ -8,6 +8,7 @@ import { useGame } from '@/lib/gameContext';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import { playClickSound, playErrorSound } from '@/lib/sounds';
+import { POWER_UP_COSTS } from '@shared/schema';
 
 interface SquarePowerUpProps {
     type: 'wildcard' | 'banish';
@@ -165,9 +166,9 @@ export function PowerUpMenu() {
                                     <SquarePowerUp
                                         type="wildcard"
                                         title="جوكر"
-                                        cost={200}
+                                        cost={POWER_UP_COSTS.wildcard}
                                         icon={Crown}
-                                        status={getStatus(200, currentPlayer?.usedPowerUps?.wildcard || false)}
+                                        status={getStatus(POWER_UP_COSTS.wildcard, currentPlayer?.usedPowerUps?.wildcard || false)}
                                         onActivate={() => {
                                             activatePowerUp('wildcard');
                                             setIsOpen(false);
@@ -177,9 +178,9 @@ export function PowerUpMenu() {
                                     <SquarePowerUp
                                         type="banish"
                                         title="طرد"
-                                        cost={400}
+                                        cost={POWER_UP_COSTS.banish}
                                         icon={Skull}
-                                        status={getStatus(400, currentPlayer?.usedPowerUps?.banish || false)}
+                                        status={getStatus(POWER_UP_COSTS.banish, currentPlayer?.usedPowerUps?.banish || false)}
                                         onActivate={() => {
                                             setBanishOverlay(true);
                                             setIsOpen(false);

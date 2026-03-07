@@ -1134,8 +1134,9 @@ export class GameManager {
         const category = payload.category as string;
         if (!category) return; // V3-8 FIX: Prevent consuming wildcard without a category
 
-        if (!player.usedPowerUps.wildcard && player.powerUps.wildcard > 0) {
-          player.powerUps.wildcard--;
+        const cost = 200; // Expected from POWER_UP_COSTS.wildcard
+        if (!player.usedPowerUps.wildcard && player.totalEarnedPoints >= cost) {
+          player.totalEarnedPoints -= cost;
           player.usedPowerUps.wildcard = true;
           // D2 FIX: Support multiple wildcard users
           if (!round.wildcardUsedByPlayerIds) round.wildcardUsedByPlayerIds = [];
@@ -1144,7 +1145,6 @@ export class GameManager {
 
           // FIX (#17): Pick a random unused word from DB for the player
           const letter = draft.letters[draft.currentRound];
-          const category = payload.category as string;
           if (category) {
             const possibleWords = WildcardService.getInstance().getWords(letter, category);
             const usedAnswers = round.submissions.flatMap(sub =>
@@ -1187,7 +1187,8 @@ export class GameManager {
           }
         }
       } else if (payload.type === 'banish') {
-        if (!player.usedPowerUps.banish && player.powerUps.banish > 0) {
+        const cost = 400; // Expected from POWER_UP_COSTS.banish
+        if (!player.usedPowerUps.banish && player.totalEarnedPoints >= cost) {
           // P2-7 FIX: Validate banish target exists and is not host/referee/self
           const targetId = payload.targetPlayerId;
           if (!targetId) return;
@@ -1197,7 +1198,7 @@ export class GameManager {
           if (draft.refereeId === targetId) return;
           if (targetId === p.playerId) return;
 
-          player.powerUps.banish--;
+          player.totalEarnedPoints -= cost;
           player.usedPowerUps.banish = true;
           round.banishedPlayerId = targetId;
           round.powerUpUsedInRound = true;

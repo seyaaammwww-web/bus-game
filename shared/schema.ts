@@ -19,8 +19,14 @@ export type Category = typeof categories[number];
 export type CustomCategory = string & { readonly __brand: 'CustomCategory' };
 export type GameCategory = Category | CustomCategory;
 
-// Power-ups system
 export type PowerUpType = 'hint' | 'steal' | 'wildcard' | 'banish';
+
+export const POWER_UP_COSTS = {
+  hint: 50,
+  steal: 100,
+  wildcard: 200,
+  banish: 400,
+} as const;
 
 export interface PowerUps {
   hint: number;

@@ -180,7 +180,7 @@ const VotingItemCard = memo(function VotingItemCard({ item, currentPlayer, castP
 });
 
 export const VotingOverlay = memo(function VotingOverlay() {
-    const { state, castParallelVote, refereeOverride, currentPlayer, isReferee, isHost } = useGame();
+    const { state, castParallelVote, refereeOverride, currentPlayer, isReferee, isHost, sendMessage } = useGame();
     const room = state.room;
     const voteQueue = room?.voteQueue || [];
 
@@ -283,24 +283,34 @@ export const VotingOverlay = memo(function VotingOverlay() {
                     className="w-full max-w-md max-h-[90vh] flex flex-col retro-overlay overflow-hidden shadow-[0_0_20px_rgba(124,58,237,0.5)]"
                 >
                     {/* ── Header banner ── */}
-                    <div className="bg-[#4c1d95] px-4 py-3 flex items-center justify-between border-b-[3px] border-[#2e1065] shrink-0">
-                        <div className="flex items-center gap-2">
-                            <motion.div
-                                animate={{ rotate: [-10, 10, -10] }}
-                                transition={{ repeat: Infinity, duration: 0.8 }}
+                    <div className="bg-[#4c1d95] px-4 py-3 flex flex-col gap-2 border-b-[3px] border-[#2e1065] shrink-0">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <motion.div
+                                    animate={{ rotate: [-10, 10, -10] }}
+                                    transition={{ repeat: Infinity, duration: 0.8 }}
+                                >
+                                    <Gavel className="w-5 h-5 text-amber-300" />
+                                </motion.div>
+                                <span className="font-pixel-title text-amber-200 text-base tracking-wide">
+                                    محكمة الجولة {room.currentRound + 1}
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Timer timeLeft={voteTimeLeft} isRush={voteTimeLeft <= 5} maxTime={30} />
+                                <span className="text-[10px] bg-amber-400 text-amber-900 font-pixel-text font-bold px-2 py-0.5 rounded-full border border-amber-600">
+                                    {voteQueue.length} إجابات
+                                </span>
+                            </div>
+                        </div>
+                        {isHost && (
+                            <button
+                                onClick={() => sendMessage('host_end_round', {})}
+                                className="w-full text-center bg-rose-500 hover:bg-rose-600 border-[2px] border-rose-700 text-white font-pixel-button text-sm py-1 rounded shadow-[0_2px_0_0_#9f1239] active:translate-y-[1px] active:shadow-none transition-all mt-1"
                             >
-                                <Gavel className="w-5 h-5 text-amber-300" />
-                            </motion.div>
-                            <span className="font-pixel-title text-amber-200 text-base tracking-wide">
-                                محكمة الجولة {room.currentRound + 1}
-                            </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Timer timeLeft={voteTimeLeft} isRush={voteTimeLeft <= 5} maxTime={30} />
-                            <span className="text-[10px] bg-amber-400 text-amber-900 font-pixel-text font-bold px-2 py-0.5 rounded-full border border-amber-600">
-                                {voteQueue.length} إجابات
-                            </span>
-                        </div>
+                                تخطي التصويت
+                            </button>
+                        )}
                     </div>
 
                     {/* Error display */}
