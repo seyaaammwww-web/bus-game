@@ -397,7 +397,13 @@ export class WildcardService {
                 await fsAsync.writeFile(cleanDbPath, snapshot, 'utf-8');
                 console.log(`[Wildcard DB] Added ${word} to ${dbKey}:${category}`);
             } catch (error) {
-                console.error('[Wildcard DB] Failed to save:', error);
+                console.error('[Wildcard DB] Failed to save, retrying once...', error);
+                try {
+                    await fsAsync.writeFile(cleanDbPath, snapshot, 'utf-8');
+                    console.log(`[Wildcard DB] Retry succeeded for ${word}`);
+                } catch (retryErr) {
+                    console.error('[Wildcard DB] Retry also failed:', retryErr);
+                }
             }
         });
 

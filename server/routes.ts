@@ -48,6 +48,15 @@ export async function registerRoutes(
     ws.on('message', (data: Buffer) => {
       connectionMetrics.messagesProcessed++;
 
+      // P1-4 FIX: Reject excessively large payloads before parsing to prevent DoS
+      if (data.length > 32 * 1024) {
+        ws.send(JSON.stringify({
+          type: 'error',
+          payload: { code: WSErrorCode.INVALID_PAYLOAD, message: 'حجم الرسالة كبير جداً' }
+        }));
+        return;
+      }
+
       try {
         let message;
         try {
@@ -154,14 +163,21 @@ export async function registerRoutes(
     }
   });
 
-  // Validator metrics endpoint
-  app.get('/api/metrics', (_req, res) => {
+  // Validator and Server metrics endpoint
+  app.get('/api/metrics', (req, res) => {
+    if (process.env.NODE_ENV === 'production') {
+      const token = req.headers['x-metrics-token'] || req.headers.authorization?.replace('Bearer ', '');
+      if (token !== process.env.METRICS_TOKEN) {
+        return res.status(403).json({ error: 'Forbidden' });
+      }
+    }
+
     res.json({
       websocket: connectionMetrics,
       validator: WildcardService.getInstance().getStats(),
       timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      memory: process.memoryUsage()
+      uptime: process.uptime()
+      // memory usage removed for security
     });
   });
 

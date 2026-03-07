@@ -339,7 +339,7 @@ export type WSMessage =
   | { type: 'send_reaction'; payload: { reactionType: string } }
   | { type: 'reaction_received'; payload: { reaction: any } } // Refine later
   | { type: 'draft_update'; payload: { answers: Record<string, string> } }
-  | { type: 'update_settings'; payload: any } // Refine later
+  | { type: 'update_settings'; payload: UpdateSettingsInput }
   | { type: 'referee_toggle_unique'; payload: { playerId: string; category: string } }
   | { type: 'activate_powerup'; payload: { type: string; targetPlayerId?: string } }
   | { type: 'powerup_activated'; payload: { activation: any } } // Refine later
@@ -465,7 +465,9 @@ export const refereeDeductPayloadSchema = z.object({
 export const updateSettingsSchema = z.object({
   maxRounds: z.number().int().min(1).max(20).optional(),
   roundDuration: z.number().int().min(30).max(300).optional(),
-  customCategories: z.array(z.string().min(1).max(20)).max(10).optional(),
+  customCategories: z.array(
+    z.string().min(1).max(20).regex(/^[\p{L}\p{N}\s\-_]+$/u, 'الاسم يحتوي على رموز غير صالحة')
+  ).max(10).optional(),
   votingEnabled: z.boolean().optional(),
   refereeEnabled: z.boolean().optional(),
 }).passthrough(); // allow extra settings fields

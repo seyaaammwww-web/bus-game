@@ -7,7 +7,7 @@ import {
   castParallelVoteSchema, requestVoteSchema, kickPlayerSchema, hostAdjustScoreSchema,
   refereeToggleValiditySchema, refereeOverrideSchema, appealAnswerSchema,
   activatePowerUpSchema, sendReactionSchema, setRefereeSchema, updateSettingsSchema,
-  playerAppealPayloadSchema, refereeDeductPayloadSchema
+  playerAppealPayloadSchema, refereeDeductPayloadSchema, POWER_UP_COSTS
 } from '../shared/schema';
 import { RoomManager } from './managers/RoomManager';
 import { PlayerManager } from './managers/PlayerManager';
@@ -178,13 +178,24 @@ export class GameManager {
     const ws = this.playerManager.getSocket(playerId);
     if (ws) this.removeSocketFromRoomIndex(roomId, ws);
 
+    let oldHostId = '';
+    const buffer = this.roomManager.getRoomBuffer(roomId);
+    if (buffer) oldHostId = buffer.get().hostId;
+
     this.roomManager.removePlayerFromRoom(roomId, playerId);
 
-    const buffer = this.roomManager.getRoomBuffer(roomId);
     if (buffer) {
       const room = buffer.get();
       if (room.players.length > 0) {
         this.broadcastToRoom(room.code, { type: 'player_left', payload: { players: room.players } });
+
+        // Host migration notification
+        if (oldHostId !== room.hostId && room.hostId) {
+          const newHostWs = this.playerManager.getSocket(room.hostId);
+          if (newHostWs) {
+            this.send(newHostWs, { type: 'toast', payload: { message: 'صرت مدير الغرفة عشان المدير القديم خرج!', type: 'success' } });
+          }
+        }
       }
     }
 
@@ -223,10 +234,10 @@ export class GameManager {
           );
           if (ans && ans.isPendingVote) {
             // FIX (#13): Align timeout vote logic with live voting requirement (> 50%) -> strict majority
-            // This treats Ties as Rejections.
+            // Accept ties as valid answers (50% or more) instead of rejecting.
             const { yes = 0 } = (item as any).votes || {};
             const totalEligible = item.eligibleVoterIds?.length || 0;
-            const majorityNeeded = Math.floor(totalEligible / 2) + 1;
+            const majorityNeeded = Math.ceil(totalEligible / 2); // 50% passes
             ans.isValid = yes >= majorityNeeded;
             ans.isPendingVote = false;
             ans.reason = ans.isValid ? 'تم قبوله (انتهاء الوقت)' : 'تم رفضه (انتهاء الوقت - لم يحظ بأغلبية)';
@@ -496,22 +507,41 @@ export class GameManager {
     // GM1: Explicit cleanup of WeakMap entry on disconnect
     this.rateLimits.delete(ws);
 
+    // Robust cleanup: ensure ws is removed from all room indices regardless of player state 
+    // to prevent memory leaks if socket was added without full registration.
+    for (const [code, sockets] of this.roomSocketIndex.entries()) {
+      if (sockets.has(ws)) {
+        sockets.delete(ws);
+        if (sockets.size === 0) {
+          this.roomSocketIndex.delete(code);
+        }
+      }
+    }
+
     const playerInfo = this.playerManager.removePlayer(ws);
     if (!playerInfo) return;
-
-    // P2-10 FIX: Remove from room→socket index
-    this.removeSocketFromRoomIndex(playerInfo.roomId, ws);
 
     // GM3: Clean up lastVoteTime entry when player leaves
     this.lastVoteTime.delete(playerInfo.playerId);
 
+    let oldHostId = '';
+    const buffer = this.roomManager.getRoomBuffer(playerInfo.roomId);
+    if (buffer) oldHostId = buffer.get().hostId;
+
     this.roomManager.removePlayerFromRoom(playerInfo.roomId, playerInfo.playerId);
 
-    const buffer = this.roomManager.getRoomBuffer(playerInfo.roomId);
     if (buffer) {
       const room = buffer.get();
       if (room.players.length > 0) {
         this.broadcastToRoom(room.code, { type: 'player_left', payload: { players: room.players } });
+
+        // Host migration notification
+        if (oldHostId !== room.hostId && room.hostId) {
+          const newHostWs = this.playerManager.getSocket(room.hostId);
+          if (newHostWs) {
+            this.send(newHostWs, { type: 'toast', payload: { message: 'صرت مدير الغرفة عشان المدير القديم خرج!', type: 'success' } });
+          }
+        }
       }
     }
 
@@ -761,6 +791,11 @@ export class GameManager {
 
     // V3-4 CRITICAL GUARD: Prevent double-processing via race conditions
     const room = buffer.get();
+    // P2-16 FIX: Reject stale timer that fires after phase already advanced
+    if (room.phase !== 'playing') {
+      console.log(`[endRound] Room ${roomCode} phase='${room.phase}', skipping stale timer`);
+      return;
+    }
     const roundKey = `${roomCode}:${room.currentRound}`;
     if (this.endedRounds.has(roundKey)) {
       console.log(`[endRound] Round ${roundKey} already ended, skipping`);
@@ -1114,7 +1149,10 @@ export class GameManager {
 
   activatePowerUp(ws: WebSocket, payload: any) {
     const p = this.playerManager.getPlayer(ws);
-    if (!p) return;
+    if (!p) {
+      this.send(ws, { type: 'error', payload: { message: 'غير مسجل' } });
+      return;
+    }
     const buffer = this.roomManager.getRoomBuffer(p.roomId);
     if (!buffer) return;
 
@@ -1131,17 +1169,19 @@ export class GameManager {
       if (!player) return;
 
       if (payload.type === 'wildcard') {
-        const cost = 200; // Expected from POWER_UP_COSTS.wildcard
+        const cost = POWER_UP_COSTS.wildcard;
 
         // ✅ Check if already used
         if (player.usedPowerUps.wildcard) {
           console.log(`[PowerUp] Player ${player.name} already used wildcard`);
+          this.send(ws, { type: 'error', payload: { message: 'استخدمت هذه القدرة بالفعل!' } });
           return;
         }
 
         // ✅ Check if player has enough points
         if (player.totalEarnedPoints < cost) {
           console.log(`[PowerUp] Player ${player.name} doesn't have enough points (${player.totalEarnedPoints} < ${cost})`);
+          this.send(ws, { type: 'error', payload: { message: `تحتاج لـ ${cost} نقطة لاستخدام هذه القدرة` } });
           return;
         }
 
@@ -1219,24 +1259,41 @@ export class GameManager {
           }
         }
       } else if (payload.type === 'banish') {
-        const cost = 400; // Expected from POWER_UP_COSTS.banish
-        if (!player.usedPowerUps.banish && player.totalEarnedPoints >= cost) {
-          // P2-7 FIX: Validate banish target exists and is not host/referee/self
-          const targetId = payload.targetPlayerId;
-          if (!targetId) return;
-          const targetPlayer = draft.players.find(pl => pl.id === targetId);
-          if (!targetPlayer) return;
-          if (targetPlayer.isHost) return;
-          if (draft.refereeId === targetId) return;
-          if (targetId === p.playerId) return;
+        const cost = POWER_UP_COSTS.banish;
 
-          player.totalEarnedPoints -= cost;
-          player.usedPowerUps.banish = true;
-          round.banishedPlayerId = targetId;
-          round.powerUpUsedInRound = true;
-
-          console.log(`[PowerUp] Banish activated: ${player.name} -> ${targetPlayer.name}`);
+        if (player.usedPowerUps.banish) {
+          console.log(`[PowerUp] Player ${player.name} already used banish`);
+          this.send(ws, { type: 'error', payload: { message: 'استخدمت هذه القدرة بالفعل!' } });
+          return;
         }
+
+        if (player.totalEarnedPoints < cost) {
+          console.log(`[PowerUp] Player ${player.name} doesn't have enough points (${player.totalEarnedPoints} < ${cost})`);
+          this.send(ws, { type: 'error', payload: { message: `تحتاج لـ ${cost} نقطة لاستخدام هذه القدرة` } });
+          return;
+        }
+
+        // P2-7 FIX: Validate banish target exists and is not host/referee/self
+        const targetId = payload.targetPlayerId;
+        if (!targetId) return;
+        const targetPlayer = draft.players.find(pl => pl.id === targetId);
+        if (!targetPlayer) return;
+        if (targetPlayer.isHost) {
+          this.send(ws, { type: 'error', payload: { message: 'لا يمكنك طرد مدير الغرفة!' } });
+          return;
+        }
+        if (draft.refereeId === targetId) {
+          this.send(ws, { type: 'error', payload: { message: 'لا يمكنك طرد الحكم!' } });
+          return;
+        }
+        if (targetId === p.playerId) return;
+
+        player.totalEarnedPoints -= cost;
+        player.usedPowerUps.banish = true;
+        round.banishedPlayerId = targetId;
+        round.powerUpUsedInRound = true;
+
+        console.log(`[PowerUp] Banish activated: ${player.name} -> ${targetPlayer.name}`);
       }
     }, "activatePowerUp");
 
