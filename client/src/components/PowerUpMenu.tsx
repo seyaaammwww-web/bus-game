@@ -207,7 +207,7 @@ export function PowerUpMenu() {
             >
                 {/* Shimmer Effect */}
                 <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-12 w-[40%]"
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-12 w-[40%] pointer-events-none"
                     animate={{ left: ['-100%', '200%'] }}
                     transition={{ repeat: Infinity, duration: 3, ease: "linear", repeatDelay: 1 }}
                 />
