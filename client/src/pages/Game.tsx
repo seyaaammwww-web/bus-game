@@ -14,8 +14,6 @@ import { BanishNotification } from '@/components/BanishNotification';
 import { PowerUpMenu } from '@/components/PowerUpMenu';
 import { VotingOverlay } from '@/components/VotingOverlay';
 import { Confetti } from '@/components/Confetti';
-import { GameScore } from '@/components/ui/GameScore';
-import { ImpactFrame } from '@/components/ui/ImpactFrame';
 import { useGame } from '@/lib/gameContext';
 import { categories, type Category, type RoundAnswers } from '@shared/schema';
 import { AlertTriangle, Send, User, Users, Globe, PawPrint, Box, LogOut, Zap, Eye, Trophy, Flame, Sparkles, Crown, Skull, Pyramid, Gavel } from 'lucide-react';
@@ -267,12 +265,14 @@ export default function Game() {
         </div>
       )}
 
-      {/* JUICY: Impact Frame for Bus Complete */}
-      <ImpactFrame
-        show={busCompleteTriggered}
-        text="أتوبيس كومبليت!"
-        duration={2000}
-      />
+      {/* Mobile Pixel Rain Background */}
+      {isMobile && (
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-40 mobile-juicy-bg">
+          <div className="pixel-rain pixel-rain-1"></div>
+          <div className="pixel-rain pixel-rain-2"></div>
+          <div className="pixel-rain pixel-rain-3"></div>
+        </div>
+      )}
 
       <AnimatePresence>
         {showCountdown && (
@@ -343,13 +343,11 @@ export default function Game() {
           <div className="flex items-center justify-between px-2 mt-4">
             <PowerUpMenu />
 
-            <GameScore
-              score={room.currentRound + 1}
-              maxScore={room.totalRounds}
-              size="sm"
-              showLabel={false}
-              hideProgressBar={true}
-            />
+            <div className="px-3 py-1 bg-white/10 rounded-full border border-white/20">
+              <span className="font-pixel-text font-bold text-sm text-amber-300">
+                الجولة {room.currentRound + 1} / {room.totalRounds}
+              </span>
+            </div>
           </div>
         </motion.div>
 
@@ -373,13 +371,10 @@ export default function Game() {
               <LogOut className="w-5 h-5" />
             </Button>
 
-            <GameScore
-              score={room.currentRound + 1}
-              maxScore={room.totalRounds}
-              size="md"
-              showLabel={false}
-              hideProgressBar={true}
-            />
+            <div className="px-4 py-1 flex items-center gap-2 bg-[#2e1065]/50 border-2 border-[#4c1d95] rounded-xl shadow-[2px_2px_0_0_#2e1065]">
+              <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+              <span className="font-pixel-text font-bold text-[#FFFDD1]">الجولة {room.currentRound + 1} / {room.totalRounds}</span>
+            </div>
 
             <div className="scale-75 origin-right">
               <LetterDisplay letter={letter} />

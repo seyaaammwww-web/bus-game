@@ -9,7 +9,6 @@ import { PlayerCard } from '@/components/PlayerCard';
 import { useGame } from '@/lib/gameContext';
 import { RetroCard } from '@/components/ui/RetroCard';
 import { BouncyCard } from '@/components/ui/BouncyCard';
-import { JuicyButton } from '@/components/ui/JuicyButton';
 import { Tutorial } from '@/components/Tutorial';
 import { HelpCircle } from 'lucide-react';
 import { HostControls } from '@/components/HostControls';
@@ -378,16 +377,15 @@ export default function Lobby() {
             <motion.div
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             >
-              <JuicyButton
-                variant="primary"
-                fullWidth={true}
-                className="h-16 text-xl"
+              <Button
+                variant="default"
+                className="w-full h-16 text-xl bg-[#6d28d9] hover:bg-[#5b21b6] border-[3px] border-[#4c1d95] text-white shadow-[0_4px_0_0_#4c1d95] active:translate-y-1 active:shadow-none hover:-translate-y-1 hover:shadow-[0_6px_0_0_#4c1d95] transition-all relative font-pixel-button"
                 onClick={setReady}
                 data-testid="button-ready"
               >
-                <Check className="w-6 h-6 ml-2 absolute right-4" />
+                <Check className="w-6 h-6 absolute right-4" />
                 أنا جاهز!
-              </JuicyButton>
+              </Button>
             </motion.div>
           )}
 
@@ -412,17 +410,19 @@ export default function Lobby() {
             <motion.div
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             >
-              <JuicyButton
-                variant={canStart ? "success" : "primary"}
-                fullWidth={true}
-                className={`h-16 text-lg`}
+              <Button
+                variant="default"
+                className={`w-full h-16 text-lg border-[3px] text-white shadow-[0_4px_0_0_rgba(0,0,0,0.2)] active:translate-y-1 active:shadow-none transition-all relative font-pixel-button ${canStart
+                  ? 'bg-[#10b981] hover:bg-[#059669] border-[#047857]'
+                  : 'bg-[#6d28d9] hover:bg-[#5b21b6] border-[#4c1d95]'
+                  }`}
                 onClick={startGame}
                 disabled={!canStart}
                 data-testid="button-start-game"
               >
-                <Play className="w-6 h-6 ml-2 absolute right-4" />
+                <Play className="w-6 h-6 absolute right-4" />
                 {otherPlayersReady ? 'ابدأ!' : 'في الانتظار...'}
-              </JuicyButton>
+              </Button>
             </motion.div>
           )}
         </motion.div>

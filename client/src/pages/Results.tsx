@@ -8,9 +8,7 @@ import { categories, type Category } from '@shared/schema';
 import { playSuccessSound, playCountdownSound, playBonusSound } from '@/lib/sounds';
 import { RetroCard } from '@/components/ui/RetroCard';
 import { BouncyCard } from '@/components/ui/BouncyCard';
-import { JuicyButton } from '@/components/ui/JuicyButton';
 import { PixelAvatar } from '@/components/ui/PixelAvatar';
-import { RetroQuote } from '@/components/ui/RetroQuote';
 import { LetterDisplay } from '@/components/LetterDisplay';
 import { VotingOverlay } from '@/components/VotingOverlay';
 import { RefereeReviewOverlay } from '@/components/RefereeReviewOverlay';
@@ -442,27 +440,25 @@ export default function Results() {
           className="space-y-3"
         >
           {isHost && isFinal && (
-            <JuicyButton
-              variant="success"
+            <Button
+              variant="default"
               onClick={playAgain}
-              fullWidth={true}
-              className="h-16 text-xl"
+              className="w-full h-16 text-xl bg-[#10b981] hover:bg-[#059669] border-[3px] border-[#047857] text-white shadow-[0_4px_0_0_#064e3b] active:translate-y-1 active:shadow-none hover:-translate-y-1 hover:shadow-[0_6px_0_0_#064e3b] transition-all relative font-pixel-button"
               data-testid="button-play-again"
             >
-              <RotateCcw className="w-6 h-6 ml-2" />
+              <RotateCcw className="w-6 h-6 ml-2 absolute right-4" />
               العب مرة أخرى
-            </JuicyButton>
+            </Button>
           )}
-          <JuicyButton
-            variant="danger"
+          <Button
+            variant="destructive"
             onClick={disconnect}
-            fullWidth={true}
-            className="h-16 text-xl"
+            className="w-full h-16 text-xl border-[3px] border-[#881337] shadow-[0_4px_0_0_#4c0519] active:translate-y-1 active:shadow-none hover:-translate-y-1 hover:shadow-[0_6px_0_0_#4c0519] transition-all relative font-pixel-button"
             data-testid="button-end-game"
           >
-            <Home className="w-6 h-6 ml-2" />
+            <Home className="w-6 h-6 ml-2 absolute right-4" />
             العودة للرئيسية
-          </JuicyButton>
+          </Button>
         </motion.div>
 
 
@@ -520,15 +516,14 @@ export default function Results() {
                   </div>
                   {/* BUG-3b FIX: Allow Host to skip the auto-timer wait */}
                   {isHost && (
-                    <JuicyButton
+                    <Button
                       onClick={() => nextRound()}
-                      variant="primary"
-                      fullWidth={true}
-                      className="h-12 text-sm mt-2 font-pixel-title"
+                      variant="default"
+                      className="w-full h-12 text-sm mt-2 font-pixel-title bg-[#6d28d9] hover:bg-[#5b21b6] border-[2px] border-[#4c1d95] text-white shadow-[0_3px_0_0_#4c1d95] active:translate-y-1 active:shadow-none transition-all"
                       data-testid="button-skip-timer"
                     >
                       تخطي الانتظار وبدء الجولة
-                    </JuicyButton>
+                    </Button>
                   )}
                 </div>
               ) : (
@@ -539,14 +534,13 @@ export default function Results() {
                       <p className="text-[#FFFDD1] font-bold font-pixel-text text-lg animate-pulse">
                         الوقت متوقف للمراجعة
                       </p>
-                      <JuicyButton
+                      <Button
                         onClick={() => room.phase === 'results' ? nextRound() : refereeApprove()}
-                        variant="success"
-                        fullWidth={true}
-                        className="h-14 text-lg font-pixel-title"
+                        variant="default"
+                        className="w-full h-14 text-lg font-pixel-title bg-[#10b981] hover:bg-[#059669] border-[3px] border-[#047857] text-white shadow-[0_4px_0_0_#064e3b] active:translate-y-1 active:shadow-none hover:-translate-y-1 transition-all"
                       >
                         {room.phase === 'results' ? '➡️ بدء الجولة التالية' : 'اعتماد النتيجة وبدء الجولة'}
-                      </JuicyButton>
+                      </Button>
                     </div>
                   ) : room.settings?.votingEnabled && isHost ? (
                     // Host Control for Voting Mode
@@ -554,28 +548,27 @@ export default function Results() {
                       <p className="text-[#FFFDD1] font-bold font-pixel-text text-lg">
                         وضع التصويت مفعل
                       </p>
-                      <JuicyButton
+                      <Button
                         onClick={() => nextRound()}
-                        variant="success"
-                        fullWidth={true}
-                        className="h-14 text-lg font-pixel-title"
+                        variant="default"
+                        className="w-full h-14 text-lg font-pixel-title bg-[#10b981] hover:bg-[#059669] border-[3px] border-[#047857] text-white shadow-[0_4px_0_0_#064e3b] active:translate-y-1 active:shadow-none hover:-translate-y-1 transition-all"
                         data-testid="button-next-round"
                       >
                         الاستمرار للجولة التالية
-                      </JuicyButton>
+                      </Button>
                     </div>
                   ) : isHost ? (
                     // BUG-10 FIX: Host in standard mode (no timer, no referee, no voting) always sees a Next Round button
                     <div className="space-y-2">
-                      <JuicyButton
+                      <Button
                         onClick={() => nextRound()}
-                        variant="success"
-                        fullWidth={true}
-                        className="h-14 text-lg"
+                        variant="default"
+                        className="w-full h-14 text-lg font-pixel-button bg-[#10b981] hover:bg-[#059669] border-[3px] border-[#047857] text-white shadow-[0_4px_0_0_#064e3b] active:translate-y-1 active:shadow-none hover:-translate-y-1 transition-all relative"
                         data-testid="button-next-round"
                       >
-                        {room.currentRound >= room.totalRounds - 1 ? 'إنهاء اللعبة' : 'الجولة التالية ←'}
-                      </JuicyButton>
+                        <ArrowLeft className="w-5 h-5 absolute left-4" />
+                        {room.currentRound >= room.totalRounds - 1 ? 'إنهاء اللعبة' : 'الجولة التالية'}
+                      </Button>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center gap-2">
