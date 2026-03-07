@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { RetroCard } from '@/components/ui/RetroCard';
 import { useGame } from '@/lib/gameContext';
 import { cn } from '@/lib/utils';
-import { toast } from '@/hooks/use-toast';
 import { playClickSound, playErrorSound } from '@/lib/sounds';
 import { POWER_UP_COSTS, categories } from '@shared/schema';
 
@@ -23,6 +22,8 @@ function SquarePowerUp({ type, title, cost, icon: Icon, status, onActivate }: Sq
     const isLocked = status === 'locked';
     const isUsed = status === 'used';
     const isDisabled = status === 'disabled';
+    const [showLockedMsg, setShowLockedMsg] = useState(false);
+    const [shaking, setShaking] = useState(false);
 
     const theme = type === 'wildcard'
         ? { bg: 'bg-[#fbbf24]', text: 'text-[#78350f]' }
@@ -35,11 +36,11 @@ function SquarePowerUp({ type, title, cost, icon: Icon, status, onActivate }: Sq
 
         if (isLocked) {
             playErrorSound();
-            toast({
-                title: "رصيدك غير كافي!",
-                description: `محتاج ${cost} نقطة عشان تستخدم ${title}`,
-                variant: "destructive",
-            });
+            // Show inline locked message + shake
+            setShaking(true);
+            setShowLockedMsg(true);
+            setTimeout(() => setShaking(false), 500);
+            setTimeout(() => setShowLockedMsg(false), 2500);
             return;
         }
 
@@ -57,38 +58,61 @@ function SquarePowerUp({ type, title, cost, icon: Icon, status, onActivate }: Sq
     }
 
     return (
-        <button
-            onClick={handleClick}
-            className={cn(
-                "relative w-32 h-32 md:w-40 md:h-40 rounded-xl flex flex-col items-center justify-center gap-2 group transition-all active:scale-95",
-                theme.bg,
-                isDisabled ? "opacity-70 grayscale cursor-not-allowed pointer-events-none" : "hover:scale-105 hover:-translate-y-1 hover:brightness-110 shadow-[4px_4px_0_0_rgba(0,0,0,0.5)] border-[3px]"
-            )}
-        >
-            {/* Price Badge */}
-            <div className={cn(
-                "absolute -top-3 -right-3 px-2 py-1 bg-black border-2 border-white/50 text-white font-pixel-text text-xs md:text-sm font-bold flex items-center gap-1 shadow-sm z-20",
-                isLocked && "text-red-400 border-red-400"
-            )}>
-                <Zap className={cn("w-3 h-3", isLocked ? "text-red-400" : "text-yellow-400 fill-yellow-400")} />
-                {formatCost(cost)}
-            </div>
-
-            {/* Content */}
-            <div className="relative z-10 flex flex-col items-center">
-                <div className="p-3 bg-white/20 rounded-lg mb-1">
-                    <Icon className={cn("w-10 h-10 md:w-12 md:h-12", theme.text)} />
+        <div className="flex flex-col items-center gap-2">
+            <button
+                onClick={handleClick}
+                className={cn(
+                    "relative w-32 h-32 md:w-40 md:h-40 rounded-xl flex flex-col items-center justify-center gap-2 group transition-all active:scale-95",
+                    theme.bg,
+                    shaking && "animate-shake",
+                    isLocked && "opacity-80 grayscale-[30%]",
+                    isDisabled ? "opacity-70 grayscale cursor-not-allowed pointer-events-none" : "hover:scale-105 hover:-translate-y-1 hover:brightness-110 shadow-[4px_4px_0_0_rgba(0,0,0,0.5)] border-[3px]"
+                )}
+            >
+                {/* Price Badge */}
+                <div className={cn(
+                    "absolute -top-3 -right-3 px-2 py-1 bg-black border-2 border-white/50 text-white font-pixel-text text-xs md:text-sm font-bold flex items-center gap-1 shadow-sm z-20",
+                    isLocked && "text-red-400 border-red-400"
+                )}>
+                    <Zap className={cn("w-3 h-3", isLocked ? "text-red-400" : "text-yellow-400 fill-yellow-400")} />
+                    {formatCost(cost)}
                 </div>
-                <span className={cn("font-pixel-title text-lg md:text-xl font-bold", theme.text)}>{title}</span>
-            </div>
 
-            {/* Lock Overlay */}
-            {isDisabled && (
-                <div className="absolute inset-0 bg-black/40 rounded-lg flex items-center justify-center z-10">
-                    <Lock className="w-8 h-8 text-white/80" />
+                {/* Content */}
+                <div className="relative z-10 flex flex-col items-center">
+                    <div className="p-3 bg-white/20 rounded-lg mb-1">
+                        <Icon className={cn("w-10 h-10 md:w-12 md:h-12", theme.text)} />
+                    </div>
+                    <span className={cn("font-pixel-title text-lg md:text-xl font-bold", theme.text)}>{title}</span>
                 </div>
+
+                {/* Lock Overlay for locked state */}
+                {isLocked && (
+                    <div className="absolute inset-0 bg-black/30 rounded-xl flex items-center justify-center z-10">
+                        <Lock className="w-6 h-6 text-white/80" />
+                    </div>
+                )}
+
+                {/* Lock Overlay for disabled */}
+                {isDisabled && (
+                    <div className="absolute inset-0 bg-black/40 rounded-lg flex items-center justify-center z-10">
+                        <Lock className="w-8 h-8 text-white/80" />
+                    </div>
+                )}
+            </button>
+
+            {/* Inline error message when clicking without enough points */}
+            {showLockedMsg && (
+                <motion.div
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    className="bg-red-500 text-white px-3 py-1.5 rounded-lg font-pixel-text text-xs md:text-sm text-center border-2 border-red-700 shadow-[2px_2px_0_0_#7f1d1d] max-w-[140px]"
+                >
+                    محتاج {formatCost(cost)} نقطة! ⚡
+                </motion.div>
             )}
-        </button>
+        </div>
     );
 }
 
