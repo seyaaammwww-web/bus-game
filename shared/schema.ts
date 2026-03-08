@@ -130,6 +130,7 @@ export interface Round {
   isComplete: boolean;
   busPlayerId?: string | null;
   voteEndTime?: number;
+  endRoundInProgress?: boolean;
 }
 
 // Referee deduction

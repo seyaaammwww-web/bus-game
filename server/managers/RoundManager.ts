@@ -75,6 +75,7 @@ export class RoundManager {
                 validatedAnswers: [],
                 votingComplete: false,
                 powerUpUsedInRound: false,
+                endRoundInProgress: false,
             };
 
             draft.rounds[draft.currentRound] = round;

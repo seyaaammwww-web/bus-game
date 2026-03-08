@@ -764,11 +764,11 @@ export class GameManager {
       if (draft.phase !== 'playing') return;
 
       const round = draft.rounds[draft.currentRound];
-      if (!round || round.isRush) return;
+      if (!round || round.isRush || round.endRoundInProgress) return;
       if (round.banishedPlayerId === p.playerId) return;
 
       const sub = round.submissions.find(s => s.playerId === p.playerId);
-      if (!sub) return;
+      if (!sub || sub.busComplete) return; // FIX: Prevent double-fire if already bus-completed
 
       sub.busComplete = true;
       round.isRush = true;
@@ -813,6 +813,12 @@ export class GameManager {
     // Draft Rescue Logic
     buffer.transact(draft => {
       const round = draft.rounds[draft.currentRound];
+      if (!round) return;
+
+      // CORE GUARD: Prevent double logic execution even if set check was slightly raced (transactional lock)
+      if (round.endRoundInProgress) return;
+      round.endRoundInProgress = true;
+
       const active = draft.players.filter(pl => pl.id !== draft.refereeId && pl.id !== round?.banishedPlayerId);
 
       for (const player of active) {
@@ -875,6 +881,9 @@ export class GameManager {
 
   private finishRoundPhase(roomCode: string) {
     try {
+      // Clear any pending timers to make it idempotent
+      this.roundManager.clearTimer(roomCode);
+
       const buffer = this.roomManager.getRoomBuffer(roomCode);
       if (!buffer) return;
 
@@ -1172,7 +1181,15 @@ export class GameManager {
       const round = draft.rounds[draft.currentRound];
       if (!round) return;
       // P1-5 FIX: Only allow power-ups during playing phase
-      if (draft.phase !== 'playing') return;
+      if (draft.phase !== 'playing' || round.endRoundInProgress) return;
+
+      // FIX: Prevent power-up usage if player already triggered bus complete or if round is in rush mode
+      const submission = round.submissions.find(s => s.playerId === p.playerId);
+      if (submission?.busComplete || round.isRush) {
+        console.log(`[PowerUp] Player ${p.playerId} blocked: busComplete=${!!submission?.busComplete}, isRush=${round.isRush}`);
+        return;
+      }
+
       // D1 FIX: Lift global powerUpUsedInRound restriction.
       // Players are only limited by their own usage flag.
       if (round.banishedPlayerId === p.playerId) return;
