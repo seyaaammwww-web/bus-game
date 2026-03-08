@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, ArrowLeft, RotateCcw, User, Users, Globe, PawPrint, Box, Crown, Star, Sparkles, Medal, Shield, LogOut, Home, Zap, Award, Target, Timer, Plus, UserX, AlertTriangle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -42,7 +43,10 @@ export default function Results() {
   const { state, currentRound, isHost, nextRound, playAgain, disconnect, isReferee, refereeDeduct, refereeToggleUnique, refereeApprove, requestVote } = useGame();
   const [countdown, setCountdown] = useState(5);
 
-  const room = state.room!;
+  const isMobile = useIsMobile();
+
+  if (!state.room) return null;
+  const room = state.room;
   const isFinal = room.phase === 'final';
   // LOGIC-5 FIX: Filter referee from the leaderboard — they didn't play, so they should not appear in standings
   const activePlayers = room.players.filter(p => p.id !== room.refereeId);
@@ -132,7 +136,7 @@ export default function Results() {
     };
   }, [isFinal, room.rounds, room.players]);
 
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
+
 
   return (
     <div className="min-h-screen p-4 overflow-hidden relative text-white font-pixel-text">

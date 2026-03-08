@@ -325,7 +325,7 @@ export type WSMessage =
   | { type: 'rush_mode'; payload: { room: any } } // Refine later
   | { type: 'round_end'; payload: { room: any } } // Refine later
   | { type: 'voting_start'; payload: { room: any; validatedAnswers: any[] } } // Refine later
-  | { type: 'vote'; payload: VoteInput }
+
   | { type: 'voting_complete'; payload: { room: any } } // Refine later
   | { type: 'referee_review_start'; payload: { room: any } } // Refine later
   | { type: 'referee_deduct'; payload: { playerId: string; category: string; reason: string } }
@@ -393,11 +393,6 @@ export const draftUpdateSchema = z.object({
   answers: z.record(z.string().max(100))
 });
 
-export const voteSchema = z.object({
-  playerId: z.string(),
-  category: z.string(),
-  accepted: z.boolean()
-});
 
 export const castParallelVoteSchema = z.object({
   requesterId: z.string(),
@@ -475,7 +470,7 @@ export const updateSettingsSchema = z.object({
 export type CreateRoomInput = z.infer<typeof createRoomSchema>;
 export type JoinRoomInput = z.infer<typeof joinRoomSchema>;
 export type SubmitAnswersInput = z.infer<typeof submitAnswersSchema>;
-export type VoteInput = z.infer<typeof voteSchema>;
+
 export type RequestVoteInput = z.infer<typeof requestVoteSchema>;
 export type CastParallelVoteInput = z.infer<typeof castParallelVoteSchema>;
 export type RefereeDeductInput = z.infer<typeof refereeDeductPayloadSchema>;

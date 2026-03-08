@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Timer } from '@/components/Timer';
 import { LetterDisplay } from '@/components/LetterDisplay';
@@ -82,7 +83,10 @@ export default function Game() {
     sendDraftUpdate,
   } = useGame();
 
-  const room = state.room!;
+  const isMobile = useIsMobile();
+
+  if (!state.room) return null;
+  const room = state.room;
   const currentCategories = (room.settings?.customCategories && room.settings.customCategories.length > 0)
     ? room.settings.customCategories
     : categories;
@@ -247,7 +251,7 @@ export default function Game() {
     }
   }, [state.timeLeft, hasSubmitted]);
 
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
+
 
   return (
     <motion.div

@@ -1,5 +1,6 @@
 // ... imports
 import { useState, useEffect } from 'react';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Plus, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -58,8 +59,7 @@ export default function Home() {
 
 
 
-  // ... inside component
-  const isMobileView = typeof window !== 'undefined' && window.innerWidth < 1024;
+  const isMobileView = useIsMobile();
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden relative text-white">

@@ -1,5 +1,6 @@
 import { Copy, Check, Play, Users, Shield, Crown, Sparkles, X, Home, LogOut, Settings, UserX, Wifi, WifiOff, Minus, Plus, Gavel } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -21,7 +22,10 @@ export default function Lobby() {
   const [showTutorial, setShowTutorial] = useState(false);
   const [customCats, setCustomCats] = useState(categories);
 
-  const room = state.room!;
+  const isMobileView = useIsMobile();
+
+  if (!state.room) return null;
+  const room = state.room;
   const otherPlayers = room.players.filter(p => p.id !== state.playerId);
   const otherPlayersReady = otherPlayers.length === 0 || otherPlayers.every(p => p.isReady);
   const canStart = isHost && otherPlayersReady;
@@ -37,7 +41,7 @@ export default function Lobby() {
     setShowRefereeSelect(false);
   };
 
-  const isMobileView = typeof window !== 'undefined' && window.innerWidth < 1024;
+
 
   return (
     <div className="min-h-screen p-4 overflow-hidden relative text-white font-pixel-text">

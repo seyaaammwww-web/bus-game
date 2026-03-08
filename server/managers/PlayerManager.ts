@@ -27,11 +27,6 @@ export class PlayerManager {
         return playerInfo;
     }
 
-    updateRoomId(ws: WebSocket, roomId: string) {
-        const player = this.players.get(ws);
-        if (player) player.roomId = roomId;
-    }
-
     recordPong(ws: WebSocket) {
         const player = this.players.get(ws);
         if (player) player.lastPong = Date.now();
