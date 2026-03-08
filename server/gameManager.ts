@@ -16,6 +16,7 @@ import { CorruptionProofBuffer } from './utils/reliability';
 import { StateOrchestrator } from './persistence/StateOrchestrator';
 import { WildcardService } from './services/wildcardService';
 import { getRandomLetters } from '../shared/arabicWords';
+import { randomUUID } from 'crypto';
 
 // V3 State Machine: Guard against invalid phase transitions
 function canTransition(from: GamePhase, to: GamePhase): boolean {
@@ -74,7 +75,7 @@ export class GameManager {
     if (connId) {
       return `conn:${connId}`;
     }
-    const newId = require('crypto').randomUUID();
+    const newId = randomUUID();
     (ws as any).id = newId;
     return `conn:${newId}`;
   }
@@ -1898,8 +1899,8 @@ export class GameManager {
 
       // VOTE-ELIGIBILITY-FIX: Exclude both referee and banished player
       const eligibleVoterIds = draft.players
-        .filter(pl => 
-          pl.id !== p.playerId && 
+        .filter(pl =>
+          pl.id !== p.playerId &&
           pl.id !== draft.refereeId &&
           pl.id !== round.banishedPlayerId
         )

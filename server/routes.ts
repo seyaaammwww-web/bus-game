@@ -6,6 +6,7 @@ import { HybridValidator } from "./hybridValidator";
 import { GroqService } from "./services/groqService";
 import { WildcardService } from "./services/wildcardService";
 import { WSErrorCode } from "../shared/schema";
+import { randomUUID } from "crypto";
 
 // Connection tracking for metrics
 const connectionMetrics = {
@@ -34,7 +35,7 @@ export async function registerRoutes(
     connectionMetrics.activeConnections++;
 
     // Attach connection metadata
-    (ws as any).id = require('crypto').randomUUID();
+    (ws as any).id = randomUUID();
     (ws as any).connectedAt = Date.now();
 
     // Extract and attach client IP (for proxy support)
@@ -186,7 +187,6 @@ export async function registerRoutes(
     // V3-12 FIX: Secure debug endpoint
     if (process.env.NODE_ENV === 'production') return res.status(403).json({ error: 'Forbidden' });
     try {
-      const { WildcardService } = require("./services/wildcardService");
       const stats = WildcardService.getInstance().getStats();
       res.json({
         status: 'ok',

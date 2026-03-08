@@ -178,18 +178,34 @@ export function PowerUpMenu() {
     const [showWildcardOverlay, setShowWildcardOverlay] = useState(false);
     const { currentPlayer, activatePowerUp, currentRound, setBanishOverlay } = useGame();
 
+    useEffect(() => {
+        console.log('[PowerUpMenu] Mounted');
+        return () => console.log('[PowerUpMenu] Unmounted');
+    }, []);
+
+    useEffect(() => {
+        console.log('[PowerUpMenu] isOpen changed to:', isOpen);
+    }, [isOpen]);
+
     const toggleOpen = () => {
         playClickSound();
         setIsOpen(!isOpen);
     };
 
     const getStatus = (cost: number, used: boolean) => {
-        if (used) return 'used';
-        // If someone else has active wildcard, disable mine
-        if (currentRound?.activePowerUp && currentRound.activePowerUp.playerId !== currentPlayer?.id) return 'disabled';
+        try {
+            if (used) return 'used';
+            // If someone else has active wildcard, disable mine
+            if (currentRound?.activePowerUp && currentRound.activePowerUp.playerId !== currentPlayer?.id) {
+                return 'disabled';
+            }
 
-        const points = currentPlayer?.totalEarnedPoints || 0;
-        return points >= cost ? 'available' : 'locked';
+            const points = currentPlayer?.totalEarnedPoints ?? 0;
+            return points >= (cost || 0) ? 'available' : 'locked';
+        } catch (e) {
+            console.error('[PowerUpMenu] Error in getStatus:', e);
+            return 'locked';
+        }
     };
 
     const handleWildcardSelect = (category: string) => {
