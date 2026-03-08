@@ -1,31 +1,41 @@
-FROM node:20-alpine
+# --- STAGE 1: Build ---
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# 1) Copy package files first — cached if unchanged
+# Copy package files and install ALL dependencies (including devDeps for build)
 COPY package.json package-lock.json* ./
-
-# 2) Install dependencies (cached layer if package*.json didn't change)
 RUN npm ci 2>/dev/null || npm install
 
-# 3) Copy config files
+# Copy config files
 COPY tsconfig.json vite.config.ts tailwind.config.ts postcss.config.js components.json drizzle.config.ts ./
 
-# 4) Copy source + build script
+# Copy source code and build script
 COPY shared/ ./shared/
 COPY server/ ./server/
 COPY client/ ./client/
 COPY script/ ./script/
 COPY attached_assets/ ./attached_assets/
 
-# 5) Build client + server bundle
+# Build client + server bundle
 RUN npm run build
 
-# 6) Prune dev dependencies after build
-RUN npm prune --omit=dev 2>/dev/null || true
+# --- STAGE 2: Runtime ---
+FROM node:20-alpine AS runtime
 
+WORKDIR /app
+
+# Copy only package files and install ONLY production dependencies
+COPY package.json package-lock.json* ./
+RUN npm ci --omit=dev 2>/dev/null || npm install --omit=dev
+
+# Copy the built assets from the builder stage
+COPY --from=builder /app/dist ./dist
+
+# Environment variables
 ENV PORT=7860
 ENV NODE_ENV=production
 EXPOSE 7860
 
+# Start the application
 CMD ["npm", "start"]
