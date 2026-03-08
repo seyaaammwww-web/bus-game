@@ -16,6 +16,7 @@ COPY shared/ ./shared/
 COPY server/ ./server/
 COPY client/ ./client/
 COPY script/ ./script/
+COPY attached_assets/ ./attached_assets/
 
 # 5) Build client + server bundle
 RUN npm run build

@@ -39,10 +39,7 @@ check_specific_words.js
 peek_db.js
 
 # Misc
-attached_assets/
 *.tar.gz
-*.png
-*.txt
 old_*.tsx
 firebase.json
 vercel.json
