@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+
+# Git
+.git/
+.gitignore
+
+# Backup & duplicate project folders
+backup/
+Egyptian-Bus-Complete/
+
+# Build output (rebuilt inside Docker)
+dist/
+
+# Test screenshots
+comprehensive-test-screenshots/
+test-screenshots/
+voting-test-screenshots/
+
+# Development files
+.local/
+.vscode/
+.agent/
+.agents/
+
+# Documentation (not needed at runtime)
+*.md
+!README.md
+
+# Test & script files
+tests/
+scripts/
+script/
+test-ws.ts
+testGroqIntegration.ts
+test_voting.py
+
+# Attached assets
+attached_assets/
+
+# OS files
+.DS_Store
+Thumbs.db
