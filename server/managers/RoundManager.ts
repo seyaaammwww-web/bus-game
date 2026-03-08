@@ -325,11 +325,18 @@ export class RoundManager {
                 let reason = result?.reason || '';
                 let isPendingVote = false;
 
-                // D2: Wildcard overrides everything
+                // D2-FIX: Wildcard must check basic validity (starts with correct letter)
                 const isWildcard = dRound.wildcardUsedByPlayerIds?.includes(item.playerId);
                 if (isWildcard) {
-                    isValid = true;
-                    reason = 'جوكر';
+                    // Check if word at least starts with the correct letter
+                    const startsWithLetter = validateAnswerStrict(dRound.letter, item.category as Category, item.answer);
+                    if (startsWithLetter) {
+                        isValid = true;
+                        reason = 'جوكر';
+                    } else {
+                        isValid = false;
+                        reason = 'جوكر - لكن الحرف خطأ';
+                    }
                 }
 
                 if (!isValid && !isPendingVote && item.answer.trim().length >= 2) {
@@ -477,6 +484,12 @@ export class RoundManager {
 
             player.score += roundScore;
             player.totalEarnedPoints = (player.totalEarnedPoints || 0) + roundScore;
+
+            // MANUAL-SCORE-ADJUSTMENT-FIX: Apply manual adjustments after round score
+            if (player.manualScoreAdjustment) {
+                player.score += player.manualScoreAdjustment;
+                player.totalEarnedPoints += player.manualScoreAdjustment;
+            }
 
             const submission = round.submissions.find(s => s.playerId === player.id);
             const allCorrect = playerAnswers.filter(a => a.isValid).length >= currentCategories.length;

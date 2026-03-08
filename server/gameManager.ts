@@ -1896,8 +1896,13 @@ export class GameManager {
 
       if (!draft.voteQueue) draft.voteQueue = [];
 
+      // VOTE-ELIGIBILITY-FIX: Exclude both referee and banished player
       const eligibleVoterIds = draft.players
-        .filter(pl => pl.id !== p.playerId && pl.id !== draft.refereeId)
+        .filter(pl => 
+          pl.id !== p.playerId && 
+          pl.id !== draft.refereeId &&
+          pl.id !== round.banishedPlayerId
+        )
         .map(pl => pl.id);
 
       draft.voteQueue.push({
