@@ -895,7 +895,17 @@ export class GameManager {
       let totalRounds = 0;
       buffer.transact(draft => {
         const round = draft.rounds[draft.currentRound];
-        if (round) round.powerUpUsedInRound = false;
+        if (round) {
+          round.powerUpUsedInRound = false;
+          // Bug 3 FIX: Clean up frozen player state between rounds
+          // frozenPlayerId exists at runtime but not in strict types
+          const frozenId = (round as any).frozenPlayerId;
+          if (frozenId) {
+            const frozenPlayer = draft.players.find(pl => pl.id === frozenId);
+            if (frozenPlayer) (frozenPlayer as any).isFrozen = false;
+            (round as any).frozenPlayerId = null;
+          }
+        }
 
         // FIX-AUTO-1: Must check both 'playing' AND 'voting' phases for referee_review routing.
         // When voting+referee combo is used, phase='voting' after votes finish — not 'playing'.
@@ -1156,6 +1166,7 @@ export class GameManager {
     const buffer = this.roomManager.getRoomBuffer(p.roomId);
     if (!buffer) return;
 
+    let didActivate = false;
     buffer.transact(draft => {
       const round = draft.rounds[draft.currentRound];
       if (!round) return;
@@ -1244,6 +1255,7 @@ export class GameManager {
           }
 
           console.log(`[PowerUp] Wildcard activated for ${player.name}: ${category} -> ${chosen}`);
+          didActivate = true;
         } else {
           // Fallback if no specific word available
           if (submission) {
@@ -1257,6 +1269,7 @@ export class GameManager {
               busComplete: false
             });
           }
+          didActivate = true;
         }
       } else if (payload.type === 'banish') {
         const cost = POWER_UP_COSTS.banish;
@@ -1294,8 +1307,11 @@ export class GameManager {
         round.powerUpUsedInRound = true;
 
         console.log(`[PowerUp] Banish activated: ${player.name} -> ${targetPlayer.name}`);
+        didActivate = true;
       }
     }, "activatePowerUp");
+
+    if (!didActivate) return;
 
     const room = buffer.get();
     this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });

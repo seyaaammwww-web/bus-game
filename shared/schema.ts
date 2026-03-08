@@ -434,7 +434,8 @@ export const appealAnswerSchema = z.object({
 
 export const activatePowerUpSchema = z.object({
   type: z.enum(['hint', 'steal', 'wildcard', 'banish']),
-  targetPlayerId: z.string().optional()
+  targetPlayerId: z.string().optional(),
+  category: z.string().max(30).optional(),
 });
 
 export const sendReactionSchema = z.object({
