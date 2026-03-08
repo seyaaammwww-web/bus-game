@@ -1,9 +1,10 @@
-# Dependencies
+# Dependencies (rebuilt inside Docker)
 node_modules/
 
 # Git
 .git/
 .gitignore
+.gitattributes
 
 # Backup & duplicate project folders
 backup/
@@ -22,22 +23,30 @@ voting-test-screenshots/
 .vscode/
 .agent/
 .agents/
+.replit
 
 # Documentation (not needed at runtime)
 *.md
-!README.md
 
-# Test & script files
+# Test files
 tests/
 scripts/
-script/
 test-ws.ts
 testGroqIntegration.ts
 test_voting.py
+check-ai.js
+check_specific_words.js
+peek_db.js
 
-# Attached assets
+# Misc
 attached_assets/
-
-# OS files
+*.tar.gz
+*.png
+*.txt
+old_*.tsx
+firebase.json
+vercel.json
+build_error.txt
+log.txt
 .DS_Store
 Thumbs.db
