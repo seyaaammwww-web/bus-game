@@ -1,4 +1,7 @@
-FROM node:20
+FROM node:20-alpine
+
+# Add build tools for native modules like better-sqlite3
+RUN apk add --no-cache python3 make g++ 
 
 WORKDIR /app
 
@@ -19,5 +22,5 @@ ENV PORT=7860
 # Expose HF default port
 EXPOSE 7860
 
-# Start server directly
+# Start server directly with node for instant boot
 CMD ["node", "dist/index.cjs"]
