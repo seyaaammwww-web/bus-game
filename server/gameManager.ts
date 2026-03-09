@@ -1805,10 +1805,6 @@ export class GameManager {
       this.finishRoundPhase(p.roomId);
     }
 
-    // إعلام جميع اللاعبين بالطرد
-    const room = buffer.get();
-    this.broadcastToRoom(room.code, { type: 'player_kicked', payload: { playerId: targetPlayerId, room } });
-  }
     if (targetWs) {
       // BUG FIX #2: Send 'kicked' (not just toast) so client redirects the kicked player to home
       this.send(targetWs, { type: 'kicked', payload: { reason: 'تم طردك من الغرفة من قبل المضيف' } });
