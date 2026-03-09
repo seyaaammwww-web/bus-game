@@ -70,7 +70,7 @@ function validateAnswerLenient(letter: string, category: Category, answer: strin
 
 export class RoundManager {
     private timers: Map<string, NodeJS.Timeout> = new Map();
-    private calculatingRooms = new Map<string, number>();
+    private calculatingRooms = new Set<string>();
 
     // FIX: Combined startRound — increment currentRound AND initialize round in one transact
     startRound(buffer: CorruptionProofBuffer<GameRoom>): Round {
@@ -91,6 +91,7 @@ export class RoundManager {
                 validatedAnswers: [],
                 votingComplete: false,
                 powerUpUsedInRound: false,
+                endRoundInProgress: false,
             };
 
             draft.rounds[draft.currentRound] = round;
@@ -177,11 +178,12 @@ export class RoundManager {
     ): Promise<void> {
         const roomCode = buffer.get().code;
 
-        // Prevent Re-entry / Race
-        const now = Date.now();
-        const existing = this.calculatingRooms.get(roomCode);
-        if (existing && (now - existing) < 30000) return;
-        this.calculatingRooms.set(roomCode, now);
+        // Prevent Re-entry / Race using Set
+        if (this.calculatingRooms.has(roomCode)) {
+            console.log(`[RoundManager] Already processing ${roomCode}, skipping`);
+            return;
+        }
+        this.calculatingRooms.add(roomCode);
 
         try {
             // FIX: Add 6-second timeout for validation — if slow, push everything to vote
@@ -252,15 +254,26 @@ export class RoundManager {
                 }
             }
 
-            if (hasPending && draft.settings?.enableVoting) {
+            if (hasPending && draft.settings?.votingEnabled) {
                 draft.phase = 'voting';
                 this.buildVoteQueueInDraft(draft);
             } else {
+                // BUG FIX: If voting is disabled, clear the isPendingVote flag 
+                // and mark them invalid so clients don't get stuck rendering pending UI.
+                if (hasPending) {
+                    dRound.validatedAnswers.forEach(a => {
+                        if (a.isPendingVote) {
+                            a.isPendingVote = false;
+                            a.isValid = false;
+                            a.reason = 'غير موجودة في القاموس';
+                        }
+                    });
+                }
                 this.calculateAnswerScores(draft);
             }
         }, "fallbackVote");
 
-        if (hasPending && buffer.get().settings?.enableVoting) {
+        if (hasPending && buffer.get().settings?.votingEnabled) {
             onVotingStart();
         } else {
             onRoundFinish();
@@ -338,17 +351,24 @@ export class RoundManager {
                 let reason = result?.reason || '';
                 let isPendingVote = false;
 
-                // D2: Wildcard overrides everything
+                // D2-FIX: Wildcard must check basic validity (starts with correct letter)
                 const isWildcard = dRound.wildcardUsedByPlayerIds?.includes(item.playerId);
                 if (isWildcard) {
-                    isValid = true;
-                    reason = 'جوكر';
+                    // Check if word at least starts with the correct letter
+                    const startsWithLetter = validateAnswerStrict(dRound.letter, item.category as Category, item.answer);
+                    if (startsWithLetter) {
+                        isValid = true;
+                        reason = 'جوكر';
+                    } else {
+                        isValid = false;
+                        reason = 'جوكر - لكن الحرف خطأ';
+                    }
                 }
 
                 if (!isValid && !isPendingVote && item.answer.trim().length >= 2) {
                     const lenient = validateAnswerLenient(dRound.letter, item.category as Category, item.answer);
                     if (lenient) {
-                        if (draft.settings?.enableVoting) {
+                        if (draft.settings?.votingEnabled) {
                             isPendingVote = true;
                             reason = 'تتطلب تصويت';
                             hasPendingVotes = true;
@@ -381,7 +401,7 @@ export class RoundManager {
             if (hasPendingVotes) {
                 // LOGIC-3 FIX: Don't force-enable voting. If host disabled it, keep it disabled
                 // and treat pending-vote answers as invalid instead.
-                if (draft.settings?.enableVoting) {
+                if (draft.settings?.votingEnabled) {
                     draft.phase = 'voting';
                     // FIX: Build PARALLEL vote queue — all pending answers at once
                     this.buildVoteQueueInDraft(draft);
@@ -501,6 +521,12 @@ export class RoundManager {
 
             player.score += roundScore;
             player.totalEarnedPoints = (player.totalEarnedPoints || 0) + roundScore;
+
+            // MANUAL-SCORE-ADJUSTMENT-FIX: Apply manual adjustments after round score
+            if (player.manualScoreAdjustment) {
+                player.score += player.manualScoreAdjustment;
+                player.totalEarnedPoints += player.manualScoreAdjustment;
+            }
 
             const submission = round.submissions.find(s => s.playerId === player.id);
             const allCorrect = playerAnswers.filter(a => a.isValid).length >= currentCategories.length;

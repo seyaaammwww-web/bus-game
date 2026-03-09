@@ -1150,5 +1150,50 @@
     "count": 1,
     "firstSeen": "2026-02-26T20:06:08.480Z",
     "lastSeen": "2026-02-26T20:06:08.480Z"
+  },
+  {
+    "word": "مخنهتع",
+    "normalized": "مخنهتع",
+    "letter": "ي",
+    "category": "ولد",
+    "count": 1,
+    "firstSeen": "2026-03-08T13:52:19.885Z",
+    "lastSeen": "2026-03-08T13:52:19.885Z"
+  },
+  {
+    "word": "نهتعا",
+    "normalized": "نهتعا",
+    "letter": "ي",
+    "category": "بنت",
+    "count": 1,
+    "firstSeen": "2026-03-08T13:52:19.888Z",
+    "lastSeen": "2026-03-08T13:52:19.888Z"
+  },
+  {
+    "word": "نخهتى",
+    "normalized": "نخهتي",
+    "letter": "ي",
+    "category": "بلد",
+    "count": 1,
+    "firstSeen": "2026-03-08T13:52:19.890Z",
+    "lastSeen": "2026-03-08T13:52:19.890Z"
+  },
+  {
+    "word": "ةنتىا",
+    "normalized": "هنتيا",
+    "letter": "ي",
+    "category": "حيوان",
+    "count": 1,
+    "firstSeen": "2026-03-08T13:52:19.893Z",
+    "lastSeen": "2026-03-08T13:52:19.893Z"
+  },
+  {
+    "word": "مخنهت",
+    "normalized": "مخنهت",
+    "letter": "ي",
+    "category": "جماد",
+    "count": 1,
+    "firstSeen": "2026-03-08T13:52:19.896Z",
+    "lastSeen": "2026-03-08T13:52:19.896Z"
   }
 ]

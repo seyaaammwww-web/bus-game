@@ -1,0 +1,49 @@
+# Dependencies (rebuilt inside Docker)
+node_modules/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Backup & duplicate project folders
+backup/
+Egyptian-Bus-Complete/
+
+# Build output (rebuilt inside Docker)
+dist/
+
+# Test screenshots
+comprehensive-test-screenshots/
+test-screenshots/
+voting-test-screenshots/
+
+# Development files
+.local/
+.vscode/
+.agent/
+.agents/
+.replit
+
+# Documentation (not needed at runtime)
+*.md
+
+# Test files
+tests/
+scripts/
+test-ws.ts
+testGroqIntegration.ts
+test_voting.py
+check-ai.js
+check_specific_words.js
+peek_db.js
+
+# Misc
+*.tar.gz
+old_*.tsx
+firebase.json
+vercel.json
+build_error.txt
+log.txt
+.DS_Store
+Thumbs.db

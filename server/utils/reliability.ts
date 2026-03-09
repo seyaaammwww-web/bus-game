@@ -60,39 +60,50 @@ export class CorruptionProofBuffer<T> {
     transact(
         mutator: (draft: T) => void,
         description: string,
-        onPatches?: (patches: Patch[], inversePatches: Patch[]) => void
-    ): void {
-        try {
-            // Verify integrity of current primary before mutating (Double Check)
-            const currentChecksum = this.calculateChecksum(this.primary);
-            if (this.checksum !== currentChecksum) {
-                console.error(`[MEMORY CORRUPTION DETECTED] Before applying '${description}'. Restoring from shadow.`);
-                this.restoreFromShadow();
-                throw new Error(`Memory corruption detected before '${description}'`);
+        onPatches?: (patches: Patch[], inversePatches: Patch[]) => void,
+        retries: number = 1
+    ): boolean {
+        for (let attempt = 0; attempt <= retries; attempt++) {
+            try {
+                // Verify integrity of current primary before mutating (Double Check)
+                const currentChecksum = this.calculateChecksum(this.primary);
+                if (this.checksum !== currentChecksum) {
+                    console.error(`[MEMORY CORRUPTION DETECTED] Before applying '${description}'. Restoring from shadow.`);
+                    this.restoreFromShadow();
+                    if (attempt === retries) {
+                        throw new Error(`Memory corruption detected before '${description}'`);
+                    }
+                    console.warn(`[Retry ${attempt}] Transaction '${description}' failed, retrying...`);
+                    continue;
+                }
+
+                // Create new immutable state using Immer and extract patches
+                const [nextState, patches, inversePatches] = produceWithPatches(this.primary, mutator);
+
+                // Calculate new checksum
+                const newChecksum = this.calculateChecksum(nextState);
+
+                // Commit transaction
+                this.primary = nextState;
+                this.shadow = produce(nextState, () => { }); // Create a frozen shadow copy
+                this.checksum = newChecksum;
+
+                // Trigger callback if provided
+                if (onPatches) {
+                    onPatches(patches, inversePatches);
+                }
+
+                return true;
+
+            } catch (error) {
+                if (attempt === retries) {
+                    console.error(`[Transaction Failed] ${description}:`, error);
+                    throw error;
+                }
+                console.warn(`[Retry ${attempt}] Transaction '${description}' failed, retrying...`);
             }
-
-            // Create new immutable state using Immer and extract patches
-            const [nextState, patches, inversePatches] = produceWithPatches(this.primary, mutator);
-
-            // Calculate new checksum
-            const newChecksum = this.calculateChecksum(nextState);
-
-            // Commit transaction
-            this.primary = nextState;
-            this.shadow = produce(nextState, () => { }); // Create a frozen shadow copy
-            this.checksum = newChecksum;
-
-            // Trigger callback if provided
-            if (onPatches) {
-                onPatches(patches, inversePatches);
-            }
-
-            // console.log(`[Transaction] ${description} - New Checksum: ${this.checksum.substring(0, 8)}`);
-
-        } catch (error) {
-            console.error(`[Transaction Failed] ${description}:`, error);
-            throw error; // Re-throw to caller
         }
+        return false;
     }
 
     private restoreFromShadow() {

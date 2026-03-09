@@ -1,12 +1,13 @@
 
 import { WebSocket } from 'ws';
 import { z } from 'zod';
-import type { WSMessage, RoundAnswers, Category, PowerUpType, ReactionType, GameRoom } from '../shared/schema';
+import type { WSMessage, RoundAnswers, Category, PowerUpType, ReactionType, GameRoom, GamePhase } from '../shared/schema';
 import {
   createRoomSchema, joinRoomSchema, rejoinRoomSchema, submitAnswersSchema, draftUpdateSchema,
   castParallelVoteSchema, requestVoteSchema, kickPlayerSchema, hostAdjustScoreSchema,
   refereeToggleValiditySchema, refereeOverrideSchema, appealAnswerSchema,
-  activatePowerUpSchema, sendReactionSchema, setRefereeSchema, updateSettingsSchema
+  activatePowerUpSchema, sendReactionSchema, setRefereeSchema, updateSettingsSchema,
+  playerAppealPayloadSchema, refereeDeductPayloadSchema, POWER_UP_COSTS
 } from '../shared/schema';
 import { RoomManager } from './managers/RoomManager';
 import { PlayerManager } from './managers/PlayerManager';
@@ -15,6 +16,22 @@ import { CorruptionProofBuffer } from './utils/reliability';
 import { StateOrchestrator } from './persistence/StateOrchestrator';
 import { WildcardService } from './services/wildcardService';
 import { getRandomLetters } from '../shared/arabicWords';
+import { randomUUID } from 'crypto';
+
+// V3 State Machine: Guard against invalid phase transitions
+function canTransition(from: GamePhase, to: GamePhase): boolean {
+  if (from === to) return true;
+  const transitions: Record<GamePhase, GamePhase[]> = {
+    lobby: ['playing'],
+    playing: ['ai_processing', 'voting', 'results', 'referee_review', 'final'],
+    ai_processing: ['voting', 'results', 'referee_review', 'final'],
+    voting: ['results', 'referee_review', 'final'],
+    results: ['referee_review', 'playing', 'final', 'lobby'],
+    referee_review: ['results', 'playing', 'final', 'lobby'],
+    final: ['lobby']
+  };
+  return transitions[from]?.includes(to) ?? false;
+}
 
 // FIX: Inline constants to avoid import path issues on HF deployment
 const RUSH_MODE_DURATION_MS = 10000;
@@ -32,7 +49,14 @@ export class GameManager {
   private readonly RATE_LIMIT_COUNT = 50;
   private readonly RATE_LIMIT_WINDOW_MS = 10000;
 
-  private causalityLog: Map<string, Array<{ tick: number, event: string }>> = new Map();
+  // P2-10 FIX: Room→Socket index for O(1) broadcasts
+  private roomSocketIndex: Map<string, Set<WebSocket>> = new Map();
+
+  // P2-11 FIX: Idempotency key to prevent double finishRoundPhase
+  private finishedRounds: Set<string> = new Set();
+
+  // V3-4 FIX: Idempotency key to prevent double endRound processing race
+  private endedRounds: Set<string> = new Set();
 
   private heartbeatInterval: NodeJS.Timeout | null = null;
   private lastVoteTime: Map<string, number> = new Map();
@@ -44,7 +68,21 @@ export class GameManager {
   private readonly ROOM_CREATION_WINDOW_MS = 10 * 60 * 1000;
 
   private getClientIp(ws: WebSocket): string {
-    return (ws as any)._socket?.remoteAddress || 'unknown';
+    const forwarded = (ws as any).forwardedFor || (ws as any)['x-forwarded-for'];
+    if (forwarded) {
+      return forwarded.split(',')[0].trim();
+    }
+    const socket = (ws as any)._socket;
+    if (socket?.remoteAddress) {
+      return socket.remoteAddress;
+    }
+    const connId = (ws as any).id;
+    if (connId) {
+      return `conn:${connId}`;
+    }
+    const newId = randomUUID();
+    (ws as any).id = newId;
+    return `conn:${newId}`;
   }
 
   private checkRoomCreationLimit(ws: WebSocket): boolean {
@@ -82,7 +120,19 @@ export class GameManager {
   }
 
   constructor() {
-    this.roomManager = new RoomManager();
+    // V3-14 & P1-1 FIX: Extended callback for deep room cleanup
+    this.roomManager = new RoomManager((code) => {
+      const prefix = code + ':';
+      this.endedRounds.forEach(key => {
+        if (key.startsWith(prefix)) this.endedRounds.delete(key);
+      });
+      this.finishedRounds.forEach(key => {
+        if (key.startsWith(prefix)) this.finishedRounds.delete(key);
+      });
+      this.roomSocketIndex.delete(code);
+      this.roundManager.clearTimer(code);
+      console.log(`[GameManager] Cleaned up all tracking for room ${code}`);
+    });
 
     // FIX: PlayerManager now takes a timeout callback to remove dead players from rooms
     this.playerManager = new PlayerManager((playerId, roomId) => {
@@ -103,6 +153,14 @@ export class GameManager {
           this.send(p.ws, { type: 'ping', payload: { timestamp: Date.now() } });
         }
       }
+
+      // Garbage collect expired IP room creation limits
+      const now = Date.now();
+      for (const [ip, record] of this.roomCreationLimits.entries()) {
+        if (now > record.resetTime) {
+          this.roomCreationLimits.delete(ip);
+        }
+      }
     }, 10000);
   }
 
@@ -121,27 +179,33 @@ export class GameManager {
    */
   private handlePlayerTimeout(playerId: string, roomId: string) {
     console.log(`[GameManager] Player ${playerId} timed out (no pong).`);
+
+    // GAP-1 FIX: Remove dead socket from index BEFORE removing from PlayerManager
+    const ws = this.playerManager.getSocket(playerId);
+    if (ws) this.removeSocketFromRoomIndex(roomId, ws);
+
+    let oldHostId = '';
+    const buffer = this.roomManager.getRoomBuffer(roomId);
+    if (buffer) oldHostId = buffer.get().hostId;
+
     this.roomManager.removePlayerFromRoom(roomId, playerId);
 
-    const buffer = this.roomManager.getRoomBuffer(roomId);
     if (buffer) {
-      // FIX: If the timed-out player was the host, reassign host to another player
-      buffer.transact(draft => {
-        if (draft.hostId === playerId && draft.players.length > 0) {
-          const newHost = draft.players.find(p => p.id !== playerId);
-          if (newHost) {
-            draft.hostId = newHost.id;
-            newHost.isHost = true;
-            console.log(`[GameManager] Host reassigned to ${newHost.name} after timeout.`);
-          }
-        }
-      }, 'host_reassign_on_timeout');
-
       const room = buffer.get();
       if (room.players.length > 0) {
         this.broadcastToRoom(room.code, { type: 'player_left', payload: { players: room.players } });
+
+        // Host migration notification
+        if (oldHostId !== room.hostId && room.hostId) {
+          const newHostWs = this.playerManager.getSocket(room.hostId);
+          if (newHostWs) {
+            this.send(newHostWs, { type: 'toast', payload: { message: 'صرت مدير الغرفة عشان المدير القديم خرج!', type: 'success' } });
+          }
+        }
       }
     }
+
+    this.cleanupPlayerVotes(roomId, playerId);
   }
 
   // ==========================================
@@ -176,10 +240,10 @@ export class GameManager {
           );
           if (ans && ans.isPendingVote) {
             // FIX (#13): Align timeout vote logic with live voting requirement (> 50%) -> strict majority
-            // This treats Ties as Rejections.
+            // Accept ties as valid answers (50% or more) instead of rejecting.
             const { yes = 0 } = (item as any).votes || {};
             const totalEligible = item.eligibleVoterIds?.length || 0;
-            const majorityNeeded = Math.floor(totalEligible / 2) + 1;
+            const majorityNeeded = Math.ceil(totalEligible / 2); // 50% passes
             ans.isValid = yes >= majorityNeeded;
             ans.isPendingVote = false;
             ans.reason = ans.isValid ? 'تم قبوله (انتهاء الوقت)' : 'تم رفضه (انتهاء الوقت - لم يحظ بأغلبية)';
@@ -188,7 +252,9 @@ export class GameManager {
         }
 
         // Remove resolved items safely
-        draft.voteQueue = draft.voteQueue.filter((item: any) => !resolvedItems.includes(item));
+        draft.voteQueue = draft.voteQueue.filter((item: any) =>
+          !resolvedItems.some(r => r.requesterId === item.requesterId && r.category === item.category)
+        );
 
         if (draft.voteQueue.length === 0) {
           this.roundManager.calculateAnswerScores(draft);
@@ -217,7 +283,7 @@ export class GameManager {
       return;
     }
 
-    const invalid = () => this.send(ws, { type: 'error', payload: { message: 'بيانات غير صالحة' } });
+    const invalid = () => this.send(ws, { type: 'error', payload: { code: 'INVALID_PAYLOAD', message: 'بيانات غير صالحة' } });
 
     console.log(`[GameManager] Received: ${message.type}`);
     try {
@@ -302,9 +368,13 @@ export class GameManager {
           this.castParallelVote(ws, p);
           break;
         }
-        case 'player_appeal':
-          this.handlePlayerAppeal(ws, message.payload);
+        case 'player_appeal': {
+          // P1-4 FIX: Validate payload with Zod schema
+          const appealP = this.validatePayload(playerAppealPayloadSchema, message.payload);
+          if (!appealP) return invalid();
+          this.handlePlayerAppeal(ws, appealP);
           break;
+        }
         case 'referee_toggle_validity': {
           const p = this.validatePayload(refereeToggleValiditySchema, message.payload);
           if (!p) return invalid();
@@ -345,9 +415,13 @@ export class GameManager {
           this.hostAdjustScore(ws, p);
           break;
         }
-        case 'referee_deduct':
-          this.refereeDeduct(ws, message.payload);
+        case 'referee_deduct': {
+          // P1-4 FIX: Validate payload with Zod schema
+          const deductP = this.validatePayload(refereeDeductPayloadSchema, message.payload);
+          if (!deductP) return invalid();
+          this.refereeDeduct(ws, deductP);
           break;
+        }
         case 'referee_override': {
           const p = this.validatePayload(refereeOverrideSchema, message.payload);
           if (!p) return invalid();
@@ -357,7 +431,13 @@ export class GameManager {
         case 'appeal_answer': {
           const p = this.validatePayload(appealAnswerSchema, message.payload);
           if (!p) return invalid();
-          this.appealAnswer(ws, p);
+          this.appealAnswer(ws, { ...p, category: p.category as any });
+          break;
+        }
+        default: {
+          const unknownType = (message as any).type;
+          console.warn(`[GameManager] Unknown message type: ${unknownType}`);
+          this.send(ws, { type: 'error', payload: { code: 'UNKNOWN_TYPE', message: `نوع رسالة غير معروف: ${unknownType}` } });
           break;
         }
       }
@@ -367,9 +447,88 @@ export class GameManager {
     }
   }
 
+  private cleanupPlayerVotes(roomId: string, playerId: string) {
+    const buffer = this.roomManager.getRoomBuffer(roomId);
+    if (!buffer) return;
+
+    let shouldFinishVoting = false;
+    buffer.transact(draft => {
+      if (draft.voteQueue) {
+        // Remove any vote items that belong to this player (their answer was pending)
+        draft.voteQueue = draft.voteQueue.filter((v: any) => v.requesterId !== playerId);
+
+        draft.voteQueue.forEach((v: any) => {
+          // Remove from eligible list
+          if (v.eligibleVoterIds) {
+            v.eligibleVoterIds = v.eligibleVoterIds.filter((id: string) => id !== playerId);
+          }
+
+          if (v.voterIds && v.voterIds.includes(playerId)) {
+            v.voterIds = v.voterIds.filter((id: string) => id !== playerId);
+            if (v.voteMap && v.voteMap[playerId]) {
+              const direction = v.voteMap[playerId];
+              if (direction === 'yes' && v.votes?.yes > 0) v.votes.yes--;
+              else if (direction === 'no' && v.votes?.no > 0) v.votes.no--;
+              delete v.voteMap[playerId];
+            } else if (v.votes) {
+              const newTotal = v.eligibleVoterIds?.length ?? 0;
+              const currentTotal = (v.votes.yes ?? 0) + (v.votes.no ?? 0);
+              if (currentTotal > newTotal) {
+                if ((v.votes.no ?? 0) > 0) v.votes.no = Math.max(0, (v.votes.no ?? 0) - 1);
+                else v.votes.yes = Math.max(0, (v.votes.yes ?? 0) - 1);
+              }
+            }
+          }
+        });
+      }
+
+      if (draft.phase === 'voting' && draft.voteQueue) {
+        draft.voteQueue = draft.voteQueue.filter((v: any) => {
+          if ((v.eligibleVoterIds?.length || 0) === 0) {
+            const ans = draft.rounds[draft.currentRound]?.validatedAnswers.find(
+              (a: any) => a.playerId === v.requesterId && a.category === v.category
+            );
+            if (ans) {
+              ans.isValid = false;
+              ans.isPendingVote = false;
+              ans.reason = 'رفض تلقائي — لا ناخبين متبقين';
+            }
+            return false;
+          }
+          return true;
+        });
+
+        const stillPending = draft.rounds[draft.currentRound]?.validatedAnswers
+          .some((a: any) => a.isPendingVote);
+        if (draft.voteQueue.length === 0 && !stillPending) {
+          this.roundManager.calculateAnswerScores(draft);
+          shouldFinishVoting = true;
+        }
+      }
+    }, `cleanupPlayerVotes:${playerId}`);
+
+    if (shouldFinishVoting) {
+      const room = buffer.get();
+      this.roundManager.clearTimer(room.code);
+      this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
+      this.finishRoundPhase(room.code);
+    }
+  }
+
   handleDisconnect(ws: WebSocket): void {
     // GM1: Explicit cleanup of WeakMap entry on disconnect
     this.rateLimits.delete(ws);
+
+    // Robust cleanup: ensure ws is removed from all room indices regardless of player state 
+    // to prevent memory leaks if socket was added without full registration.
+    for (const [code, sockets] of this.roomSocketIndex.entries()) {
+      if (sockets.has(ws)) {
+        sockets.delete(ws);
+        if (sockets.size === 0) {
+          this.roomSocketIndex.delete(code);
+        }
+      }
+    }
 
     const playerInfo = this.playerManager.removePlayer(ws);
     if (!playerInfo) return;
@@ -377,96 +536,28 @@ export class GameManager {
     // GM3: Clean up lastVoteTime entry when player leaves
     this.lastVoteTime.delete(playerInfo.playerId);
 
+    let oldHostId = '';
+    const buffer = this.roomManager.getRoomBuffer(playerInfo.roomId);
+    if (buffer) oldHostId = buffer.get().hostId;
+
     this.roomManager.removePlayerFromRoom(playerInfo.roomId, playerInfo.playerId);
 
-    const buffer = this.roomManager.getRoomBuffer(playerInfo.roomId);
     if (buffer) {
-      // FIX (#12): Clean up eligibleVoterIds and orphaned vote requests when player leaves
-      let shouldFinishVoting = false;
-      buffer.transact(draft => {
-        // FIX: If the disconnected player was the host, reassign to another player
-        if (draft.hostId === playerInfo.playerId && draft.players.length > 0) {
-          const newHost = draft.players.find(p => p.id !== playerInfo.playerId);
-          if (newHost) {
-            draft.hostId = newHost.id;
-            newHost.isHost = true;
-            console.log(`[GameManager] Host reassigned to ${newHost.name} after disconnect.`);
-          }
-        }
-
-        if (draft.voteQueue) {
-          // Remove any vote items that belong to this player (their answer was pending)
-          draft.voteQueue = draft.voteQueue.filter((v: any) => v.requesterId !== playerInfo.playerId);
-
-          draft.voteQueue.forEach((v: any) => {
-            // Remove from eligible list
-            if (v.eligibleVoterIds) {
-              v.eligibleVoterIds = v.eligibleVoterIds.filter((id: string) => id !== playerInfo.playerId);
-            }
-
-            // Retract any vote they already cast — keeps yes+no <= eligibleVoterIds.length
-            // so the "all voted" condition can still trigger correctly
-            if (v.voterIds && v.voterIds.includes(playerInfo.playerId)) {
-              v.voterIds = v.voterIds.filter((id: string) => id !== playerInfo.playerId);
-              // Precise retraction using voteMap if available
-              if (v.voteMap && v.voteMap[playerInfo.playerId]) {
-                const direction = v.voteMap[playerInfo.playerId];
-                if (direction === 'yes' && v.votes?.yes > 0) v.votes.yes--;
-                else if (direction === 'no' && v.votes?.no > 0) v.votes.no--;
-                delete v.voteMap[playerInfo.playerId];
-              } else if (v.votes) {
-                // Fallback heuristic: decrement minority side
-                const newTotal = v.eligibleVoterIds?.length ?? 0;
-                const currentTotal = (v.votes.yes ?? 0) + (v.votes.no ?? 0);
-                if (currentTotal > newTotal) {
-                  if ((v.votes.no ?? 0) > 0) v.votes.no = Math.max(0, (v.votes.no ?? 0) - 1);
-                  else v.votes.yes = Math.max(0, (v.votes.yes ?? 0) - 1);
-                }
-              }
-            }
-          });
-        }
-
-        // FIX-AUTO-4: After cleanup, check if voting is now completable
-        if (draft.phase === 'voting' && draft.voteQueue) {
-          // Auto-resolve items that now have 0 eligible voters
-          draft.voteQueue = draft.voteQueue.filter((v: any) => {
-            if ((v.eligibleVoterIds?.length || 0) === 0) {
-              const ans = draft.rounds[draft.currentRound]?.validatedAnswers.find(
-                (a: any) => a.playerId === v.requesterId && a.category === v.category
-              );
-              if (ans) {
-                ans.isValid = false;
-                ans.isPendingVote = false;
-                ans.reason = 'رفض تلقائي — لا ناخبين متبقين';
-              }
-              return false;
-            }
-            return true;
-          });
-
-          const stillPending = draft.rounds[draft.currentRound]?.validatedAnswers
-            .some((a: any) => a.isPendingVote);
-          if (draft.voteQueue.length === 0 && !stillPending) {
-            this.roundManager.calculateAnswerScores(draft);
-            shouldFinishVoting = true;
-          }
-        }
-      }, `player_left:${playerInfo.playerId}`);
-
-
       const room = buffer.get();
       if (room.players.length > 0) {
         this.broadcastToRoom(room.code, { type: 'player_left', payload: { players: room.players } });
-      }
 
-      // FIX-AUTO-4: If disconnect emptied the voteQueue, finish the round now
-      if (shouldFinishVoting) {
-        this.roundManager.clearTimer(room.code);
-        this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
-        this.finishRoundPhase(room.code);
+        // Host migration notification
+        if (oldHostId !== room.hostId && room.hostId) {
+          const newHostWs = this.playerManager.getSocket(room.hostId);
+          if (newHostWs) {
+            this.send(newHostWs, { type: 'toast', payload: { message: 'صرت مدير الغرفة عشان المدير القديم خرج!', type: 'success' } });
+          }
+        }
       }
     }
+
+    this.cleanupPlayerVotes(playerInfo.roomId, playerInfo.playerId);
   }
 
   // FIX (#5): Missing Session Reconnection Logic
@@ -480,19 +571,26 @@ export class GameManager {
     const player = room.players.find(p => p.id === playerId);
     if (!player) return this.send(ws, { type: 'error', payload: { message: 'اللاعب غير موجود في هذه الغرفة' } });
 
+    buffer.transact(draft => {
+      const p = draft.players.find(pl => pl.id === playerId);
+      if (p) p.isOffline = false;
+    }, "rejoinRoom Offline Clear");
+
     // Remove old socket if exists
     const oldSocket = this.playerManager.getSocket(playerId);
     if (oldSocket) {
+      // GAP-3 FIX: Remove old socket from index BEFORE removing from PlayerManager
+      this.removeSocketFromRoomIndex(room.code, oldSocket);
       this.playerManager.removePlayer(oldSocket);
       try { oldSocket.close(); } catch { }
     }
 
     // Assign new socket to this player id
     this.playerManager.addPlayer(ws, room.code, playerId);
+    this.addSocketToRoomIndex(room.code, ws);
 
-    // Sync state
+    // SESSION-2 FIX: Send only room_joined (it already contains full state)
     this.send(ws, { type: 'room_joined', payload: { room: buffer.get(), playerId } });
-    this.send(ws, { type: 'sync_state', payload: { room: buffer.get() } });
   }
 
   // ==========================================
@@ -519,6 +617,7 @@ export class GameManager {
     try {
       const { room } = this.roomManager.createRoom(hostId, name);
       this.playerManager.addPlayer(ws, room.code, hostId);
+      this.addSocketToRoomIndex(room.code, ws);
 
       this.send(ws, {
         type: 'room_created',
@@ -549,6 +648,7 @@ export class GameManager {
     try {
       const room = this.roomManager.joinRoom(normCode, playerId, name);
       this.playerManager.addPlayer(ws, room.code, playerId);
+      this.addSocketToRoomIndex(room.code, ws);
 
       this.send(ws, { type: 'room_joined', payload: { room, playerId } });
       this.broadcastToRoom(room.code, { type: 'player_joined', payload: { players: room.players } }, ws);
@@ -568,6 +668,7 @@ export class GameManager {
     try {
       const room = this.roomManager.joinPublicRoom(playerId, name);
       this.playerManager.addPlayer(ws, room.code, playerId);
+      this.addSocketToRoomIndex(room.code, ws);
 
       this.send(ws, { type: 'room_joined', payload: { room, playerId } });
       this.broadcastToRoom(room.code, { type: 'player_joined', payload: { players: room.players } }, ws);
@@ -675,12 +776,16 @@ export class GameManager {
 
     let startedRush = false;
     buffer.transact(draft => {
+      // BUG-4 FIX: Crucial guard! If we are no longer playing (e.g. they submitted at the very last
+      // millisecond and phase shifted to voting/results), DO NOT start rush mode and overwrite timers
+      if (draft.phase !== 'playing') return;
+
       const round = draft.rounds[draft.currentRound];
-      if (!round || round.isRush) return;
+      if (!round || round.isRush || round.endRoundInProgress) return;
       if (round.banishedPlayerId === p.playerId) return;
 
       const sub = round.submissions.find(s => s.playerId === p.playerId);
-      if (!sub) return;
+      if (!sub || sub.busComplete) return; // FIX: Prevent double-fire if already bus-completed
 
       sub.busComplete = true;
       round.isRush = true;
@@ -702,13 +807,38 @@ export class GameManager {
   }
 
   private endRound(roomCode: string) {
-    this.roundManager.clearTimer(roomCode);
     const buffer = this.roomManager.getRoomBuffer(roomCode);
     if (!buffer) return;
+
+    // V3-4 CRITICAL GUARD: Prevent double-processing via race conditions
+    const room = buffer.get();
+    // P2-16 FIX: Reject stale timer that fires after phase already advanced
+    if (room.phase !== 'playing') {
+      console.log(`[endRound] Room ${roomCode} phase='${room.phase}', skipping stale timer`);
+      return;
+    }
+    const roundKey = `${roomCode}:${room.currentRound}`;
+    if (this.endedRounds.has(roundKey)) {
+      console.log(`[endRound] Round ${roundKey} already ended, skipping`);
+      return;
+    }
+    this.endedRounds.add(roundKey);
+    if (this.endedRounds.size > 50) {
+      const first = this.endedRounds.values().next().value;
+      if (first) this.endedRounds.delete(first);
+    }
+
+    this.roundManager.clearTimer(roomCode);
 
     // Draft Rescue Logic
     buffer.transact(draft => {
       const round = draft.rounds[draft.currentRound];
+      if (!round) return;
+
+      // CORE GUARD: Prevent double logic execution even if set check was slightly raced (transactional lock)
+      if (round.endRoundInProgress) return;
+      round.endRoundInProgress = true;
+
       const active = draft.players.filter(pl => pl.id !== draft.refereeId && pl.id !== round?.banishedPlayerId);
 
       for (const player of active) {
@@ -734,8 +864,8 @@ export class GameManager {
       }
     }, "endRound_rescue");
 
-    const room = buffer.get();
-    this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
+    const updatedRoom = buffer.get();
+    this.broadcastToRoom(updatedRoom.code, { type: 'sync_state', payload: { room: updatedRoom } });
 
     this.roundManager.processRoundWithAI(buffer, () => {
       // On Voting Start (parallel mode)
@@ -771,17 +901,52 @@ export class GameManager {
 
   private finishRoundPhase(roomCode: string) {
     try {
+      // Clear any pending timers to make it idempotent
+      this.roundManager.clearTimer(roomCode);
+
       const buffer = this.roomManager.getRoomBuffer(roomCode);
       if (!buffer) return;
 
+      // P2-11 FIX: Idempotency — prevent double finishRoundPhase for same round
+      const roundKey = `${roomCode}:${buffer.get().currentRound}`;
+      if (this.finishedRounds.has(roundKey)) {
+        console.log(`[FinishRoundPhase] Already processed ${roundKey}, skipping.`);
+        return;
+      }
+      this.finishedRounds.add(roundKey);
+      // Evict old entries to prevent memory leak (keep last 200)
+      if (this.finishedRounds.size > 200) {
+        const first = this.finishedRounds.values().next().value;
+        if (first) this.finishedRounds.delete(first);
+      }
+
       let autoStart = false;
+      let currentRound = 0;
+      let totalRounds = 0;
       buffer.transact(draft => {
         const round = draft.rounds[draft.currentRound];
-        if (round) round.powerUpUsedInRound = false;
+        if (round) {
+          round.powerUpUsedInRound = false;
+          // Bug 3 FIX: Clean up frozen player state between rounds
+          // frozenPlayerId exists at runtime but not in strict types
+          const frozenId = (round as any).frozenPlayerId;
+          if (frozenId) {
+            const frozenPlayer = draft.players.find(pl => pl.id === frozenId);
+            if (frozenPlayer) (frozenPlayer as any).isFrozen = false;
+            (round as any).frozenPlayerId = null;
+          }
+        }
 
         // FIX-AUTO-1: Must check both 'playing' AND 'voting' phases for referee_review routing.
         // When voting+referee combo is used, phase='voting' after votes finish — not 'playing'.
         const canGoToRefereeReview = (draft.phase === 'playing' || draft.phase === 'voting') && !!draft.refereeId;
+        const targetPhase = canGoToRefereeReview ? 'referee_review' : 'results';
+
+        if (!canTransition(draft.phase, targetPhase)) {
+          console.error(`[finishRoundPhase] Invalid transition: ${draft.phase} → ${targetPhase}`);
+          return;
+        }
+
         if (canGoToRefereeReview) {
           draft.phase = 'referee_review';
         } else {
@@ -790,24 +955,27 @@ export class GameManager {
           draft.phase = 'results';
           this.roundManager.commitRoundResults(draft);
 
-          if (!draft.refereeId && !draft.settings?.enableVoting) {
+          if (!draft.refereeId && !draft.settings?.votingEnabled) {
             draft.nextRoundAt = Date.now() + 20000;
             autoStart = true;
           }
         }
+
+        currentRound = draft.currentRound;
+        totalRounds = draft.totalRounds;
       }, "finishRoundPhase");
 
       const room = buffer.get();
       this.broadcastToRoom(room.code, { type: 'round_results', payload: { room } });
 
-      if (autoStart && room.currentRound < room.totalRounds - 1) {
+      if (autoStart && currentRound < totalRounds - 1) {
         this.roundManager.setRoundTimer(room.code, () => {
           const check = this.roomManager.getRoomBuffer(room.code)?.get();
-          if (check && check.phase === 'results' && check.currentRound === room.currentRound) {
+          if (check && check.phase === 'results' && check.currentRound === currentRound) {
             this.nextRoundByRoomCode(room.code);
           }
         }, 20000);
-      } else if (room.currentRound >= room.totalRounds - 1) {
+      } else if (currentRound >= totalRounds - 1) {
         this.roundManager.setRoundTimer(room.code, () => {
           const check = this.roomManager.getRoomBuffer(room.code)?.get();
           if (check && check.phase === 'results') {
@@ -829,6 +997,15 @@ export class GameManager {
     if (!buffer) return;
     const room = buffer.get();
     if (!room.players.find(pl => pl.id === p.playerId)?.isHost) return;
+
+    // V3-2 CRITICAL GUARD: Only allow next round from results or referee_review phase
+    if (room.phase !== 'results' && room.phase !== 'referee_review') {
+      this.send(ws, {
+        type: 'error',
+        payload: { message: 'يمكنك الانتقال للجولة التالية فقط بعد عرض النتائج' }
+      });
+      return;
+    }
 
     this.nextRoundByRoomCode(p.roomId);
   }
@@ -868,6 +1045,16 @@ export class GameManager {
 
     const room = buffer.get();
     this.broadcastToRoom(room.code, { type: 'game_end', payload: { room } });
+
+    // FIX: Auto-restart public rooms after 15 seconds
+    if (room.isPublicRoom) {
+      this.roundManager.setRoundTimer(roomCode, () => {
+        const check = this.roomManager.getRoomBuffer(roomCode)?.get();
+        if (check && check.phase === 'final') {
+          this.forcePlayAgain(roomCode);
+        }
+      }, 15000);
+    }
   }
 
   // ==========================================
@@ -919,11 +1106,11 @@ export class GameManager {
         }
       }
 
-      if (settings.enableVoting !== undefined) {
+      if (settings.votingEnabled !== undefined) {
         if (!draft.settings) draft.settings = {};
-        draft.settings.enableVoting = settings.enableVoting;
+        draft.settings.votingEnabled = settings.votingEnabled;
 
-        if (settings.enableVoting && draft.refereeId) {
+        if (settings.votingEnabled && draft.refereeId) {
           draft.refereeId = undefined;
           draft.players.forEach(pl => pl.isReferee = false);
           if (draft.phase === 'referee_review') {
@@ -955,7 +1142,7 @@ export class GameManager {
       draft.voteQueue = [];
       draft.currentVote = null;
       if (!draft.settings) draft.settings = {};
-      draft.settings.enableVoting = false;
+      draft.settings.votingEnabled = false;
     }, "setReferee");
 
     const room = buffer.get();
@@ -985,6 +1172,11 @@ export class GameManager {
     if (!buffer) return;
 
     const room = buffer.get();
+    // FLOW-1 FIX: Only allow approval during referee_review phase
+    if (room.phase !== 'referee_review') {
+      this.send(ws, { type: 'error', payload: { message: 'لا يمكن الموافقة إلا أثناء مراجعة الحكم' } });
+      return;
+    }
     // FIX: Only the referee or the host can approve results
     const isRef = room.refereeId === p.playerId;
     const isHost = room.players.find(pl => pl.id === p.playerId)?.isHost;
@@ -997,13 +1189,27 @@ export class GameManager {
 
   activatePowerUp(ws: WebSocket, payload: any) {
     const p = this.playerManager.getPlayer(ws);
-    if (!p) return;
+    if (!p) {
+      this.send(ws, { type: 'error', payload: { message: 'غير مسجل' } });
+      return;
+    }
     const buffer = this.roomManager.getRoomBuffer(p.roomId);
     if (!buffer) return;
 
+    let didActivate = false;
     buffer.transact(draft => {
       const round = draft.rounds[draft.currentRound];
       if (!round) return;
+      // P1-5 FIX: Only allow power-ups during playing phase
+      if (draft.phase !== 'playing' || round.endRoundInProgress) return;
+
+      // FIX: Prevent power-up usage if player already triggered bus complete or if round is in rush mode
+      const submission = round.submissions.find(s => s.playerId === p.playerId);
+      if (submission?.busComplete || round.isRush) {
+        console.log(`[PowerUp] Player ${p.playerId} blocked: busComplete=${!!submission?.busComplete}, isRush=${round.isRush}`);
+        return;
+      }
+
       // D1 FIX: Lift global powerUpUsedInRound restriction.
       // Players are only limited by their own usage flag.
       if (round.banishedPlayerId === p.playerId) return;
@@ -1012,70 +1218,153 @@ export class GameManager {
       if (!player) return;
 
       if (payload.type === 'wildcard') {
-        if (!player.usedPowerUps.wildcard && player.powerUps.wildcard > 0) {
-          player.powerUps.wildcard--;
-          player.usedPowerUps.wildcard = true;
-          // D2 FIX: Support multiple wildcard users
-          if (!round.wildcardUsedByPlayerIds) round.wildcardUsedByPlayerIds = [];
-          round.wildcardUsedByPlayerIds.push(p.playerId);
-          round.powerUpUsedInRound = true;
+        const cost = POWER_UP_COSTS.wildcard;
 
-          // FIX (#17): Pick a random unused word from DB for the player
-          const letter = draft.letters[draft.currentRound];
-          const category = payload.category as string;
-          if (category) {
-            const possibleWords = WildcardService.getInstance().getWords(letter, category);
-            const usedAnswers = round.submissions.flatMap(sub =>
-              sub.answers[category] ? [sub.answers[category]] : []
-            );
+        // ✅ Check if already used
+        if (player.usedPowerUps.wildcard) {
+          console.log(`[PowerUp] Player ${player.name} already used wildcard`);
+          this.send(ws, { type: 'toast', payload: { message: 'استخدمت هذه القدرة بالفعل!', type: 'error' } });
+          return;
+        }
 
-            // Filter out already used words to ensure uniqueness
-            const freshWords = possibleWords.filter(w => !usedAnswers.includes(w));
-            const chosen = freshWords.length > 0 ? freshWords[Math.floor(Math.random() * freshWords.length)] : possibleWords[0];
+        // ✅ Check if player has enough points
+        if (player.totalEarnedPoints < cost) {
+          console.log(`[PowerUp] Player ${player.name} doesn't have enough points (${player.totalEarnedPoints} < ${cost})`);
+          this.send(ws, { type: 'toast', payload: { message: `تحتاج لـ ${cost} نقطة لاستخدام هذه القدرة`, type: 'error' } });
+          return;
+        }
 
-            if (chosen) {
-              const submission = round.submissions.find(s => s.playerId === p.playerId);
-              if (submission) {
-                submission.answers[category] = chosen;
-              } else {
-                round.submissions.push({
-                  playerId: p.playerId,
-                  playerName: player?.name || 'Unknown',
-                  answers: { [category]: chosen },
-                  submittedAt: Date.now(),
-                  busComplete: false
-                });
-              }
-            } else {
-              // Fallback if no fresh words available
-              const fallback = possibleWords.length > 0 ? possibleWords[Math.floor(Math.random() * possibleWords.length)] : 'جمل';
-              const submission = round.submissions.find(s => s.playerId === p.playerId);
-              if (submission) {
-                submission.answers[category] = fallback;
-              } else {
-                round.submissions.push({
-                  playerId: p.playerId,
-                  playerName: player?.name || 'Unknown',
-                  answers: { [category]: fallback },
-                  submittedAt: Date.now(),
-                  busComplete: false
-                });
-              }
+        // ✅ Get category from payload or auto-select
+        let category = payload.category as string;
+        if (!category) {
+          // Auto-select first empty category
+          const currentCategories = draft.settings?.customCategories?.length
+            ? draft.settings.customCategories
+            : ['ولد', 'بنت', 'بلد', 'حيوان', 'جماد'];
+
+          const submission = round.submissions.find(s => s.playerId === p.playerId);
+          for (const cat of currentCategories) {
+            if (!submission?.answers[cat] || submission.answers[cat].trim() === '') {
+              category = cat;
+              break;
             }
           }
+
+          if (!category) {
+            category = currentCategories[0]; // Fallback
+          }
+        }
+
+        // Deduct points and mark as used
+        player.totalEarnedPoints -= cost;
+        player.usedPowerUps.wildcard = true;
+
+        // Track wildcard usage
+        if (!round.wildcardUsedByPlayerIds) round.wildcardUsedByPlayerIds = [];
+        round.wildcardUsedByPlayerIds.push(p.playerId);
+        round.powerUpUsedInRound = true;
+
+        // Generate word for the category
+        const letter = draft.letters[draft.currentRound];
+        const possibleWords = WildcardService.getInstance().getWords(letter, category);
+
+        // Find or create submission
+        let submission = round.submissions.find(s => s.playerId === p.playerId);
+
+        if (possibleWords.length > 0) {
+          const usedAnswers = round.submissions.flatMap(sub =>
+            sub.answers[category] ? [sub.answers[category]] : []
+          );
+
+          // Filter out already used words to ensure uniqueness
+          const freshWords = possibleWords.filter(w => !usedAnswers.includes(w));
+          const chosen = freshWords.length > 0 ? freshWords[Math.floor(Math.random() * freshWords.length)] : possibleWords[0];
+
+          if (submission) {
+            submission.answers[category] = chosen;
+          } else {
+            round.submissions.push({
+              playerId: p.playerId,
+              playerName: player.name,
+              answers: { [category]: chosen },
+              submittedAt: Date.now(),
+              busComplete: false
+            });
+          }
+
+          console.log(`[PowerUp] Wildcard activated for ${player.name}: ${category} -> ${chosen}`);
+          didActivate = true;
+        } else {
+          // Fallback if no specific word available
+          if (submission) {
+            submission.answers[category] = 'جمل'; // fallback word
+          } else {
+            round.submissions.push({
+              playerId: p.playerId,
+              playerName: player?.name || 'Unknown',
+              answers: { [category]: 'جمل' },
+              submittedAt: Date.now(),
+              busComplete: false
+            });
+          }
+          didActivate = true;
         }
       } else if (payload.type === 'banish') {
-        if (!player.usedPowerUps.banish && player.powerUps.banish > 0) {
-          player.powerUps.banish--;
-          player.usedPowerUps.banish = true;
-          round.banishedPlayerId = payload.targetPlayerId;
-          round.powerUpUsedInRound = true;
+        const cost = POWER_UP_COSTS.banish;
+
+        if (player.usedPowerUps.banish) {
+          console.log(`[PowerUp] Player ${player.name} already used banish`);
+          this.send(ws, { type: 'toast', payload: { message: 'استخدمت هذه القدرة بالفعل!', type: 'error' } });
+          return;
         }
+
+        if (player.totalEarnedPoints < cost) {
+          console.log(`[PowerUp] Player ${player.name} doesn't have enough points (${player.totalEarnedPoints} < ${cost})`);
+          this.send(ws, { type: 'toast', payload: { message: `تحتاج لـ ${cost} نقطة لاستخدام هذه القدرة`, type: 'error' } });
+          return;
+        }
+
+        // P2-7 FIX: Validate banish target exists and is not host/referee/self
+        const targetId = payload.targetPlayerId;
+        if (!targetId) return;
+        const targetPlayer = draft.players.find(pl => pl.id === targetId);
+        if (!targetPlayer) return;
+        if (targetPlayer.isHost) {
+          this.send(ws, { type: 'toast', payload: { message: 'لا يمكنك طرد مدير الغرفة!', type: 'error' } });
+          return;
+        }
+        if (draft.refereeId === targetId) {
+          this.send(ws, { type: 'toast', payload: { message: 'لا يمكنك طرد الحكم!', type: 'error' } });
+          return;
+        }
+        if (targetId === p.playerId) return;
+
+        player.totalEarnedPoints -= cost;
+        player.usedPowerUps.banish = true;
+        round.banishedPlayerId = targetId;
+        round.powerUpUsedInRound = true;
+
+        console.log(`[PowerUp] Banish activated: ${player.name} -> ${targetPlayer.name}`);
+        didActivate = true;
       }
     }, "activatePowerUp");
 
+    if (!didActivate) return;
+
     const room = buffer.get();
     this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
+
+    // ✅ Send confirmation toast to the player
+    const playerWs = this.playerManager.getSocket(p.playerId);
+    if (playerWs) {
+      this.send(playerWs, {
+        type: 'toast',
+        payload: {
+          message: '✅ تم تفعيل المساعدة بنجاح!',
+          type: 'success'
+        }
+      });
+    }
   }
 
   // ---------- Host Control Methods ----------
@@ -1175,6 +1464,9 @@ export class GameManager {
       const isRef = draft.refereeId === p.playerId;
       if (!isHost && !isRef) return;
 
+      // FIX (#2): Added defensive guard to prevent vote modification if parallel voting is entirely disabled
+      if (!draft.settings?.votingEnabled) return;
+
       const round = draft.rounds[draft.currentRound];
       if (!round) return;
       const ans = round.validatedAnswers.find(a => a.playerId === payload.playerId && a.category === payload.category);
@@ -1245,52 +1537,9 @@ export class GameManager {
     });
   }
 
-  /** Host can override final ranking order */
-  hostOverrideRanking(ws: WebSocket, payload: { orderedPlayerIds: string[] }) {
-    const p = this.playerManager.getPlayer(ws);
-    if (!p) return;
-    const buffer = this.roomManager.getRoomBuffer(p.roomId);
-    if (!buffer) return;
-    const isHost = buffer.get().players.find(pl => pl.id === p.playerId)?.isHost;
-    if (!isHost) return;
-    const { orderedPlayerIds } = payload;
-    buffer.transact(draft => {
-      const newOrder: typeof draft.players = [];
-      for (const pid of orderedPlayerIds) {
-        const player = draft.players.find(pl => pl.id === pid);
-        if (player) newOrder.push(player);
-      }
-      // Append any missing players at the end
-      for (const pl of draft.players) {
-        if (!orderedPlayerIds.includes(pl.id)) newOrder.push(pl);
-      }
-      draft.players = newOrder;
 
-      this.addAuditLogEntry(
-        draft,
-        p.playerId,
-        undefined,
-        'OVERRIDE_RANKING',
-        `المضيف قام بتعديل ترتيب اللاعبين يدوياً`
-      );
-
-      // Run soft validation
-      const warnings = this.validateGameState(draft);
-      if (warnings.length > 0) {
-        this.addAuditLogEntry(draft, 'SYSTEM', undefined, 'SYSTEM_WARNING', warnings.join(' | '));
-      }
-    }, 'host_override_ranking');
-    const room = buffer.get();
-    this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
-  }
-
-  /** Host can kick a player out of the room */
-
-  vote(ws: WebSocket, targetId: string, category: string, accepted: boolean) {
-    const p = this.playerManager.getPlayer(ws);
-    if (!p) return;
-    this.castParallelVote(ws, { requesterId: targetId, category: category as any, vote: accepted ? 'yes' : 'no' });
-  }
+  // DEAD-1: Removed hostOverrideRanking (no message type routes here)
+  // DEAD-1: Removed vote wrapper (no message type routes here)
 
   requestVote(ws: WebSocket, payload: any) {
     const p = this.playerManager.getPlayer(ws);
@@ -1299,7 +1548,7 @@ export class GameManager {
     if (!buffer) return;
 
     buffer.transact(draft => {
-      if (!draft.settings?.enableVoting) return;
+      if (!draft.settings?.votingEnabled) return;
 
       const player = draft.players.find((pl: any) => pl.id === p.playerId);
       const round = draft.rounds[draft.currentRound];
@@ -1425,53 +1674,8 @@ export class GameManager {
     }
   }
 
-  castDemocraticVote(ws: WebSocket, vote: 'yes' | 'no') {
-    const p = this.playerManager.getPlayer(ws);
-    if (!p) return;
-    const buffer = this.roomManager.getRoomBuffer(p.roomId);
-    if (!buffer) return;
 
-    let allVotesDone = false;
-
-    buffer.transact(draft => {
-      if (draft.phase !== 'voting' || !draft.currentVote) return;
-      if (draft.currentVote.voterIds.includes(p.playerId)) return;
-
-      const eligibleVoters = draft.players.filter(pl =>
-        pl.id !== draft.currentVote!.requesterId &&
-        pl.id !== draft.refereeId &&
-        pl.id !== draft.rounds[draft.currentRound]?.banishedPlayerId
-      );
-
-      if (!eligibleVoters.some(ev => ev.id === p.playerId)) return;
-
-      draft.currentVote.voterIds.push(p.playerId);
-      if (vote === 'yes') draft.currentVote.votes.yes++;
-      else draft.currentVote.votes.no++;
-
-      const activeCount = eligibleVoters.length;
-      const { yes, no } = draft.currentVote.votes;
-      if (yes > activeCount / 2 || no > activeCount / 2 || yes + no === activeCount) {
-        this.resolveCurrentVoteInDraft(draft);
-      }
-      if (!draft.currentVote) {
-        allVotesDone = true;
-      }
-    }, "castVote");
-
-    const room = buffer.get();
-    this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
-
-    if (allVotesDone) {
-      this.roundManager.clearTimer(room.code);
-      this.finishRoundPhase(room.code);
-    } else if (room.phase === 'voting' && room.currentVote) {
-      const elapsed = Date.now() - room.currentVote.startTime;
-      if (elapsed < 1000) {
-        this.startVoteTimer(room.code);
-      }
-    }
-  }
+  // DEAD-1: Removed castDemocraticVote (sequential voting removed, no message type routes here)
 
   refereeToggleValidity(ws: WebSocket, payload: any) {
     const p = this.playerManager.getPlayer(ws);
@@ -1480,6 +1684,9 @@ export class GameManager {
     if (!buffer) return;
 
     buffer.transact(draft => {
+      // V3-11 FIX: Only allow validity toggles during voting, results, or referee_review
+      if (draft.phase !== 'voting' && draft.phase !== 'results' && draft.phase !== 'referee_review') return;
+
       const isHost = draft.players.find(pl => pl.id === p.playerId)?.isHost;
       if (draft.refereeId !== p.playerId && !isHost) return;
 
@@ -1605,6 +1812,8 @@ export class GameManager {
     if (targetWs) {
       // BUG FIX #2: Send 'kicked' (not just toast) so client redirects the kicked player to home
       this.send(targetWs, { type: 'kicked', payload: { reason: 'تم طردك من الغرفة من قبل المضيف' } });
+      // GAP-2 FIX: Remove kicked player's socket from index BEFORE closing
+      this.removeSocketFromRoomIndex(p.roomId, targetWs);
       this.playerManager.removePlayer(targetWs);
       try { targetWs.close(); } catch { }
     }
@@ -1711,11 +1920,20 @@ export class GameManager {
     const buffer = this.roomManager.getRoomBuffer(p.roomId);
     if (!buffer) return;
 
+    // P1-2 FIX: Never allow appeals during final phase — prevents phase regression
+    if (buffer.get().phase === 'final') {
+      this.send(ws, { type: 'error', payload: { message: 'لا يمكن الاستئناف بعد انتهاء اللعبة' } });
+      return;
+    }
+
     let appealAdded = false;
 
     buffer.transact(draft => {
       const round = draft.rounds[draft.currentRound];
       if (!round) return;
+
+      // P1-2 FIX: Only allow appeals during voting, results, or referee_review
+      if (draft.phase !== 'voting' && draft.phase !== 'results' && draft.phase !== 'referee_review') return;
 
       const ans = round.validatedAnswers.find(a => a.playerId === p.playerId && a.category === payload.category);
       // Can only appeal if invalid and not already pending
@@ -1726,8 +1944,13 @@ export class GameManager {
 
       if (!draft.voteQueue) draft.voteQueue = [];
 
+      // VOTE-ELIGIBILITY-FIX: Exclude both referee and banished player
       const eligibleVoterIds = draft.players
-        .filter(pl => pl.id !== p.playerId && pl.id !== draft.refereeId)
+        .filter(pl =>
+          pl.id !== p.playerId &&
+          pl.id !== draft.refereeId &&
+          pl.id !== round.banishedPlayerId
+        )
         .map(pl => pl.id);
 
       draft.voteQueue.push({
@@ -1741,8 +1964,9 @@ export class GameManager {
         votes: { yes: 0, no: 0 }
       });
 
-      // If phase transitioned out of voting (e.g., results), push it back to voting so players can see it
-      if (draft.phase !== 'voting') {
+      // V3-3 FIX: Only set phase to voting if we're NOT already in results/referee_review
+      // This prevents phase regression when someone appeals from the results screen
+      if (draft.phase !== 'voting' && draft.phase !== 'results' && draft.phase !== 'referee_review') {
         draft.phase = 'voting';
       }
 
@@ -1752,8 +1976,6 @@ export class GameManager {
     const room = buffer.get();
     if (appealAdded) {
       this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
-
-      // Start or reset vote timer for the newly added appeal (if it's the first one, or reset to give them time)
       this.roundManager.setRoundTimer(room.code, () => this.handleVoteTimeout(room.code), 30000);
     }
   }
@@ -1767,17 +1989,20 @@ export class GameManager {
     });
   }
 
-  playAgain(ws: WebSocket) {
-    const p = this.playerManager.getPlayer(ws);
-    if (!p) return;
-    const buffer = this.roomManager.getRoomBuffer(p.roomId);
+  forcePlayAgain(roomCode: string) {
+    const buffer = this.roomManager.getRoomBuffer(roomCode);
     if (!buffer) return;
 
-    // Only host can trigger play again
-    const room = buffer.get();
-    if (!room.players.find(pl => pl.id === p.playerId)?.isHost) return;
+    this.roundManager.clearTimer(roomCode);
 
-    this.roundManager.clearTimer(p.roomId);
+    // V3-6 FIX: Clean roomSocketIndex for offline players before removing them
+    const roomBefore = buffer.get();
+    roomBefore.players.forEach(pl => {
+      if (pl.isOffline) {
+        const ws = this.playerManager.getSocket(pl.id);
+        if (ws) this.removeSocketFromRoomIndex(roomCode, ws);
+      }
+    });
 
     buffer.transact(draft => {
       draft.currentRound = 0;
@@ -1787,11 +2012,11 @@ export class GameManager {
       draft.currentVote = null;
       draft.nextRoundAt = undefined;
       draft.auditLog = [];
-      // FIX: Clear referee state on play again — old referee would otherwise persist
       draft.refereeId = undefined;
-
-      // BUG FIX #3: Use getRandomLetters to get truly fresh letters, not a shuffle of the same pool
       draft.letters = getRandomLetters(draft.totalRounds);
+
+      // FIX: Filter out offline players during restart
+      draft.players = draft.players.filter(pl => !pl.isOffline);
 
       draft.players.forEach(pl => {
         pl.score = 0;
@@ -1800,16 +2025,37 @@ export class GameManager {
         pl.busStreak = 0;
         pl.powerUps = { hint: 0, steal: 0, wildcard: 0, banish: 0 };
         pl.usedPowerUps = { hint: false, steal: false, wildcard: false, banish: false };
-        // FIX: Clear referee and draft state
         pl.isReferee = false;
         pl.draftAnswers = undefined;
-        // BUG-1 FIX: Reset manual score adjustments for new game
         pl.manualScoreAdjustment = 0;
       });
-    }, "playAgain");
+
+      // Fix host migration in case original host offline
+      if (draft.players.length > 0) {
+        if (!draft.players.find(p => p.isHost)) {
+          draft.hostId = draft.players[0].id;
+          draft.players[0].isHost = true;
+        }
+      }
+    }, "forcePlayAgain");
 
     const updated = buffer.get();
     this.broadcastToRoom(updated.code, { type: 'sync_state', payload: { room: updated } });
+  }
+
+  playAgain(ws: WebSocket) {
+    const p = this.playerManager.getPlayer(ws);
+    if (!p) return;
+    const buffer = this.roomManager.getRoomBuffer(p.roomId);
+    if (!buffer) return;
+
+    const room = buffer.get();
+    // Allow anyone to click play again in a public room
+    // V3-5 CRITICAL GUARD: Private rooms can only be restarted from the final phase
+    if (!room.isPublicRoom && room.phase !== 'final') return;
+    if (!room.isPublicRoom && !room.players.find(pl => pl.id === p.playerId)?.isHost) return;
+
+    this.forcePlayAgain(p.roomId);
   }
 
   // Helpers
@@ -1818,11 +2064,31 @@ export class GameManager {
     if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(message));
   }
 
+  // P2-10 FIX: O(1) broadcast using room→socket index instead of scanning all players
   private broadcastToRoom(roomCode: string, message: WSMessage, exclude?: WebSocket) {
-    const players = this.playerManager.getAllPlayers();
-    for (const p of players) {
-      if (p.roomId === roomCode && p.ws !== exclude) {
-        this.send(p.ws, message);
+    const roomSockets = this.roomSocketIndex.get(roomCode);
+    if (!roomSockets) return;
+    const messageStr = JSON.stringify(message);
+    for (const ws of roomSockets) {
+      if (ws !== exclude && ws.readyState === WebSocket.OPEN) {
+        ws.send(messageStr);
+      }
+    }
+  }
+
+  private addSocketToRoomIndex(roomCode: string, ws: WebSocket) {
+    if (!this.roomSocketIndex.has(roomCode)) {
+      this.roomSocketIndex.set(roomCode, new Set());
+    }
+    this.roomSocketIndex.get(roomCode)!.add(ws);
+  }
+
+  private removeSocketFromRoomIndex(roomCode: string, ws: WebSocket) {
+    const roomSockets = this.roomSocketIndex.get(roomCode);
+    if (roomSockets) {
+      roomSockets.delete(ws);
+      if (roomSockets.size === 0) {
+        this.roomSocketIndex.delete(roomCode);
       }
     }
   }

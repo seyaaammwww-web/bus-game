@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Bus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,13 @@ interface BusCompleteButtonProps {
 }
 
 export function BusCompleteButton({ onPress, disabled }: BusCompleteButtonProps) {
+  // Use a ref to prevent overlapping sounds if clicked rapidly
+  const lastSoundRef = useRef(0);
+
   const handleClick = () => {
+    const now = Date.now();
+    if (now - lastSoundRef.current < 2000) return; // 2s cooldown
+    lastSoundRef.current = now;
     playBusSound();
     onPress();
   };

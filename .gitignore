@@ -6,3 +6,7 @@ vite.config.ts.*
 *.tar.gz
 .env
 .local
+sqlite.db
+*-screenshots/
+host_fail.png
+joiner_fail.png

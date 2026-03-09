@@ -29,11 +29,6 @@ export class PlayerManager {
         return playerInfo;
     }
 
-    updateRoomId(ws: WebSocket, roomId: string) {
-        const player = this.players.get(ws);
-        if (player) player.roomId = roomId;
-    }
-
     recordPong(ws: WebSocket) {
         const player = this.players.get(ws);
         if (player) player.lastPong = Date.now();
@@ -70,11 +65,15 @@ export class PlayerManager {
 
             if (isWebSocketDead || isPongTimedOut) {
                 console.log(`[PlayerManager] Removing dead player ${info.playerId} (ws=${ws.readyState}, pong=${isPongTimedOut})`);
+
+                // V3-1 FIX: Call timeout handler BEFORE deleting socket from map
+                // so handlePlayerTimeout can find it via getSocket() and remove it from roomSocketIndex
+                this.onPlayerTimeout(info.playerId, info.roomId);
+
                 this.players.delete(ws);
                 if (ws.readyState === WebSocket.OPEN) {
                     try { ws.terminate(); } catch { }
                 }
-                this.onPlayerTimeout(info.playerId, info.roomId);
             }
         }
     }

@@ -10,7 +10,13 @@ const PUBLIC_ROOM_CODE = 'PLAY';
 export class RoomManager {
     private rooms: Map<string, CorruptionProofBuffer<GameRoom>> = new Map();
 
-    constructor() {
+    // PERSIST-1 FIX: Public accessor so StateOrchestrator doesn't need @ts-ignore
+    public getAllBuffers(): CorruptionProofBuffer<GameRoom>[] {
+        return Array.from(this.rooms.values());
+    }
+
+    // V3-14 FIX: Constructor accepts callback to notify GameManager of room deletion
+    constructor(private onRoomDeleted?: (code: string) => void) {
         this.startCleanupInterval();
     }
 
@@ -38,7 +44,7 @@ export class RoomManager {
             voteQueue: [],
             currentVote: null,
             settings: {
-                enableVoting: false,
+                votingEnabled: false,
                 customCategories: []
             }
         };
@@ -91,7 +97,7 @@ export class RoomManager {
                 letters: getRandomLetters(10),
                 createdAt: Date.now(),
                 isPublicRoom: true,
-                settings: { enableVoting: false }
+                settings: { votingEnabled: false }
             };
             buffer = new CorruptionProofBuffer(room);
             this.rooms.set(PUBLIC_ROOM_CODE, buffer);
@@ -113,17 +119,29 @@ export class RoomManager {
         return buffer.get();
     }
 
-    removePlayerFromRoom(roomCode: string, playerId: string) {
+    removePlayerFromRoom(roomCode: string, playerId: string, hardDelete: boolean = false) {
         const buffer = this.rooms.get(roomCode);
         if (!buffer) return;
 
         buffer.transact((draft) => {
-            draft.players = draft.players.filter(p => p.id !== playerId);
+            if (hardDelete || draft.phase === 'lobby') {
+                draft.players = draft.players.filter(p => p.id !== playerId);
+            } else {
+                const player = draft.players.find(p => p.id === playerId);
+                if (player) {
+                    player.isOffline = true;
+                }
+            }
 
             // Handle Host Migration
-            if (draft.players.length > 0 && draft.hostId === playerId) {
-                draft.hostId = draft.players[0].id;
-                draft.players[0].isHost = true;
+            const onlinePlayers = draft.players.filter(p => !p.isOffline);
+            if (onlinePlayers.length > 0 && draft.hostId === playerId) {
+                // P1-1 FIX: Clear old host flag FIRST to prevent dual-host
+                const oldHost = draft.players.find(p => p.id === playerId);
+                if (oldHost) oldHost.isHost = false;
+
+                draft.hostId = onlinePlayers[0].id;
+                onlinePlayers[0].isHost = true;
             }
         }, "removePlayer");
 
@@ -144,13 +162,14 @@ export class RoomManager {
         };
     }
 
-    private generateRoomCode(): string {
+    private generateRoomCode(depth: number = 0): string {
+        if (depth > 20) throw new Error("Could not generate unique room code after 20 attempts");
         const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
         let code = '';
         for (let i = 0; i < 4; i++) {
             code += chars[Math.floor(Math.random() * chars.length)];
         }
-        return this.rooms.has(code) ? this.generateRoomCode() : code;
+        return this.rooms.has(code) ? this.generateRoomCode(depth + 1) : code;
     }
 
 
@@ -159,16 +178,29 @@ export class RoomManager {
             const now = Date.now();
             for (const [code, buffer] of this.rooms.entries()) {
                 const room = buffer.get();
-                // Remove if empty for > 10 min OR created > 24h
-                const isEmpty = room.players.length === 0;
-                const isOld = now - room.createdAt > 24 * 60 * 60 * 1000;
+                const lastActivity = room.lastActivityAt || room.createdAt;
 
-                if ((isEmpty && now - room.createdAt > 10 * 60 * 1000) || isOld) {
+                const isEmpty = room.players.filter(p => !p.isOffline).length === 0;
+
+                const shouldCleanupEmpty = isEmpty && (now - lastActivity > 10 * 60 * 1000);
+                const isStale = now - lastActivity > 24 * 60 * 60 * 1000;
+
+                if (shouldCleanupEmpty || isStale) {
                     this.rooms.delete(code);
-                    console.log(`[RoomManager] Cleaned up room ${code}`);
+                    if (this.onRoomDeleted) this.onRoomDeleted(code);
+                    console.log(`[RoomManager] Cleaned up room ${code} (empty: ${shouldCleanupEmpty}, stale: ${isStale})`);
                 }
             }
-        }, 60 * 60 * 1000);
+        }, 5 * 60 * 1000);
+    }
+
+    updateActivity(roomCode: string): void {
+        const buffer = this.rooms.get(roomCode);
+        if (buffer) {
+            buffer.transact(draft => {
+                draft.lastActivityAt = Date.now();
+            }, "updateActivity");
+        }
     }
 
     // Persistence Helpers

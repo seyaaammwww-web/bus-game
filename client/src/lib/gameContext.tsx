@@ -1,18 +1,28 @@
 import { createContext, useContext, useReducer, useCallback, useEffect, useRef, ReactNode, useState } from 'react';
 import { applyPatches } from 'immer';
+import { toast } from '@/hooks/use-toast';
 import type { GameRoom, Player, Round, GamePhase, RoundAnswers, Category, ValidatedAnswer, Reaction, ReactionType, PowerUpType } from '@shared/schema';
 
 // FIX: Persist session info in sessionStorage for reconnection
 const SESSION_KEY = 'egyptian_bus_session';
 
 function saveSession(playerId: string, roomCode: string) {
-  try { sessionStorage.setItem(SESSION_KEY, JSON.stringify({ playerId, roomCode, ts: Date.now() })); } catch { }
+  try {
+    const data = btoa(encodeURIComponent(JSON.stringify({ playerId, roomCode, ts: Date.now() })));
+    sessionStorage.setItem(SESSION_KEY, data);
+  } catch { }
 }
 function loadSession(): { playerId: string; roomCode: string; ts: number } | null {
   try {
     const raw = sessionStorage.getItem(SESSION_KEY);
     if (!raw) return null;
-    const data = JSON.parse(raw);
+    let data;
+    try {
+      data = JSON.parse(decodeURIComponent(atob(raw)));
+    } catch {
+      // Fallback for old unencrypted sessions
+      data = JSON.parse(raw);
+    }
     // Session valid for 30 minutes
     if (Date.now() - data.ts > 30 * 60 * 1000) { sessionStorage.removeItem(SESSION_KEY); return null; }
     return data;
@@ -105,6 +115,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         return { ...state, room: applyPatches(state.room, action.patches) };
       } catch (e) {
         console.error("Failed to apply patches", e);
+        // Don't call toast() here — reducers must be pure. Just return state unchanged.
         return state;
       }
     case 'RESET':
@@ -147,7 +158,7 @@ interface GameContextType {
   hostResolveVotes: () => void;
   // FIX: Host can kick a player
   kickPlayer: (playerId: string) => void;
-  activatePowerUp: (type: PowerUpType, targetId?: string) => void;
+  activatePowerUp: (type: PowerUpType, targetId?: string, category?: string) => void;
   activePowerUpNotification: { type: PowerUpType; playerName: string } | null;
   isBanished: boolean;
   banishedBy: string | null;
@@ -279,19 +290,21 @@ export function GameProvider({ children }: { children: ReactNode }) {
         dispatch({ type: 'SET_RUSH', isRush: false });
         break;
       case 'toast':
-        // FIX: Show server toast messages in the UI (was only console.log before)
+        // FIX: Show server toast messages directly using toast hook
         if (typeof message.payload?.message === 'string') {
-          // Use a custom event so Toaster can pick it up without hook dependency here
-          window.dispatchEvent(new CustomEvent('game-toast', { detail: message.payload }));
+          toast({
+            title: message.payload.type === 'error' ? 'خطأ' : 'تنبيه',
+            description: message.payload.message,
+            variant: message.payload.type === 'error' ? 'destructive' : 'default',
+          });
         }
         break;
       case 'appeal_result':
-        window.dispatchEvent(new CustomEvent('game-toast', {
-          detail: {
-            message: message.payload.success ? '✅ ' + (message.payload.message || 'تم قبول الاستئناف') : '❌ ' + (message.payload.message || 'تم رفض الاستئناف'),
-            type: message.payload.success ? 'success' : 'error'
-          }
-        }));
+        toast({
+          title: message.payload.success ? 'نجاح' : 'خطأ',
+          description: message.payload.success ? '✅ ' + (message.payload.message || 'تم قبول الاستئناف') : '❌ ' + (message.payload.message || 'تم رفض الاستئناف'),
+          variant: message.payload.success ? 'default' : 'destructive',
+        });
         break;
 
       // FIX: Handle being kicked
@@ -310,8 +323,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
     if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
 
     const attempt = reconnectAttemptRef.current;
-    if (attempt >= 8) {
-      // Give up after 8 attempts (~4 minutes total)
+    if (attempt >= 15) {
+      // Give up after 15 attempts (increased from 8)
       dispatch({ type: 'SET_ERROR', error: 'انتهت محاولات الاتصال. حاول مجدداً.' });
       dispatch({ type: 'SET_RECONNECTING', reconnecting: false });
       return;
@@ -394,6 +407,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const createRoom = useCallback((playerName: string) => {
+    clearSession();
     const ws = connect();
     const doCreate = () => {
       ws.send(JSON.stringify({ type: 'create_room', payload: { playerName } }));
@@ -403,6 +417,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [connect]);
 
   const joinRoom = useCallback((roomCode: string, playerName: string) => {
+    clearSession();
     const ws = connect();
     const doJoin = () => {
       ws.send(JSON.stringify({ type: 'join_room', payload: { roomCode: roomCode.toUpperCase(), playerName } }));
@@ -423,7 +438,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const setReferee = useCallback((playerId: string) => { sendMessage('set_referee', { playerId }); }, [sendMessage]);
   const removeReferee = useCallback(() => { sendMessage('remove_referee', {}); }, [sendMessage]);
   const refereeDeduct = useCallback((playerId: string, category: Category, reason: string) => { sendMessage('referee_deduct', { playerId, category, reason }); }, [sendMessage]);
-  const refereeToggleUnique = useCallback((playerId: string, category: Category) => { sendMessage('referee_toggle_unique', { playerId, category }); }, [sendMessage]);
+  // P1-6 FIX: Was 'referee_toggle_unique' which the server doesn't handle — must match server handler
+  const refereeToggleUnique = useCallback((playerId: string, category: Category) => { sendMessage('referee_toggle_validity', { playerId, category }); }, [sendMessage]);
   const refereeToggleValidity = useCallback((playerId: string, category: Category) => { sendMessage('referee_toggle_validity', { playerId, category }); }, [sendMessage]);
   const refereeApprove = useCallback(() => { sendMessage('referee_approve', {}); }, [sendMessage]);
   const nextRound = useCallback(() => { sendMessage('next_round', {}); }, [sendMessage]);
@@ -456,8 +472,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const hostResolveVotes = useCallback(() => { sendMessage('host_resolve_votes', {}); }, [sendMessage]);
   // FIX: Host kick
   const kickPlayer = useCallback((playerId: string) => { sendMessage('kick_player', { playerId }); }, [sendMessage]);
-  const activatePowerUp = useCallback((type: PowerUpType, targetId?: string) => {
-    sendMessage('activate_powerup', targetId ? { type, targetPlayerId: targetId } : { type });
+  const activatePowerUp = useCallback((type: PowerUpType, targetId?: string, category?: string) => {
+    const payload: any = { type };
+    if (targetId) payload.targetPlayerId = targetId;
+    if (category) payload.category = category;
+    sendMessage('activate_powerup', payload);
   }, [sendMessage]);
 
   const disconnect = useCallback(() => {

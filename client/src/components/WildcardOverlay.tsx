@@ -77,7 +77,7 @@ export const WildcardOverlay = memo(function WildcardOverlay({ isActive, playerN
 
               <h3 className="text-2xl font-bold text-amber-600 mb-2">استخدمت الجوكر!</h3>
               <p className="text-gray-700 font-semibold text-lg mb-2">
-                تم ملء جميع الخانات بإجابات صحيحة!
+                إجابات صحيحة!
               </p>
               <p className="text-gray-600 text-sm leading-relaxed">
                 {message || 'تم تقديم إجاباتك تلقائياً. استمتع بالمزايا!'}

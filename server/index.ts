@@ -1,3 +1,4 @@
+console.log(`[BOOT] Server script started at ${new Date().toISOString()}`);
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
@@ -5,6 +6,7 @@ import { createServer } from "http";
 
 const app = express();
 const httpServer = createServer(app);
+
 
 declare module "http" {
   interface IncomingMessage {
@@ -60,58 +62,61 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  await registerRoutes(httpServer, app);
-
-  app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-
-    console.error("Internal Server Error:", err);
-
-    if (res.headersSent) {
-      return next(err);
-    }
-
-    return res.status(status).json({ message });
-  });
-
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (process.env.NODE_ENV === "production") {
-    serveStatic(app);
-  } else {
-    const { setupVite } = await import("./vite");
-    await setupVite(httpServer, app);
-  }
-
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
   const port = parseInt(process.env.PORT || "5000", 10);
+
+  // FH1: Listen IMMEDIATELY to pass Hugging Face health checks
   httpServer.listen(
     {
       port,
       host: "0.0.0.0",
     },
     () => {
-      log(`serving on port ${port}`);
+      log(`[BOOT] Server listening on port ${port} (Ready for health checks)`);
     },
   );
 
-  // Graceful shutdown — stop accepting connections and clean up timers
+  try {
+    log(`Starting server initialization...`);
+    console.time('Startup');
+
+    log(`Registering routes...`);
+    await registerRoutes(httpServer, app);
+    console.timeLog('Startup', 'Routes registered');
+
+    app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
+      const status = err.status || err.statusCode || 500;
+      const message = err.message || "Internal Server Error";
+      console.error("Internal Server Error:", err);
+      if (res.headersSent) return next(err);
+      return res.status(status).json({ message });
+    });
+
+    if (process.env.NODE_ENV === "production") {
+      log(`Serving static files in production mode...`);
+      serveStatic(app);
+    } else {
+      log(`Initializing Vite in development mode...`);
+      const { setupVite } = await import("./vite");
+      await setupVite(httpServer, app);
+    }
+    console.timeLog('Startup', 'Static/Vite setup complete');
+    console.timeEnd('Startup');
+
+  } catch (err) {
+    console.error("FATAL STARTUP ERROR:", err);
+    process.exit(1);
+  }
+
   const gracefulShutdown = (signal: string) => {
     log(`Received ${signal}, shutting down gracefully...`);
     httpServer.close(() => {
       log('All connections closed. Exiting.');
       process.exit(0);
     });
-    // Force-exit fallback if connections don't drain within 10 s
     setTimeout(() => {
       log('Could not drain connections in time — forcing exit.');
       process.exit(1);
-    }, 10000).unref(); // .unref() so this timer doesn't block the event loop itself
+    }, 10000).unref();
   };
 
   process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
