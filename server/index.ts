@@ -61,7 +61,12 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  log(`Starting server initialization...`);
+  console.time('Startup');
+
+  log(`Registering routes...`);
   await registerRoutes(httpServer, app);
+  console.timeLog('Startup', 'Routes registered');
 
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
@@ -76,20 +81,16 @@ app.use((req, res, next) => {
     return res.status(status).json({ message });
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
   if (process.env.NODE_ENV === "production") {
+    log(`Serving static files in production mode...`);
     serveStatic(app);
   } else {
+    log(`Initializing Vite in development mode...`);
     const { setupVite } = await import("./vite");
     await setupVite(httpServer, app);
   }
+  console.timeLog('Startup', 'Static/Vite setup complete');
 
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
   const port = parseInt(process.env.PORT || "5000", 10);
   httpServer.listen(
     {
@@ -97,7 +98,8 @@ app.use((req, res, next) => {
       host: "0.0.0.0",
     },
     () => {
-      log(`serving on port ${port}`);
+      log(`Serving on port ${port}`);
+      console.timeEnd('Startup');
     },
   );
 
