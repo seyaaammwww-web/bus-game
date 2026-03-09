@@ -1,32 +1,38 @@
-FROM node:20-alpine
+# Build Stage
+FROM node:20-slim AS builder
 
 WORKDIR /app
 
-# 1) Copy package files first — cached if unchanged
-COPY package.json package-lock.json* ./
+# Install build dependencies
+COPY package*.json ./
+RUN npm install
 
-# 2) Install ALL dependencies (need devDeps for build step)
-RUN npm ci 2>/dev/null || npm install
-
-# 3) Copy config files (drizzle, tailwind, etc.)
-COPY tsconfig.json vite.config.ts tailwind.config.ts postcss.config.js components.json drizzle.config.ts ./
-
-# 4) Copy all necessary source code
-COPY shared/ ./shared/
-COPY server/ ./server/
-COPY client/ ./client/
-COPY script/ ./script/
-COPY attached_assets/ ./attached_assets/
-
-# 5) Build the application (client + server bundle)
+# Copy source and build
+COPY . .
 RUN npm run build
 
-# 6) Prune dev dependencies after build to keep image lean
-RUN npm prune --omit=dev 2>/dev/null || true
+# Runtime Stage
+FROM node:20-slim
 
-ENV PORT=7860
+# Install better-sqlite3 runtime dependencies
+RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy production artifacts from builder
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/server/data ./server/data
+
+# Install production dependencies only
+RUN npm install --omit=dev && npm cache clean --force
+
+# Set production environment
 ENV NODE_ENV=production
+ENV PORT=7860
+
+# Expose port (HF standard)
 EXPOSE 7860
 
-# Start the application
-CMD ["npm", "start"]
+# Start server directly with node for faster boot
+CMD ["node", "dist/index.cjs"]

@@ -91,9 +91,7 @@ export class WildcardService {
             if (dbPath && fs.existsSync(dbPath)) {
                 const data = fs.readFileSync(dbPath, 'utf-8');
                 this.database = JSON.parse(data);
-                const stats = this.getStats();
                 console.log(`✅ Wildcard Database loaded from: ${dbPath}`);
-                console.log(`📊 Stats: ${stats.totalAnswers} words, ${stats.letters} letters.`);
             } else {
                 console.error(`❌ Wildcard Database NOT found in any candidate path.`);
                 if (!arabicWords || Object.keys(arabicWords).length === 0) {
