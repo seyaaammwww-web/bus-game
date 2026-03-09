@@ -6,6 +6,9 @@ import { HybridValidator } from "./hybridValidator";
 import { GroqService } from "./services/groqService";
 import { WildcardService } from "./services/wildcardService";
 
+// FIX: Inline constant to avoid import path issues on HF deployment
+const HEARTBEAT_INTERVAL_MS = 30000;
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -19,8 +22,24 @@ export async function registerRoutes(
   // Create WebSocket server
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
 
+  // Heartbeat من الخادم
+  const heartbeatInterval = setInterval(() => {
+    wss.clients.forEach((ws: any) => {
+      if (ws.isAlive === false) {
+        return ws.terminate();
+      }
+      ws.isAlive = false;
+      ws.ping();
+    });
+  }, HEARTBEAT_INTERVAL_MS);
+
   wss.on('connection', (ws: WebSocket) => {
     console.log('New WebSocket connection');
+    ws.isAlive = true;
+
+    ws.on('pong', () => {
+      ws.isAlive = true;
+    });
 
     ws.on('message', (data: Buffer) => {
       try {

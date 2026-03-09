@@ -14,9 +14,17 @@ if (redisClient) {
     const worker = new Worker('ghost-cleanup', async (job: any) => {
         console.log(`[GhostCleanup] Starting job ${job.id}...`);
         try {
-            // PlayerManager handles ghost cleanup via pong timeout automatically.
-            // No additional action needed here.
-            console.log(`[GhostCleanup] Completed job ${job.id} (handled by PlayerManager pong timeout).`);
+            // تنظيف اللاعبين غير المتصلين فعلياً
+            const rooms = gameManager.getAllRooms();
+            for (const room of rooms) {
+                const disconnectedPlayers = room.players.filter(p =>
+                    !gameManager.playerManager.isConnected(p.id)
+                );
+                for (const player of disconnectedPlayers) {
+                    gameManager.handlePlayerDisconnect(player.id, room.code);
+                }
+            }
+            console.log(`[GhostCleanup] Completed job ${job.id} (actual cleanup done).`);
         } catch (err) {
             console.error(`[GhostCleanup] Error in job ${job.id}:`, err);
         }
