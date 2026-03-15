@@ -699,7 +699,10 @@ export class GameManager {
       return;
     }
     const host = room.players.find(pl => pl.id === p.playerId);
-    if (!host?.isHost) return;
+    if (!host?.isHost) {
+      this.send(ws, { type: 'error', payload: { message: 'فقط المدير يقدر يبدأ اللعبة' } });
+      return;
+    }
 
     // D4 FIX: Ensure all other players are ready
     const otherPlayers = room.players.filter(pl => pl.id !== p.playerId && pl.id !== room.refereeId);
@@ -1306,9 +1309,15 @@ export class GameManager {
 
         // P2-7 FIX: Validate banish target exists and is not host/referee/self
         const targetId = payload.targetPlayerId;
-        if (!targetId) return;
+        if (!targetId) {
+          this.send(ws, { type: 'toast', payload: { message: 'لازم تختار لاعب للفعل ده', type: 'error' } });
+          return;
+        }
         const targetPlayer = draft.players.find(pl => pl.id === targetId);
-        if (!targetPlayer) return;
+        if (!targetPlayer) {
+          this.send(ws, { type: 'toast', payload: { message: 'اللاعب ده مش موجود', type: 'error' } });
+          return;
+        }
         if (targetPlayer.isHost) {
           this.send(ws, { type: 'toast', payload: { message: 'لا يمكنك طرد مدير الغرفة!', type: 'error' } });
           return;
@@ -1317,7 +1326,10 @@ export class GameManager {
           this.send(ws, { type: 'toast', payload: { message: 'لا يمكنك طرد الحكم!', type: 'error' } });
           return;
         }
-        if (targetId === p.playerId) return;
+        if (targetId === p.playerId) {
+          this.send(ws, { type: 'toast', payload: { message: 'مينفعش تختار نفسك!', type: 'error' } });
+          return;
+        }
 
         player.totalEarnedPoints -= cost;
         player.usedPowerUps.banish = true;

@@ -65,7 +65,7 @@ export const WildcardOverlay = memo(function WildcardOverlay({ isActive, playerN
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
           >
             <div
-              className="retro-overlay p-8 max-w-md border-amber-300 shadow-[8px_8px_0_0_#d97706]"
+              className="retro-overlay p-8 max-w-md border-amber-300 shadow-[8px_8px_0_0_#d97706] pointer-events-auto"
             >
               <motion.div
                 animate={{ rotate: [0, 15, -15, 0], scale: [1, 1.1, 1] }}

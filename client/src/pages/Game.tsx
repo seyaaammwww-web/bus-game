@@ -319,7 +319,7 @@ export default function Game() {
       <div className="max-w-5xl mx-auto relative z-10 px-4 w-full">
         {/* Mobile Header: Clean Standard Layout (Exit - Letter - Timer) */}
         <motion.div
-          className="flex flex-col gap-2 mb-4 relative z-10 md:hidden"
+          className="flex flex-col gap-2 mb-4 relative z-[100] md:hidden"
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
         >
@@ -359,7 +359,7 @@ export default function Game() {
 
         {/* Desktop Header - Unchanged */}
         <motion.div
-          className="hidden md:flex items-center justify-between mb-6"
+          className="hidden md:flex items-center justify-between mb-6 relative z-[40]"
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
         >

@@ -24,7 +24,7 @@ export function WildcardNotification({ show, playerName }: WildcardNotificationP
           animate={{ scale: 1, opacity: 1, rotate: 0 }}
           exit={{ scale: 0, opacity: 0, rotate: 180 }}
           transition={{ type: 'spring', stiffness: 150, damping: 20 }}
-          className="fixed top-24 left-1/2 -translate-x-1/2 z-50 w-80"
+          className="fixed top-24 left-1/2 -translate-x-1/2 z-50 w-80 pointer-events-none"
         >
           {/* Sparkle particles */}
           {sparkles.map(sparkle => (

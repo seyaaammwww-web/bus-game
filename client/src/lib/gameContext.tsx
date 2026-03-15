@@ -261,6 +261,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
         break;
       case 'error':
         dispatch({ type: 'SET_ERROR', error: message.payload.message });
+        toast({
+          title: 'خطأ',
+          description: message.payload.message || 'حدث خطأ غير متوقع',
+          variant: 'destructive',
+        });
         break;
       case 'reaction_received':
         setReactions(prev => {

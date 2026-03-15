@@ -13,9 +13,11 @@ import { BouncyCard } from '@/components/ui/BouncyCard';
 import { Tutorial } from '@/components/Tutorial';
 import { HelpCircle } from 'lucide-react';
 import { HostControls } from '@/components/HostControls';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Lobby() {
   const { state, currentPlayer, isHost, setReady, startGame, setReferee, removeReferee, referee, disconnect, updateSettings, kickPlayer } = useGame();
+  const { toast } = useToast();
   const [copied, setCopied] = useState(false);
   const [showRefereeSelect, setShowRefereeSelect] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -26,7 +28,7 @@ export default function Lobby() {
 
   if (!state.room) return null;
   const room = state.room;
-  const otherPlayers = room.players.filter(p => p.id !== state.playerId);
+  const otherPlayers = room.players.filter(p => p.id !== state.playerId && p.id !== room.refereeId);
   const otherPlayersReady = otherPlayers.length === 0 || otherPlayers.every(p => p.isReady);
   const canStart = isHost && otherPlayersReady;
 
@@ -414,19 +416,39 @@ export default function Lobby() {
             <motion.div
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             >
-              <Button
-                variant="default"
-                className={`w-full h-16 text-lg border-[3px] text-white shadow-[0_4px_0_0_rgba(0,0,0,0.2)] active:translate-y-1 active:shadow-none transition-all relative font-pixel-button ${canStart
-                  ? 'bg-[#10b981] hover:bg-[#059669] border-[#047857]'
-                  : 'bg-[#6d28d9] hover:bg-[#5b21b6] border-[#4c1d95]'
-                  }`}
-                onClick={startGame}
-                disabled={!canStart}
-                data-testid="button-start-game"
-              >
-                <Play className="w-6 h-6 absolute right-4" />
-                {otherPlayersReady ? 'ابدأ!' : 'في الانتظار...'}
-              </Button>
+              <div className="relative group">
+                <Button
+                  variant="default"
+                  className={`w-full h-16 text-lg border-[3px] text-white shadow-[0_4px_0_0_rgba(0,0,0,0.2)] active:translate-y-1 active:shadow-none transition-all relative font-pixel-button ${canStart
+                    ? 'bg-[#10b981] hover:bg-[#059669] border-[#047857]'
+                    : 'bg-[#6d28d9]/50 hover:bg-[#5b21b6]/50 border-[#4c1d95]/50 grayscale cursor-not-allowed'
+                    }`}
+                  onClick={() => {
+                    if (!canStart) {
+                      toast({
+                        title: 'تنبيه',
+                        description: 'لازم كل اللاعبين يضغطوا "أنا جاهز" الأول!',
+                        variant: 'destructive',
+                      });
+                      return;
+                    }
+                    startGame();
+                  }}
+                  data-testid="button-start-game"
+                >
+                  <Play className="w-6 h-6 absolute right-4" />
+                  {otherPlayersReady ? 'ابدأ!' : 'في الانتظار...'}
+                </Button>
+                {!canStart && isHost && (
+                  <div className="absolute inset-0 z-10" onClick={() => {
+                    toast({
+                      title: 'تنبيه',
+                      description: 'لازم كل اللاعبين يضغطوا "أنا جاهز" الأول!',
+                      variant: 'destructive',
+                    });
+                  }} />
+                )}
+              </div>
             </motion.div>
           )}
         </motion.div>

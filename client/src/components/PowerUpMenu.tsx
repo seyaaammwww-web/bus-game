@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, Crown, Skull, X, Lock } from 'lucide-react';
@@ -223,8 +223,8 @@ export function PowerUpMenu() {
                     playClickSound();
                     setIsOpen(!isOpen);
                 }}
-                className="h-10 md:h-14 px-4 md:px-6 flex items-center justify-center gap-2 font-pixel-title relative overflow-hidden bg-gradient-to-b from-[#fbbf24] to-[#f59e0b] text-[#78350f] rounded-xl border-[3px] border-[#78350f] shadow-[3px_3px_0_0_#78350f] hover:brightness-110 active:translate-y-[2px] active:shadow-[1px_1px_0_0_#78350f] transition-all cursor-pointer"
-                style={{ zIndex: 50 }}
+                className="h-10 md:h-14 px-4 md:px-6 flex items-center justify-center gap-2 font-pixel-title relative overflow-hidden bg-gradient-to-b from-[#fbbf24] to-[#f59e0b] text-[#78350f] rounded-xl border-[3px] border-[#78350f] shadow-[3px_3px_0_0_#78350f] hover:brightness-110 active:translate-y-[2px] active:shadow-[1px_1px_0_0_#78350f] transition-all cursor-pointer pointer-events-auto"
+                style={{ zIndex: 110 }}
             >
                 <Zap className="w-5 h-5 md:w-6 md:h-6 fill-current" />
                 <span className="text-base md:text-xl">مساعدات</span>
