@@ -244,7 +244,7 @@ export class GameManager {
             const { yes = 0 } = (item as any).votes || {};
             const totalEligible = item.eligibleVoterIds?.length || 0;
             const majorityNeeded = Math.ceil(totalEligible / 2); // 50% passes
-            ans.isValid = yes >= majorityNeeded;
+            ans.isValid = totalEligible > 0 && yes >= majorityNeeded;
             ans.isPendingVote = false;
             ans.reason = ans.isValid ? 'تم قبوله (انتهاء الوقت)' : 'تم رفضه (انتهاء الوقت - لم يحظ بأغلبية)';
             resolvedItems.push(item);
