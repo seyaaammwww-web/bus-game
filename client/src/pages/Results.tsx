@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, ArrowLeft, RotateCcw, User, Users, Globe, PawPrint, Box, Crown, Star, Sparkles, Medal, Shield, LogOut, Home, Zap, Award, Target, Timer, Plus, UserX, AlertTriangle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -41,6 +42,7 @@ const rankIcons = [Crown, Medal, Star];
 export default function Results() {
   const { state, currentRound, isHost, nextRound, playAgain, disconnect, isReferee, refereeDeduct, refereeToggleUnique, refereeApprove, requestVote } = useGame();
   const [countdown, setCountdown] = useState(5);
+  const [hasRequestedNext, setHasRequestedNext] = useState(false);
 
   const room = state.room!;
   const isFinal = room.phase === 'final';
@@ -85,7 +87,8 @@ export default function Results() {
     
     // Auto-advance after countdown finishes
     const timer = setTimeout(() => {
-      if (countdown === 0) {
+      if (countdown === 0 && !hasRequestedNext) {
+        setHasRequestedNext(true);
         nextRound();
       }
     }, 500);
@@ -137,18 +140,10 @@ export default function Results() {
     };
   }, [isFinal, room.rounds, room.players]);
 
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
+  const isMobile = useIsMobile();
 
   return (
     <div className="min-h-screen p-4 overflow-hidden relative text-white font-pixel-text">
-      {/* Mobile Pixel Rain Background */}
-      {isMobile && (
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-40 mobile-juicy-bg">
-          <div className="pixel-rain pixel-rain-1"></div>
-          <div className="pixel-rain pixel-rain-2"></div>
-          <div className="pixel-rain pixel-rain-3"></div>
-        </div>
-      )}
 
       <Confetti active={isFinal} count={isMobile ? 1 : 3} />
       <VotingOverlay />
@@ -553,7 +548,12 @@ export default function Results() {
                     // BUG-10 FIX: Host in standard mode (no timer, no referee, no voting) always sees a Next Round button
                     <div className="space-y-2">
                       <Button
-                        onClick={() => nextRound()}
+                        onClick={() => {
+                          if (!hasRequestedNext) {
+                            setHasRequestedNext(true);
+                            nextRound();
+                          }
+                        }}
                         size="lg"
                         className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
                         data-testid="button-next-round"

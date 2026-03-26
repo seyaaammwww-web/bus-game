@@ -1479,8 +1479,7 @@ export class GameManager {
       const isRef = draft.refereeId === p.playerId;
       if (!isHost && !isRef) return;
 
-      // FIX (#2): Added defensive guard to prevent vote modification if parallel voting is entirely disabled
-      if (!draft.settings?.votingEnabled) return;
+
 
       const round = draft.rounds[draft.currentRound];
       if (!round) return;
@@ -1865,9 +1864,11 @@ export class GameManager {
   sendReaction(ws: WebSocket, type: ReactionType) {
     const p = this.playerManager.getPlayer(ws);
     if (!p) return;
+    const room = this.roomManager.getRoomBuffer(p.roomId)?.get();
+    const playerName = room?.players.find(pl => pl.id === p.playerId)?.name || '';
     this.broadcastToRoom(p.roomId, {
       type: 'reaction_received',
-      payload: { reaction: { id: crypto.randomUUID(), type, playerId: p.playerId, playerName: '', timestamp: Date.now() } }
+      payload: { reaction: { id: crypto.randomUUID(), type, playerId: p.playerId, playerName, timestamp: Date.now() } }
     });
   }
 

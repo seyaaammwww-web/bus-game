@@ -1,5 +1,6 @@
 import { Copy, Check, Play, Users, Shield, Crown, Sparkles, X, Home, LogOut, Settings, UserX, Wifi, WifiOff, Minus, Plus, Gavel } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -16,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 export default function Lobby() {
   const { state, currentPlayer, isHost, setReady, startGame, setReferee, removeReferee, referee, disconnect, updateSettings, kickPlayer } = useGame();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const [copied, setCopied] = useState(false);
   const [showRefereeSelect, setShowRefereeSelect] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -39,18 +41,8 @@ export default function Lobby() {
     setShowRefereeSelect(false);
   };
 
-  const isMobileView = typeof window !== 'undefined' && window.innerWidth < 1024;
-
   return (
     <div className="min-h-screen p-4 overflow-hidden relative text-white font-pixel-text">
-      {/* Mobile Pixel Rain Background */}
-      {isMobileView && (
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-40 mobile-juicy-bg">
-          <div className="pixel-rain pixel-rain-1"></div>
-          <div className="pixel-rain pixel-rain-2"></div>
-          <div className="pixel-rain pixel-rain-3"></div>
-        </div>
-      )}
       <div className="max-w-2xl mx-auto relative z-10">
         <div className="flex justify-between items-center mb-4">
           <Button
@@ -96,7 +88,7 @@ export default function Lobby() {
         >
           <motion.div
             className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-white to-[#faf5ff] border-[3px] border-[#4c1d95] rounded-full mb-4 shadow-[4px_4px_0_0_#2e1065,_0_0_20px_rgba(139,92,246,0.2)]"
-            animate={isMobileView ? {} : { scale: [1, 1.05, 1] }}
+            animate={isMobile ? {} : { scale: [1, 1.05, 1] }}
             transition={{ repeat: Infinity, duration: 2 }}
           >
             <Sparkles className="w-6 h-6 text-[#7c3aed]" />
@@ -120,14 +112,14 @@ export default function Lobby() {
                   dir="ltr"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  transition={{ type: 'spring', stiffness: isMobileView ? 100 : 200, delay: 0.2 }}
+                  transition={{ type: 'spring', stiffness: isMobile ? 100 : 200, delay: 0.2 }}
                 >
                   {room.code.split('').map((char, i) => (
                     <motion.span
                       key={i}
                       className="w-14 h-16 flex items-center justify-center text-3xl font-bold bg-[#4c1d95] text-white rounded-lg shadow-[4px_4px_0_0_#2e1065,_0_0_10px_rgba(139,92,246,0.3)] border-2 border-[#7c3aed] font-pixel-title"
-                      initial={isMobileView ? { opacity: 0 } : { rotateY: 90 }}
-                      animate={isMobileView ? { opacity: 1 } : { rotateY: 0 }}
+                      initial={isMobile ? { opacity: 0 } : { rotateY: 90 }}
+                      animate={isMobile ? { opacity: 1 } : { rotateY: 0 }}
                       transition={{ delay: 0.3 + i * 0.1 }}
                     >
                       {char}

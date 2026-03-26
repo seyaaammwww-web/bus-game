@@ -515,12 +515,6 @@ export class RoundManager {
             player.score += roundScore;
             player.totalEarnedPoints = (player.totalEarnedPoints || 0) + roundScore;
 
-            // MANUAL-SCORE-ADJUSTMENT-FIX: Apply manual adjustments after round score
-            if (player.manualScoreAdjustment) {
-                player.score += player.manualScoreAdjustment;
-                player.totalEarnedPoints += player.manualScoreAdjustment;
-            }
-
             const submission = round.submissions.find(s => s.playerId === player.id);
             const allCorrect = playerAnswers.filter(a => a.isValid).length >= currentCategories.length;
 
