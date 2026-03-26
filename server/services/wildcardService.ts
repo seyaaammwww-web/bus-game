@@ -49,7 +49,7 @@ export class WildcardService {
     private constructor() {
         this.normalizer = AdvancedNormalizer.getInstance();
         this.toleranceEngine = SmartToleranceEngine.getInstance();
-            this.loadSynonyms();
+        this.loadDatabase();
         this.loadSynonyms();
     }
 
