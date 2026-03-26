@@ -13,7 +13,6 @@ import { HelpCircle } from 'lucide-react';
 import { RetroQuote } from '@/components/ui/RetroQuote';
 import { PixelReveal } from '@/components/ui/PixelReveal';
 import { Text3D } from '@/components/ui/Text3D';
-import WorkOSBackground from '@/components/WorkOSBackground';
 
 
 
@@ -52,24 +51,8 @@ export default function Home() {
 
 
 
-  // ... inside component
-  const isMobileView = typeof window !== 'undefined' && window.innerWidth < 1024;
-
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden relative text-white">
-
-      {/* Backgrounds */}
-      {isMobileView ? (
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-40 mobile-juicy-bg">
-          <div className="pixel-rain pixel-rain-1"></div>
-          <div className="pixel-rain pixel-rain-2"></div>
-          <div className="pixel-rain pixel-rain-3"></div>
-        </div>
-      ) : (
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-          <WorkOSBackground />
-        </div>
-      )}
 
       {showHelp && <Tutorial onClose={() => setShowHelp(false)} />}
 
@@ -77,7 +60,7 @@ export default function Home() {
       <motion.button
         className="fixed bottom-4 right-4 z-50 w-12 h-12 bg-[#FFFDD1] rounded-full flex items-center justify-center shadow-[4px_4px_0px_0px_#2e1065] border-[3px] border-[#2e1065] hover:bg-[#FFFEF0] hover:scale-110 active:scale-95 transition-all"
         onClick={() => setShowHelp(true)}
-        whileHover={isMobileView ? {} : { scale: 1.1 }}
+        whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
       >
         <span className="text-2xl font-bold text-[#2e1065] font-pixel-title">؟</span>
@@ -86,7 +69,7 @@ export default function Home() {
       <motion.div
         initial={{ y: -30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ type: 'spring', stiffness: isMobileView ? 100 : 200, damping: 20 }}
+        transition={{ type: 'spring', stiffness: 200, damping: 20 }}
         className="text-center mb-12 relative z-10"
       >
         <div className={`logo-container mb-2 animate-slow-float`}>

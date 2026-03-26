@@ -49,10 +49,10 @@ const isMobile = () => typeof window !== 'undefined' && window.innerWidth < 1024
 function BackgroundManager() {
   const { state } = useGame();
 
-  // Performance mode active on mobile to save GPU resources
-  const performanceMode = isMobile();
+  // On mobile: reduce particle count for GPU performance, but keep all effects
+  const mobile = isMobile();
 
-  return <WorkOSBackground performanceMode={performanceMode} />;
+  return <WorkOSBackground isMobile={mobile} />;
 }
 
 function App() {

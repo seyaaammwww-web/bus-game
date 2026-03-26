@@ -36,15 +36,16 @@ const purpleGradient = [
 ];
 
 interface WorkOSBackgroundProps {
-    performanceMode?: boolean;
+    /** If true, reduces particle count for mobile performance (keeps all visual effects) */
+    isMobile?: boolean;
 }
 
-const WorkOSBackground: React.FC<WorkOSBackgroundProps> = ({ performanceMode = false }) => {
-    // Generate white stars
+const WorkOSBackground: React.FC<WorkOSBackgroundProps> = ({ isMobile = false }) => {
+    // Generate white stars — fewer on mobile for performance
     const stars = useMemo(() => {
-        if (performanceMode) return [];
+        const count = isMobile ? 40 : 100;
         const generated: Star[] = [];
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < count; i++) {
             generated.push({
                 id: i,
                 top: Math.random() * 100,
@@ -54,13 +55,13 @@ const WorkOSBackground: React.FC<WorkOSBackgroundProps> = ({ performanceMode = f
             });
         }
         return generated;
-    }, [performanceMode]);
+    }, [isMobile]);
 
-    // Generate MANY micro dots with purple gradient colors
+    // Generate micro dots with purple gradient colors — fewer on mobile
     const microDots = useMemo(() => {
-        if (performanceMode) return [];
+        const count = isMobile ? 80 : 300;
         const generated: MicroDot[] = [];
-        for (let i = 0; i < 300; i++) {
+        for (let i = 0; i < count; i++) {
             generated.push({
                 id: i,
                 top: Math.random() * 100,
@@ -72,39 +73,36 @@ const WorkOSBackground: React.FC<WorkOSBackgroundProps> = ({ performanceMode = f
             });
         }
         return generated;
-    }, [performanceMode]);
+    }, [isMobile]);
 
-    // Generate clouds with RANDOM positions, speeds, and delays
+    // Generate clouds with RANDOM positions, speeds, and delays — fewer on mobile
     const clouds = useMemo(() => {
-        if (performanceMode) return [];
         const cloudImages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
         const generated: Cloud[] = [];
 
-        // Create 8-10 clouds with random properties
-        const numClouds = 8 + Math.floor(Math.random() * 3);
+        // Mobile: 4 clouds, Desktop: 8-10 clouds
+        const numClouds = isMobile ? 4 : 8 + Math.floor(Math.random() * 3);
 
         for (let i = 0; i < numClouds; i++) {
             const cloudNum = cloudImages[Math.floor(Math.random() * cloudImages.length)];
             generated.push({
                 id: i,
                 src: `/images/hero/clouds/${cloudNum}.png`,
-                top: 5 + Math.random() * 50, // Random vertical position 5-55%
-                width: 100 + Math.random() * 150, // Random size 100-250px
-                opacity: 0.4 + Math.random() * 0.5, // Random opacity 0.4-0.9
-                duration: 40 + Math.random() * 60, // Random speed 40-100s
-                delay: -Math.random() * 50, // Random start position
+                top: 5 + Math.random() * 50,
+                width: 100 + Math.random() * 150,
+                opacity: 0.4 + Math.random() * 0.5,
+                // Slower animations on mobile to reduce repaints
+                duration: isMobile ? 60 + Math.random() * 40 : 40 + Math.random() * 60,
+                delay: -Math.random() * 50,
             });
         }
         return generated;
-    }, [performanceMode]);
+    }, [isMobile]);
 
     return (
-        <div className={`workos-background ${performanceMode ? 'static-mode' : ''}`}>
+        <div className={`workos-background${isMobile ? ' mobile-optimized' : ''}`}>
             {/* Gradient Overlay for depth */}
             <div className="workos-gradient-overlay" />
-
-            {/* Performance Pattern (Only in performance mode) */}
-            {performanceMode && <div className="workos-performance-pattern" />}
 
             {/* Micro Dots Layer - The Art */}
             <div className="workos-micro-dots-container">
@@ -143,14 +141,12 @@ const WorkOSBackground: React.FC<WorkOSBackgroundProps> = ({ performanceMode = f
                 ))}
             </div>
 
-            {/* Moon (Hidden in performance mode) */}
-            {!performanceMode && (
-                <img
-                    src="/images/hero/moon.png"
-                    alt=""
-                    className="workos-moon"
-                />
-            )}
+            {/* Moon - Always visible, smaller on mobile */}
+            <img
+                src="/images/hero/moon.png"
+                alt=""
+                className={`workos-moon${isMobile ? ' workos-moon-mobile' : ''}`}
+            />
 
             {/* Clouds Layer - RANDOMIZED */}
             <div className="workos-clouds-container">
