@@ -239,11 +239,13 @@ export class RoundManager {
                 }
             }
 
-            if (hasPending && draft.settings?.votingEnabled) {
+            const activeVoters = draft.players.filter(p => !p.isReferee && p.id !== dRound.banishedPlayerId).length;
+
+            if (hasPending && draft.settings?.votingEnabled && activeVoters > 1) {
                 draft.phase = 'voting';
                 this.buildVoteQueueInDraft(draft);
             } else {
-                // BUG FIX: If voting is disabled, clear the isPendingVote flag 
+                // BUG FIX: If voting is disabled or not enough voters, clear the isPendingVote flag 
                 // and mark them invalid so clients don't get stuck rendering pending UI.
                 if (hasPending) {
                     dRound.validatedAnswers.forEach(a => {
@@ -258,7 +260,9 @@ export class RoundManager {
             }
         }, "fallbackVote");
 
-        if (hasPending && buffer.get().settings?.votingEnabled) {
+        const roomState = buffer.get();
+        const finalActiveVoters = roomState.players.filter(p => p.id !== roomState.refereeId && p.id !== roomState.rounds[roomState.currentRound]?.banishedPlayerId).length;
+        if (hasPending && roomState.settings?.votingEnabled && finalActiveVoters > 1) {
             onVotingStart();
         } else {
             onRoundFinish();
@@ -384,14 +388,16 @@ export class RoundManager {
             }
 
             if (hasPendingVotes) {
-                // LOGIC-3 FIX: Don't force-enable voting. If host disabled it, keep it disabled
-                // and treat pending-vote answers as invalid instead.
-                if (draft.settings?.votingEnabled) {
+                // LOGIC-3 FIX: Don't force-enable voting. If host disabled it, keep it disabled.
+                // ALSO: Do not enter voting if the player is playing alone (activeVoters <= 1)
+                const activeVoters = draft.players.filter(p => !p.isReferee && p.id !== dRound.banishedPlayerId).length;
+
+                if (draft.settings?.votingEnabled && activeVoters > 1) {
                     draft.phase = 'voting';
                     // FIX: Build PARALLEL vote queue — all pending answers at once
                     this.buildVoteQueueInDraft(draft);
                 } else {
-                    // Voting is disabled — mark all pending answers as invalid
+                    // Voting is disabled OR player is alone — mark all pending answers as invalid
                     dRound.validatedAnswers.forEach(a => {
                         if (a.isPendingVote) {
                             a.isPendingVote = false;
@@ -407,7 +413,10 @@ export class RoundManager {
 
         }, "calculateScores");
 
-        if (hasPendingVotes) {
+        const roomState = buffer.get();
+        const finalActiveVoters = roomState.players.filter(p => p.id !== roomState.refereeId && p.id !== roomState.rounds[roomState.currentRound]?.banishedPlayerId).length;
+
+        if (hasPendingVotes && roomState.settings?.votingEnabled && finalActiveVoters > 1) {
             onVotingStart();
         } else {
             onRoundFinish();
