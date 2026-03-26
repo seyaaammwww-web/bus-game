@@ -1,6 +1,5 @@
 import { Copy, Check, Play, Users, Shield, Crown, Sparkles, X, Home, LogOut, Settings, UserX, Wifi, WifiOff, Minus, Plus, Gavel } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { useIsMobile } from '@/hooks/useIsMobile';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -9,7 +8,6 @@ import { categories } from '@shared/schema';
 import { PlayerCard } from '@/components/PlayerCard';
 import { useGame } from '@/lib/gameContext';
 import { RetroCard } from '@/components/ui/RetroCard';
-import { BouncyCard } from '@/components/ui/BouncyCard';
 import { Tutorial } from '@/components/Tutorial';
 import { HelpCircle } from 'lucide-react';
 import { HostControls } from '@/components/HostControls';
@@ -23,8 +21,6 @@ export default function Lobby() {
   const [showSettings, setShowSettings] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
   const [customCats, setCustomCats] = useState(categories);
-
-  const isMobileView = useIsMobile();
 
   if (!state.room) return null;
   const room = state.room;
@@ -43,7 +39,7 @@ export default function Lobby() {
     setShowRefereeSelect(false);
   };
 
-
+  const isMobileView = typeof window !== 'undefined' && window.innerWidth < 1024;
 
   return (
     <div className="min-h-screen p-4 overflow-hidden relative text-white font-pixel-text">
@@ -107,7 +103,7 @@ export default function Lobby() {
             <span className="font-bold text-lg text-[#4c1d95] font-pixel-text">غرفة الانتظار</span>
           </motion.div>
           <h1 className="text-5xl font-pixel-title mb-3 text-white font-bold">في الانتظار...</h1>
-          <p className="text-3xl text-[#e9d5ff] font-bold font-pixel-text">ادعي أصحابك وعيلتك!</p>
+          <p className="text-3xl text-[#e9d5ff] font-bold font-pixel-text">ادعي أصحابك!</p>
         </motion.div>
 
         <motion.div
@@ -168,7 +164,7 @@ export default function Lobby() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          <BouncyCard className="mb-6">
+          <RetroCard className="mb-6">
             <div className="flex flex-row items-center justify-between gap-2 pb-4 border-b-2 border-[#4c1d95]/10 mb-3">
               <h2 className="text-xl flex items-center gap-2 font-pixel-title text-[#4c1d95] font-bold">
                 <Users className="w-6 h-6 text-[#7c3aed]" />
@@ -222,14 +218,14 @@ export default function Lobby() {
               {/* Voting Toggle — STYLE-3 FIX: full-width retro toggle with visual feedback */}
               {isHost ? (
                 <button
-                  onClick={() => updateSettings({ votingEnabled: !room.settings?.votingEnabled })}
-                  className={`w-full flex items-center justify-between p-3 rounded-lg border-[3px] transition-all active:translate-y-[1px] active:shadow-none ${room.settings?.votingEnabled
+                  onClick={() => updateSettings({ enableVoting: !room.settings?.enableVoting })}
+                  className={`w-full flex items-center justify-between p-3 rounded-lg border-[3px] transition-all active:translate-y-[1px] active:shadow-none ${room.settings?.enableVoting
                     ? 'bg-[#7c3aed]/10 border-[#7c3aed] shadow-[0_3px_0_0_#4c1d95]'
                     : 'bg-white/50 border-[#4c1d95]/20 shadow-[0_2px_0_0_#4c1d95]/10'
                     }`}
                 >
                   <div className="flex items-center gap-2">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white transition-colors ${room.settings?.votingEnabled ? 'bg-[#7c3aed]' : 'bg-[#4c1d95]/40'
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white transition-colors ${room.settings?.enableVoting ? 'bg-[#7c3aed]' : 'bg-[#4c1d95]/40'
                       }`}>
                       <Gavel className="w-4 h-4" />
                     </div>
@@ -240,15 +236,15 @@ export default function Lobby() {
                       </p>
                     </div>
                   </div>
-                  <div className={`px-3 py-1 rounded-full border-[2px] font-bold font-pixel-text text-xs transition-colors ${room.settings?.votingEnabled
+                  <div className={`px-3 py-1 rounded-full border-[2px] font-bold font-pixel-text text-xs transition-colors ${room.settings?.enableVoting
                     ? 'bg-[#7c3aed] border-[#4c1d95] text-white shadow-[0_2px_0_0_#2e1065]'
                     : 'bg-white border-[#4c1d95]/30 text-[#4c1d95]/50'
                     }`}>
-                    {room.settings?.votingEnabled ? 'مفعل' : 'معطل'}
+                    {room.settings?.enableVoting ? 'مفعل' : 'معطل'}
                   </div>
                 </button>
               ) : (
-                room.settings?.votingEnabled && (
+                room.settings?.enableVoting && (
                   <div className="flex items-center gap-2 p-2 bg-[#7c3aed]/10 rounded-lg border border-[#7c3aed]/30 justify-center mb-2">
                     <Gavel className="w-4 h-4 text-[#7c3aed]" />
                     <span className="text-xs font-bold text-[#4c1d95] font-pixel-text">نظام التحكيم الديمقراطي مفعل</span>
@@ -288,7 +284,7 @@ export default function Lobby() {
                   ))}
               </AnimatePresence>
             </div>
-          </BouncyCard>
+          </RetroCard>
         </motion.div>
 
         {isHost && room.players.length >= 1 && (
@@ -329,7 +325,7 @@ export default function Lobby() {
                     className="h-10 border-2 border-[#4c1d95] text-[#4c1d95] font-pixel-text font-bold text-base"
                     data-testid="button-choose-referee"
                   >
-                    {room.settings?.votingEnabled ? <span className="text-xs text-red-500 ml-2">(سيلغي التصويت)</span> : 'اختر حكم'}
+                    {room.settings?.enableVoting ? <span className="text-xs text-red-500 ml-2">(سيلغي التصويت)</span> : 'اختر حكم'}
                   </Button>
                 )}
               </div>
@@ -345,7 +341,7 @@ export default function Lobby() {
                     <p className="text-base text-[#4c1d95] mb-3 font-pixel-text font-bold">اختر واحد من اللاعبين:</p>
                     <div className="grid grid-cols-2 gap-2">
                       {room.players
-                        .filter(p => !p.isHost) // P2-8 FIX: Exclude host from referee selection
+                        .filter((player) => !player.isHost) // BUG-11 FIX: Host cannot be their own referee
                         .map((player) => (
                           <Button
                             key={player.id}
@@ -384,12 +380,13 @@ export default function Lobby() {
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             >
               <Button
-                variant="default"
-                className="w-full h-16 text-xl bg-[#6d28d9] hover:bg-[#5b21b6] border-[3px] border-[#4c1d95] text-white shadow-[0_4px_0_0_#4c1d95] active:translate-y-1 active:shadow-none hover:-translate-y-1 hover:shadow-[0_6px_0_0_#4c1d95] transition-all relative font-pixel-button"
+                variant="primary"
+                size="lg"
+                className="w-full h-16 text-xl font-pixel-title shine-effect relative overflow-hidden"
                 onClick={setReady}
                 data-testid="button-ready"
               >
-                <Check className="w-6 h-6 absolute right-4" />
+                <Check className="w-6 h-6 ml-2 absolute right-4" />
                 أنا جاهز!
               </Button>
             </motion.div>
@@ -416,43 +413,43 @@ export default function Lobby() {
             <motion.div
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             >
-              <div className="relative group">
-                <Button
-                  variant="default"
-                  className={`w-full h-16 text-lg border-[3px] text-white shadow-[0_4px_0_0_rgba(0,0,0,0.2)] active:translate-y-1 active:shadow-none transition-all relative font-pixel-button ${canStart
-                    ? 'bg-[#10b981] hover:bg-[#059669] border-[#047857]'
-                    : 'bg-[#6d28d9]/50 hover:bg-[#5b21b6]/50 border-[#4c1d95]/50 grayscale cursor-not-allowed'
-                    }`}
-                  onClick={() => {
-                    if (!canStart) {
-                      toast({
-                        title: 'تنبيه',
-                        description: 'لازم كل اللاعبين يضغطوا "أنا جاهز" الأول!',
-                        variant: 'destructive',
-                      });
-                      return;
-                    }
-                    startGame();
-                  }}
-                  data-testid="button-start-game"
-                >
-                  <Play className="w-6 h-6 absolute right-4" />
-                  {otherPlayersReady ? 'ابدأ!' : 'في الانتظار...'}
-                </Button>
-                {!canStart && isHost && (
-                  <div className="absolute inset-0 z-10" onClick={() => {
-                    toast({
-                      title: 'تنبيه',
-                      description: 'لازم كل اللاعبين يضغطوا "أنا جاهز" الأول!',
-                      variant: 'destructive',
-                    });
-                  }} />
-                )}
-              </div>
+  <div className="relative group">
+    <Button
+      variant="default"
+      className={`w-full h-16 text-lg border-[3px] text-white shadow-[0_4px_0_0_rgba(0,0,0,0.2)] active:translate-y-1 active:shadow-none transition-all relative font-pixel-button ${canStart
+        ? 'bg-[#10b981] hover:bg-[#059669] border-[#047857]'
+        : 'bg-[#6d28d9]/50 hover:bg-[#5b21b6]/50 border-[#4c1d95]/50 grayscale cursor-not-allowed'
+        }`}
+      onClick={() => {
+        if (!canStart) {
+          toast({
+            title: 'تنبيه',
+            description: 'لازم كل اللاعبين يضغطوا "أنا جاهز" الأول!',
+            variant: 'destructive',
+          });
+          return;
+        }
+        startGame();
+      }}
+      data-testid="button-start-game"
+    >
+      <Play className="w-6 h-6 absolute right-4" />
+      {otherPlayersReady ? 'ابدأ!' : 'في الانتظار...'}
+    </Button>
+    {!canStart && isHost && (
+      <div className="absolute inset-0 z-10 cursor-not-allowed" onClick={() => {
+        toast({
+          title: 'تنبيه',
+          description: 'لازم كل اللاعبين يضغطوا "أنا جاهز" الأول!',
+          variant: 'destructive',
+        });
+      }} />
+    )}
+  </div>
             </motion.div>
           )}
         </motion.div>
-      </div>
+      </div >
     </div >
   );
 }

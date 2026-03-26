@@ -528,7 +528,7 @@ export default function Game() {
               >
                 <Send className="w-8 h-8 text-white" />
               </motion.div>
-              <p className="font-pixel-title text-2xl text-[#4c1d95] mb-2">تم الإرسال!</p>
+              <p className="font-pixel-title text-2xl text-[#4c1d95] mb-2">تم!</p>
               <motion.p className="text-lg text-[#7c3aed] font-bold font-pixel-text"
                 animate={{ opacity: [0.8, 1, 0.8] }}
                 transition={{ repeat: Infinity, duration: 2 }}

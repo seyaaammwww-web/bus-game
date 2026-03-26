@@ -1,6 +1,10 @@
 
 import { WebSocket } from 'ws';
-import { randomUUID } from 'crypto';
+import { nanoid } from 'nanoid';
+
+// FIX: Inline constants to avoid import path issues on HF deployment
+const PONG_TIMEOUT_MS = 35000;
+const CLEANUP_INTERVAL_MS = 15000;
 
 export interface ConnectedPlayer {
     ws: WebSocket;
@@ -9,19 +13,17 @@ export interface ConnectedPlayer {
     lastPong: number;   // timestamp of last pong received
 }
 
-const PONG_TIMEOUT_MS = 60000; // 60 seconds — lenient for mobile/slow networks
-
 export class PlayerManager {
     private players: Map<WebSocket, ConnectedPlayer> = new Map();
     private cleanupInterval: NodeJS.Timeout;
 
     constructor(private onPlayerTimeout: (playerId: string, roomId: string) => void) {
         // Check every 15 seconds for dead connections
-        this.cleanupInterval = setInterval(() => this.cleanupDeadConnections(), 15000);
+        this.cleanupInterval = setInterval(() => this.cleanupDeadConnections(), CLEANUP_INTERVAL_MS);
     }
 
     addPlayer(ws: WebSocket, roomId: string, playerId?: string): ConnectedPlayer {
-        const id = playerId || randomUUID();
+        const id = playerId || nanoid(16);
         const playerInfo: ConnectedPlayer = { ws, playerId: id, roomId, lastPong: Date.now() };
         this.players.set(ws, playerInfo);
         return playerInfo;

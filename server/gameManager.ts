@@ -33,6 +33,11 @@ function canTransition(from: GamePhase, to: GamePhase): boolean {
   return transitions[from]?.includes(to) ?? false;
 }
 
+// FIX: Inline constants to avoid import path issues on HF deployment
+const RUSH_MODE_DURATION_MS = 10000;
+const HEARTBEAT_INTERVAL_MS = 30000;
+const PONG_TIMEOUT_MS = 35000;
+
 export class GameManager {
   private roomManager: RoomManager;
   private playerManager: PlayerManager;
@@ -395,6 +400,12 @@ export class GameManager {
         case 'kick_player': {
           const p = this.validatePayload(kickPlayerSchema, message.payload);
           if (!p) return invalid();
+          const player = this.playerManager.getPlayer(ws);
+          const room = this.getRoomByPlayerId(player?.playerId);
+          if (!room || room.hostId !== player?.playerId) {
+            this.sendError(ws, 'فقط المضيف يمكنه طرد اللاعبين');
+            break;
+          }
           this.kickPlayer(ws, p.playerId);
           break;
         }
@@ -760,6 +771,12 @@ export class GameManager {
     const buffer = this.roomManager.getRoomBuffer(p.roomId);
     if (!buffer) return;
 
+    // قفل لمنع التكرار
+    if (!this.busCompleteLocks) this.busCompleteLocks = new Map();
+    const lockKey = p.roomId;
+    if (this.busCompleteLocks.get(lockKey)) return;
+    this.busCompleteLocks.set(lockKey, true);
+
     let startedRush = false;
     buffer.transact(draft => {
       // BUG-4 FIX: Crucial guard! If we are no longer playing (e.g. they submitted at the very last
@@ -775,7 +792,7 @@ export class GameManager {
 
       sub.busComplete = true;
       round.isRush = true;
-      round.endTime = Date.now() + 10000;
+      round.endTime = Date.now() + RUSH_MODE_DURATION_MS;
       startedRush = true;
     }, "triggerBusComplete");
 
@@ -785,7 +802,10 @@ export class GameManager {
 
       this.roundManager.setRoundTimer(room.code, () => {
         this.endRound(room.code);
-      }, 10000);
+        this.busCompleteLocks.delete(lockKey);
+      }, RUSH_MODE_DURATION_MS);
+    } else {
+      this.busCompleteLocks.delete(lockKey);
     }
   }
 
@@ -1744,18 +1764,24 @@ export class GameManager {
     if (!isHost) return;
     if (targetPlayerId === p.playerId) return;
 
+    // إزالة اللاعب من الغرفة (يجب إعلام اللاعب المطروف قبل الحذف)
+    const targetWsBeforeRemove = this.playerManager.getSocket(targetPlayerId);
+    if (targetWsBeforeRemove) {
+      this.sendError(targetWsBeforeRemove, 'تم طردك من الغرفة بواسطة المضيف');
+    }
+    
     this.roomManager.removePlayerFromRoom(p.roomId, targetPlayerId);
 
-    // Fix: Remove orphaned votes from kicked player and check if voting can now resolve
+    // نفس المنطق المستخدم في handleDisconnect - تنظيف الأصوات والتصويتات
     let shouldFinishVoting = false;
     buffer.transact(draft => {
+      // تنظيف الأصوات والتصويتات (نفس logic handleDisconnect)
       if (draft.voteQueue) {
         draft.voteQueue = draft.voteQueue.filter((v: any) => v.requesterId !== targetPlayerId);
         draft.voteQueue.forEach((v: any) => {
           if (v.eligibleVoterIds) {
             v.eligibleVoterIds = v.eligibleVoterIds.filter((id: string) => id !== targetPlayerId);
           }
-          // Also retract any already-cast vote from the kicked player
           if (v.voterIds?.includes(targetPlayerId)) {
             v.voterIds = v.voterIds.filter((id: string) => id !== targetPlayerId);
             if (v.voteMap?.[targetPlayerId]) {
@@ -1766,12 +1792,10 @@ export class GameManager {
           }
         });
 
-        // FIX: If voting is now unresolvable (no eligible voters left on remaining items), auto-resolve
         if (draft.phase === 'voting' && draft.voteQueue.length > 0) {
           draft.voteQueue = draft.voteQueue.filter((v: any) => {
             const eligible = v.eligibleVoterIds?.length || 0;
             if (eligible === 0) {
-              // No one can vote — auto-reject
               const ans = draft.rounds[draft.currentRound]?.validatedAnswers.find(
                 (a: any) => a.playerId === v.requesterId && a.category === v.category
               );
@@ -1782,7 +1806,6 @@ export class GameManager {
           });
         }
 
-        // If voting queue is now empty, mark for finish
         if (draft.phase === 'voting' && draft.voteQueue.length === 0) {
           this.roundManager.calculateAnswerScores(draft);
           shouldFinishVoting = true;
@@ -1790,7 +1813,10 @@ export class GameManager {
       }
     }, "kickPlayerCleanup");
 
-    const targetWs = this.playerManager.getSocket(targetPlayerId);
+    if (shouldFinishVoting) {
+      this.finishRoundPhase(p.roomId);
+    }
+
     if (targetWs) {
       // BUG FIX #2: Send 'kicked' (not just toast) so client redirects the kicked player to home
       this.send(targetWs, { type: 'kicked', payload: { reason: 'تم طردك من الغرفة من قبل المضيف' } });

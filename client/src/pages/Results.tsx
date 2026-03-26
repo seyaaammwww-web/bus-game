@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useIsMobile } from '@/hooks/useIsMobile';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, ArrowLeft, RotateCcw, User, Users, Globe, PawPrint, Box, Crown, Star, Sparkles, Medal, Shield, LogOut, Home, Zap, Award, Target, Timer, Plus, UserX, AlertTriangle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,8 +7,8 @@ import { useGame } from '@/lib/gameContext';
 import { categories, type Category } from '@shared/schema';
 import { playSuccessSound, playCountdownSound, playBonusSound } from '@/lib/sounds';
 import { RetroCard } from '@/components/ui/RetroCard';
-import { BouncyCard } from '@/components/ui/BouncyCard';
 import { PixelAvatar } from '@/components/ui/PixelAvatar';
+import { RetroQuote } from '@/components/ui/RetroQuote';
 import { LetterDisplay } from '@/components/LetterDisplay';
 import { VotingOverlay } from '@/components/VotingOverlay';
 import { RefereeReviewOverlay } from '@/components/RefereeReviewOverlay';
@@ -43,10 +42,7 @@ export default function Results() {
   const { state, currentRound, isHost, nextRound, playAgain, disconnect, isReferee, refereeDeduct, refereeToggleUnique, refereeApprove, requestVote } = useGame();
   const [countdown, setCountdown] = useState(5);
 
-  const isMobile = useIsMobile();
-
-  if (!state.room) return null;
-  const room = state.room;
+  const room = state.room!;
   const isFinal = room.phase === 'final';
   // LOGIC-5 FIX: Filter referee from the leaderboard — they didn't play, so they should not appear in standings
   const activePlayers = room.players.filter(p => p.id !== room.refereeId);
@@ -69,28 +65,33 @@ export default function Results() {
     // LOGIC-6 FIX: Don't run countdown during voting — wait until results phase
     if (room.phase === 'voting') return;
 
-    if (!room.nextRoundAt) return;
+    const tick = () => {
+      if (room.nextRoundAt) {
+        const remaining = Math.max(0, Math.ceil((room.nextRoundAt - Date.now()) / 1000));
+        setCountdown(remaining);
+        if (remaining > 0 && remaining <= 5) playCountdownSound(); // R2: only last 5s
+      }
+    };
 
-    // BUG-3 FIX: Drift protection. Use a local countdown rather than strictly calculating
-    // from Date.now() every frame, which can result in 0 or negative numbers if client clock skews.
-    const initialTime = Math.max(0, Math.ceil((room.nextRoundAt - Date.now()) / 1000));
-    setCountdown(initialTime > 20 ? 20 : Math.min(initialTime, 20));
-
-    const timer = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          return 0;
-        }
-        if (prev <= 6) { // when prev drops to 5,4,3,2,1
-          playCountdownSound();
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
+    tick(); // Fire immediately
+    const timer = setInterval(tick, 1000);
     return () => clearInterval(timer);
   }, [isFinal, room.nextRoundAt, room.phase]);
+
+  // FIX-AUTO-ADVANCE: Auto-advance when countdown reaches 0 and host hasn't clicked yet
+  useEffect(() => {
+    if (isFinal || countdown > 0 || room.phase === 'voting') return;
+    if (!isHost) return; // Only host can auto-advance
+    
+    // Auto-advance after countdown finishes
+    const timer = setTimeout(() => {
+      if (countdown === 0) {
+        nextRound();
+      }
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, [countdown, isFinal, room.phase, isHost, nextRound]);
 
   const gameStats = useMemo(() => {
     if (!isFinal || room.rounds.length === 0) return null;
@@ -136,7 +137,7 @@ export default function Results() {
     };
   }, [isFinal, room.rounds, room.players]);
 
-
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
 
   return (
     <div className="min-h-screen p-4 overflow-hidden relative text-white font-pixel-text">
@@ -287,7 +288,7 @@ export default function Results() {
                 transition={{ delay: 0.8 }}
                 className="mb-6"
               >
-                <BouncyCard delay={0.8} hoverEffect={false}>
+                <RetroCard>
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-7 h-7 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-lg flex items-center justify-center shadow-[2px_2px_0_0_#78350f]">
                       <Trophy className="w-4 h-4 text-white" />
@@ -352,7 +353,7 @@ export default function Results() {
                       );
                     })}
                   </div>
-                </BouncyCard>
+                </RetroCard>
               </motion.div>
             </>
           ) : (
@@ -374,7 +375,7 @@ export default function Results() {
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
-            <BouncyCard className="mb-4" hoverEffect={false}>
+            <RetroCard className="mb-4">
               <div className="flex items-center gap-2 mb-3 font-pixel-title text-[#4c1d95] text-base">
                 <div className="w-7 h-7 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-lg flex items-center justify-center">
                   <Trophy className="w-4 h-4 text-white" />
@@ -426,7 +427,7 @@ export default function Results() {
                   })}
                 </AnimatePresence>
               </div>
-            </BouncyCard>
+            </RetroCard>
           </motion.div>
         )}
 
@@ -445,22 +446,22 @@ export default function Results() {
         >
           {isHost && isFinal && (
             <Button
-              variant="default"
               onClick={playAgain}
-              className="w-full h-16 text-xl bg-[#10b981] hover:bg-[#059669] border-[3px] border-[#047857] text-white shadow-[0_4px_0_0_#064e3b] active:translate-y-1 active:shadow-none hover:-translate-y-1 hover:shadow-[0_6px_0_0_#064e3b] transition-all relative font-pixel-button"
+              size="lg"
+              className="w-full h-16 text-xl font-bold bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title"
               data-testid="button-play-again"
             >
-              <RotateCcw className="w-6 h-6 ml-2 absolute right-4" />
+              <RotateCcw className="w-6 h-6 ml-2" />
               العب مرة أخرى
             </Button>
           )}
           <Button
-            variant="destructive"
             onClick={disconnect}
-            className="w-full h-16 text-xl border-[3px] border-[#881337] shadow-[0_4px_0_0_#4c0519] active:translate-y-1 active:shadow-none hover:-translate-y-1 hover:shadow-[0_6px_0_0_#4c0519] transition-all relative font-pixel-button"
+            size="lg"
+            className="w-full h-16 text-xl font-bold bg-gradient-to-r from-[#7c3aed] to-[#8b5cf6] hover:from-[#6d28d9] hover:to-[#7c3aed] text-white shadow-[4px_4px_0_0_#2e1065] border-[3px] border-[#4c1d95] font-pixel-title"
             data-testid="button-end-game"
           >
-            <Home className="w-6 h-6 ml-2 absolute right-4" />
+            <Home className="w-6 h-6 ml-2" />
             العودة للرئيسية
           </Button>
         </motion.div>
@@ -488,8 +489,8 @@ export default function Results() {
                   currentPlayerId={state.playerId!}
                   isReferee={isReferee}
                   isHost={isHost}
-                  onRefereeToggle={room.phase === 'referee_review' ? (pid, cat) => refereeToggleUnique(pid, cat as Category) : undefined}
-                  onRefereeDeduct={room.phase === 'referee_review' ? (pid, cat) => refereeDeduct(pid, cat as Category, 'رفض الحكم') : undefined}
+                  onRefereeToggle={room.phase === 'referee_review' ? refereeToggleUnique : undefined}
+                  onRefereeDeduct={room.phase === 'referee_review' ? (pid, cat) => refereeDeduct(pid, cat, 'رفض الحكم') : undefined}
                 />
               </div>
             </motion.div>
@@ -506,29 +507,16 @@ export default function Results() {
             <>
               {/* Case 1: Countdown Running (Approved or Auto) */}
               {room.nextRoundAt ? (
-                <div className="flex flex-col gap-2">
-                  <div className="w-full h-20 bg-gradient-to-r from-[#7c3aed]/20 to-[#8b5cf6]/20 rounded-2xl flex items-center justify-center gap-5 border-[3px] border-[#4c1d95] shadow-[3px_3px_0_0_#2e1065] font-pixel-text text-xl font-bold">
-                    <span className="text-white text-xl">الجولة التالية في</span>
-                    <motion.span
-                      key={countdown}
-                      initial={{ scale: 1.5, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      className="w-14 h-14 bg-gradient-to-br from-white to-[#faf5ff] text-[#4c1d95] rounded-full flex items-center justify-center font-bold shadow-lg border-2 border-[#4c1d95] font-pixel-title text-2xl"
-                    >
-                      {countdown}
-                    </motion.span>
-                  </div>
-                  {/* BUG-3b FIX: Allow Host to skip the auto-timer wait */}
-                  {isHost && (
-                    <Button
-                      onClick={() => nextRound()}
-                      variant="default"
-                      className="w-full h-12 text-sm mt-2 font-pixel-title bg-[#6d28d9] hover:bg-[#5b21b6] border-[2px] border-[#4c1d95] text-white shadow-[0_3px_0_0_#4c1d95] active:translate-y-1 active:shadow-none transition-all"
-                      data-testid="button-skip-timer"
-                    >
-                      تخطي الانتظار وبدء الجولة
-                    </Button>
-                  )}
+                <div className="w-full h-20 bg-gradient-to-r from-[#7c3aed]/20 to-[#8b5cf6]/20 rounded-2xl flex items-center justify-center gap-5 border-[3px] border-[#4c1d95] shadow-[3px_3px_0_0_#2e1065] font-pixel-text text-xl font-bold">
+                  <span className="text-white text-xl">الجولة التالية في</span>
+                  <motion.span
+                    key={countdown}
+                    initial={{ scale: 1.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="w-14 h-14 bg-gradient-to-br from-white to-[#faf5ff] text-[#4c1d95] rounded-full flex items-center justify-center font-bold shadow-lg border-2 border-[#4c1d95] font-pixel-title text-2xl"
+                  >
+                    {countdown}
+                  </motion.span>
                 </div>
               ) : (
                 /* Case 2: Waiting for Referee (No Timer) */
@@ -540,13 +528,13 @@ export default function Results() {
                       </p>
                       <Button
                         onClick={() => room.phase === 'results' ? nextRound() : refereeApprove()}
-                        variant="default"
-                        className="w-full h-14 text-lg font-pixel-title bg-[#10b981] hover:bg-[#059669] border-[3px] border-[#047857] text-white shadow-[0_4px_0_0_#064e3b] active:translate-y-1 active:shadow-none hover:-translate-y-1 transition-all"
+                        size="lg"
+                        className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
                       >
                         {room.phase === 'results' ? '➡️ بدء الجولة التالية' : 'اعتماد النتيجة وبدء الجولة'}
                       </Button>
                     </div>
-                  ) : room.settings?.votingEnabled && isHost ? (
+                  ) : room.settings?.enableVoting && isHost ? (
                     // Host Control for Voting Mode
                     <div className="space-y-2">
                       <p className="text-[#FFFDD1] font-bold font-pixel-text text-lg">
@@ -554,8 +542,8 @@ export default function Results() {
                       </p>
                       <Button
                         onClick={() => nextRound()}
-                        variant="default"
-                        className="w-full h-14 text-lg font-pixel-title bg-[#10b981] hover:bg-[#059669] border-[3px] border-[#047857] text-white shadow-[0_4px_0_0_#064e3b] active:translate-y-1 active:shadow-none hover:-translate-y-1 transition-all"
+                        size="lg"
+                        className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
                         data-testid="button-next-round"
                       >
                         الاستمرار للجولة التالية
@@ -566,12 +554,11 @@ export default function Results() {
                     <div className="space-y-2">
                       <Button
                         onClick={() => nextRound()}
-                        variant="default"
-                        className="w-full h-14 text-lg font-pixel-button bg-[#10b981] hover:bg-[#059669] border-[3px] border-[#047857] text-white shadow-[0_4px_0_0_#064e3b] active:translate-y-1 active:shadow-none hover:-translate-y-1 transition-all relative"
+                        size="lg"
+                        className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
                         data-testid="button-next-round"
                       >
-                        <ArrowLeft className="w-5 h-5 absolute left-4" />
-                        {room.currentRound >= room.totalRounds - 1 ? 'إنهاء اللعبة' : 'الجولة التالية'}
+                        {room.currentRound >= room.totalRounds - 1 ? 'إنهاء اللعبة' : 'الجولة التالية ←'}
                       </Button>
                     </div>
                   ) : (
@@ -579,7 +566,7 @@ export default function Results() {
                       <Timer className="w-8 h-8 text-[#FFFDD1] animate-spin-slow" />
                       <p className="text-[#FFFDD1] font-bold font-pixel-text text-xl">
                         {/* BUG-R2 FIX: Only show referee message when a referee actually exists */}
-                        {room.refereeId ? 'في الانتظار...' : 'في الانتظار...'}
+                        في الانتظار...
                       </p>
                     </div>
                   )}

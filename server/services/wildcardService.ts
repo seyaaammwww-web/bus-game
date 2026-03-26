@@ -35,7 +35,7 @@ interface SynonymsConfig {
  */
 export class WildcardService {
     private static instance: WildcardService;
-    private database: WildcardDatabase = {};
+        private database: WildcardDatabase | null = null;
     private synonyms: SynonymsConfig = { jamad_synonyms: {}, jamad_categories: {} };
 
     // Performance Optimization: Cache validation results
@@ -49,7 +49,7 @@ export class WildcardService {
     private constructor() {
         this.normalizer = AdvancedNormalizer.getInstance();
         this.toleranceEngine = SmartToleranceEngine.getInstance();
-        this.loadDatabase();
+            this.loadSynonyms();
         this.loadSynonyms();
     }
 
@@ -241,35 +241,6 @@ export class WildcardService {
         } catch (e) {
             return text;
         }
-    }
-
-    // Direct Levenshtein implementation for dependency-free fuzzy matching
-    private levenshtein(a: string, b: string): number {
-        if (a.length === 0) return b.length;
-        if (b.length === 0) return a.length;
-
-        const matrix = [];
-        for (let i = 0; i <= b.length; i++) {
-            matrix[i] = [i];
-        }
-        for (let j = 0; j <= a.length; j++) {
-            matrix[0][j] = j;
-        }
-
-        for (let i = 1; i <= b.length; i++) {
-            for (let j = 1; j <= a.length; j++) {
-                if (b.charAt(i - 1) === a.charAt(j - 1)) {
-                    matrix[i][j] = matrix[i - 1][j - 1];
-                } else {
-                    matrix[i][j] = Math.min(
-                        matrix[i - 1][j - 1] + 1, // substitution
-                        matrix[i][j - 1] + 1,     // insertion
-                        matrix[i - 1][j] + 1      // deletion
-                    );
-                }
-            }
-        }
-        return matrix[b.length][a.length];
     }
 
     /**

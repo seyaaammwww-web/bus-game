@@ -1,9 +1,21 @@
-
 import { CorruptionProofBuffer, stringToSeed } from '../utils/reliability';
 import { GameRoom, Round, PlayerSubmission, RoundAnswers, Category, ValidatedAnswer } from '../../shared/schema';
 import { randomUUID } from 'crypto';
 import { HybridValidator } from '../hybridValidator';
 import { categories } from '../../shared/schema';
+
+// ثوابت المؤقتات
+const ROUND_DURATION_MS = 45000; // 45 ثانية
+const RUSH_MODE_DURATION_MS = 10000; // 10 ثواني
+const SYNONYM_MAP: Record<string, string[][]> = {
+    // مثال: 'حيوان': [['أسد', 'ليث'], ['كلب', 'جرو']],
+};
+
+function areSynonyms(word1: string, word2: string, category: string): boolean {
+    const synonyms = SYNONYM_MAP[category];
+    if (!synonyms) return false;
+    return synonyms.some(group => group.includes(word1) && group.includes(word2));
+}
 
 // Helper to normalize arabic for comparison/validation
 function normalizeArabic(text: string): string {
@@ -52,6 +64,11 @@ function validateAnswerLenient(letter: string, category: Category, answer: strin
 }
 
 
+function validateAnswerStrict(letter: string, category: Category, answer: string): boolean {
+    return validateAnswerLenient(letter, category, answer);
+}
+
+
 export class RoundManager {
     private timers: Map<string, NodeJS.Timeout> = new Map();
     private calculatingRooms = new Set<string>();
@@ -68,7 +85,7 @@ export class RoundManager {
                 number: draft.currentRound + 1,
                 letter: draft.letters[draft.currentRound],
                 startTime: Date.now(),
-                endTime: Date.now() + 45000,
+                endTime: Date.now() + ROUND_DURATION_MS,
                 isRush: false,
                 isComplete: false,
                 submissions: [],
@@ -89,7 +106,7 @@ export class RoundManager {
         return room.rounds[room.currentRound];
     }
 
-    setRoundTimer(roomCode: string, callback: () => void, durationMs: number = 45000) {
+    setRoundTimer(roomCode: string, callback: () => void, durationMs: number = ROUND_DURATION_MS) {
         this.clearTimer(roomCode);
         const timer = setTimeout(() => {
             callback();
@@ -133,7 +150,6 @@ export class RoundManager {
                     busComplete: false
                 });
             }
-
             const activePlayers = draft.refereeId
                 ? draft.players.filter(p => p.id !== draft.refereeId && p.id !== round.banishedPlayerId).length
                 : draft.players.filter(p => p.id !== round.banishedPlayerId).length;
@@ -174,8 +190,6 @@ export class RoundManager {
                 console.warn(`[RoundManager] Validation timed out for ${roomCode}. Pushing all to vote.`);
                 this.pushAllAnswersToVote(buffer, onVotingStart, onRoundFinish);
             } else {
-                console.error("Error calculating scores:", e);
-                // Graceful fallback — go directly to results without crashing
                 onRoundFinish();
             }
         } finally {
@@ -183,11 +197,7 @@ export class RoundManager {
         }
     }
 
-    /**
-     * Fallback: when validation times out, push ALL non-empty answers to a single vote batch
-     */
     private pushAllAnswersToVote(
-        buffer: CorruptionProofBuffer<GameRoom>,
         onVotingStart: () => void,
         onRoundFinish: () => void
     ) {
@@ -275,7 +285,7 @@ export class RoundManager {
                 if (submission.playerId === round.banishedPlayerId) continue;
 
                 const answer = submission.answers[category];
-                if (answer && answer.trim()) {
+                if (answer?.trim()) {
                     allAnswers.push({ playerId: submission.playerId, category, answer });
                 }
             }
@@ -403,7 +413,6 @@ export class RoundManager {
             onRoundFinish();
         }
     }
-
     /**
      * FIX: Parallel Voting — instead of sequential one-by-one, we expose ALL pending
      * answers simultaneously. The UI renders a card per answer, all voted on at once.
@@ -446,19 +455,29 @@ export class RoundManager {
 
     calculateAnswerScores(draft: GameRoom) {
         const round = draft.rounds[draft.currentRound];
-
-        const answerCounts = new Map<string, number>();
-
+        const answerGroups: Record<string, string[][]> = {};
         for (const a of round.validatedAnswers) {
             if (!a.isValid) continue;
-            const key = `${a.category}:${normalizeArabic(a.answer)}`;
-            answerCounts.set(key, (answerCounts.get(key) || 0) + 1);
+            const cat = a.category;
+            const ansNorm = normalizeArabic(a.answer);
+            if (!answerGroups[cat]) answerGroups[cat] = [];
+            // تحقق من وجود مجموعة مرادفات
+            let found = false;
+            for (const group of answerGroups[cat]) {
+                if (group.some(w => areSynonyms(w, ansNorm, cat) || w === ansNorm)) {
+                    group.push(ansNorm);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) answerGroups[cat].push([ansNorm]);
         }
-
         for (const ans of round.validatedAnswers) {
             if (ans.isValid) {
-                const key = `${ans.category}:${normalizeArabic(ans.answer)}`;
-                ans.isUnique = answerCounts.get(key) === 1;
+                const cat = ans.category;
+                const ansNorm = normalizeArabic(ans.answer);
+                const group = answerGroups[cat]?.find(g => g.includes(ansNorm));
+                ans.isUnique = group && group.length === 1;
                 ans.score = ans.isUnique ? 20 : 10;
             } else {
                 ans.score = 0;

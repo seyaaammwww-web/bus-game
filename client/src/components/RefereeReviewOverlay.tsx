@@ -131,7 +131,7 @@ export function RefereeReviewOverlay() {
                             الموافقة على النتائج
                         </Button>
                         <p className="text-xs text-[#4c1d95]/60 mt-2">
-                            سيتم الانتقال للجولة التالية بعد الموافقة
+                            الموافقة → الجولة التالية
                         </p>
                     </div>
                 </div>
