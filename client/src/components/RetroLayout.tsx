@@ -24,7 +24,7 @@ const RetroBackground = () => {
 
 const RetroHeader = () => {
     return (
-        <div className="header fixed top-0 left-0 w-full z-20 flex justify-between items-center">
+        <div className="header py-24 px-32 fixed top-0 left-0 w-full z-20 flex justify-between items-center">
             <div className="flex gap-4 items-center cursor-pointer">
                 <a aria-label="WorkOS" href="#" className="w-48 h-48 flex items-center justify-center group">
                     <div className="w-36 h-36 relative">

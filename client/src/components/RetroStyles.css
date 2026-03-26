@@ -221,47 +221,23 @@ body {
 }
 
 /* Animations */
+@keyframes features-question-coin {
+
+    0%,
+    to {
+        transform: translate(-50%);
+    }
+
+    50% {
+        transform: translate(-50%, -60px);
+    }
+
+    99% {
+        opacity: 1;
+    }
+
     to {
         opacity: 0;
-    }
-}
-
-/* HIGH PERFORMANCE: GPU Accelerated Pixel Rain */
-.pixel-rain {
-    position: absolute;
-    width: 2px;
-    height: 2px;
-    background: rgba(139, 92, 246, 0.3);
-    will-change: transform;
-    pointer-events: none;
-    z-index: 0;
-}
-
-.pixel-rain-1 { animation: rain-fall 3s linear infinite; left: 10%; }
-.pixel-rain-2 { animation: rain-fall 4s linear infinite; left: 40%; animation-delay: 1s; }
-.pixel-rain-3 { animation: rain-fall 2.5s linear infinite; left: 70%; animation-delay: 0.5s; }
-
-@keyframes rain-fall {
-    from { transform: translateY(-10vh) translateZ(0); }
-    to { transform: translateY(110vh) translateZ(0); }
-}
-
-.gpu {
-    backface-visibility: hidden;
-    perspective: 1000px;
-    transform: translate3d(0,0,0);
-}
-
-/* Responsive Spacing Strategy */
-:root {
-    --header-px: 32px;
-    --header-py: 24px;
-}
-
-@media (max-width: 1024px) {
-    :root {
-        --header-px: 16px;
-        --header-py: 12px;
     }
 }
 
@@ -308,7 +284,6 @@ body {
 .header {
     font-family: 'Pixelify Sans', sans-serif;
     color: #fff;
-    padding: var(--header-py) var(--header-px);
 }
 
 .header img {

@@ -143,14 +143,16 @@ const WorkOSBackground: React.FC<WorkOSBackgroundProps> = ({ performanceMode = f
                 ))}
             </div>
 
-            {/* Moon - Optimized for all devices */}
-            <img
-                src="/images/hero/moon.png"
-                alt=""
-                className="workos-moon"
-            />
+            {/* Moon (Hidden in performance mode) */}
+            {!performanceMode && (
+                <img
+                    src="/images/hero/moon.png"
+                    alt=""
+                    className="workos-moon"
+                />
+            )}
 
-            {/* Clouds Layer - Optimized for all devices */}
+            {/* Clouds Layer - RANDOMIZED */}
             <div className="workos-clouds-container">
                 {clouds.map((cloud) => (
                     <img
@@ -164,12 +166,10 @@ const WorkOSBackground: React.FC<WorkOSBackgroundProps> = ({ performanceMode = f
                             opacity: cloud.opacity,
                             animationDuration: `${cloud.duration}s`,
                             animationDelay: `${cloud.delay}s`,
-                        } as any}
+                        }}
                     />
                 ))}
             </div>
-
-
 
             {/* Vignette */}
             <div className="workos-vignette" />

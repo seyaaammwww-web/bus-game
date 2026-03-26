@@ -140,19 +140,21 @@ export default function Results() {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
 
   return (
-    <div className="min-h-screen p-4 overflow-hidden relative text-white font-pixel-text bg-background">
-      {/* High Performance Pixel Rain (Visible on all devices for SAME STYLE) */}
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-20">
-        <div className="pixel-rain pixel-rain-1"></div>
-        <div className="pixel-rain pixel-rain-2"></div>
-        <div className="pixel-rain pixel-rain-3"></div>
-      </div>
+    <div className="min-h-screen p-4 overflow-hidden relative text-white font-pixel-text">
+      {/* Mobile Pixel Rain Background */}
+      {isMobile && (
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-40 mobile-juicy-bg">
+          <div className="pixel-rain pixel-rain-1"></div>
+          <div className="pixel-rain pixel-rain-2"></div>
+          <div className="pixel-rain pixel-rain-3"></div>
+        </div>
+      )}
 
-      <Confetti active={isFinal} count={3} />
+      <Confetti active={isFinal} count={isMobile ? 1 : 3} />
       <VotingOverlay />
       <RefereeReviewOverlay />
 
-      <div className="max-w-3xl mx-auto relative z-10 gpu">
+      <div className="max-w-3xl mx-auto relative z-10">
         <div className="flex justify-between items-center mb-4">
           <Button
             variant="ghost"
