@@ -162,7 +162,7 @@ export function Tutorial({ onClose }: TutorialProps) {
                             <Button
                                 variant="default"
                                 onClick={onClose}
-                                className="bg-[#7c3aed] hover:bg-[#6d28d9] font-bold font-pixel-text"
+                                className="bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold font-pixel-text"
                             >
                                 يلا نبدأ!
                                 <Sparkles className="w-4 h-4 mr-1" />
@@ -171,7 +171,7 @@ export function Tutorial({ onClose }: TutorialProps) {
                             <Button
                                 variant="default"
                                 onClick={nextStep}
-                                className="bg-[#4c1d95] hover:bg-[#3b0764] font-bold font-pixel-text"
+                                className="bg-[#4c1d95] hover:bg-[#3b0764] text-white font-bold font-pixel-text"
                             >
                                 التالي
                                 <ChevronLeft className="w-4 h-4 mr-1" />
