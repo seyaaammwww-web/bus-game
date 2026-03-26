@@ -42,15 +42,13 @@ export default function Lobby() {
   const isMobileView = typeof window !== 'undefined' && window.innerWidth < 1024;
 
   return (
-    <div className="min-h-screen p-4 overflow-hidden relative text-white font-pixel-text">
-      {/* Mobile Pixel Rain Background */}
-      {isMobileView && (
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-40 mobile-juicy-bg">
-          <div className="pixel-rain pixel-rain-1"></div>
-          <div className="pixel-rain pixel-rain-2"></div>
-          <div className="pixel-rain pixel-rain-3"></div>
-        </div>
-      )}
+    <div className="min-h-screen p-4 overflow-hidden relative text-white font-pixel-text bg-background">
+      {/* High Performance Pixel Rain (Visible on all devices for SAME STYLE) */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-20">
+        <div className="pixel-rain pixel-rain-1"></div>
+        <div className="pixel-rain pixel-rain-2"></div>
+        <div className="pixel-rain pixel-rain-3"></div>
+      </div>
       <div className="max-w-2xl mx-auto relative z-10">
         <div className="flex justify-between items-center mb-4">
           <Button
@@ -96,8 +94,8 @@ export default function Lobby() {
         >
           <motion.div
             className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-white to-[#faf5ff] border-[3px] border-[#4c1d95] rounded-full mb-4 shadow-[4px_4px_0_0_#2e1065,_0_0_20px_rgba(139,92,246,0.2)]"
-            animate={isMobileView ? {} : { scale: [1, 1.05, 1] }}
-            transition={{ repeat: Infinity, duration: 2 }}
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
           >
             <Sparkles className="w-6 h-6 text-[#7c3aed]" />
             <span className="font-bold text-lg text-[#4c1d95] font-pixel-text">غرفة الانتظار</span>
@@ -126,9 +124,9 @@ export default function Lobby() {
                     <motion.span
                       key={i}
                       className="w-14 h-16 flex items-center justify-center text-3xl font-bold bg-[#4c1d95] text-white rounded-lg shadow-[4px_4px_0_0_#2e1065,_0_0_10px_rgba(139,92,246,0.3)] border-2 border-[#7c3aed] font-pixel-title"
-                      initial={isMobileView ? { opacity: 0 } : { rotateY: 90 }}
-                      animate={isMobileView ? { opacity: 1 } : { rotateY: 0 }}
-                      transition={{ delay: 0.3 + i * 0.1 }}
+                      initial={{ rotateY: 90, opacity: 0 }}
+                      animate={{ rotateY: 0, opacity: 1 }}
+                      transition={{ delay: 0.3 + i * 0.1, type: "spring", damping: 12 }}
                     >
                       {char}
                     </motion.span>

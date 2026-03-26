@@ -317,14 +317,14 @@ export default function Game() {
       </AnimatePresence>
 
       <div className="max-w-5xl mx-auto relative z-10 px-4 w-full">
-        {/* Mobile Header: Clean Standard Layout (Exit - Letter - Timer) */}
+        {/* Mobile Header: Unified Premium Style */}
         <motion.div
-          className="flex flex-col gap-2 mb-4 relative z-[100] md:hidden"
+          className="flex flex-col gap-2 mb-4 relative z-[100] md:hidden gpu"
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
         >
           {/* Mobile Top Row: Exit - Letter - Timer */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between p-2 bg-[#2e1065]/40 border-[2px] border-[#4c1d95] rounded-2xl shadow-[0_4px_0_0_#2e1065]">
             <Button
               variant="ghost"
               size="icon"
@@ -334,7 +334,7 @@ export default function Game() {
               <LogOut className="w-5 h-5" />
             </Button>
 
-            <div className="flex-1 flex justify-center">
+            <div className="flex-1 flex justify-center scale-90">
               <LetterDisplay letter={letter} />
             </div>
 
@@ -344,11 +344,13 @@ export default function Game() {
           </div>
 
           {/* Mobile Bottom Row: PowerUps - Round Badge */}
-          <div className="flex items-center justify-between px-2 mt-4">
-            <PowerUpMenu />
+          <div className="flex items-center justify-between px-2 mt-2">
+            <div className="scale-90 origin-right">
+              <PowerUpMenu />
+            </div>
 
-            <div className="px-3 py-1 bg-white/10 rounded-full border border-white/20">
-              <span className="font-pixel-text font-bold text-sm text-amber-300">
+            <div className="px-3 py-1 bg-gradient-to-r from-[#7c3aed] to-[#8b5cf6] border-2 border-[#4c1d95] rounded-full shadow-[2px_2px_0_0_#2e1065]">
+              <span className="font-pixel-text font-bold text-xs text-[#FFFDD1]">
                 الجولة {room.currentRound + 1} / {room.totalRounds}
               </span>
             </div>
@@ -359,7 +361,7 @@ export default function Game() {
 
         {/* Desktop Header - Unchanged */}
         <motion.div
-          className="hidden md:flex items-center justify-between mb-6 relative z-[40]"
+          className="hidden md:flex items-center justify-between mb-6 relative z-[40] gpu"
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
         >

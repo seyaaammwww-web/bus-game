@@ -58,18 +58,7 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden relative text-white">
 
-      {/* Backgrounds */}
-      {isMobileView ? (
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-40 mobile-juicy-bg">
-          <div className="pixel-rain pixel-rain-1"></div>
-          <div className="pixel-rain pixel-rain-2"></div>
-          <div className="pixel-rain pixel-rain-3"></div>
-        </div>
-      ) : (
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-          <WorkOSBackground />
-        </div>
-      )}
+      {/* Background is handled globally by BackgroundManager in App.tsx */}
 
       {showHelp && <Tutorial onClose={() => setShowHelp(false)} />}
 
