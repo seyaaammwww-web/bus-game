@@ -91,11 +91,13 @@ export default function Home() {
       >
         <div className={`logo-container mb-2 animate-slow-float`}>
           {/* Logo with shine effect - uses CSS mask to constrain glow to logo shape */}
-          <img
-            src="/assets/logo.png"
-            alt="أوتوبيس كومبليت"
-            className="w-full max-w-[500px] object-contain pixelated"
-          />
+          <div className="relative inline-block w-56 h-auto drop-shadow-2xl">
+            <img
+              src="/assets/logo.png"
+              alt="اتوبيس كومبليت"
+              className="w-full h-full relative z-10"
+            />
+          </div>
         </div>
 
         <div dir="ltr" className="flex justify-center mt-4">

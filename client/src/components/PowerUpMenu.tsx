@@ -218,7 +218,9 @@ export function PowerUpMenu() {
         <>
             <button
                 type="button"
-                onClick={() => {
+                onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     console.log('[PowerUpMenu] Button clicked, isOpen:', isOpen);
                     playClickSound();
                     setIsOpen(!isOpen);

@@ -26,9 +26,9 @@ export function Tutorial({ onClose }: TutorialProps) {
                 </div>
             ),
             icon: (
-                <motion.img
-                    src="/assets/logo.png"
-                    alt="Bus"
+                <motion.img 
+                    src="/assets/logo.png" 
+                    alt="اتوبيس كومبليت"                   
                     className="w-32 h-auto mx-auto mb-4 object-contain"
                     animate={{ y: [0, -10, 0] }}
                     transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}

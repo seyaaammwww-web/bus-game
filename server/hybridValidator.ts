@@ -7,7 +7,6 @@ import { SeededRNG } from './utils/reliability';
 // Groq is no longer in the validation path.
 // Validation = local word database (WildcardService) only.
 // Uncertain answers go to parallel player voting.
-// Groq is still used ONLY for the Wildcard power-up generator.
 // ============================================================
 
 interface ValidationResult {
