@@ -1,6 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Wand2, Sparkles } from 'lucide-react';
-import { memo } from 'react';
 
 interface WildcardOverlayProps {
   isActive: boolean;
@@ -8,7 +7,7 @@ interface WildcardOverlayProps {
   message?: string;
 }
 
-export const WildcardOverlay = memo(function WildcardOverlay({ isActive, playerName, message }: WildcardOverlayProps) {
+export function WildcardOverlay({ isActive, playerName, message }: WildcardOverlayProps) {
   return (
     <AnimatePresence>
       {isActive && (
@@ -17,16 +16,6 @@ export const WildcardOverlay = memo(function WildcardOverlay({ isActive, playerN
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-40 bg-amber-500/5 pointer-events-none flex items-center justify-center overflow-hidden backdrop-blur-sm"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Wildcard Activated"
-          tabIndex={0}
-          onKeyDown={e => {
-            if (e.key === 'Escape') {
-              // Optionally trigger close if overlay is closable
-              e.stopPropagation();
-            }
-          }}
         >
           {/* Sparkle particles background */}
           <div className="absolute inset-0 bg-gradient-to-b from-amber-200/10 via-transparent to-amber-200/10 opacity-30"></div>
@@ -65,7 +54,7 @@ export const WildcardOverlay = memo(function WildcardOverlay({ isActive, playerN
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
           >
             <div
-              className="retro-overlay p-8 max-w-md border-amber-300 shadow-[8px_8px_0_0_#d97706] pointer-events-auto"
+              className="retro-overlay p-8 max-w-md border-amber-300 shadow-[8px_8px_0_0_#d97706]"
             >
               <motion.div
                 animate={{ rotate: [0, 15, -15, 0], scale: [1, 1.1, 1] }}
@@ -77,7 +66,7 @@ export const WildcardOverlay = memo(function WildcardOverlay({ isActive, playerN
 
               <h3 className="text-2xl font-bold text-amber-600 mb-2">استخدمت الجوكر!</h3>
               <p className="text-gray-700 font-semibold text-lg mb-2">
-                إجابات صحيحة!
+                تم ملء جميع الخانات بإجابات صحيحة!
               </p>
               <p className="text-gray-600 text-sm leading-relaxed">
                 {message || 'تم تقديم إجاباتك تلقائياً. استمتع بالمزايا!'}
@@ -145,4 +134,4 @@ export const WildcardOverlay = memo(function WildcardOverlay({ isActive, playerN
       )}
     </AnimatePresence>
   );
-});
+}

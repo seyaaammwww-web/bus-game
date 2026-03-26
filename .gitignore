@@ -10,3 +10,15 @@ sqlite.db
 *-screenshots/
 host_fail.png
 joiner_fail.png
+
+# Game Backups & Legacy
+backup/
+old stable copy/
+*.txt
+game_diff*
+round_diff*
+diff.txt
+sqlite.db*
+*.db
+temp/
+tmp/

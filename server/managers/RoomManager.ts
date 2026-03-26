@@ -10,6 +10,10 @@ const PUBLIC_ROOM_CODE = 'PLAY';
 export class RoomManager {
     private rooms: Map<string, CorruptionProofBuffer<GameRoom>> = new Map();
 
+    public getAllRoomCodes(): string[] {
+        return Array.from(this.rooms.keys());
+    }
+
     // PERSIST-1 FIX: Public accessor so StateOrchestrator doesn't need @ts-ignore
     public getAllBuffers(): CorruptionProofBuffer<GameRoom>[] {
         return Array.from(this.rooms.values());

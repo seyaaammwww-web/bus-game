@@ -342,7 +342,7 @@ export type WSMessage =
   | { type: 'draft_update'; payload: { answers: Record<string, string> } }
   | { type: 'update_settings'; payload: UpdateSettingsInput }
   | { type: 'referee_toggle_unique'; payload: { playerId: string; category: string } }
-  | { type: 'activate_powerup'; payload: { type: string; targetPlayerId?: string } }
+  | { type: 'activate_powerup'; payload: { type: string; targetPlayerId?: string; category?: string } }
   | { type: 'powerup_activated'; payload: { activation: any } } // Refine later
   | { type: 'wildcard_activated'; payload: { playerId: string; category: string } }
   | { type: 'player_banished'; payload: { playerId: string; duration: number } } // Refine later

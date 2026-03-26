@@ -53,6 +53,13 @@ export class PlayerManager {
         return undefined;
     }
 
+    getRoomId(playerId: string): string | undefined {
+        for (const info of this.players.values()) {
+            if (info.playerId === playerId) return info.roomId;
+        }
+        return undefined;
+    }
+
     getAllPlayers(): ConnectedPlayer[] {
         return Array.from(this.players.values());
     }

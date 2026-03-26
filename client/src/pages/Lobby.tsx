@@ -218,14 +218,14 @@ export default function Lobby() {
               {/* Voting Toggle — STYLE-3 FIX: full-width retro toggle with visual feedback */}
               {isHost ? (
                 <button
-                  onClick={() => updateSettings({ enableVoting: !room.settings?.enableVoting })}
-                  className={`w-full flex items-center justify-between p-3 rounded-lg border-[3px] transition-all active:translate-y-[1px] active:shadow-none ${room.settings?.enableVoting
+                  onClick={() => updateSettings({ votingEnabled: !room.settings?.votingEnabled })}
+                  className={`w-full flex items-center justify-between p-3 rounded-lg border-[3px] transition-all active:translate-y-[1px] active:shadow-none ${room.settings?.votingEnabled
                     ? 'bg-[#7c3aed]/10 border-[#7c3aed] shadow-[0_3px_0_0_#4c1d95]'
                     : 'bg-white/50 border-[#4c1d95]/20 shadow-[0_2px_0_0_#4c1d95]/10'
                     }`}
                 >
                   <div className="flex items-center gap-2">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white transition-colors ${room.settings?.enableVoting ? 'bg-[#7c3aed]' : 'bg-[#4c1d95]/40'
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white transition-colors ${room.settings?.votingEnabled ? 'bg-[#7c3aed]' : 'bg-[#4c1d95]/40'
                       }`}>
                       <Gavel className="w-4 h-4" />
                     </div>
@@ -236,15 +236,15 @@ export default function Lobby() {
                       </p>
                     </div>
                   </div>
-                  <div className={`px-3 py-1 rounded-full border-[2px] font-bold font-pixel-text text-xs transition-colors ${room.settings?.enableVoting
-                    ? 'bg-[#7c3aed] border-[#4c1d95] text-white shadow-[0_2px_0_0_#2e1065]'
-                    : 'bg-white border-[#4c1d95]/30 text-[#4c1d95]/50'
+                  <div className={`px-3 py-1 rounded-full border-[2px] font-bold font-pixel-text text-xs transition-colors ${room.settings?.votingEnabled
+                    ? 'border-[#7c3aed] bg-[#7c3aed]/10 text-[#7c3aed]'
+                    : 'border-[#4c1d95]/20 bg-[#4c1d95]/10 text-[#4c1d95]/40'
                     }`}>
-                    {room.settings?.enableVoting ? 'مفعل' : 'معطل'}
+                    {room.settings?.votingEnabled ? 'مفعل' : 'معطل'}
                   </div>
                 </button>
               ) : (
-                room.settings?.enableVoting && (
+                room.settings?.votingEnabled && (
                   <div className="flex items-center gap-2 p-2 bg-[#7c3aed]/10 rounded-lg border border-[#7c3aed]/30 justify-center mb-2">
                     <Gavel className="w-4 h-4 text-[#7c3aed]" />
                     <span className="text-xs font-bold text-[#4c1d95] font-pixel-text">نظام التحكيم الديمقراطي مفعل</span>
@@ -325,7 +325,7 @@ export default function Lobby() {
                     className="h-10 border-2 border-[#4c1d95] text-[#4c1d95] font-pixel-text font-bold text-base"
                     data-testid="button-choose-referee"
                   >
-                    {room.settings?.enableVoting ? <span className="text-xs text-red-500 ml-2">(سيلغي التصويت)</span> : 'اختر حكم'}
+                    {room.settings?.votingEnabled ? <span className="text-xs text-red-500 ml-2">(سيلغي التصويت)</span> : 'اختر حكم'}
                   </Button>
                 )}
               </div>

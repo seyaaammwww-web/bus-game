@@ -490,7 +490,7 @@ export default function Results() {
                   isReferee={isReferee}
                   isHost={isHost}
                   onRefereeToggle={room.phase === 'referee_review' ? refereeToggleUnique : undefined}
-                  onRefereeDeduct={room.phase === 'referee_review' ? (pid, cat) => refereeDeduct(pid, cat, 'رفض الحكم') : undefined}
+                  onRefereeDeduct={room.phase === 'referee_review' ? (pid, cat) => refereeDeduct(pid, cat as Category, 'رفض الحكم') : undefined}
                 />
               </div>
             </motion.div>
@@ -534,7 +534,7 @@ export default function Results() {
                         {room.phase === 'results' ? '➡️ بدء الجولة التالية' : 'اعتماد النتيجة وبدء الجولة'}
                       </Button>
                     </div>
-                  ) : room.settings?.enableVoting && isHost ? (
+                  ) : room.settings?.votingEnabled && isHost ? (
                     // Host Control for Voting Mode
                     <div className="space-y-2">
                       <p className="text-[#FFFDD1] font-bold font-pixel-text text-lg">

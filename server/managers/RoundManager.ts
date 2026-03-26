@@ -106,7 +106,7 @@ export class RoundManager {
         return room.rounds[room.currentRound];
     }
 
-    setRoundTimer(roomCode: string, callback: () => void, durationMs: number = ROUND_DURATION_MS) {
+    public setRoundTimer(roomCode: string, callback: () => void, durationMs: number = ROUND_DURATION_MS) {
         this.clearTimer(roomCode);
         const timer = setTimeout(() => {
             callback();
@@ -115,7 +115,7 @@ export class RoundManager {
         this.timers.set(roomCode, timer);
     }
 
-    clearTimer(roomCode: string) {
+    public clearTimer(roomCode: string) {
         if (this.timers.has(roomCode)) {
             clearTimeout(this.timers.get(roomCode)!);
             this.timers.delete(roomCode);
@@ -198,6 +198,7 @@ export class RoundManager {
     }
 
     private pushAllAnswersToVote(
+        buffer: CorruptionProofBuffer<GameRoom>,
         onVotingStart: () => void,
         onRoundFinish: () => void
     ) {
@@ -486,7 +487,7 @@ export class RoundManager {
                 const cat = ans.category;
                 const ansNorm = normalizeArabic(ans.answer);
                 const group = answerGroups[cat]?.find(g => g.includes(ansNorm));
-                ans.isUnique = group && group.length === 1;
+                ans.isUnique = !!(group && group.length === 1);
                 ans.score = ans.isUnique ? 20 : 10;
             } else {
                 ans.score = 0;

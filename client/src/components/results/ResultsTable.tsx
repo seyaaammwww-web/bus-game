@@ -26,8 +26,8 @@ interface ResultsTableProps {
     isReferee: boolean;
     isHost?: boolean;
     // PHANTOM-3: Optional — only provided during referee_review phase
-    onRefereeToggle?: (playerId: string, category: string) => void;
-    onRefereeDeduct?: (playerId: string, category: string) => void;
+    onRefereeToggle?: (playerId: string, category: Category) => void;
+    onRefereeDeduct?: (playerId: string, category: Category) => void;
 }
 
 export function ResultsTable({

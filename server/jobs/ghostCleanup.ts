@@ -15,13 +15,23 @@ if (redisClient) {
         console.log(`[GhostCleanup] Starting job ${job.id}...`);
         try {
             // تنظيف اللاعبين غير المتصلين فعلياً
-            const rooms = gameManager.getAllRooms();
-            for (const room of rooms) {
-                const disconnectedPlayers = room.players.filter(p =>
-                    !gameManager.playerManager.isConnected(p.id)
+            const roomCodes = gameManager.getAllRooms();
+            for (const code of roomCodes) {
+                const room = gameManager.getRoom(code); // Use public method to get room
+                if (!room) continue;
+                // Filter players who are NOT isOffline but don't have a socket in PlayerManager
+                const ghostPlayers = room.players.filter((p: any) =>
+                    !p.isOffline && !gameManager.getPlayerSocket(p.id) // Use public method to get socket
                 );
-                for (const player of disconnectedPlayers) {
-                    gameManager.handlePlayerDisconnect(player.id, room.code);
+                for (const player of ghostPlayers) {
+                    console.log(`[GhostCleanup] Handling disconnect for ghost player ${player.id} in room ${code}`);
+                    const ws = gameManager.getPlayerSocket(player.id); // Use public method to get socket
+                    if (ws) {
+                        gameManager.handleDisconnect(ws);
+                    } else {
+                        // If no socket, ensure player is removed from room if still present
+                        gameManager.removePlayerFromRoom(code, player.id); // Use public method
+                    }
                 }
             }
             console.log(`[GhostCleanup] Completed job ${job.id} (actual cleanup done).`);

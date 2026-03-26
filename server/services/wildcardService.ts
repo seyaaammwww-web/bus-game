@@ -35,7 +35,7 @@ interface SynonymsConfig {
  */
 export class WildcardService {
     private static instance: WildcardService;
-        private database: WildcardDatabase | null = null;
+  private database: WildcardDatabase = {};
     private synonyms: SynonymsConfig = { jamad_synonyms: {}, jamad_categories: {} };
 
     // Performance Optimization: Cache validation results
