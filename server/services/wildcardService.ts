@@ -180,11 +180,12 @@ export class WildcardService {
             for (const [category, words] of Object.entries(categories)) {
                 clean[letter][category] = words.filter(w => {
                     const trimmed = w.trim();
-                    if (trimmed.length < 3) return false;
+                    // Keep curated 2-char words (دب، قط، مي…) — they are matched exact-only, never fuzzy
+                    if (trimmed.length < 2) return false;
                     if (!/^[\u0600-\u06FF]+$/.test(trimmed)) return false;
                     if (/(.)\1{2,}/.test(trimmed)) return false;
                     const norm = this.normalizer.normalize(trimmed);
-                    return norm.length >= 3;
+                    return norm.length >= 2;
                 });
             }
         }
@@ -255,13 +256,13 @@ export class WildcardService {
      */
     validateWord(letter: string, category: string, word: string): boolean {
         const trimmed = word.trim();
-        if (!trimmed || trimmed.length < 3) return false;
+        if (!trimmed || trimmed.length < 2) return false;
         if (!isMostlyArabic(trimmed)) return false;
         if (hasGarbagePattern(trimmed)) return false;
 
         // 1. Basic cleaning using advanced normalizer
         const normalizedInput = this.normalizer.normalize(trimmed);
-        if (!normalizedInput || normalizedInput.length < 3) return false;
+        if (!normalizedInput || normalizedInput.length < 2) return false;
 
         // 2. Cache Check (O(1))
         const cacheKey = `${letter}:${category}:${normalizedInput}`;
@@ -278,8 +279,14 @@ export class WildcardService {
             return false;
         }
 
+        // Short-word guard: 2-char inputs are matched EXACT-only against curated
+        // dictionary entries (دب، قط، مي…). Fuzzy tolerance on fragments this
+        // short causes false positives, so the tolerance engine is bypassed.
+        if (normalizedInput.length === 2) {
+            isValid = this.checkExactShortWord(letter, category, normalizedInput);
+        }
         // 4. Advanced Database Check with all tolerance rules
-        if (this.checkDatabaseAdvanced(letter, category, word)) {
+        else if (this.checkDatabaseAdvanced(letter, category, word)) {
             isValid = true;
         }
         // 5. Extended Synonyms & Smart Logic (all categories)
@@ -316,6 +323,20 @@ export class WildcardService {
         } catch (e) {
             return text;
         }
+    }
+
+    /**
+     * Exact-match lookup for 2-char words — no fuzzy tolerance, no synonyms.
+     * Only curated dictionary entries of the same normalized form are accepted.
+     */
+    private checkExactShortWord(letter: string, category: string, normalizedInput: string): boolean {
+        const dbKey = this.getDatabaseKey(letter);
+        if (!dbKey) return false;
+
+        const categoryAnswers = this.database[dbKey]?.[category];
+        if (!categoryAnswers || categoryAnswers.length === 0) return false;
+
+        return categoryAnswers.some(w => this.normalizer.normalize(w) === normalizedInput);
     }
 
     /**
