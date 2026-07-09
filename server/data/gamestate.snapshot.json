@@ -1,4 +1,56 @@
 {
-  "timestamp": 1783567162818,
-  "rooms": []
+  "timestamp": 1783603862551,
+  "rooms": [
+    {
+      "id": "dfe489ed-2d93-4944-865c-724b4d8b9d67",
+      "code": "STFY",
+      "hostId": "1c36ec89-2925-4784-bb0c-cf0d022cbdb6",
+      "players": [
+        {
+          "id": "1c36ec89-2925-4784-bb0c-cf0d022cbdb6",
+          "name": "لاعب تجريبي",
+          "score": 0,
+          "isHost": true,
+          "isReady": false,
+          "busStreak": 0,
+          "powerUps": {
+            "hint": 0,
+            "steal": 0,
+            "wildcard": 0,
+            "banish": 0
+          },
+          "usedPowerUps": {
+            "hint": false,
+            "steal": false,
+            "wildcard": false,
+            "banish": false
+          },
+          "totalEarnedPoints": 0
+        }
+      ],
+      "rounds": [],
+      "currentRound": 0,
+      "totalRounds": 10,
+      "phase": "lobby",
+      "letters": [
+        "خ",
+        "ط",
+        "ظ",
+        "أ",
+        "ح",
+        "ن",
+        "م",
+        "ب",
+        "هـ",
+        "ص"
+      ],
+      "createdAt": 1783603808087,
+      "voteQueue": [],
+      "currentVote": null,
+      "settings": {
+        "votingEnabled": true,
+        "customCategories": []
+      }
+    }
+  ]
 }
