@@ -1,35 +1,6 @@
 {
-  "timestamp": 1783561389444,
+  "timestamp": 1783561629446,
   "rooms": [
-    {
-      "id": "7a924926-e87c-48eb-807c-6834fbd0b19c",
-      "code": "8F63",
-      "hostId": "a76e743b-17a3-4c66-abd4-22e5e8224392",
-      "players": [],
-      "rounds": [],
-      "currentRound": 0,
-      "totalRounds": 10,
-      "phase": "lobby",
-      "letters": [
-        "ف",
-        "ي",
-        "غ",
-        "د",
-        "س",
-        "ز",
-        "م",
-        "خ",
-        "ح",
-        "أ"
-      ],
-      "createdAt": 1783560176480,
-      "voteQueue": [],
-      "currentVote": null,
-      "settings": {
-        "votingEnabled": true,
-        "customCategories": []
-      }
-    },
     {
       "id": "41d4127e-ef02-431d-9de8-9f673320900d",
       "code": "22Y2",
@@ -53,6 +24,217 @@
       ],
       "createdAt": 1783561319776,
       "voteQueue": [],
+      "currentVote": null,
+      "settings": {
+        "votingEnabled": true,
+        "customCategories": []
+      }
+    },
+    {
+      "id": "8a7bbdb7-4c15-44db-86d0-6bb3f7486963",
+      "code": "77LC",
+      "hostId": "73db37b1-1acc-4a6c-89d4-ab83508b1ff6",
+      "players": [
+        {
+          "id": "73db37b1-1acc-4a6c-89d4-ab83508b1ff6",
+          "name": "سيام",
+          "score": 0,
+          "isHost": true,
+          "isReady": false,
+          "busStreak": 0,
+          "powerUps": {
+            "hint": 0,
+            "steal": 0,
+            "wildcard": 0,
+            "banish": 0
+          },
+          "usedPowerUps": {
+            "hint": false,
+            "steal": false,
+            "wildcard": false,
+            "banish": false
+          },
+          "totalEarnedPoints": 0
+        },
+        {
+          "id": "7078e3e8-836b-4609-a2ce-e47cbd2e4a21",
+          "name": "نورا",
+          "score": 0,
+          "isHost": false,
+          "isReady": true,
+          "busStreak": 0,
+          "powerUps": {
+            "hint": 0,
+            "steal": 0,
+            "wildcard": 0,
+            "banish": 0
+          },
+          "usedPowerUps": {
+            "hint": false,
+            "steal": false,
+            "wildcard": false,
+            "banish": false
+          },
+          "totalEarnedPoints": 0
+        }
+      ],
+      "rounds": [
+        {
+          "number": 1,
+          "letter": "ث",
+          "startTime": 1783561569238,
+          "endTime": 1783561611798,
+          "isRush": true,
+          "isComplete": false,
+          "submissions": [
+            {
+              "playerId": "73db37b1-1acc-4a6c-89d4-ab83508b1ff6",
+              "playerName": "سيام",
+              "answers": {
+                "ولد": "ثامر",
+                "بنت": "ثريا",
+                "بلد": "ثايلاند",
+                "حيوان": "ثعلب",
+                "جماد": "ثلاجة"
+              },
+              "submittedAt": 1783561601748,
+              "busComplete": true
+            },
+            {
+              "playerId": "7078e3e8-836b-4609-a2ce-e47cbd2e4a21",
+              "playerName": "نورا",
+              "answers": {
+                "ولد": "",
+                "بنت": "",
+                "بلد": "",
+                "حيوان": "",
+                "جماد": ""
+              },
+              "submittedAt": 1783561610876,
+              "busComplete": false
+            }
+          ],
+          "validatedAnswers": [
+            {
+              "playerId": "73db37b1-1acc-4a6c-89d4-ab83508b1ff6",
+              "playerName": "سيام",
+              "category": "ولد",
+              "answer": "ثامر",
+              "isValid": true,
+              "isPendingVote": false,
+              "isUnique": false,
+              "score": 0,
+              "votes": {
+                "accepted": 0,
+                "rejected": 0
+              },
+              "reason": "موجودة في القاموس",
+              "isFabricated": false
+            },
+            {
+              "playerId": "73db37b1-1acc-4a6c-89d4-ab83508b1ff6",
+              "playerName": "سيام",
+              "category": "بنت",
+              "answer": "ثريا",
+              "isValid": true,
+              "isPendingVote": false,
+              "isUnique": false,
+              "score": 0,
+              "votes": {
+                "accepted": 0,
+                "rejected": 0
+              },
+              "reason": "موجودة في القاموس",
+              "isFabricated": false
+            },
+            {
+              "playerId": "73db37b1-1acc-4a6c-89d4-ab83508b1ff6",
+              "playerName": "سيام",
+              "category": "بلد",
+              "answer": "ثايلاند",
+              "isValid": false,
+              "isPendingVote": true,
+              "isUnique": false,
+              "score": 0,
+              "votes": {
+                "accepted": 0,
+                "rejected": 0
+              },
+              "reason": "تتطلب تصويت",
+              "isFabricated": false
+            },
+            {
+              "playerId": "73db37b1-1acc-4a6c-89d4-ab83508b1ff6",
+              "playerName": "سيام",
+              "category": "حيوان",
+              "answer": "ثعلب",
+              "isValid": true,
+              "isPendingVote": false,
+              "isUnique": false,
+              "score": 0,
+              "votes": {
+                "accepted": 0,
+                "rejected": 0
+              },
+              "reason": "موجودة في القاموس",
+              "isFabricated": false
+            },
+            {
+              "playerId": "73db37b1-1acc-4a6c-89d4-ab83508b1ff6",
+              "playerName": "سيام",
+              "category": "جماد",
+              "answer": "ثلاجة",
+              "isValid": true,
+              "isPendingVote": false,
+              "isUnique": false,
+              "score": 0,
+              "votes": {
+                "accepted": 0,
+                "rejected": 0
+              },
+              "reason": "موجودة في القاموس",
+              "isFabricated": false
+            }
+          ],
+          "votingComplete": false,
+          "powerUpUsedInRound": false,
+          "endRoundInProgress": true,
+          "voteEndTime": 1783561641013
+        }
+      ],
+      "currentRound": 0,
+      "totalRounds": 10,
+      "phase": "voting",
+      "letters": [
+        "ث",
+        "ت",
+        "ق",
+        "ج",
+        "ظ",
+        "غ",
+        "ب",
+        "ص",
+        "ل",
+        "أ"
+      ],
+      "createdAt": 1783561495739,
+      "voteQueue": [
+        {
+          "requestId": "d68ce87b-1a87-422c-aeec-7e3dc7759243",
+          "requesterId": "73db37b1-1acc-4a6c-89d4-ab83508b1ff6",
+          "requesterName": "سيام",
+          "category": "بلد",
+          "word": "ثايلاند",
+          "eligibleVoterIds": [
+            "7078e3e8-836b-4609-a2ce-e47cbd2e4a21"
+          ],
+          "voterIds": [],
+          "votes": {
+            "yes": 0,
+            "no": 0
+          }
+        }
+      ],
       "currentVote": null,
       "settings": {
         "votingEnabled": true,
