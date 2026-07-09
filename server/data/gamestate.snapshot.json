@@ -1,15 +1,37 @@
 {
-  "timestamp": 1783557545645,
+  "timestamp": 1783557665646,
   "rooms": [
     {
       "id": "021eb10f-7b6e-463d-9bf5-19803ffe8eae",
       "code": "GJBV",
-      "hostId": "df5cbdc2-62b8-4a14-b5f5-94605267abb5",
+      "hostId": "46bf63d8-b16d-4b6d-beb8-8840cb4e95f5",
       "players": [
         {
           "id": "df5cbdc2-62b8-4a14-b5f5-94605267abb5",
           "name": "أحمد",
           "score": 80,
+          "isHost": false,
+          "isReady": false,
+          "busStreak": 0,
+          "powerUps": {
+            "wildcard": 0,
+            "banish": 0,
+            "hint": 0,
+            "steal": 0
+          },
+          "usedPowerUps": {
+            "hint": false,
+            "steal": false,
+            "wildcard": false,
+            "banish": false
+          },
+          "totalEarnedPoints": 80,
+          "isOffline": true
+        },
+        {
+          "id": "46bf63d8-b16d-4b6d-beb8-8840cb4e95f5",
+          "name": "منى",
+          "score": 100,
           "isHost": true,
           "isReady": false,
           "busStreak": 0,
@@ -25,28 +47,8 @@
             "wildcard": false,
             "banish": false
           },
-          "totalEarnedPoints": 80
-        },
-        {
-          "id": "46bf63d8-b16d-4b6d-beb8-8840cb4e95f5",
-          "name": "منى",
-          "score": 100,
-          "isHost": false,
-          "isReady": true,
-          "busStreak": 0,
-          "powerUps": {
-            "wildcard": 0,
-            "banish": 0,
-            "hint": 0,
-            "steal": 0
-          },
-          "usedPowerUps": {
-            "hint": false,
-            "steal": false,
-            "wildcard": false,
-            "banish": false
-          },
-          "totalEarnedPoints": 100
+          "totalEarnedPoints": 100,
+          "isOffline": true
         }
       ],
       "rounds": [
