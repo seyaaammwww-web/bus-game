@@ -29,7 +29,7 @@ export default function RefereeWaiting() {
 
             {/* Title */}
             <motion.h1
-                className="text-3xl font-pixel-title text-white mb-2 drop-shadow-lg"
+                className="text-3xl font-pixel-title text-white mb-2 [text-shadow:3px_3px_0_#350D7A]"
                 animate={{ opacity: [0.8, 1, 0.8] }}
                 transition={{ duration: 2, repeat: Infinity }}
             >
