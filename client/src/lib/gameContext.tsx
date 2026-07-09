@@ -1,18 +1,22 @@
 import { createContext, useContext, useReducer, useCallback, useEffect, useRef, ReactNode, useState } from 'react';
-import { applyPatches } from 'immer';
 import { toast } from '@/hooks/use-toast';
 import type { GameRoom, Player, Round, GamePhase, RoundAnswers, Category, ValidatedAnswer, Reaction, ReactionType, PowerUpType } from '@shared/schema';
 
 // FIX: Persist session info in sessionStorage for reconnection
 const SESSION_KEY = 'egyptian_bus_session';
 
-function saveSession(playerId: string, roomCode: string) {
+function saveSession(playerId: string, roomCode: string, reconnectToken?: string) {
   try {
-    const data = btoa(encodeURIComponent(JSON.stringify({ playerId, roomCode, ts: Date.now() })));
+    const data = btoa(encodeURIComponent(JSON.stringify({
+      playerId,
+      roomCode,
+      reconnectToken,
+      ts: Date.now()
+    })));
     sessionStorage.setItem(SESSION_KEY, data);
   } catch { }
 }
-function loadSession(): { playerId: string; roomCode: string; ts: number } | null {
+function loadSession(): { playerId: string; roomCode: string; reconnectToken?: string; ts: number } | null {
   try {
     const raw = sessionStorage.getItem(SESSION_KEY);
     if (!raw) return null;
@@ -29,6 +33,35 @@ function loadSession(): { playerId: string; roomCode: string; ts: number } | nul
   } catch { return null; }
 }
 function clearSession() { try { sessionStorage.removeItem(SESSION_KEY); } catch { } }
+
+function computeTimeLeft(room: GameRoom | null): number | null {
+  if (!room || room.phase !== 'playing') return null;
+  const round = room.rounds[room.currentRound];
+  if (!round?.endTime) return null;
+  return Math.max(0, Math.ceil((round.endTime - Date.now()) / 1000));
+}
+
+function syncBanishFromRoom(
+  room: GameRoom | null,
+  playerId: string | null,
+  setIsBanished: (v: boolean) => void,
+  setBanishedBy: (v: string | null) => void,
+) {
+  if (!room || !playerId) {
+    setIsBanished(false);
+    setBanishedBy(null);
+    return;
+  }
+  const round = room.rounds[room.currentRound];
+  if (round?.banishedPlayerId === playerId) {
+    setIsBanished(true);
+    const banisher = room.players.find(p => p.id === round.banishedByPlayerId);
+    setBanishedBy(banisher?.name || null);
+  } else {
+    setIsBanished(false);
+    setBanishedBy(null);
+  }
+}
 
 interface GameState {
   room: GameRoom | null;
@@ -54,7 +87,6 @@ type GameAction =
   | { type: 'UPDATE_ROUND'; round: Round }
   | { type: 'UPDATE_VOTE_STATE'; payload: any }
   | { type: 'SET_RECONNECTING'; reconnecting: boolean }
-  | { type: 'APPLY_PATCHES'; patches: any[] }
   | { type: 'RESET' };
 
 const initialState: GameState = {
@@ -109,15 +141,6 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return { ...state, room: { ...state.room, currentVote: newCurrentVote, voteQueue: newVoteQueue } };
     case 'SET_RECONNECTING':
       return { ...state, reconnecting: action.reconnecting };
-    case 'APPLY_PATCHES':
-      if (!state.room) return state;
-      try {
-        return { ...state, room: applyPatches(state.room, action.patches) };
-      } catch (e) {
-        console.error("Failed to apply patches", e);
-        // Don't call toast() here — reducers must be pure. Just return state unchanged.
-        return state;
-      }
     case 'RESET':
       return initialState;
     default:
@@ -169,7 +192,9 @@ interface GameContextType {
   refereeOverride: (requestId: string, category: string, accepted: boolean) => void;
   hostAdjustScore: (playerId: string, delta: number) => void;
   sendMessage: (type: string, payload: any) => void;
-  sendAppeal: (targetPlayerId: string, category: string) => void;
+  sendAppeal: (category: string, word?: string) => void;
+  typingPlayers: Record<string, boolean>;
+  setTimerPaused: (paused: boolean) => void;
 }
 
 const GameContext = createContext<GameContextType | null>(null);
@@ -181,7 +206,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [isBanished, setIsBanished] = useState(false);
   const [banishedBy, setBanishedBy] = useState<string | null>(null);
   const [banishOverlay, setBanishOverlay] = useState(false);
+  const [typingPlayers, setTypingPlayers] = useState<Record<string, boolean>>({});
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerPausedRef = useRef(false);
+  const reactionTimeoutsRef = useRef<Set<NodeJS.Timeout>>(new Set());
   const wsRef = useRef<WebSocket | null>(null);
   // FIX: Reconnection tracking
   const reconnectAttemptRef = useRef(0);
@@ -198,7 +226,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
         dispatch({ type: 'SET_ROOM', room: message.payload.room });
         dispatch({ type: 'SET_PLAYER_ID', playerId: message.payload.playerId });
         // FIX: Save session for reconnection
-        saveSession(message.payload.playerId, message.payload.room.code);
+        saveSession(
+          message.payload.playerId,
+          message.payload.room.code,
+          message.payload.reconnectToken
+        );
         break;
       case 'player_submitted':
         // BUG-5 FIX: use stateRef.current to avoid stale closure reading null room
@@ -232,27 +264,46 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
         dispatch({ type: 'UPDATE_PLAYERS', players: message.payload.players });
         break;
-      case 'round_start':
-        dispatch({ type: 'SET_ROOM', room: message.payload.room });
-        dispatch({ type: 'SET_TIME_LEFT', timeLeft: 45 });
-        dispatch({ type: 'SET_RUSH', isRush: false });
-        setIsBanished(false);
-        setBanishedBy(null);
+      case 'round_start': {
+        const room = message.payload.room as GameRoom;
+        dispatch({ type: 'SET_ROOM', room });
+        if (timerPausedRef.current) break;
+        const timeLeft = computeTimeLeft(room);
+        dispatch({ type: 'SET_TIME_LEFT', timeLeft: timeLeft ?? 45 });
+        dispatch({ type: 'SET_RUSH', isRush: !!room.rounds[room.currentRound]?.isRush });
+        syncBanishFromRoom(room, stateRef.current.playerId, setIsBanished, setBanishedBy);
+        setTypingPlayers({});
         break;
-      case 'rush_mode':
-        dispatch({ type: 'SET_ROOM', room: message.payload.room });
+      }
+      case 'rush_mode': {
+        const room = message.payload.room as GameRoom;
+        dispatch({ type: 'SET_ROOM', room });
         dispatch({ type: 'SET_RUSH', isRush: true });
-        dispatch({ type: 'SET_TIME_LEFT', timeLeft: 10 });
+        const timeLeft = computeTimeLeft(room);
+        dispatch({ type: 'SET_TIME_LEFT', timeLeft: timeLeft ?? 10 });
         break;
+      }
       case 'voting_start':
       case 'round_results':
       case 'game_end':
-      case 'sync_state':
-        dispatch({ type: 'SET_ROOM', room: message.payload.room });
+      case 'sync_state': {
+        const room = message.payload.room as GameRoom;
+        dispatch({ type: 'SET_ROOM', room });
         dispatch({ type: 'SET_RUSH', isRush: false });
+        if (!timerPausedRef.current) {
+          const timeLeft = computeTimeLeft(room);
+          if (timeLeft !== null) {
+            dispatch({ type: 'SET_TIME_LEFT', timeLeft });
+          }
+        }
+        syncBanishFromRoom(room, stateRef.current.playerId, setIsBanished, setBanishedBy);
         break;
-      case 'patch_update':
-        dispatch({ type: 'APPLY_PATCHES', patches: message.payload.patches });
+      }
+      case 'typing_status':
+        setTypingPlayers(prev => ({
+          ...prev,
+          [message.payload.playerId]: message.payload.isTyping,
+        }));
         break;
       case 'vote_session_start':
       case 'vote_update':
@@ -270,9 +321,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
       case 'reaction_received':
         setReactions(prev => {
           const newReactions = [...prev, message.payload.reaction];
-          setTimeout(() => {
+          const timeoutId = setTimeout(() => {
             setReactions(r => r.filter(reaction => reaction.id !== message.payload.reaction.id));
+            reactionTimeoutsRef.current.delete(timeoutId);
           }, 3000);
+          reactionTimeoutsRef.current.add(timeoutId);
           return newReactions;
         });
         break;
@@ -285,8 +338,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
         setTimeout(() => setActivePowerUpNotification(null), 4000);
         break;
       case 'player_banished':
-        setIsBanished(true);
-        setBanishedBy(message.payload.banishedBy);
+        if (message.payload.playerId === stateRef.current.playerId) {
+          setIsBanished(true);
+          setBanishedBy(message.payload.banishedBy || null);
+        }
         break;
       case 'referee_review_start':
         setIsBanished(false);
@@ -312,12 +367,26 @@ export function GameProvider({ children }: { children: ReactNode }) {
         });
         break;
 
-      // FIX: Handle being kicked
+      case 'player_kicked':
+        if (stateRef.current.room && message.payload?.playerId) {
+          dispatch({
+            type: 'SET_ROOM',
+            room: {
+              ...stateRef.current.room,
+              players: stateRef.current.room.players.filter(p => p.id !== message.payload.playerId),
+            },
+          });
+        }
+        break;
       case 'kicked':
+        isIntentionalDisconnectRef.current = true;
         clearSession();
+        if (wsRef.current) {
+          try { wsRef.current.close(); } catch { }
+          wsRef.current = null;
+        }
         dispatch({ type: 'RESET' });
         dispatch({ type: 'SET_ERROR', error: message.payload.reason || 'تم طردك من الغرفة' });
-        isIntentionalDisconnectRef.current = true; // Don't reconnect
         break;
     }
   }, []);
@@ -359,10 +428,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
       // FIX (#5): Attempt silent rejoin if session exists
       const session = loadSession();
-      if (session && session.playerId && session.roomCode) {
+      if (session?.playerId && session?.roomCode && session?.reconnectToken) {
         ws.send(JSON.stringify({
           type: 'rejoin_room',
-          payload: { roomCode: session.roomCode, playerId: session.playerId }
+          payload: {
+            roomCode: session.roomCode,
+            playerId: session.playerId,
+            reconnectToken: session.reconnectToken,
+          }
         }));
       }
     };
@@ -403,6 +476,18 @@ export function GameProvider({ children }: { children: ReactNode }) {
     isIntentionalDisconnectRef.current = false;
     return connectWs();
   }, [connectWs]);
+
+  // Restore session on page load (refresh / new tab)
+  useEffect(() => {
+    const session = loadSession();
+    if (session?.playerId && session?.roomCode) {
+      connect();
+    }
+  }, [connect]);
+
+  const setTimerPaused = useCallback((paused: boolean) => {
+    timerPausedRef.current = paused;
+  }, []);
 
   const sendMessage = useCallback((type: string, payload: any) => {
     const ws = wsRef.current;
@@ -498,14 +583,18 @@ export function GameProvider({ children }: { children: ReactNode }) {
     timeLeftRef.current = state.timeLeft;
   }, [state.timeLeft]);
 
-  // Timer effect — only re-created when phase changes, never on every tick
+  const roomRef = useRef(state.room);
+  useEffect(() => { roomRef.current = state.room; }, [state.room]);
+
+  // Timer synced to server endTime — avoids drift from tab backgrounding
   useEffect(() => {
     if (state.room?.phase === 'playing') {
       timerRef.current = setInterval(() => {
-        const current = timeLeftRef.current;
-        if (current > 0) {
-          dispatch({ type: 'SET_TIME_LEFT', timeLeft: current - 1 });
-        } else {
+        if (timerPausedRef.current) return;
+        const computed = computeTimeLeft(roomRef.current);
+        if (computed === null) return;
+        dispatch({ type: 'SET_TIME_LEFT', timeLeft: computed });
+        if (computed <= 0) {
           clearInterval(timerRef.current!);
           timerRef.current = null;
         }
@@ -526,6 +615,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
       if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
       if (wsRef.current) wsRef.current.close();
       if (timerRef.current) clearInterval(timerRef.current);
+      reactionTimeoutsRef.current.forEach(clearTimeout);
+      reactionTimeoutsRef.current.clear();
     };
   }, []);
 
@@ -535,8 +626,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const isReferee = state.room?.refereeId === state.playerId;
   const referee = state.room?.players.find(p => p.id === state.room?.refereeId) || null;
 
-  const sendAppeal = useCallback((targetPlayerId: string, category: string) => {
-    sendMessage('player_appeal', { targetPlayerId, category });
+  const sendAppeal = useCallback((category: string, word?: string) => {
+    sendMessage('appeal_answer', { category, word });
   }, [sendMessage]);
 
   return (
@@ -582,6 +673,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
       hostAdjustScore,
       sendMessage,
       sendAppeal,
+      typingPlayers,
+      setTimerPaused,
     }}>
       {children}
     </GameContext.Provider>

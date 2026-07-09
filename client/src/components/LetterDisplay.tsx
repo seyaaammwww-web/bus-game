@@ -13,14 +13,14 @@ export function LetterDisplay({ letter, round, totalRounds }: LetterDisplayProps
         className="relative"
         initial={{ scale: 0, rotate: -180 }}
         animate={{ scale: 1, rotate: -6 }}
-        whileHover={{ scale: 1.1, rotate: 0 }}
-        transition={{ type: 'spring', stiffness: 80, damping: 20, duration: 1.5 }}
+        whileHover={{ scale: 1.05, rotate: 0 }}
+        transition={{ type: 'spring', stiffness: 80, damping: 20 }}
       >
         {/* Glow Effect */}
         <div className="absolute inset-0 bg-[#7c3aed]/30 blur-xl rounded-xl" />
 
         {/* Card */}
-        <div className="relative w-28 h-28 bg-gradient-to-br from-[#4c1d95] to-[#2e1065] rounded-xl flex items-center justify-center shadow-[6px_6px_0_0_rgba(139,92,246,0.5),_0_0_30px_rgba(139,92,246,0.3)] border-[4px] border-[#8b5cf6]">
+        <div className="relative w-28 h-28 bg-gradient-to-br from-[#7c3aed] to-[#4c1d95] rounded-2xl flex items-center justify-center shadow-[0_8px_32px_rgba(124,58,237,0.45)] border border-purple-300/40 ring-1 ring-white/20">
           {/* Inner Glow */}
           <div className="absolute inset-2 bg-gradient-to-br from-white/10 to-transparent rounded-lg" />
 

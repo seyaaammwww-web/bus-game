@@ -74,7 +74,7 @@ html,
 :host {
     line-height: 1.5;
     -webkit-text-size-adjust: 100%;
-    font-family: 'Pixelify Sans', sans-serif;
+    font-family: 'Cairo', 'Inter', system-ui, sans-serif;
     -webkit-tap-highlight-color: transparent;
 }
 
@@ -265,7 +265,7 @@ body {
 }
 
 .text {
-    font-family: 'Pixelify Sans', sans-serif;
+    font-family: 'Cairo', 'Inter', system-ui, sans-serif;
     /* Define vars locally in inline style or here */
     --color: #36053c;
     --shadow: 3px;
@@ -282,7 +282,7 @@ body {
 
 /* Specific component styles */
 .header {
-    font-family: 'Pixelify Sans', sans-serif;
+    font-family: 'Cairo', 'Inter', system-ui, sans-serif;
     color: #fff;
 }
 
@@ -337,7 +337,7 @@ input:hover {
 }
 
 .giveaway-notice {
-    font-family: 'Pixelify Sans', sans-serif;
+    font-family: 'Cairo', 'Inter', system-ui, sans-serif;
     position: relative;
 }
 

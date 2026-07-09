@@ -81,7 +81,7 @@ export class ErrorBoundary extends Component<Props, State> {
                             <Button
                                 onClick={this.handleReset}
                                 size="lg"
-                                className="w-full h-16 text-xl bg-gradient-to-r from-[#7c3aed] to-[#4c1d95] text-white font-pixel-title shadow-[0_4px_0_0_#2e1065] border-[3px] border-[#a78bfa]"
+                                className="w-full h-16 text-xl"
                             >
                                 <Home className="w-6 h-6 ml-2" />
                                 رجوع للمحطة الرئيسية

@@ -14,7 +14,10 @@
     "check": "tsc",
     "db:push": "drizzle-kit push",
     "generate:wildcard": "node --import tsx -r dotenv/config server/scripts/generateWildcardDB.ts",
-    "test:load": "cross-env NODE_ENV=development node --import tsx -r dotenv/config server/scripts/loadTest.ts"
+    "test:load": "cross-env NODE_ENV=development node --import tsx -r dotenv/config server/scripts/loadTest.ts",
+    "test": "node --import tsx --test server/__tests__/logic.test.ts",
+    "verify:db": "node --import tsx server/scripts/verifyIntegrity.ts",
+    "clean:db": "node --import tsx server/scripts/cleanDatabase.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -50,6 +53,7 @@
     "@tanstack/react-query": "^5.60.5",
     "@types/canvas-confetti": "^1.9.0",
     "better-sqlite3": "^12.6.2",
+    "bullmq": "^5.70.1",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -58,7 +62,7 @@
     "cross-env": "^10.1.0",
     "date-fns": "^3.6.0",
     "dotenv": "^17.2.3",
-    "drizzle-orm": "^0.39.3",
+    "drizzle-orm": "^0.45.2",
     "drizzle-zod": "^0.7.0",
     "embla-carousel-react": "^8.6.0",
     "esbuild": "^0.25.0",
@@ -68,6 +72,7 @@
     "groq-sdk": "^0.37.0",
     "immer": "^11.1.4",
     "input-otp": "^1.4.2",
+    "ioredis": "^5.9.3",
     "lucide-react": "^0.453.0",
     "memorystore": "^1.6.7",
     "next-themes": "^0.4.6",
@@ -90,9 +95,7 @@
     "wouter": "^3.3.5",
     "ws": "^8.18.0",
     "zod": "^3.24.2",
-    "zod-validation-error": "^3.4.0",
-    "ioredis": "^5.9.3",
-    "bullmq": "^5.70.1"
+    "zod-validation-error": "^3.4.0"
   },
   "devDependencies": {
     "@replit/vite-plugin-cartographer": "^0.4.4",
@@ -111,10 +114,10 @@
     "@types/react-dom": "^18.3.1",
     "@types/ws": "^8.5.13",
     "@vitejs/plugin-react": "^4.7.0",
-    "puppeteer-core": "^24.37.2",
     "autoprefixer": "^10.4.20",
     "drizzle-kit": "^0.31.8",
     "postcss": "^8.4.47",
+    "puppeteer-core": "^24.37.2",
     "tailwindcss": "^3.4.17",
     "typescript": "5.6.3"
   },

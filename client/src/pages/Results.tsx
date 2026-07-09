@@ -9,16 +9,15 @@ import { categories, type Category } from '@shared/schema';
 import { playSuccessSound, playCountdownSound, playBonusSound } from '@/lib/sounds';
 import { RetroCard } from '@/components/ui/RetroCard';
 import { PixelAvatar } from '@/components/ui/PixelAvatar';
-import { RetroQuote } from '@/components/ui/RetroQuote';
 import { LetterDisplay } from '@/components/LetterDisplay';
 import { VotingOverlay } from '@/components/VotingOverlay';
 import { RefereeReviewOverlay } from '@/components/RefereeReviewOverlay';
 import { GameStats } from '@/components/results/GameStats';
 
 import { ResultsTable } from '@/components/results/ResultsTable';
-import { PixelReveal } from '@/components/ui/PixelReveal';
+import { rankStyles, defaultAvatar } from '@/lib/designTokens';
+import { ScoreCounter } from '@/components/ScoreCounter';
 import { HostControls } from '@/components/HostControls';
-
 
 const categoryIcons: Record<Category, any> = {
   'ولد': User,
@@ -28,15 +27,7 @@ const categoryIcons: Record<Category, any> = {
   'جماد': Box,
 };
 
-const categoryColors: Record<Category, string> = {
-  'ولد': 'category-boy',
-  'بنت': 'category-girl',
-  'بلد': 'category-country',
-  'حيوان': 'category-animal',
-  'جماد': 'category-thing',
-};
-
-const rankColors = ['bg-gradient-to-br from-amber-300 to-yellow-500', 'bg-gradient-to-br from-slate-300 to-gray-400', 'bg-gradient-to-br from-orange-400 to-amber-600'];
+const rankColors = [rankStyles.gold, rankStyles.silver, rankStyles.bronze];
 const rankIcons = [Crown, Medal, Star];
 
 export default function Results() {
@@ -48,7 +39,11 @@ export default function Results() {
   const isFinal = room.phase === 'final';
   // LOGIC-5 FIX: Filter referee from the leaderboard — they didn't play, so they should not appear in standings
   const activePlayers = room.players.filter(p => p.id !== room.refereeId);
-  const sortedPlayers = [...activePlayers].sort((a, b) => b.score - a.score);
+  const sortedPlayers = [...activePlayers].sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    if ((b.busStreak || 0) !== (a.busStreak || 0)) return (b.busStreak || 0) - (a.busStreak || 0);
+    return a.name.localeCompare(b.name, 'ar');
+  });
   const winner = sortedPlayers[0];
 
   useEffect(() => {
@@ -145,7 +140,7 @@ export default function Results() {
   return (
     <div className="min-h-screen p-4 overflow-hidden relative text-white font-pixel-text">
 
-      <Confetti active={isFinal} count={isMobile ? 1 : 3} />
+      <Confetti active={isFinal} variant="gold" count={1} />
       <VotingOverlay />
       <RefereeReviewOverlay />
 
@@ -176,11 +171,11 @@ export default function Results() {
                 transition={{ type: 'spring', stiffness: 150, damping: 15 }}
                 className="relative inline-block mb-4"
               >
-                <div className="w-28 h-28 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-3xl flex items-center justify-center shadow-[6px_6px_0_0_#78350f] border-[4px] border-[#78350f]">
+                <div className="w-28 h-28 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-3xl flex items-center justify-center shadow-[0_12px_40px_rgba(251,191,36,0.45)] border border-amber-400/40">
                   <Trophy className="w-16 h-16 text-white drop-shadow-lg" />
                 </div>
                 <motion.div
-                  className="absolute -top-3 -right-3 w-12 h-12 bg-[#4c1d95] rounded-full flex items-center justify-center shadow-[3px_3px_0_0_#2e1065] border-[3px] border-[#2e1065]"
+                  className="absolute -top-3 -right-3 w-12 h-12 bg-gradient-to-br from-[#7c3aed] to-[#6d28d9] rounded-full flex items-center justify-center shadow-lg border border-purple-400/30"
                   animate={{ scale: [1, 1.2, 1], rotate: [0, 15, -15, 0] }}
                   transition={{ repeat: Infinity, duration: 1.2 }}
                 >
@@ -189,7 +184,7 @@ export default function Results() {
               </motion.div>
 
               <motion.h1
-                className="text-4xl md:text-5xl font-pixel-title text-white mb-6 drop-shadow-[0_4px_0_rgba(0,0,0,0.5)]"
+                className="text-4xl md:text-5xl font-bold text-white mb-6 drop-shadow-lg"
                 initial={{ y: -20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
@@ -214,15 +209,14 @@ export default function Results() {
                       transition={{ delay: 0.6 }}
                     >
                       <PixelAvatar
-                        src={sortedPlayers[1].avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${sortedPlayers[1].id}`}
+                        src={sortedPlayers[1].avatar || defaultAvatar(sortedPlayers[1].id)}
                         size="sm"
-                        className="border-[3px] border-slate-400 shadow-[2px_2px_0_0_#475569]"
+                        className={`ring-2 ring-gray-300/60 shadow-lg`}
                       />
                       <span className="text-xl my-0.5">2</span>
                       <p className="text-xs font-pixel-text text-white font-bold truncate max-w-[72px] leading-tight">{sortedPlayers[1].name}</p>
-                      <p className="text-xs font-pixel-title text-slate-200 leading-tight">{sortedPlayers[1].score}</p>
-                      {/* Podium bar */}
-                      <div className="w-20 h-10 bg-gradient-to-b from-slate-300 to-slate-500 border-t-[3px] border-slate-500 mt-2" />
+                      <p className="text-xs font-pixel-title text-gray-100 leading-tight">{sortedPlayers[1].score}</p>
+                      <div className={`w-20 h-10 border-t-[3px] mt-2 ${rankStyles.silver}`} />
                     </motion.div>
                   )}
 
@@ -240,17 +234,19 @@ export default function Results() {
                       <div className="relative">
                         <div className="absolute inset-0 bg-amber-400 rounded-full blur-xl opacity-40 animate-pulse" />
                         <PixelAvatar
-                          src={winner.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${winner.id}`}
+                          src={winner.avatar || defaultAvatar(winner.id)}
                           size="md"
-                          className="border-[4px] border-amber-400 relative z-10 shadow-[0_0_20px_rgba(250,204,21,0.6)]"
+                          className="relative z-10 ring-4 ring-amber-400/60 shadow-[0_0_32px_rgba(250,204,21,0.5)]"
                         />
                       </div>
                     </motion.div>
                     <span className="text-2xl my-0.5">1</span>
                     <p className="text-sm font-pixel-text text-white font-bold truncate max-w-[90px] leading-tight">{winner.name}</p>
-                    <p className="text-sm font-pixel-title text-amber-200 leading-tight">{winner.score} نقطة</p>
+                    <p className="text-sm font-pixel-title text-amber-200 leading-tight">
+                      <ScoreCounter value={winner.score} /> نقطة
+                    </p>
                     {/* Podium bar — tallest */}
-                    <div className="w-24 h-16 bg-gradient-to-b from-amber-300 to-yellow-600 border-t-[3px] border-amber-600 mt-2" />
+                    <div className={`w-24 h-16 border-t-[3px] mt-2 ${rankStyles.gold}`} />
                   </motion.div>
 
                   {/* 3rd place */}
@@ -262,15 +258,15 @@ export default function Results() {
                       transition={{ delay: 0.7 }}
                     >
                       <PixelAvatar
-                        src={sortedPlayers[2].avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${sortedPlayers[2].id}`}
+                        src={sortedPlayers[2].avatar || defaultAvatar(sortedPlayers[2].id)}
                         size="sm"
-                        className="border-[3px] border-orange-400 shadow-[2px_2px_0_0_#9a3412]"
+                        className="ring-2 ring-amber-600/50 shadow-lg"
                       />
                       <span className="text-xl my-0.5">3</span>
                       <p className="text-xs font-pixel-text text-white font-bold truncate max-w-[72px] leading-tight">{sortedPlayers[2].name}</p>
                       <p className="text-xs font-pixel-title text-orange-200 leading-tight">{sortedPlayers[2].score}</p>
                       {/* Podium bar — shortest */}
-                      <div className="w-20 h-6 bg-gradient-to-b from-orange-400 to-amber-700 border-t-[3px] border-amber-800 mt-2" />
+                      <div className={`w-20 h-6 border-t-[3px] mt-2 ${rankStyles.bronze}`} />
                     </motion.div>
                   )}
                 </motion.div>
@@ -285,7 +281,7 @@ export default function Results() {
               >
                 <RetroCard>
                   <div className="flex items-center gap-2 mb-3">
-                    <div className="w-7 h-7 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-lg flex items-center justify-center shadow-[2px_2px_0_0_#78350f]">
+                    <div className="w-7 h-7 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-lg flex items-center justify-center shadow-sm">
                       <Trophy className="w-4 h-4 text-white" />
                     </div>
                     <span className="font-pixel-title text-[#4c1d95] text-base font-bold">الترتيب النهائي</span>
@@ -301,23 +297,23 @@ export default function Results() {
                           initial={{ x: -30, opacity: 0 }}
                           animate={{ x: 0, opacity: 1 }}
                           transition={{ delay: 0.85 + index * 0.07, type: 'spring', stiffness: 300 }}
-                          className={`flex items-center gap-3 px-3 py-2 rounded-xl border-[2px] font-pixel-text text-sm ${isMe
-                            ? 'bg-gradient-to-r from-[#7c3aed]/15 to-[#8b5cf6]/15 border-[#7c3aed] shadow-[2px_2px_0_0_#4c1d95]'
-                            : 'bg-white border-[#4c1d95]/20'
+                          className={`flex items-center gap-3 px-3 py-2 rounded-xl border text-sm font-medium ${isMe
+                            ? 'bg-gradient-to-r from-purple-500/10 to-purple-400/10 border-purple-300/50 shadow-sm'
+                            : 'bg-white/80 border-purple-100'
                             }`}
                         >
                           {/* Rank */}
-                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-base font-bold flex-shrink-0 ${index === 0 ? 'bg-gradient-to-br from-amber-300 to-yellow-500 shadow-[2px_2px_0_0_#78350f]' :
-                            index === 1 ? 'bg-gradient-to-br from-slate-300 to-gray-400 shadow-[2px_2px_0_0_#334155]' :
-                              index === 2 ? 'bg-gradient-to-br from-orange-400 to-amber-600 shadow-[2px_2px_0_0_#7c2d12]' :
-                                'bg-[#4c1d95]/10 text-[#4c1d95] text-sm'
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-base font-bold flex-shrink-0 shadow-sm ${index === 0 ? rankStyles.gold :
+                            index === 1 ? rankStyles.silver :
+                              index === 2 ? rankStyles.bronze :
+                                'bg-purple-500/10 text-[#4c1d95] text-sm'
                             } text-white`}>
                             {index < 3 ? medals[index] : index + 1}
                           </div>
 
                           {/* Avatar */}
                           <PixelAvatar
-                            src={player.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${player.id}`}
+                            src={player.avatar || defaultAvatar(player.id)}
                             size="sm"
                             className="border border-[#4c1d95]/30 flex-shrink-0"
                           />
@@ -335,7 +331,7 @@ export default function Results() {
                           {/* Score */}
                           <div className="flex items-center gap-1 flex-shrink-0">
                             <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                            <span className="text-lg font-bold text-[#4c1d95] font-pixel-title tabular-nums">{player.score}</span>
+                            <ScoreCounter value={player.score} className="text-lg font-bold text-[#4c1d95] font-pixel-title tabular-nums" />
                           </div>
 
                           {/* Host Controls for Score Adjustment — hide for referee players */}
@@ -404,7 +400,7 @@ export default function Results() {
                         )}
 
                         <PixelAvatar
-                          src={player.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${player.id}`}
+                          src={player.avatar || defaultAvatar(player.id)}
                           className="w-8 h-8 border border-[#4c1d95]/30"
                           size="sm"
                         />
@@ -442,8 +438,9 @@ export default function Results() {
           {isHost && isFinal && (
             <Button
               onClick={playAgain}
+              variant="retro"
               size="lg"
-              className="w-full h-16 text-xl font-bold bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title"
+              className="w-full h-16 text-xl font-bold font-pixel-title"
               data-testid="button-play-again"
             >
               <RotateCcw className="w-6 h-6 ml-2" />
@@ -452,8 +449,9 @@ export default function Results() {
           )}
           <Button
             onClick={disconnect}
+            variant="primary"
             size="lg"
-            className="w-full h-16 text-xl font-bold bg-gradient-to-r from-[#7c3aed] to-[#8b5cf6] hover:from-[#6d28d9] hover:to-[#7c3aed] text-white shadow-[4px_4px_0_0_#2e1065] border-[3px] border-[#4c1d95] font-pixel-title"
+            className="w-full h-16 text-xl font-bold font-pixel-title"
             data-testid="button-end-game"
           >
             <Home className="w-6 h-6 ml-2" />
@@ -502,7 +500,7 @@ export default function Results() {
             <>
               {/* Case 1: Countdown Running (Approved or Auto) */}
               {room.nextRoundAt ? (
-                <div className="w-full h-20 bg-gradient-to-r from-[#7c3aed]/20 to-[#8b5cf6]/20 rounded-2xl flex items-center justify-center gap-5 border-[3px] border-[#4c1d95] shadow-[3px_3px_0_0_#2e1065] font-pixel-text text-xl font-bold">
+                <div className="w-full h-20 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center gap-5 border border-white/20 text-xl font-semibold">
                   <span className="text-white text-xl">الجولة التالية في</span>
                   <motion.span
                     key={countdown}
@@ -515,7 +513,7 @@ export default function Results() {
                 </div>
               ) : (
                 /* Case 2: Waiting for Referee (No Timer) */
-                <div className="w-full p-4 bg-[#4c1d95]/80 rounded-2xl text-center border-[3px] border-[#FFFDD1] shadow-lg backdrop-blur-sm">
+                <div className="w-full p-4 surface-dark text-center rounded-2xl">
                   {isReferee && (room.phase === 'referee_review' || room.phase === 'results') ? (
                     <div className="space-y-2">
                       <p className="text-[#FFFDD1] font-bold font-pixel-text text-lg animate-pulse">
@@ -523,22 +521,24 @@ export default function Results() {
                       </p>
                       <Button
                         onClick={() => room.phase === 'results' ? nextRound() : refereeApprove()}
+                        variant="primary"
                         size="lg"
-                        className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
+                        className="w-full h-14 text-lg font-bold font-pixel-title"
                       >
                         {room.phase === 'results' ? '➡️ بدء الجولة التالية' : 'اعتماد النتيجة وبدء الجولة'}
                       </Button>
                     </div>
-                  ) : room.settings?.votingEnabled && isHost ? (
-                    // Host Control for Voting Mode
+                  ) : room.settings?.votingEnabled && isHost && room.phase !== 'referee_review' ? (
+                    // Host Control for Voting Mode (not during referee review — must approve first)
                     <div className="space-y-2">
                       <p className="text-[#FFFDD1] font-bold font-pixel-text text-lg">
                         وضع التصويت مفعل
                       </p>
                       <Button
                         onClick={() => nextRound()}
+                        variant="primary"
                         size="lg"
-                        className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
+                        className="w-full h-14 text-lg font-bold font-pixel-title"
                         data-testid="button-next-round"
                       >
                         الاستمرار للجولة التالية
@@ -554,8 +554,9 @@ export default function Results() {
                             nextRound();
                           }
                         }}
+                        variant="primary"
                         size="lg"
-                        className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-[4px_4px_0_0_#14532d] border-[3px] border-[#14532d] font-pixel-title transition-all active:translate-y-1 active:shadow-none"
+                        className="w-full h-14 text-lg font-bold font-pixel-title"
                         data-testid="button-next-round"
                       >
                         {room.currentRound >= room.totalRounds - 1 ? 'إنهاء اللعبة' : 'الجولة التالية ←'}
@@ -565,8 +566,7 @@ export default function Results() {
                     <div className="flex flex-col items-center gap-2">
                       <Timer className="w-8 h-8 text-[#FFFDD1] animate-spin-slow" />
                       <p className="text-[#FFFDD1] font-bold font-pixel-text text-xl">
-                        {/* BUG-R2 FIX: Only show referee message when a referee actually exists */}
-                        في الانتظار...
+                        في انتظار المضيف للمتابعة...
                       </p>
                     </div>
                   )}

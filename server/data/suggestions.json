@@ -1195,5 +1195,221 @@
     "count": 1,
     "firstSeen": "2026-03-08T13:52:19.896Z",
     "lastSeen": "2026-03-08T13:52:19.896Z"
+  },
+  {
+    "word": "أميرة",
+    "normalized": "اميره",
+    "letter": "أ",
+    "category": "بنت",
+    "count": 1,
+    "firstSeen": "2026-06-08T03:11:07.236Z",
+    "lastSeen": "2026-06-08T03:11:07.237Z"
+  },
+  {
+    "word": "طاولة",
+    "normalized": "طاوله",
+    "letter": "ط",
+    "category": "ولد",
+    "count": 1,
+    "firstSeen": "2026-06-11T16:50:19.519Z",
+    "lastSeen": "2026-06-11T16:50:19.522Z"
+  },
+  {
+    "word": "اللاعب",
+    "normalized": "اللاعب",
+    "letter": "ط",
+    "category": "ولد",
+    "count": 1,
+    "firstSeen": "2026-06-11T16:50:19.524Z",
+    "lastSeen": "2026-06-11T16:50:19.524Z"
+  },
+  {
+    "word": "طهران",
+    "normalized": "طهران",
+    "letter": "ط",
+    "category": "ولد",
+    "count": 1,
+    "firstSeen": "2026-06-11T16:50:19.526Z",
+    "lastSeen": "2026-06-11T16:50:19.526Z"
+  },
+  {
+    "word": "طاووس",
+    "normalized": "طاووس",
+    "letter": "ط",
+    "category": "بنت",
+    "count": 1,
+    "firstSeen": "2026-06-11T16:50:19.527Z",
+    "lastSeen": "2026-06-11T16:50:19.527Z"
+  },
+  {
+    "word": "اللاعب",
+    "normalized": "اللاعب",
+    "letter": "ط",
+    "category": "بنت",
+    "count": 1,
+    "firstSeen": "2026-06-11T16:50:19.529Z",
+    "lastSeen": "2026-06-11T16:50:19.529Z"
+  },
+  {
+    "word": "طهران",
+    "normalized": "طهران",
+    "letter": "ط",
+    "category": "بنت",
+    "count": 1,
+    "firstSeen": "2026-06-11T16:50:19.530Z",
+    "lastSeen": "2026-06-11T16:50:19.530Z"
+  },
+  {
+    "word": "طاووس",
+    "normalized": "طاووس",
+    "letter": "ط",
+    "category": "بلد",
+    "count": 2,
+    "firstSeen": "2026-06-11T16:50:19.532Z",
+    "lastSeen": "2026-06-11T16:50:57.285Z"
+  },
+  {
+    "word": "طاولة",
+    "normalized": "طاوله",
+    "letter": "ط",
+    "category": "بلد",
+    "count": 1,
+    "firstSeen": "2026-06-11T16:50:19.533Z",
+    "lastSeen": "2026-06-11T16:50:19.533Z"
+  },
+  {
+    "word": "اللاعب",
+    "normalized": "اللاعب",
+    "letter": "ط",
+    "category": "بلد",
+    "count": 1,
+    "firstSeen": "2026-06-11T16:50:19.535Z",
+    "lastSeen": "2026-06-11T16:50:19.535Z"
+  },
+  {
+    "word": "طاولة",
+    "normalized": "طاوله",
+    "letter": "ط",
+    "category": "حيوان",
+    "count": 2,
+    "firstSeen": "2026-06-11T16:50:19.536Z",
+    "lastSeen": "2026-06-11T16:50:57.292Z"
+  },
+  {
+    "word": "اللاعب",
+    "normalized": "اللاعب",
+    "letter": "ط",
+    "category": "حيوان",
+    "count": 1,
+    "firstSeen": "2026-06-11T16:50:19.538Z",
+    "lastSeen": "2026-06-11T16:50:19.538Z"
+  },
+  {
+    "word": "طهران",
+    "normalized": "طهران",
+    "letter": "ط",
+    "category": "حيوان",
+    "count": 3,
+    "firstSeen": "2026-06-11T16:50:19.540Z",
+    "lastSeen": "2026-06-11T16:58:16.910Z"
+  },
+  {
+    "word": "طاووس",
+    "normalized": "طاووس",
+    "letter": "ط",
+    "category": "جماد",
+    "count": 2,
+    "firstSeen": "2026-06-11T16:50:19.541Z",
+    "lastSeen": "2026-06-11T16:50:57.290Z"
+  },
+  {
+    "word": "اللاعب",
+    "normalized": "اللاعب",
+    "letter": "ط",
+    "category": "جماد",
+    "count": 1,
+    "firstSeen": "2026-06-11T16:50:19.543Z",
+    "lastSeen": "2026-06-11T16:50:19.543Z"
+  },
+  {
+    "word": "طهران",
+    "normalized": "طهران",
+    "letter": "ط",
+    "category": "جماد",
+    "count": 2,
+    "firstSeen": "2026-06-11T16:50:19.545Z",
+    "lastSeen": "2026-06-11T16:50:57.293Z"
+  },
+  {
+    "word": "طاووس",
+    "normalized": "طاووس",
+    "letter": "ط",
+    "category": "لاعب",
+    "count": 1,
+    "firstSeen": "2026-06-11T16:50:19.546Z",
+    "lastSeen": "2026-06-11T16:50:19.546Z"
+  },
+  {
+    "word": "طاولة",
+    "normalized": "طاوله",
+    "letter": "ط",
+    "category": "لاعب",
+    "count": 1,
+    "firstSeen": "2026-06-11T16:50:19.547Z",
+    "lastSeen": "2026-06-11T16:50:19.547Z"
+  },
+  {
+    "word": "اللاعب",
+    "normalized": "اللاعب",
+    "letter": "ط",
+    "category": "لاعب",
+    "count": 1,
+    "firstSeen": "2026-06-11T16:50:19.549Z",
+    "lastSeen": "2026-06-11T16:50:19.549Z"
+  },
+  {
+    "word": "طهران",
+    "normalized": "طهران",
+    "letter": "ط",
+    "category": "لاعب",
+    "count": 1,
+    "firstSeen": "2026-06-11T16:50:19.550Z",
+    "lastSeen": "2026-06-11T16:50:19.550Z"
+  },
+  {
+    "word": "طاووس",
+    "normalized": "طاووس",
+    "letter": "ط",
+    "category": "ولد",
+    "count": 6,
+    "firstSeen": "2026-06-11T16:54:47.109Z",
+    "lastSeen": "2026-06-11T16:58:16.180Z"
+  },
+  {
+    "word": "طاولة",
+    "normalized": "طاوله",
+    "letter": "ط",
+    "category": "بنت",
+    "count": 6,
+    "firstSeen": "2026-06-11T16:54:47.113Z",
+    "lastSeen": "2026-06-11T16:58:16.183Z"
+  },
+  {
+    "word": "طائر",
+    "normalized": "طائر",
+    "letter": "ط",
+    "category": "ولد",
+    "count": 3,
+    "firstSeen": "2026-06-11T16:56:09.723Z",
+    "lastSeen": "2026-06-11T16:58:16.186Z"
+  },
+  {
+    "word": "طائر",
+    "normalized": "طائر",
+    "letter": "ط",
+    "category": "جماد",
+    "count": 2,
+    "firstSeen": "2026-06-11T16:58:16.187Z",
+    "lastSeen": "2026-06-11T16:58:16.907Z"
   }
 ]

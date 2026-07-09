@@ -10,9 +10,6 @@ import { useGame } from '@/lib/gameContext';
 import { resumeAudioContext } from '@/lib/sounds';
 import { Tutorial } from '@/components/Tutorial';
 import { HelpCircle } from 'lucide-react';
-import { RetroQuote } from '@/components/ui/RetroQuote';
-import { PixelReveal } from '@/components/ui/PixelReveal';
-import { Text3D } from '@/components/ui/Text3D';
 
 
 
@@ -58,7 +55,7 @@ export default function Home() {
 
       {/* Large Floating Help Button */}
       <motion.button
-        className="fixed bottom-4 right-4 z-50 w-12 h-12 bg-[#FFFDD1] rounded-full flex items-center justify-center shadow-[4px_4px_0px_0px_#2e1065] border-[3px] border-[#2e1065] hover:bg-[#FFFEF0] hover:scale-110 active:scale-95 transition-all"
+        className="fixed bottom-4 right-4 z-50 w-12 h-12 bg-white/95 rounded-full flex items-center justify-center shadow-lg border border-purple-200/60 backdrop-blur-md hover:bg-white hover:scale-110 active:scale-95 transition-all"
         onClick={() => setShowHelp(true)}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
@@ -67,8 +64,8 @@ export default function Home() {
       </motion.button>
 
       <motion.div
-        initial={{ y: -30, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
+        initial={{ y: -30, opacity: 0, scale: 0.95 }}
+        animate={{ y: 0, opacity: 1, scale: 1 }}
         transition={{ type: 'spring', stiffness: 200, damping: 20 }}
         className="text-center mb-12 relative z-10"
       >
@@ -77,7 +74,7 @@ export default function Home() {
           <img
             src="/assets/logo.png"
             alt="أوتوبيس كومبليت"
-            className="w-full max-w-[500px] object-contain pixelated"
+            className="w-full max-w-[500px] object-contain drop-shadow-2xl"
           />
         </div>
 
@@ -185,7 +182,7 @@ export default function Home() {
                   transition={{ type: 'spring', delay: 0.1 }}
                 >
                   <CardTitle className="flex items-center gap-2 font-pixel-title text-4xl">
-                    <Plus className="w-7 h-7 text-primary" />
+                    <Plus className="w-7 h-7 text-[#7c3aed]" />
                     غرفة جديدة
                   </CardTitle>
                 </motion.div>

@@ -1,4 +1,3 @@
-import { pgTable, text, serial, integer, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { sqliteTable, text as sqliteText, integer as sqliteInteger } from "drizzle-orm/sqlite-core";
@@ -67,6 +66,7 @@ export interface Player {
   draftAnswers?: RoundAnswers; // Delta Sync support for live typing
   // BUG-1 FIX: Accumulates host manual +/- adjustments so they survive recalculatePlayerTotals
   manualScoreAdjustment?: number;
+  isTyping?: boolean;
 }
 
 // Answers for a round
@@ -263,8 +263,8 @@ export type WSMessageType =
   | 'send_reaction'
   | 'reaction_received'
   | 'draft_update'
+  | 'typing_status'
   | 'update_settings'
-  | 'referee_toggle_unique'
   | 'activate_powerup'
   | 'powerup_activated'
   | 'wildcard_activated'
@@ -292,7 +292,6 @@ export type WSMessageType =
   | 'kick_player'
   | 'kicked'
   | 'player_kicked'
-  | 'patch_update'
   // FIX (#3): Phase 3 Player Appeal
   | 'player_appeal'
   | 'appeal_notification';
@@ -309,10 +308,10 @@ export interface WSMessageEnvelope<T = unknown> {
 export type WSMessage =
   | { type: 'create_room'; payload: CreateRoomInput }
   | { type: 'join_room'; payload: JoinRoomInput }
-  | { type: 'rejoin_room'; payload: { roomCode: string; playerId: string } }
+  | { type: 'rejoin_room'; payload: { roomCode: string; playerId: string; reconnectToken: string } }
   | { type: 'join_public_room'; payload: CreateRoomInput }
-  | { type: 'room_created'; payload: { room: any; playerId: string } } // Refine later
-  | { type: 'room_joined'; payload: { room: any; playerId: string } } // Refine later
+  | { type: 'room_created'; payload: { room: any; playerId: string; reconnectToken: string } }
+  | { type: 'room_joined'; payload: { room: any; playerId: string; reconnectToken: string } }
   | { type: 'player_joined'; payload: { players: any[] } } // Refine later
   | { type: 'player_left'; payload: { players: any[] } } // Refine later
   | { type: 'player_ready'; payload: undefined | null | any }
@@ -340,12 +339,12 @@ export type WSMessage =
   | { type: 'send_reaction'; payload: { reactionType: string } }
   | { type: 'reaction_received'; payload: { reaction: any } } // Refine later
   | { type: 'draft_update'; payload: { answers: Record<string, string> } }
+  | { type: 'typing_status'; payload: { playerId: string; isTyping: boolean } }
   | { type: 'update_settings'; payload: UpdateSettingsInput }
-  | { type: 'referee_toggle_unique'; payload: { playerId: string; category: string } }
   | { type: 'activate_powerup'; payload: { type: string; targetPlayerId?: string; category?: string } }
-  | { type: 'powerup_activated'; payload: { activation: any } } // Refine later
+  | { type: 'powerup_activated'; payload: { type: PowerUpType; playerName: string } }
   | { type: 'wildcard_activated'; payload: { playerId: string; category: string } }
-  | { type: 'player_banished'; payload: { playerId: string; duration: number } } // Refine later
+  | { type: 'player_banished'; payload: { playerId: string; banishedBy: string } }
   | { type: 'vote_update'; payload: { request: any } } // Refine later
   | { type: 'waiting_for_freeze_player'; payload: { targetPlayerId: string } }
   | { type: 'appeal_answer'; payload: { playerId: string; category: string; word: string } }
@@ -367,7 +366,6 @@ export type WSMessage =
   | { type: 'kick_player'; payload: { playerId: string } }
   | { type: 'kicked'; payload: { reason: string } }
   | { type: 'player_kicked'; payload: { playerId: string } }
-  | { type: 'patch_update'; payload: { patches: any[] } }
   | { type: 'player_appeal'; payload: { targetPlayerId: string; category: string } }
   | { type: 'appeal_notification'; payload: { appeal: any } };
 
@@ -383,7 +381,8 @@ export const joinRoomSchema = z.object({
 
 export const rejoinRoomSchema = z.object({
   roomCode: z.string().length(4),
-  playerId: z.string().uuid()
+  playerId: z.string().uuid(),
+  reconnectToken: z.string().min(1),
 });
 
 export const submitAnswersSchema = z.object({
@@ -428,9 +427,8 @@ export const refereeOverrideSchema = z.object({
 });
 
 export const appealAnswerSchema = z.object({
-  playerId: z.string(),
-  category: z.string().min(1),
-  word: z.string().min(1).max(100)
+  category: z.string().min(1).max(50),
+  word: z.string().min(1).max(100).optional(),
 });
 
 export const activatePowerUpSchema = z.object({
@@ -460,7 +458,7 @@ export const refereeDeductPayloadSchema = z.object({
 });
 
 export const updateSettingsSchema = z.object({
-  maxRounds: z.number().int().min(1).max(20).optional(),
+  totalRounds: z.number().int().min(1).max(20).optional(),
   roundDuration: z.number().int().min(30).max(300).optional(),
   customCategories: z.array(
     z.string().min(1).max(20).regex(/^[\p{L}\p{N}\s\-_]+$/u, 'الاسم يحتوي على رموز غير صالحة')

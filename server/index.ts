@@ -1,6 +1,7 @@
 console.log(`[BOOT] Server script started at ${new Date().toISOString()}`);
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
+import { startGhostCleanupJob } from "./jobs/ghostCleanup";
 import { serveStatic } from "./static";
 import { createServer } from "http";
 
@@ -81,6 +82,7 @@ app.use((req, res, next) => {
 
     log(`Registering routes...`);
     await registerRoutes(httpServer, app);
+    void startGhostCleanupJob().catch(err => console.warn('[GhostCleanup] Failed to start:', err));
     console.timeLog('Startup', 'Routes registered');
 
     app.use((err: any, _req: Request, res: Response, next: NextFunction) => {

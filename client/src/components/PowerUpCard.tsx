@@ -16,18 +16,18 @@ const TEXTS = {
 
 const THEMES = {
     wildcard: {
-        bg: 'bg-pixel-amber',
-        border: 'border-pixel-amber-border',
-        shadow: 'md:shadow-[4px_4px_0px_theme(colors.pixel.amber.shadow)]',
-        text: 'text-pixel-amber-text',
-        iconColor: 'text-pixel-amber-text'
+        bg: 'bg-gradient-to-br from-amber-400 to-amber-500',
+        border: 'border-amber-500/50',
+        shadow: 'md:shadow-[0_4px_16px_rgba(251,191,36,0.35)]',
+        text: 'text-amber-950',
+        iconColor: 'text-amber-950'
     },
     banish: {
-        bg: 'bg-pixel-red',
-        border: 'border-pixel-red-border',
-        shadow: 'md:shadow-[4px_4px_0px_theme(colors.pixel.red.shadow)]',
-        text: 'text-pixel-red-text',
-        iconColor: 'text-pixel-red-text'
+        bg: 'bg-gradient-to-br from-red-400 to-red-500',
+        border: 'border-red-500/50',
+        shadow: 'md:shadow-[0_4px_16px_rgba(248,113,113,0.35)]',
+        text: 'text-red-950',
+        iconColor: 'text-red-950'
     }
 } as const;
 
@@ -111,7 +111,7 @@ export function PowerUpCard({
             className={cn(
                 "relative group",
                 "w-11 h-16 md:w-16 md:h-24", // Compact Pixel Card Size
-                "border-2 md:border-[3px]",
+                "border md:border-2",
                 "flex flex-col items-center justify-between p-1",
                 "rounded-sm",
                 "transition-transform active:translate-y-1 active:shadow-none", // Mechanical click feel

@@ -2,6 +2,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { defaultAvatar } from '@/lib/designTokens';
 import { PixelAvatar } from '@/components/ui/PixelAvatar';
 import { Crown, PenTool, CheckCircle, Clock } from 'lucide-react';
 
@@ -10,9 +11,10 @@ interface ActiveGamePlayerGridProps {
     currentPlayerId: string;
     submissions: Record<string, any>;
     timeLeft: number;
+    typingPlayers?: Record<string, boolean>;
 }
 
-export function ActiveGamePlayerGrid({ players, currentPlayerId, submissions, timeLeft }: ActiveGamePlayerGridProps) {
+export function ActiveGamePlayerGrid({ players, currentPlayerId, submissions, timeLeft, typingPlayers = {} }: ActiveGamePlayerGridProps) {
     return (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 w-full">
             {players.filter(p => p.id !== currentPlayerId).map((player, index) => {
@@ -26,7 +28,7 @@ export function ActiveGamePlayerGrid({ players, currentPlayerId, submissions, ti
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ delay: index * 0.1 }}
                         className={cn(
-                            "relative flex flex-col items-center p-4 rounded-xl border-[3px] shadow-[4px_4px_0_0_rgba(0,0,0,0.2)] transition-all",
+                            "relative flex flex-col items-center p-4 rounded-2xl border shadow-md backdrop-blur-sm transition-all",
                             isMe
                                 ? "bg-[#e9d5ff] border-[#7c3aed]"
                                 : hasSubmitted
@@ -49,7 +51,7 @@ export function ActiveGamePlayerGrid({ players, currentPlayerId, submissions, ti
 
                         {/* Player Content */}
                         <PixelAvatar
-                            src={player.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${player.id}`}
+                            src={player.avatar || defaultAvatar(player.id)}
                             size="sm"
                             className="border-2 border-[#4c1d95] mb-1 z-10 bg-white"
                         />
@@ -68,8 +70,8 @@ export function ActiveGamePlayerGrid({ players, currentPlayerId, submissions, ti
                             </div>
                         )}
 
-                        {/* Real Typing Indicator (Driven by Delta Sync Patches) */}
-                        {!hasSubmitted && !isMe && (player.draftAnswers && Object.values(player.draftAnswers).some((v: any) => v.trim() !== '')) && (
+                        {/* Real Typing Indicator (privacy-safe — no answer content leaked) */}
+                        {!hasSubmitted && !isMe && typingPlayers[player.id] && (
                             <div className="absolute bottom-2 left-2 flex gap-0.5">
                                 <motion.div animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0 }} className="w-1 h-1 bg-gray-400 rounded-full" />
                                 <motion.div animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }} className="w-1 h-1 bg-gray-400 rounded-full" />

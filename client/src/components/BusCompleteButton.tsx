@@ -23,7 +23,7 @@ export function BusCompleteButton({ onPress, disabled }: BusCompleteButtonProps)
 
   return (
     <motion.div
-      whileHover={{ scale: 1.05 }}
+      whileHover={!disabled ? { scale: 1.03 } : {}}
       whileTap={{ scale: 0.90 }}
       transition={{ type: 'spring', stiffness: 400, damping: 10 }}
     >
@@ -44,8 +44,9 @@ export function BusCompleteButton({ onPress, disabled }: BusCompleteButtonProps)
           }
           handleClick();
         }}
-        // Cleaned: Removed disabled prop so it stays SOLID color
-        className="w-full h-16 text-xl font-bold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary shadow-lg transition-all font-pixel-title shine-effect relative overflow-hidden"
+        variant="primary"
+        size="lg"
+        className="w-full h-16 text-xl font-bold font-pixel-title shine-effect relative overflow-hidden"
         data-testid="button-bus-complete"
       >
         <Bus className="w-8 h-8 ml-3 absolute right-4" />

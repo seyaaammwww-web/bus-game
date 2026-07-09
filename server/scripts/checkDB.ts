@@ -5,26 +5,26 @@ import * as path from 'path';
 const dbPath = path.join(process.cwd(), 'server/data/clean_wildcardDatabase.json');
 const db = JSON.parse(fs.readFileSync(dbPath, 'utf-8'));
 
-console.log('🔍 Checking database content for بلاد category:\n');
+console.log('🔍 Checking database content for بلد category:\n');
 
 // Check letter ج
-console.log('Letter ج (بلاد):');
-if (db['ج'] && db['ج']['بلاد']) {
-    console.log(db['ج']['بلاد'].slice(0, 10));
+console.log('Letter ج (بلد):');
+if (db['ج'] && db['ج']['بلد']) {
+    console.log(db['ج']['بلد'].slice(0, 10));
 } else {
     console.log('NOT FOUND');
 }
 
-console.log('\nLetter م (بلاد):');
-if (db['م'] && db['م']['بلاد']) {
-    console.log(db['م']['بلاد'].slice(0, 10));
+console.log('\nLetter م (بلد):');
+if (db['م'] && db['م']['بلد']) {
+    console.log(db['م']['بلد'].slice(0, 10));
 } else {
     console.log('NOT FOUND');
 }
 
-console.log('\nLetter س (بلاد):');
-if (db['س'] && db['س']['بلاد']) {
-    console.log(db['س']['بلاد'].slice(0, 10));
+console.log('\nLetter س (بلد):');
+if (db['س'] && db['س']['بلد']) {
+    console.log(db['س']['بلد'].slice(0, 10));
 } else {
     console.log('NOT FOUND');
 }

@@ -18,24 +18,21 @@ export function PixelAvatar({ src, alt, size = 'md', className, ...props }: Pixe
     return (
         <div
             className={cn(
-                "relative inline-flex items-center justify-center p-1",
-                "bg-[#FFFDD1] border-[3px] border-[#2e1065]",
-                "shadow-[3px_3px_0px_#2e1065]",
+                "relative inline-flex items-center justify-center overflow-hidden rounded-2xl",
+                "bg-gradient-to-br from-white to-purple-50 border border-purple-200/60",
+                "shadow-md ring-2 ring-white/80",
                 sizeClasses[size],
                 className
             )}
             {...props}
         >
-            {/* Inner frame decor corners */}
-            <div className="absolute top-0 left-0 w-1 h-1 bg-[#2e1065]" />
-            <div className="absolute top-0 right-0 w-1 h-1 bg-[#2e1065]" />
-            <div className="absolute bottom-0 left-0 w-1 h-1 bg-[#2e1065]" />
-            <div className="absolute bottom-0 right-0 w-1 h-1 bg-[#2e1065]" />
-
-            <div className="w-full h-full bg-[#FFFEF0] flex items-center justify-center text-[#2e1065]">
-                <User className="w-1/2 h-1/2 opacity-50" />
-            </div>
+            {src ? (
+                <img src={src} alt={alt ?? ''} className="w-full h-full object-cover" />
+            ) : (
+                <div className="w-full h-full bg-purple-50 flex items-center justify-center text-[#7c3aed]">
+                    <User className="w-1/2 h-1/2 opacity-60" />
+                </div>
+            )}
         </div>
     )
 }
-

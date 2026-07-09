@@ -48,7 +48,7 @@ export class RoomManager {
             voteQueue: [],
             currentVote: null,
             settings: {
-                votingEnabled: false,
+                votingEnabled: true,
                 customCategories: []
             }
         };
@@ -101,7 +101,7 @@ export class RoomManager {
                 letters: getRandomLetters(10),
                 createdAt: Date.now(),
                 isPublicRoom: true,
-                settings: { votingEnabled: false }
+                settings: { votingEnabled: true }
             };
             buffer = new CorruptionProofBuffer(room);
             this.rooms.set(PUBLIC_ROOM_CODE, buffer);
@@ -134,6 +134,7 @@ export class RoomManager {
                 const player = draft.players.find(p => p.id === playerId);
                 if (player) {
                     player.isOffline = true;
+                    player.isReady = false;
                 }
             }
 

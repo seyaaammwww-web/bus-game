@@ -1,8 +1,7 @@
 /* 🎮 UNIFIED THEME - Import first */
 @import './theme.css';
 
-/* Pixelify Sans - Fallback pixel font from Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -27,36 +26,37 @@
   --sidebar: 30 30% 95%;
   --sidebar-foreground: 20 14% 15%;
   --sidebar-border: 30 20% 85%;
-  --sidebar-primary: 15 90% 55%;
+  --sidebar-primary: 263 70% 58%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 45 100% 60%;
-  --sidebar-accent-foreground: 20 14% 15%;
-  --sidebar-ring: 15 90% 55%;
+  --sidebar-accent: 43 96% 56%;
+  --sidebar-accent-foreground: 263 50% 20%;
+  --sidebar-ring: 263 70% 58%;
   --popover: 0 0% 100%;
   --popover-foreground: 20 14% 15%;
   --popover-border: 30 20% 88%;
-  --primary: 15 90% 55%;
+  --primary: 263 70% 58%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 45 100% 60%;
-  --secondary-foreground: 20 14% 15%;
+  --secondary: 43 96% 56%;
+  --secondary-foreground: 263 50% 20%;
   --muted: 30 20% 92%;
   --muted-foreground: 20 10% 45%;
-  --accent: 160 70% 45%;
+  --accent: 263 60% 45%;
   --accent-foreground: 0 0% 100%;
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
   --input: 30 20% 80%;
-  --ring: 15 90% 55%;
-  --chart-1: 15 90% 55%;
-  --chart-2: 45 100% 60%;
+  --ring: 263 70% 58%;
+  --chart-1: 263 70% 58%;
+  --chart-2: 43 96% 56%;
   --chart-3: 160 70% 45%;
   --chart-4: 200 80% 55%;
   --chart-5: 280 70% 55%;
 
-  --font-sans: 'Pixelify Sans', sans-serif;
+  --font-sans: 'Cairo', 'Inter', system-ui, sans-serif;
+  --font-display: 'Cairo', 'Inter', system-ui, sans-serif;
   --font-serif: Georgia, serif;
-  --font-mono: Menlo, monospace;
-  --radius: 0;
+  --font-mono: ui-monospace, Menlo, monospace;
+  --radius: 0.75rem;
   --shadow-2xs: 0px 2px 4px 0px rgba(0, 0, 0, 0.03);
   --shadow-xs: 0px 2px 6px 0px rgba(0, 0, 0, 0.05);
   --shadow-sm: 0px 2px 8px 0px rgba(0, 0, 0, 0.08);
@@ -190,40 +190,13 @@
     @apply font-sans antialiased text-foreground;
     direction: rtl;
     background-color: hsl(var(--hero-piece-15));
-    font-family: 'Pixelify Sans', sans-serif !important;
-    font-weight: 700 !important;
-    letter-spacing: 1px;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    letter-spacing: 0;
     cursor: url(/assets/workos/cursor-normal.png) 28 26, auto !important;
     min-height: 100%;
     margin: 0;
     padding: 0;
-  }
-
-  /* UNIVERSAL CURSOR - applies to ALL elements (Removed from * for performance) */
-
-  /* UNIVERSAL FONT OVERRIDE - Forces Pixelify Sans on ALL elements */
-  *,
-  *::before,
-  *::after {
-    font-family: 'Pixelify Sans', sans-serif !important;
-    font-weight: 700;
-  }
-
-  /* Pixel-style icons - make Lucide icons look 8-bit */
-  svg.lucide,
-  [class*="lucide-"],
-  .lucide {
-    stroke-width: 2.5 !important;
-    stroke-linecap: square !important;
-    stroke-linejoin: miter !important;
-    shape-rendering: crispEdges;
-  }
-
-  /* Make icons appear sharper/blockier */
-  svg {
-    image-rendering: pixelated;
-    image-rendering: -moz-crisp-edges;
-    image-rendering: crisp-edges;
   }
 
   /* Custom Cursor for Interactive Elements */
@@ -348,7 +321,6 @@
     cursor: inherit !important;
   }
 
-  /* Arabic Text Styling */
   p,
   span,
   div,
@@ -360,23 +332,21 @@
   h6,
   label,
   button {
-    font-family: 'Pixelify Sans', sans-serif;
+    font-family: var(--font-sans);
   }
 
   .font-pixel-title {
-    font-family: 'Pixelify Sans', sans-serif;
+    font-family: var(--font-display);
     font-weight: 800;
-    font-size: 3.5rem;
-    letter-spacing: 0px;
-    line-height: 1.2;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
   }
 
   .font-pixel-text {
-    font-family: 'Pixelify Sans', sans-serif;
-    font-weight: 700;
-    font-size: 1rem;
-    line-height: 1.4;
-    letter-spacing: 0px;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    line-height: 1.5;
+    letter-spacing: 0;
   }
 
   /* Logo Shine Effect */
@@ -409,14 +379,12 @@
   }
 
   .font-pixel-button {
-    font-family: 'Pixelify Sans', sans-serif;
-    letter-spacing: 0px;
-    font-weight: 700;
+    font-family: var(--font-sans);
+    font-weight: 600;
   }
 
-  /* Make text on background clearer */
   .text-on-bg {
-    text-shadow: 2px 2px 0px #2e1065;
+    text-shadow: 0 2px 12px rgba(46, 16, 101, 0.45);
     font-weight: 700;
     color: white;
   }
@@ -745,28 +713,30 @@
   @apply text-destructive animate-pulse-warning;
 }
 
-/* WorkOS Retro Card Styles - Updated Purple Theme */
 .retro-card {
-  background: linear-gradient(to bottom, white, #faf5ff);
-  border: 3px solid #4c1d95;
-  box-shadow: 4px 4px 0px 0px #2e1065, 0 0 15px rgba(139, 92, 246, 0.1);
-  border-radius: 0;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.97), rgba(250, 245, 255, 0.95));
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  box-shadow: 0 4px 24px rgba(76, 29, 149, 0.12), 0 1px 3px rgba(0, 0, 0, 0.06);
+  border-radius: 1rem;
+  backdrop-filter: blur(12px);
 }
 
 .retro-card:hover {
-  box-shadow: 6px 6px 0px 0px #4c1d95, 0 0 25px rgba(139, 92, 246, 0.2);
+  box-shadow: 0 8px 32px rgba(124, 58, 237, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
 }
 
 .retro-card-dark {
-  background: linear-gradient(to bottom, #2e1065, #1a0533);
-  border: 3px solid #8b5cf6;
-  box-shadow: 4px 4px 0px 0px #4c1d95, 0 0 15px rgba(139, 92, 246, 0.3);
-  border-radius: 0;
+  background: linear-gradient(145deg, rgba(46, 16, 101, 0.95), rgba(26, 5, 51, 0.98));
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  box-shadow: 0 8px 32px rgba(76, 29, 149, 0.35);
+  border-radius: 1rem;
   color: white;
+  backdrop-filter: blur(16px);
 }
 
 .retro-card-dark:hover {
-  box-shadow: 6px 6px 0px 0px #7c3aed, 0 0 25px rgba(167, 139, 250, 0.4);
+  box-shadow: 0 12px 40px rgba(124, 58, 237, 0.4);
 }
 
 
@@ -822,6 +792,51 @@
 }
 
 @layer utilities {
+  .surface-card {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(250, 245, 255, 0.96));
+    border: 1px solid rgba(124, 58, 237, 0.18);
+    border-radius: 1rem;
+    box-shadow: 0 4px 24px rgba(76, 29, 149, 0.12), 0 1px 3px rgba(0, 0, 0, 0.06);
+    backdrop-filter: blur(12px);
+  }
+
+  .surface-glass {
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(124, 58, 237, 0.15);
+    border-radius: 1rem;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 8px 32px rgba(76, 29, 149, 0.14);
+  }
+
+  .surface-dark {
+    background: rgba(46, 16, 101, 0.88);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 1rem;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 8px 32px rgba(76, 29, 149, 0.35);
+  }
+
+  .badge-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid rgba(124, 58, 237, 0.2);
+    background: rgba(255, 255, 255, 0.9);
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(124, 58, 237, 0.35);
+    border-radius: 9999px;
+  }
+
   input[type="search"]::-webkit-search-cancel-button {
     @apply hidden;
   }
@@ -1032,41 +1047,23 @@
   }
 }
 
-/* 2. Scrolling Pixel Grid */
 .mobile-juicy-bg::before {
   content: '';
   position: absolute;
-  inset: -100px;
-  /* Oversize to prevent edge clipping during parallax/animation */
-  background-image:
-    linear-gradient(rgba(139, 92, 246, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(139, 92, 246, 0.1) 1px, transparent 1px);
-  background-size: 30px 30px;
-  animation: grid-scroll-mobile 15s linear infinite;
+  inset: 0;
+  background-image: radial-gradient(rgba(139, 92, 246, 0.15) 1px, transparent 1px);
+  background-size: 24px 24px;
   z-index: 0;
   pointer-events: none;
+  opacity: 0.6;
 }
 
-@keyframes grid-scroll-mobile {
-  0% {
-    transform: translateY(0);
-  }
-
-  100% {
-    transform: translateY(30px);
-  }
-}
-
-/* 3. CRT Scanlines (Retro feel) */
 .mobile-juicy-bg::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(rgba(18, 16, 16, 0) 50%,
-      rgba(0, 0, 0, 0.15) 50%);
-  background-size: 100% 4px;
-  z-index: 10;
-  /* Above grid, below content */
+  background: radial-gradient(ellipse at 50% 0%, rgba(167, 139, 250, 0.12) 0%, transparent 60%);
+  z-index: 1;
   pointer-events: none;
 }
 
@@ -1176,10 +1173,27 @@
   }
 }
 
-/* 3. The Smash Button (Pulse) */
-.pulse-ready {
-  animation: button-heartbeat 1.2s infinite;
-  box-shadow: 0 0 15px rgba(124, 58, 237, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.3) !important;
+.countdown-digit {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 6rem;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+@media (min-width: 768px) {
+  .countdown-digit {
+    font-size: 8rem;
+  }
+}
+
+.ai-review-dot {
+  animation: ai-bounce 1.2s ease-in-out infinite;
+}
+
+@keyframes ai-bounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+  40% { transform: translateY(-8px); opacity: 1; }
 }
 
 @keyframes button-heartbeat {
@@ -1354,48 +1368,50 @@
 
 /* --- Unified Retro Design System --- */
 
-/* Retro Panel / Card (Hard Shadow) */
 .retro-panel {
-  background-color: white;
-  border: 3px solid #2e1065;
-  border-radius: 0.75rem;
-  /* rounded-xl */
-  box-shadow: 4px 4px 0px 0px #2e1065;
-  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(250, 245, 255, 0.96));
+  border: 1px solid rgba(124, 58, 237, 0.18);
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 24px rgba(76, 29, 149, 0.12), 0 1px 3px rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(12px);
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
 }
 
 .retro-panel:hover {
   transform: translateY(-2px);
-  box-shadow: 6px 6px 0px 0px #2e1065;
+  box-shadow: 0 8px 32px rgba(124, 58, 237, 0.16);
 }
 
-/* Retro Action Button (Squash Physics) */
 .retro-action-btn {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 3px solid #2e1065;
-  border-radius: 0.5rem;
-  /* rounded-lg */
-  box-shadow: 4px 4px 0px 0px #2e1065;
-  transition: all 0.1s ease;
-  font-family: 'Lalezar', cursive;
-  text-transform: uppercase;
+  border: 1px solid rgba(124, 58, 237, 0.25);
+  border-radius: 0.875rem;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.2);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+  font-family: var(--font-sans);
+  font-weight: 600;
+}
+
+.retro-action-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.28);
 }
 
 .retro-action-btn:active,
 .retro-action-btn.active-squash {
-  transform: translate(4px, 4px) !important;
-  box-shadow: 0px 0px 0px 0px #2e1065 !important;
+  transform: translateY(0) scale(0.98) !important;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.2) !important;
 }
 
-/* Overlays / Modals Base */
 .retro-overlay {
-  background-color: #faf5ff;
-  border: 4px solid #4c1d95;
-  border-radius: 1rem;
-  box-shadow: 8px 8px 0px 0px #2e1065, 0 0 40px rgba(124, 58, 237, 0.3);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.98), rgba(250, 245, 255, 0.97));
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  border-radius: 1.5rem;
+  box-shadow: 0 24px 64px rgba(76, 29, 149, 0.22), 0 8px 24px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(20px);
 }
 
 /* ================================================
@@ -1608,11 +1624,8 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 a:focus-visible {
-  outline: 3px dashed #7c3aed;
-  outline-offset: 4px;
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.3),
-    0 0 0 6px rgba(124, 58, 237, 0.1);
-  /* FIX: Removed transform: scale(1.01) to prevent layout shifts during focus */
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.35);
 }
 
 /* Smooth color transitions */

@@ -1,6 +1,6 @@
 import { WildcardService } from './services/wildcardService';
 import type { Category } from '@shared/schema';
-import { SeededRNG } from './utils/reliability';
+import { hasGarbagePattern, isMostlyArabic } from './utils/answerHeuristics';
 
 // ============================================================
 // AI validation has been INTENTIONALLY DISABLED.
@@ -47,6 +47,15 @@ export class HybridValidator {
 
     const trimmed = answer.trim();
     if (!trimmed || trimmed.length < 2) {
+      return { isValid: false, reason: 'قصير جداً', source: 'heuristic' };
+    }
+    if (!isMostlyArabic(trimmed)) {
+      return { isValid: false, reason: 'يجب أن تكون الإجابة بالعربية', source: 'heuristic' };
+    }
+    if (hasGarbagePattern(trimmed)) {
+      return { isValid: false, reason: 'إجابة غير صالحة', source: 'heuristic' };
+    }
+    if (trimmed.length < 3) {
       return { isValid: false, reason: 'قصير جداً', source: 'heuristic' };
     }
 

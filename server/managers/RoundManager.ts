@@ -1,23 +1,59 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import { CorruptionProofBuffer, stringToSeed } from '../utils/reliability';
 import { GameRoom, Round, PlayerSubmission, RoundAnswers, Category, ValidatedAnswer } from '../../shared/schema';
 import { randomUUID } from 'crypto';
 import { HybridValidator } from '../hybridValidator';
 import { categories } from '../../shared/schema';
+import {
+    passesAnswerHeuristics,
+    hasGarbagePattern,
+    answerStartsWithLetter,
+} from '../utils/answerHeuristics';
 
 // ثوابت المؤقتات
 const ROUND_DURATION_MS = 45000; // 45 ثانية
 const RUSH_MODE_DURATION_MS = 10000; // 10 ثواني
-const SYNONYM_MAP: Record<string, string[][]> = {
-    // مثال: 'حيوان': [['أسد', 'ليث'], ['كلب', 'جرو']],
-};
 
-function areSynonyms(word1: string, word2: string, category: string): boolean {
-    const synonyms = SYNONYM_MAP[category];
-    if (!synonyms) return false;
-    return synonyms.some(group => group.includes(word1) && group.includes(word2));
+function buildSynonymMap(): Record<string, string[][]> {
+    const map: Record<string, string[][]> = { جماد: [] };
+    try {
+        const synPath = path.join(process.cwd(), 'server/data/synonyms.json');
+        if (!fs.existsSync(synPath)) return map;
+
+        const data = JSON.parse(fs.readFileSync(synPath, 'utf-8'));
+
+        for (const [canonical, variants] of Object.entries(data.jamad_synonyms || {})) {
+            const group = [canonical, ...(variants as string[])];
+            map['جماد'].push(group);
+        }
+
+        for (const words of Object.values(data.jamad_categories || {})) {
+            if (Array.isArray(words) && words.length > 1) {
+                map['جماد'].push(words as string[]);
+            }
+        }
+    } catch (err) {
+        console.warn('[RoundManager] Failed to load synonyms for scoring:', err);
+    }
+    return map;
 }
 
-// Helper to normalize arabic for comparison/validation
+const SYNONYM_MAP: Record<string, string[][]> = buildSynonymMap();
+
+function areSynonyms(word1: string, word2: string, category: string): boolean {
+    const norm1 = normalizeArabic(word1);
+    const norm2 = normalizeArabic(word2);
+    if (norm1 === norm2) return true;
+
+    const synonyms = SYNONYM_MAP[category];
+    if (!synonyms) return false;
+    return synonyms.some(group => {
+        const normalizedGroup = group.map(w => normalizeArabic(w));
+        return normalizedGroup.includes(norm1) && normalizedGroup.includes(norm2);
+    });
+}
+
 function normalizeArabic(text: string): string {
     return text
         .trim()
@@ -28,50 +64,36 @@ function normalizeArabic(text: string): string {
         .toLowerCase();
 }
 
-function validateAnswerLenient(letter: string, category: Category, answer: string): boolean {
-    const trimmedAnswer = answer.trim();
 
-    // 1. Min 2 chars
-    if (!trimmedAnswer || trimmedAnswer.length < 2) return false;
-
-    // 2. Block 3 or more identical characters anywhere (e.g. "ببب", "ةةةة")
-    if (/(.)\1{2,}/.test(trimmedAnswer)) return false;
-
-    // 3. Block common Arabic keyboard mash sequences
-    if (/^(شسي|شس|ثقف|ضصث|قثص|يسب|يس)/.test(trimmedAnswer)) return false;
-
-    const normalizedLetter = normalizeArabic(letter);
-    const normalizedAnswer = normalizeArabic(trimmedAnswer);
-
-    const answerFirstChar = normalizedAnswer.startsWith('ال')
-        ? normalizedAnswer.charAt(2)
-        : normalizedAnswer.charAt(0);
-
-    const letterFirstChar = normalizedLetter.charAt(0);
-    const letterVariants: Record<string, string[]> = {
-        'ا': ['ا', 'أ', 'إ', 'آ'],
-        'أ': ['ا', 'أ', 'إ', 'آ'],
-        'إ': ['ا', 'أ', 'إ', 'آ'],
-        'آ': ['ا', 'أ', 'إ', 'آ'],
-        'ه': ['ه', 'ة'],
-        'ة': ['ه', 'ة'],
-        'ي': ['ي', 'ى'],
-        'ى': ['ي', 'ى'],
-    };
-
-    const validFirstChars = letterVariants[letterFirstChar] || [letterFirstChar];
-    return validFirstChars.includes(answerFirstChar);
+/** Eligible voters for a round (excludes referee, banished, and offline players). */
+export function getEligibleVoters(draft: GameRoom, round: Round): typeof draft.players {
+    return draft.players.filter(
+        p => !p.isOffline && p.id !== draft.refereeId && p.id !== round.banishedPlayerId
+    );
 }
 
+export function countEligibleVoters(draft: GameRoom, round: Round): number {
+    return getEligibleVoters(draft, round).length;
+}
 
-function validateAnswerStrict(letter: string, category: Category, answer: string): boolean {
-    return validateAnswerLenient(letter, category, answer);
+/** Resolve pending-vote answers when voting cannot run (solo play or voting off). */
+function resolvePendingVotes(draft: GameRoom, dRound: Round): void {
+    dRound.validatedAnswers.forEach(a => {
+        if (!a.isPendingVote) return;
+        a.isPendingVote = false;
+        // Never auto-accept words missing from the dictionary — solo or not
+        a.isValid = false;
+        a.reason = draft.settings?.votingEnabled
+            ? 'غير موجودة في القاموس (تحتاج تصويت جماعي)'
+            : 'غير موجودة في القاموس';
+    });
 }
 
 
 export class RoundManager {
     private timers: Map<string, NodeJS.Timeout> = new Map();
     private calculatingRooms = new Set<string>();
+    private validationGen = new Map<string, number>();
 
     // FIX: Combined startRound — increment currentRound AND initialize round in one transact
     startRound(buffer: CorruptionProofBuffer<GameRoom>): Round {
@@ -133,10 +155,12 @@ export class RoundManager {
         buffer.transact((draft) => {
             const round = draft.rounds[draft.currentRound];
             if (!round) return;
+            if (draft.phase !== 'playing') return;
+            if (round.endRoundInProgress) return;
             if (round.banishedPlayerId === playerId) return;
 
             const player = draft.players.find(p => p.id === playerId);
-            if (!player) return;
+            if (!player || player.isOffline) return;
 
             const existingIdx = round.submissions.findIndex(s => s.playerId === playerId);
             if (existingIdx !== -1) {
@@ -151,10 +175,17 @@ export class RoundManager {
                 });
             }
             const activePlayers = draft.refereeId
-                ? draft.players.filter(p => p.id !== draft.refereeId && p.id !== round.banishedPlayerId).length
-                : draft.players.filter(p => p.id !== round.banishedPlayerId).length;
+                ? draft.players.filter(p => !p.isOffline && p.id !== draft.refereeId && p.id !== round.banishedPlayerId).length
+                : draft.players.filter(p => !p.isOffline && p.id !== round.banishedPlayerId).length;
 
-            if (round.submissions.length >= activePlayers) {
+            const submittedActive = round.submissions.filter(s => {
+                if (s.playerId === round.banishedPlayerId) return false;
+                if (s.playerId === draft.refereeId) return false;
+                const pl = draft.players.find(p => p.id === s.playerId);
+                return !!pl && !pl.isOffline;
+            }).length;
+
+            if (submittedActive >= activePlayers) {
                 isComplete = true;
             }
         }, "handleSubmission");
@@ -170,27 +201,32 @@ export class RoundManager {
     ): Promise<void> {
         const roomCode = buffer.get().code;
 
-        // Prevent Re-entry / Race using Set
         if (this.calculatingRooms.has(roomCode)) {
             console.log(`[RoundManager] Already processing ${roomCode}, skipping`);
             return;
         }
         this.calculatingRooms.add(roomCode);
 
+        const gen = (this.validationGen.get(roomCode) || 0) + 1;
+        this.validationGen.set(roomCode, gen);
+        let finished = false;
+        const finishOnce = (cb: () => void) => {
+            if (finished || this.validationGen.get(roomCode) !== gen) return;
+            finished = true;
+            cb();
+        };
+
         try {
-            // FIX: Add 6-second timeout for validation — if slow, push everything to vote
             await Promise.race([
-                this.calculateScores(buffer, onVotingStart, onRoundFinish),
+                this.calculateScores(buffer, gen, () => finishOnce(onVotingStart), () => finishOnce(onRoundFinish)),
                 new Promise<void>((_, reject) =>
                     setTimeout(() => reject(new Error('validation_timeout')), 6000)
                 )
             ]);
         } catch (e: any) {
-            if (e?.message === 'validation_timeout') {
-                console.warn(`[RoundManager] Validation timed out for ${roomCode}. Pushing all to vote.`);
-                this.pushAllAnswersToVote(buffer, onVotingStart, onRoundFinish);
-            } else {
-                onRoundFinish();
+            console.warn(`[RoundManager] Validation failed for ${roomCode}: ${e?.message || e}. Pushing all to vote.`);
+            if (!finished && this.validationGen.get(roomCode) === gen) {
+                this.pushAllAnswersToVote(buffer, gen, () => finishOnce(onVotingStart), () => finishOnce(onRoundFinish));
             }
         } finally {
             this.calculatingRooms.delete(roomCode);
@@ -199,10 +235,14 @@ export class RoundManager {
 
     private pushAllAnswersToVote(
         buffer: CorruptionProofBuffer<GameRoom>,
+        gen: number,
         onVotingStart: () => void,
         onRoundFinish: () => void
     ) {
         const roomRead = buffer.get();
+        const roomCode = roomRead.code;
+        if (this.validationGen.get(roomCode) !== gen) return;
+
         const round = roomRead.rounds[roomRead.currentRound];
         if (!round) { onRoundFinish(); return; }
 
@@ -222,7 +262,7 @@ export class RoundManager {
                     const answer = submission.answers[category];
                     if (!answer?.trim() || answer.trim().length < 2) continue;
 
-                    const lenient = validateAnswerLenient(dRound.letter, category as Category, answer);
+                    const lenient = passesAnswerHeuristics(dRound.letter, category as Category, answer);
                     dRound.validatedAnswers.push({
                         playerId: submission.playerId,
                         playerName: submission.playerName,
@@ -240,29 +280,22 @@ export class RoundManager {
                 }
             }
 
-            const activeVoters = draft.players.filter(p => !p.isReferee && p.id !== dRound.banishedPlayerId).length;
+            const activeVoters = countEligibleVoters(draft, dRound);
 
             if (hasPending && draft.settings?.votingEnabled && activeVoters > 1) {
                 draft.phase = 'voting';
                 this.buildVoteQueueInDraft(draft);
             } else {
-                // BUG FIX: If voting is disabled or not enough voters, clear the isPendingVote flag 
-                // and mark them invalid so clients don't get stuck rendering pending UI.
-                if (hasPending) {
-                    dRound.validatedAnswers.forEach(a => {
-                        if (a.isPendingVote) {
-                            a.isPendingVote = false;
-                            a.isValid = false;
-                            a.reason = 'غير موجودة في القاموس';
-                        }
-                    });
-                }
+                if (hasPending) resolvePendingVotes(draft, dRound);
                 this.calculateAnswerScores(draft);
             }
         }, "fallbackVote");
 
+        if (this.validationGen.get(roomCode) !== gen) return;
+
         const roomState = buffer.get();
-        const finalActiveVoters = roomState.players.filter(p => p.id !== roomState.refereeId && p.id !== roomState.rounds[roomState.currentRound]?.banishedPlayerId).length;
+        const dRound = roomState.rounds[roomState.currentRound];
+        const finalActiveVoters = dRound ? countEligibleVoters(roomState, dRound) : 0;
         if (hasPending && roomState.settings?.votingEnabled && finalActiveVoters > 1) {
             onVotingStart();
         } else {
@@ -272,10 +305,14 @@ export class RoundManager {
 
     private async calculateScores(
         buffer: CorruptionProofBuffer<GameRoom>,
+        gen: number,
         onVotingStart: () => void,
         onRoundFinish: () => void
     ): Promise<void> {
         const roomRead = buffer.get();
+        const roomCode = roomRead.code;
+        if (this.validationGen.get(roomCode) !== gen) return;
+
         const round = roomRead.rounds[roomRead.currentRound];
         if (!round) return;
 
@@ -312,10 +349,9 @@ export class RoundManager {
             console.error(`[RoundManager] validateBatch failed for room ${roomRead.code}, falling back to lenient validation.`, e);
             validationResults = new Map();
             for (const item of itemsToValidate) {
-                const isLenient = validateAnswerLenient(round.letter, item.category as Category, item.answer);
                 validationResults.set(`${item.playerId}:${item.category}`, {
-                    isValid: isLenient,
-                    reason: isLenient ? 'مقبول (احتياطي)' : 'غير مقبول (احتياطي)',
+                    isValid: false,
+                    reason: 'فشل التحقق — غير موجودة في القاموس',
                     source: 'heuristic'
                 });
             }
@@ -324,9 +360,12 @@ export class RoundManager {
         // Apply Results to State
         let hasPendingVotes = false;
 
+        if (this.validationGen.get(roomCode) !== gen) return;
+
         buffer.transact((draft) => {
-            // FIX: Race Condition protection – if phase shifted past playing, skip applying calculated scores
-            if (draft.phase !== 'playing') {
+            if (this.validationGen.get(roomCode) !== gen) return;
+            // endRound sets phase to ai_processing before validation runs — that is expected
+            if (draft.phase !== 'playing' && draft.phase !== 'ai_processing') {
                 console.log(`[RoundManager] calculateScores aborted for ${roomRead.code} - Phase shifted to ${draft.phase}`);
                 return;
             }
@@ -341,23 +380,20 @@ export class RoundManager {
                 let reason = result?.reason || '';
                 let isPendingVote = false;
 
-                // D2-FIX: Wildcard must check basic validity (starts with correct letter)
+                // Wildcard only accepts dictionary-valid answers (no free pass for typed garbage)
                 const isWildcard = dRound.wildcardUsedByPlayerIds?.includes(item.playerId);
                 if (isWildcard) {
-                    // Check if word at least starts with the correct letter
-                    const startsWithLetter = validateAnswerStrict(dRound.letter, item.category as Category, item.answer);
-                    if (startsWithLetter) {
-                        isValid = true;
+                    if (isValid) {
                         reason = 'جوكر';
                     } else {
                         isValid = false;
-                        reason = 'جوكر - لكن الحرف خطأ';
+                        reason = 'جوكر - إجابة غير موجودة في القاموس';
                     }
                 }
 
                 if (!isValid && !isPendingVote && item.answer.trim().length >= 2) {
-                    const lenient = validateAnswerLenient(dRound.letter, item.category as Category, item.answer);
-                    if (lenient) {
+                    const plausible = passesAnswerHeuristics(dRound.letter, item.category as Category, item.answer);
+                    if (plausible) {
                         if (draft.settings?.votingEnabled) {
                             isPendingVote = true;
                             reason = 'تتطلب تصويت';
@@ -368,7 +404,9 @@ export class RoundManager {
                         }
                     } else {
                         isValid = false;
-                        reason = 'حرف خطأ';
+                        reason = hasGarbagePattern(item.answer)
+                            ? 'إجابة غير صالحة'
+                            : 'حرف خطأ أو قصيرة جداً';
                     }
                 }
 
@@ -391,21 +429,13 @@ export class RoundManager {
             if (hasPendingVotes) {
                 // LOGIC-3 FIX: Don't force-enable voting. If host disabled it, keep it disabled.
                 // ALSO: Do not enter voting if the player is playing alone (activeVoters <= 1)
-                const activeVoters = draft.players.filter(p => !p.isReferee && p.id !== dRound.banishedPlayerId).length;
+                const activeVoters = countEligibleVoters(draft, dRound);
 
                 if (draft.settings?.votingEnabled && activeVoters > 1) {
                     draft.phase = 'voting';
-                    // FIX: Build PARALLEL vote queue — all pending answers at once
                     this.buildVoteQueueInDraft(draft);
                 } else {
-                    // Voting is disabled OR player is alone — mark all pending answers as invalid
-                    dRound.validatedAnswers.forEach(a => {
-                        if (a.isPendingVote) {
-                            a.isPendingVote = false;
-                            a.isValid = false;
-                            a.reason = 'غير موجودة في القاموس';
-                        }
-                    });
+                    resolvePendingVotes(draft, dRound);
                     this.calculateAnswerScores(draft);
                 }
             } else {
@@ -414,8 +444,11 @@ export class RoundManager {
 
         }, "calculateScores");
 
+        if (this.validationGen.get(roomCode) !== gen) return;
+
         const roomState = buffer.get();
-        const finalActiveVoters = roomState.players.filter(p => p.id !== roomState.refereeId && p.id !== roomState.rounds[roomState.currentRound]?.banishedPlayerId).length;
+        const dRoundState = roomState.rounds[roomState.currentRound];
+        const finalActiveVoters = dRoundState ? countEligibleVoters(roomState, dRoundState) : 0;
 
         if (hasPendingVotes && roomState.settings?.votingEnabled && finalActiveVoters > 1) {
             onVotingStart();
@@ -433,10 +466,7 @@ export class RoundManager {
         const dRound = draft.rounds[draft.currentRound];
         if (!dRound) return;
 
-        // Snapshot eligible voters at this moment (excludes requester too — handled per-answer client side)
-        const eligibleVoterIds = draft.players
-            .filter(pl => pl.id !== draft.refereeId && pl.id !== dRound.banishedPlayerId)
-            .map(pl => pl.id);
+        const eligibleVoterIds = getEligibleVoters(draft, dRound).map(pl => pl.id);
 
         // RM5: Guard against undefined validatedAnswers (shouldn't happen, but defensive)
         if (!dRound.validatedAnswers || dRound.validatedAnswers.length === 0) {
@@ -495,6 +525,33 @@ export class RoundManager {
         }
     }
 
+    recalculatePlayerTotals(draft: GameRoom) {
+        draft.players.forEach(p => {
+            p.score = 0;
+            p.totalEarnedPoints = 0;
+        });
+
+        draft.rounds.forEach(r => {
+            r.validatedAnswers.forEach(ans => {
+                if (ans.isValid) {
+                    const player = draft.players.find(p => p.id === ans.playerId);
+                    if (player) {
+                        player.score += ans.score || 0;
+                        player.totalEarnedPoints += ans.score || 0;
+                    }
+                }
+            });
+        });
+
+        draft.players.forEach(p => {
+            if (p.manualScoreAdjustment) {
+                const adjustment = p.manualScoreAdjustment;
+                p.score = Math.max(0, p.score + adjustment);
+                p.totalEarnedPoints = Math.max(0, (p.totalEarnedPoints || 0) + adjustment);
+            }
+        });
+    }
+
     commitRoundResults(draft: GameRoom) {
         const round = draft.rounds[draft.currentRound];
         if (round.resultsCommitted) return;
@@ -503,18 +560,13 @@ export class RoundManager {
             ? draft.settings.customCategories
             : categories;
 
-        // Ensure scores are fresh before committing
         this.calculateAnswerScores(draft);
+        this.recalculatePlayerTotals(draft);
 
         for (const player of draft.players) {
             if (player.id === draft.refereeId) continue;
 
             const playerAnswers = round.validatedAnswers.filter(a => a.playerId === player.id);
-            const roundScore = playerAnswers.reduce((sum, a) => sum + (a.score || 0), 0);
-
-            player.score += roundScore;
-            player.totalEarnedPoints = (player.totalEarnedPoints || 0) + roundScore;
-
             const submission = round.submissions.find(s => s.playerId === player.id);
             const allCorrect = playerAnswers.filter(a => a.isValid).length >= currentCategories.length;
 
@@ -524,7 +576,6 @@ export class RoundManager {
                 player.busStreak = 0;
             }
 
-            // Wallet Update
             player.powerUps = {
                 wildcard: player.usedPowerUps.wildcard ? 0 : Math.floor((player.totalEarnedPoints || 0) / 200),
                 banish: player.usedPowerUps.banish ? 0 : Math.floor((player.totalEarnedPoints || 0) / 400),

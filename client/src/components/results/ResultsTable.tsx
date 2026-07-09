@@ -45,7 +45,7 @@ export function ResultsTable({
     return (
         <div className="flex flex-col gap-4">
             {/* Table Headers - Hidden on small mobile, visible on tablet+ */}
-            <div className="hidden md:grid grid-cols-[1.5fr,repeat(5,1fr)] gap-2 px-4 py-2 bg-[#4c1d95] text-[#FFFDD1] rounded-t-xl border-b-4 border-[#2e1065] font-pixel-text text-sm shadow-md">
+            <div className="hidden md:grid grid-cols-[1.5fr,repeat(5,1fr)] gap-2 px-4 py-2 bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] text-white rounded-t-xl text-sm font-semibold shadow-sm">
                 <div className="flex items-center gap-2">
                     <Trophy className="w-4 h-4 text-yellow-400" />
                     <span>اللاعب</span>
@@ -89,10 +89,10 @@ export function ResultsTable({
                                 visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 300, damping: 20 } }
                             }}
                             className={cn(
-                                "relative group rounded-xl border-[3px] overflow-hidden transition-all duration-300",
+                                "relative group rounded-2xl border overflow-hidden transition-all duration-300",
                                 isMe
-                                    ? "bg-[#e9d5ff] border-[#7c3aed] shadow-[0_0_15px_rgba(124,58,237,0.3)]"
-                                    : "bg-white border-[#e5e7eb] shadow-sm hover:border-[#a78bfa]"
+                                    ? "bg-purple-50/90 border-purple-300/50 shadow-[0_4px_20px_rgba(124,58,237,0.15)]"
+                                    : "bg-white/95 border-gray-200/80 shadow-sm hover:border-purple-300/50"
                             )}
                         >
                             <div className="grid grid-cols-1 md:grid-cols-[1.5fr,repeat(5,1fr)] bg-white/50">
@@ -122,12 +122,14 @@ export function ResultsTable({
                                         (v: any) => v.playerId === submission.playerId && v.category === cat
                                     );
                                     const isValid = validation?.isValid;
+                                    const isPending = validation?.isPendingVote;
                                     const score = validation?.score || 0;
+                                    const hasValidation = !!validation;
 
-                                    // Status Color Logic
                                     let statusClass = "bg-gray-50/50";
                                     if (answer) {
-                                        if (isValid) statusClass = score > 10 ? "bg-green-50" : "bg-green-50/30";
+                                        if (!hasValidation || isPending) statusClass = "bg-amber-50/50";
+                                        else if (isValid) statusClass = score > 10 ? "bg-green-50" : "bg-green-50/30";
                                         else statusClass = "bg-red-50";
                                     }
 
@@ -158,6 +160,7 @@ export function ResultsTable({
                                                 {answer ? (
                                                     <span className={cn(
                                                         "font-bold text-sm md:text-base break-words block relative z-10",
+                                                        !hasValidation || isPending ? "text-[#4c1d95]" :
                                                         isValid ? "text-[#15803d]" : "text-[#b91c1c] line-through decoration-2 decoration-red-300"
                                                     )}>
                                                         {answer}
@@ -187,9 +190,11 @@ export function ResultsTable({
                                                         )}>
                                                             {score}
                                                         </span>
-                                                    ) : (
+                                                    ) : isPending ? (
+                                                        <span className="text-[9px] px-1 py-0.5 rounded bg-amber-100 text-amber-700 border border-amber-200 font-pixel-text">؟</span>
+                                                    ) : hasValidation ? (
                                                         <X className="w-4 h-4 text-red-400 opacity-50" />
-                                                    )
+                                                    ) : null
                                                 )}
 
                                                 {/* Host / Referee Toggle Button — only shown when callbacks are wired up (referee_review phase) */}
@@ -203,18 +208,18 @@ export function ResultsTable({
                                                     </button>
                                                 )}
 
-                                                {/* FIX (#3): Phase 3 Player Appeal Control */}
-                                                {!canOverride && answer && submission.playerId !== currentPlayerId && (
+                                                {/* Player self-appeal for rejected answers */}
+                                                {!canOverride && answer && submission.playerId === currentPlayerId && !isValid && (
                                                     <button
-                                                        onClick={() => sendAppeal(submission.playerId, cat)}
-                                                        disabled={validation?.appealedBy?.includes(currentPlayerId)}
+                                                        onClick={() => sendAppeal(cat, answer)}
+                                                        disabled={validation?.isPendingVote}
                                                         className={cn(
                                                             "p-1 rounded mt-1 transition-colors",
-                                                            validation?.appealedBy?.includes(currentPlayerId)
+                                                            validation?.isPendingVote
                                                                 ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                                                                 : "bg-yellow-100 hover:bg-yellow-200 text-yellow-600"
                                                         )}
-                                                        title={validation?.appealedBy?.includes(currentPlayerId) ? "لقد قمت بإبلاغ هذه الكلمة" : "إبلاغ المضيف عن هذه الإجابة"}
+                                                        title={validation?.isPendingVote ? "الاستئناف قيد المراجعة" : "استئناف هذه الإجابة"}
                                                     >
                                                         <Flag className="w-3 h-3" />
                                                     </button>

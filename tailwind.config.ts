@@ -6,9 +6,17 @@ export default {
   theme: {
     extend: {
       borderRadius: {
-        lg: ".5625rem", /* 9px */
-        md: ".375rem", /* 6px */
-        sm: ".1875rem", /* 3px */
+        lg: "0.75rem",
+        md: "0.5rem",
+        sm: "0.375rem",
+        xl: "1rem",
+        "2xl": "1.25rem",
+      },
+      boxShadow: {
+        card: "0 4px 24px rgba(76, 29, 149, 0.12), 0 1px 3px rgba(0, 0, 0, 0.06)",
+        "card-hover": "0 8px 32px rgba(124, 58, 237, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08)",
+        glow: "0 0 24px rgba(124, 58, 237, 0.25)",
+        button: "0 4px 14px rgba(124, 58, 237, 0.35)",
       },
       colors: {
         // Flat / base colors (regular buttons)
@@ -100,8 +108,9 @@ export default {
         sans: ["var(--font-sans)"],
         serif: ["var(--font-serif)"],
         mono: ["var(--font-mono)"],
-        "pixel-title": ["'04b03'", "sans-serif"],
-        "pixel-text": ["'DogicaPixel'", "sans-serif"],
+        display: ["var(--font-display)"],
+        "pixel-title": ["var(--font-display)"],
+        "pixel-text": ["var(--font-sans)"],
       },
       keyframes: {
         "accordion-down": {

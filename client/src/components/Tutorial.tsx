@@ -19,9 +19,9 @@ export function Tutorial({ onClose }: TutorialProps) {
                     <p className="text-xl font-bold text-[#4c1d95]">لعبة الحروف اللي كلنا بنحبها..</p>
                     <p className="text-base text-[#6d28d9]">الهدف: املأ الخانات (ولد، بنت، حيوان..) بحرف معين أسرع من غيرك!</p>
                     <div className="flex justify-center gap-2 mt-4">
-                        <span className="bg-yellow-200 px-3 py-1 rounded-full text-sm font-bold border-2 border-yellow-500 text-yellow-800">سرعة</span>
-                        <span className="bg-green-200 px-3 py-1 rounded-full text-sm font-bold border-2 border-green-500 text-green-800">ذكاء</span>
-                        <span className="bg-purple-200 px-3 py-1 rounded-full text-sm font-bold border-2 border-purple-500 text-purple-800">تركيز</span>
+                        <span className="bg-amber-400 px-3 py-1.5 rounded-full text-sm font-semibold text-amber-950 shadow-sm">سرعة</span>
+                        <span className="bg-purple-600 px-3 py-1.5 rounded-full text-sm font-semibold text-white shadow-sm">ذكاء</span>
+                        <span className="bg-white px-3 py-1.5 rounded-full text-sm font-semibold text-[#4c1d95] shadow-sm border border-purple-200/50">تركيز</span>
                     </div>
                 </div>
             ),

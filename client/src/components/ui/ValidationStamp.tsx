@@ -19,7 +19,7 @@ export function ValidationStamp({
     const sizeClasses = {
         sm: 'px-3 py-1 text-sm border-2',
         md: 'px-4 py-2 text-xl border-4 drop-shadow-[2px_2px_0_rgba(0,0,0,0.1)]',
-        lg: 'px-6 py-3 text-3xl border-4 drop-shadow-[4px_4px_0_rgba(0,0,0,0.1)]'
+        lg: 'px-6 py-3 text-3xl border-2 rounded-xl shadow-md'
     }
 
     const positionClasses = {

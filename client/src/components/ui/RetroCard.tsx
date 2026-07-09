@@ -6,13 +6,12 @@ export function RetroCard({ children, className, ...props }: React.HTMLAttribute
     return (
         <div
             className={cn(
-                "retro-panel relative bg-gradient-to-b from-white to-[#faf5ff] p-6 text-[#4c1d95] font-pixel-text",
+                "retro-panel relative p-6 text-[#4c1d95]",
                 className
             )}
             {...props}
         >
-            {/* Content */}
-            <div className="relative z-10 text-[#4c1d95] font-pixel-text">
+            <div className="relative z-10">
                 {children}
             </div>
         </div>

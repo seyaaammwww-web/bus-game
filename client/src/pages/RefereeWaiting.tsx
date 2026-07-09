@@ -7,10 +7,10 @@ export default function RefereeWaiting() {
     const room = state.room;
     const currentRound = room?.rounds[room?.currentRound || 0];
     const letter = currentRound?.letter || room?.letters?.[room?.currentRound || 0] || '?';
-    const submittedCount = currentRound?.submissions?.length || 0;
-    // LOGIC-4 FIX: Always filter by refereeId instead of assuming -1
-    // BUG-R3 FIX: Also exclude banished player from total count so submitted/total is accurate
     const banishedId = currentRound?.banishedPlayerId;
+    const submittedCount = currentRound?.submissions?.filter(
+        s => s.playerId !== room?.refereeId && s.playerId !== banishedId
+    ).length || 0;
     const totalPlayers = room?.players?.filter(p => p.id !== room.refereeId && p.id !== banishedId).length || 0;
 
     return (
@@ -22,12 +22,12 @@ export default function RefereeWaiting() {
                 animate={{ rotate: [0, -15, 15, -10, 10, 0] }}
                 transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 1 }}
             >
-                <div className="w-28 h-28 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl flex items-center justify-center shadow-[4px_4px_0_0_#92400e] border-4 border-amber-300">
+                <div className="w-28 h-28 bg-gradient-to-br from-amber-400 to-amber-500 rounded-2xl flex items-center justify-center shadow-[0_8px_32px_rgba(251,191,36,0.4)] border border-amber-500/40">
                     <Gavel className="w-14 h-14 text-amber-950" strokeWidth={2.5} />
                 </div>
                 {/* Glow */}
                 <motion.div
-                    className="absolute inset-0 rounded-2xl"
+                    className="absolute inset-0 rounded-lg"
                     style={{ background: 'radial-gradient(circle, rgba(251,191,36,0.4) 0%, transparent 70%)', filter: 'blur(16px)' }}
                     animate={{ opacity: [0.4, 0.9, 0.4], scale: [1, 1.2, 1] }}
                     transition={{ duration: 2, repeat: Infinity }}
@@ -49,15 +49,15 @@ export default function RefereeWaiting() {
 
             {/* Round info */}
             <div className="flex gap-4 mb-8">
-                <div className="bg-[#4c1d95] border-2 border-[#7c3aed] rounded-xl px-5 py-3 shadow-[3px_3px_0_0_#2e1065]">
+                <div className="bg-[#4c1d95]/90 backdrop-blur-md border border-purple-400/30 rounded-xl px-5 py-3 shadow-lg">
                     <p className="text-[10px] font-pixel-text text-[#e9d5ff] mb-1">الحرف</p>
                     <p className="text-3xl font-pixel-title text-amber-300">{letter}</p>
                 </div>
-                <div className="bg-[#4c1d95] border-2 border-[#7c3aed] rounded-xl px-5 py-3 shadow-[3px_3px_0_0_#2e1065]">
+                <div className="bg-[#4c1d95]/90 backdrop-blur-md border border-purple-400/30 rounded-xl px-5 py-3 shadow-lg">
                     <p className="text-[10px] font-pixel-text text-[#e9d5ff] mb-1">أرسلوا</p>
                     <p className="text-3xl font-pixel-title text-emerald-300">{submittedCount} / {totalPlayers}</p>
                 </div>
-                <div className="bg-[#4c1d95] border-2 border-[#7c3aed] rounded-xl px-5 py-3 shadow-[3px_3px_0_0_#2e1065]">
+                <div className="bg-[#4c1d95]/90 backdrop-blur-md border border-purple-400/30 rounded-xl px-5 py-3 shadow-lg">
                     <p className="text-[10px] font-pixel-text text-[#e9d5ff] mb-1">الجولة</p>
                     <p className="text-3xl font-pixel-title text-white">{(room?.currentRound || 0) + 1} / {room?.totalRounds || '?'}</p>
                 </div>
@@ -65,7 +65,7 @@ export default function RefereeWaiting() {
 
             {/* Player status */}
             {room && room.players.filter(p => p.id !== room.refereeId).length > 0 && (
-                <div className="w-full max-w-sm bg-[#FFFDD1] border-[3px] border-[#4c1d95] rounded-xl p-4 shadow-[4px_4px_0_0_#2e1065]">
+                <div className="w-full max-w-sm bg-white/95 backdrop-blur-md border border-purple-200/50 rounded-2xl p-4 shadow-card">
                     <div className="flex items-center gap-2 mb-3">
                         <Eye className="w-4 h-4 text-[#7c3aed]" />
                         <span className="font-pixel-text text-sm font-bold text-[#4c1d95]">حالة اللاعبين</span>
@@ -77,11 +77,11 @@ export default function RefereeWaiting() {
                                 <div key={player.id} className="flex items-center justify-between">
                                     <span className="font-pixel-text text-sm text-[#4c1d95] font-bold">{player.name}</span>
                                     {hasSubmitted ? (
-                                        <span className="flex items-center gap-1 text-xs font-pixel-text font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-400">
+                                        <span className="flex items-center gap-1 text-xs font-pixel-text font-bold px-2 py-0.5 rounded-lg bg-[#7c3aed]/10 text-[#4c1d95] border border-[#7c3aed]/30">
                                             <CheckCircle className="w-3 h-3" /> أرسل
                                         </span>
                                     ) : (
-                                        <span className="text-xs font-pixel-text font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-300">يكتب...</span>
+                                        <span className="text-xs font-pixel-text font-bold px-2 py-0.5 rounded-lg bg-[#4c1d95]/5 text-[#4c1d95]/50 border border-[#4c1d95]/20">يكتب...</span>
                                     )}
                                 </div>
                             );

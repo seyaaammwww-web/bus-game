@@ -17,6 +17,7 @@ import { StateOrchestrator } from './persistence/StateOrchestrator';
 import { WildcardService } from './services/wildcardService';
 import { getRandomLetters } from '../shared/arabicWords';
 import { randomUUID } from 'crypto';
+import { reconnectService } from './container';
 
 // V3 State Machine: Guard against invalid phase transitions
 function canTransition(from: GamePhase, to: GamePhase): boolean {
@@ -46,7 +47,7 @@ export class GameManager {
 
   // FIX (#13): Rate limiting to prevent WS flood attacks (50 msgs / 10s per socket)
   private readonly rateLimits = new WeakMap<WebSocket, { count: number; resetTime: number }>();
-  private readonly RATE_LIMIT_COUNT = 50;
+  private readonly RATE_LIMIT_COUNT = 100;
   private readonly RATE_LIMIT_WINDOW_MS = 10000;
 
   // P2-10 FIX: Room→Socket index for O(1) broadcasts
@@ -60,8 +61,10 @@ export class GameManager {
 
   private heartbeatInterval: NodeJS.Timeout | null = null;
   private lastVoteTime: Map<string, number> = new Map();
-  private VOTE_COOLDOWN_MS: number = 1000;
+  private VOTE_COOLDOWN_MS: number = 500;
   private busCompleteLocks: Map<string, string> = new Map();
+  private lastTypingBroadcast: Map<string, { isTyping: boolean; at: number }> = new Map();
+  private kickedPlayers: Map<string, Set<string>> = new Map();
 
   // Per-IP room creation rate limiting (5 rooms per 10 min)
   private readonly roomCreationLimits = new Map<string, { count: number; resetTime: number }>();
@@ -108,7 +111,10 @@ export class GameManager {
     return result.data;
   }
 
-  private checkRateLimit(ws: WebSocket): boolean {
+  private checkRateLimit(ws: WebSocket, messageType?: string): boolean {
+    // Draft updates are high-frequency but low-impact — don't count toward flood limit
+    if (messageType === 'draft_update') return true;
+
     const now = Date.now();
     const record = this.rateLimits.get(ws);
     if (!record || now > record.resetTime) {
@@ -130,6 +136,7 @@ export class GameManager {
       this.finishedRounds.forEach(key => {
         if (key.startsWith(prefix)) this.finishedRounds.delete(key);
       });
+      this.kickedPlayers.delete(code);
       this.roomSocketIndex.delete(code);
       this.roundManager.clearTimer(code);
       console.log(`[GameManager] Cleaned up all tracking for room ${code}`);
@@ -144,6 +151,56 @@ export class GameManager {
     this.stateOrchestrator = new StateOrchestrator(this.roomManager);
     this.initializePersistence();
     this.startHeartbeat();
+    setInterval(() => this.runGhostCleanup(), 45000);
+  }
+
+  /** Remove players marked online but with no active socket (edge-case ghosts). */
+  private runGhostCleanup() {
+    for (const code of this.getAllRooms()) {
+      const room = this.getRoom(code);
+      if (!room) continue;
+      for (const player of room.players) {
+        if (!player.isOffline && !this.getPlayerSocket(player.id)) {
+          console.log(`[GhostCleanup] Marking ghost offline: ${player.id} in ${code}`);
+          this.roomManager.removePlayerFromRoom(code, player.id);
+          const buffer = this.roomManager.getRoomBuffer(code);
+          if (buffer && buffer.get().players.length > 0) {
+            this.broadcastToRoom(code, { type: 'player_left', payload: { players: buffer.get().players } });
+          }
+        }
+      }
+    }
+  }
+
+  private async issueReconnectToken(playerId: string, roomCode: string): Promise<string> {
+    try {
+      return await reconnectService.issueToken(playerId, roomCode);
+    } catch (e) {
+      console.warn('[GameManager] Failed to issue reconnect token:', e);
+      return `local_${playerId}_${Date.now()}`;
+    }
+  }
+
+  private async validateReconnectToken(
+    token: string,
+    playerId: string,
+    roomCode: string
+  ): Promise<{ valid: boolean; newToken?: string }> {
+    if (token.startsWith('local_')) {
+      return token.includes(playerId) ? { valid: true, newToken: token } : { valid: false };
+    }
+    try {
+      const session = await reconnectService.restore(token);
+      if (!session) return { valid: false };
+      const normCode = roomCode.toUpperCase();
+      if (session.playerId !== playerId || session.roomId.toUpperCase() !== normCode) {
+        return { valid: false };
+      }
+      return { valid: true, newToken: session.newToken };
+    } catch (e) {
+      console.warn('[GameManager] Reconnect token validation failed:', e);
+      return { valid: false };
+    }
   }
 
   public getAllRooms(): string[] {
@@ -162,8 +219,8 @@ export class GameManager {
     return this.playerManager.getSocket(playerId);
   }
 
-  public removePlayerFromRoom(roomCode: string, playerId: string) {
-    this.roomManager.removePlayerFromRoom(roomCode, playerId);
+  public removePlayerFromRoom(roomCode: string, playerId: string, hardDelete = false) {
+    this.roomManager.removePlayerFromRoom(roomCode, playerId, hardDelete);
   }
 
   private sendError(ws: WebSocket, message: string) {
@@ -264,14 +321,10 @@ export class GameManager {
             (a: any) => a.playerId === item.requesterId && a.category === item.category
           );
           if (ans && ans.isPendingVote) {
-            // FIX (#13): Align timeout vote logic with live voting requirement (> 50%) -> strict majority
-            // Accept ties as valid answers (50% or more) instead of rejecting.
-            const { yes = 0 } = (item as any).votes || {};
-            const totalEligible = item.eligibleVoterIds?.length || 0;
-            const majorityNeeded = Math.ceil(totalEligible / 2); // 50% passes
-            ans.isValid = totalEligible > 0 && yes >= majorityNeeded;
+            const { yes = 0, no = 0 } = (item as any).votes || {};
+            ans.isValid = yes > no;
             ans.isPendingVote = false;
-            ans.reason = ans.isValid ? 'تم قبوله (انتهاء الوقت)' : 'تم رفضه (انتهاء الوقت - لم يحظ بأغلبية)';
+            ans.reason = ans.isValid ? 'تم قبوله (انتهاء الوقت)' : 'تم رفضه (انتهاء الوقت - تعادل أو أغلبية رفض)';
             resolvedItems.push(item);
           }
         }
@@ -302,7 +355,7 @@ export class GameManager {
   }
 
   handleMessage(ws: WebSocket, message: WSMessage): void {
-    if (!this.checkRateLimit(ws)) {
+    if (!this.checkRateLimit(ws, message.type)) {
       console.warn(`[GameManager] Rate limit exceeded by connection. Closing socket.`);
       try { ws.close(1008, 'Rate limit exceeded'); } catch { }
       return;
@@ -310,7 +363,9 @@ export class GameManager {
 
     const invalid = () => this.send(ws, { type: 'error', payload: { code: 'INVALID_PAYLOAD', message: 'بيانات غير صالحة' } });
 
-    console.log(`[GameManager] Received: ${message.type}`);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`[GameManager] Received: ${message.type}`);
+    }
     try {
       switch (message.type) {
         case 'create_room': {
@@ -328,7 +383,7 @@ export class GameManager {
         case 'rejoin_room': {
           const p = this.validatePayload(rejoinRoomSchema, message.payload);
           if (!p) return invalid();
-          this.rejoinRoom(ws, p.roomCode, p.playerId);
+          void this.rejoinRoom(ws, p.roomCode, p.playerId, p.reconnectToken);
           break;
         }
         case 'join_public_room': {
@@ -461,7 +516,7 @@ export class GameManager {
         case 'appeal_answer': {
           const p = this.validatePayload(appealAnswerSchema, message.payload);
           if (!p) return invalid();
-          this.appealAnswer(ws, { ...p, category: p.category as any });
+          this.appealAnswer(ws, { category: p.category as Category });
           break;
         }
         default: {
@@ -546,6 +601,9 @@ export class GameManager {
   }
 
   handleDisconnect(ws: WebSocket): void {
+    if ((ws as any)._disconnected) return;
+    (ws as any)._disconnected = true;
+
     // GM1: Explicit cleanup of WeakMap entry on disconnect
     this.rateLimits.delete(ws);
 
@@ -591,10 +649,23 @@ export class GameManager {
   }
 
   // FIX (#5): Missing Session Reconnection Logic
-  rejoinRoom(ws: WebSocket, roomCode: string, playerId: string): void {
-    if (!roomCode || !playerId) return this.send(ws, { type: 'error', payload: { message: 'بيانات غير مكتملة' } });
+  async rejoinRoom(ws: WebSocket, roomCode: string, playerId: string, reconnectToken: string): Promise<void> {
+    if (!roomCode || !playerId || !reconnectToken) {
+      return this.send(ws, { type: 'error', payload: { message: 'بيانات غير مكتملة' } });
+    }
 
-    const buffer = this.roomManager.getRoomBuffer(roomCode);
+    const normCode = roomCode.toUpperCase();
+    const kicked = this.kickedPlayers.get(normCode) ?? this.kickedPlayers.get(roomCode);
+    if (kicked?.has(playerId)) {
+      return this.send(ws, { type: 'error', payload: { message: 'تم طردك من هذه الغرفة ولا يمكنك العودة' } });
+    }
+
+    const tokenResult = await this.validateReconnectToken(reconnectToken, playerId, normCode);
+    if (!tokenResult.valid) {
+      return this.send(ws, { type: 'error', payload: { message: 'انتهت صلاحية الجلسة — انضم من جديد' } });
+    }
+
+    const buffer = this.roomManager.getRoomBuffer(normCode);
     if (!buffer) return this.send(ws, { type: 'error', payload: { message: 'الغرفة غير موجودة' } });
 
     const room = buffer.getUnsafe();
@@ -603,24 +674,25 @@ export class GameManager {
 
     buffer.transact(draft => {
       const p = draft.players.find(pl => pl.id === playerId);
-      if (p) p.isOffline = false;
+      if (p) {
+        p.isOffline = false;
+        p.isReady = false;
+      }
     }, "rejoinRoom Offline Clear");
 
-    // Remove old socket if exists
     const oldSocket = this.playerManager.getSocket(playerId);
     if (oldSocket) {
-      // GAP-3 FIX: Remove old socket from index BEFORE removing from PlayerManager
       this.removeSocketFromRoomIndex(room.code, oldSocket);
       this.playerManager.removePlayer(oldSocket);
       try { oldSocket.close(); } catch { }
     }
 
-    // Assign new socket to this player id
     this.playerManager.addPlayer(ws, room.code, playerId);
     this.addSocketToRoomIndex(room.code, ws);
 
-    // SESSION-2 FIX: Send only room_joined (it already contains full state)
-    this.send(ws, { type: 'room_joined', payload: { room: buffer.get(), playerId } });
+    const freshToken = tokenResult.newToken ?? await this.issueReconnectToken(playerId, room.code);
+    this.send(ws, { type: 'room_joined', payload: { room: buffer.get(), playerId, reconnectToken: freshToken } });
+    this.broadcastToRoom(room.code, { type: 'player_joined', payload: { players: buffer.get().players } });
   }
 
   // ==========================================
@@ -649,9 +721,11 @@ export class GameManager {
       this.playerManager.addPlayer(ws, room.code, hostId);
       this.addSocketToRoomIndex(room.code, ws);
 
-      this.send(ws, {
-        type: 'room_created',
-        payload: { room, playerId: hostId }
+      void this.issueReconnectToken(hostId, room.code).then(token => {
+        this.send(ws, {
+          type: 'room_created',
+          payload: { room, playerId: hostId, reconnectToken: token }
+        });
       });
     } catch (e: any) {
       this.send(ws, { type: 'error', payload: { message: e.message } });
@@ -680,8 +754,10 @@ export class GameManager {
       this.playerManager.addPlayer(ws, room.code, playerId);
       this.addSocketToRoomIndex(room.code, ws);
 
-      this.send(ws, { type: 'room_joined', payload: { room, playerId } });
-      this.broadcastToRoom(room.code, { type: 'player_joined', payload: { players: room.players } }, ws);
+      void this.issueReconnectToken(playerId, room.code).then(token => {
+        this.send(ws, { type: 'room_joined', payload: { room, playerId, reconnectToken: token } });
+        this.broadcastToRoom(room.code, { type: 'player_joined', payload: { players: room.players } }, ws);
+      });
     } catch (e: any) {
       this.send(ws, { type: 'error', payload: { message: e.message } });
     }
@@ -700,8 +776,10 @@ export class GameManager {
       this.playerManager.addPlayer(ws, room.code, playerId);
       this.addSocketToRoomIndex(room.code, ws);
 
-      this.send(ws, { type: 'room_joined', payload: { room, playerId } });
-      this.broadcastToRoom(room.code, { type: 'player_joined', payload: { players: room.players } }, ws);
+      void this.issueReconnectToken(playerId, room.code).then(token => {
+        this.send(ws, { type: 'room_joined', payload: { room, playerId, reconnectToken: token } });
+        this.broadcastToRoom(room.code, { type: 'player_joined', payload: { players: room.players } }, ws);
+      });
     } catch (e: any) {
       this.send(ws, { type: 'error', payload: { message: e.message } });
     }
@@ -745,8 +823,10 @@ export class GameManager {
       return;
     }
 
-    // D4 FIX: Ensure all other players are ready
-    const otherPlayers = room.players.filter(pl => pl.id !== p.playerId && pl.id !== room.refereeId);
+    // D4 FIX: Ensure all other online players are ready
+    const otherPlayers = room.players.filter(
+      pl => !pl.isOffline && pl.id !== p.playerId && pl.id !== room.refereeId
+    );
     if (otherPlayers.length > 0 && !otherPlayers.every(pl => pl.isReady)) {
       this.send(ws, { type: 'error', payload: { message: 'مش كل اللاعبين جاهزين' } });
       return;
@@ -774,12 +854,27 @@ export class GameManager {
     const buffer = this.roomManager.getRoomBuffer(p.roomId);
     if (!buffer) return;
 
+    const roomBefore = buffer.get();
+    if (roomBefore.phase !== 'playing') {
+      this.send(ws, { type: 'error', payload: { message: 'انتهى وقت الإجابة' } });
+      return;
+    }
+    const roundBefore = roomBefore.rounds[roomBefore.currentRound];
+    if (roundBefore?.endRoundInProgress) {
+      this.send(ws, { type: 'error', payload: { message: 'جاري معالجة الجولة' } });
+      return;
+    }
+    if (roundBefore?.banishedPlayerId === p.playerId) {
+      this.send(ws, { type: 'error', payload: { message: 'لا يمكنك الإرسال — تم طردك من الجولة' } });
+      return;
+    }
+
     const { isComplete, round } = this.roundManager.handleSubmission(buffer, p.playerId, answers);
 
     const room = buffer.get();
     const activePlayers = room.refereeId
-      ? room.players.filter(pl => pl.id !== room.refereeId && pl.id !== round.banishedPlayerId).length
-      : room.players.filter(pl => pl.id !== round.banishedPlayerId).length;
+      ? room.players.filter(pl => !pl.isOffline && pl.id !== room.refereeId && pl.id !== round.banishedPlayerId).length
+      : room.players.filter(pl => !pl.isOffline && pl.id !== round.banishedPlayerId).length;
 
     this.broadcastToRoom(room.code, {
       type: 'player_submitted',
@@ -801,9 +896,8 @@ export class GameManager {
     const buffer = this.roomManager.getRoomBuffer(p.roomId);
     if (!buffer) return;
 
-    // قفل لمنع التكرار
-    if (!this.busCompleteLocks) this.busCompleteLocks = new Map();
-    const lockKey = p.roomId;
+    const roomSnapshot = buffer.get();
+    const lockKey = `${p.roomId}:${roomSnapshot.currentRound}`;
     if (this.busCompleteLocks.get(lockKey)) return;
     this.busCompleteLocks.set(lockKey, p.playerId);
 
@@ -862,17 +956,20 @@ export class GameManager {
     }
 
     this.roundManager.clearTimer(roomCode);
+    this.busCompleteLocks.delete(`${roomCode}:${room.currentRound}`);
 
     // Draft Rescue Logic
     buffer.transact(draft => {
+      draft.phase = 'ai_processing';
       const round = draft.rounds[draft.currentRound];
       if (!round) return;
 
-      // CORE GUARD: Prevent double logic execution even if set check was slightly raced (transactional lock)
       if (round.endRoundInProgress) return;
       round.endRoundInProgress = true;
 
-      const active = draft.players.filter(pl => pl.id !== draft.refereeId && pl.id !== round?.banishedPlayerId);
+      const active = draft.players.filter(
+        pl => !pl.isOffline && pl.id !== draft.refereeId && pl.id !== round?.banishedPlayerId
+      );
 
       for (const player of active) {
         if (!round.submissions.some(s => s.playerId === player.id)) {
@@ -934,34 +1031,32 @@ export class GameManager {
 
   private finishRoundPhase(roomCode: string) {
     try {
-      // Clear any pending timers to make it idempotent
       this.roundManager.clearTimer(roomCode);
 
       const buffer = this.roomManager.getRoomBuffer(roomCode);
       if (!buffer) return;
 
-      // P2-11 FIX: Idempotency — prevent double finishRoundPhase for same round
-      const roundKey = `${roomCode}:${buffer.get().currentRound}`;
-      if (this.finishedRounds.has(roundKey)) {
-        console.log(`[FinishRoundPhase] Already processed ${roundKey}, skipping.`);
+      const roomBefore = buffer.get();
+      const canGoToRefereeReview =
+        (roomBefore.phase === 'playing' || roomBefore.phase === 'voting' || roomBefore.phase === 'ai_processing') && !!roomBefore.refereeId;
+      const idempotencyKey = canGoToRefereeReview
+        ? `${roomCode}:${roomBefore.currentRound}:referee_review`
+        : `${roomCode}:${roomBefore.currentRound}:results`;
+
+      if (this.finishedRounds.has(idempotencyKey)) {
+        console.log(`[FinishRoundPhase] Already processed ${idempotencyKey}, skipping.`);
         return;
-      }
-      this.finishedRounds.add(roundKey);
-      // Evict old entries to prevent memory leak (keep last 200)
-      if (this.finishedRounds.size > 200) {
-        const first = this.finishedRounds.values().next().value;
-        if (first) this.finishedRounds.delete(first);
       }
 
       let autoStart = false;
       let currentRound = 0;
       let totalRounds = 0;
+      let transitionSucceeded = false;
+
       buffer.transact(draft => {
         const round = draft.rounds[draft.currentRound];
         if (round) {
           round.powerUpUsedInRound = false;
-          // Bug 3 FIX: Clean up frozen player state between rounds
-          // frozenPlayerId exists at runtime but not in strict types
           const frozenId = (round as any).frozenPlayerId;
           if (frozenId) {
             const frozenPlayer = draft.players.find(pl => pl.id === frozenId);
@@ -970,23 +1065,23 @@ export class GameManager {
           }
         }
 
-        // FIX-AUTO-1: Must check both 'playing' AND 'voting' phases for referee_review routing.
-        // When voting+referee combo is used, phase='voting' after votes finish — not 'playing'.
-        const canGoToRefereeReview = (draft.phase === 'playing' || draft.phase === 'voting') && !!draft.refereeId;
-        const targetPhase = canGoToRefereeReview ? 'referee_review' : 'results';
+        const canGoToReferee = (draft.phase === 'playing' || draft.phase === 'voting' || draft.phase === 'ai_processing') && !!draft.refereeId;
+        const targetPhase = canGoToReferee ? 'referee_review' : 'results';
 
         if (!canTransition(draft.phase, targetPhase)) {
           console.error(`[finishRoundPhase] Invalid transition: ${draft.phase} → ${targetPhase}`);
           return;
         }
 
-        if (canGoToRefereeReview) {
+        if (canGoToReferee) {
           draft.phase = 'referee_review';
+          transitionSucceeded = true;
         } else {
           if (round?.resultsCommitted) return;
 
           draft.phase = 'results';
           this.roundManager.commitRoundResults(draft);
+          transitionSucceeded = true;
 
           if (!draft.refereeId && !draft.settings?.votingEnabled) {
             draft.nextRoundAt = Date.now() + 20000;
@@ -997,6 +1092,14 @@ export class GameManager {
         currentRound = draft.currentRound;
         totalRounds = draft.totalRounds;
       }, "finishRoundPhase");
+
+      if (!transitionSucceeded) return;
+
+      this.finishedRounds.add(idempotencyKey);
+      if (this.finishedRounds.size > 200) {
+        const first = this.finishedRounds.values().next().value;
+        if (first) this.finishedRounds.delete(first);
+      }
 
       const room = buffer.get();
       this.broadcastToRoom(room.code, { type: 'round_results', payload: { room } });
@@ -1052,8 +1155,25 @@ export class GameManager {
 
     const room = buffer.get();
     if (room.currentRound >= room.totalRounds - 1) {
+      if (room.phase === 'referee_review') {
+        this.finishRoundPhase(roomCode);
+      }
       this.handleGameEnd(roomCode);
       return;
+    }
+
+    // Must commit referee review before advancing rounds
+    if (room.phase === 'referee_review') {
+      this.finishRoundPhase(roomCode);
+      const afterReview = buffer.get();
+      if (afterReview.phase !== 'results') return;
+    } else if (room.phase === 'results') {
+      const round = room.rounds[room.currentRound];
+      if (round && !round.resultsCommitted) {
+        buffer.transact(draft => {
+          this.roundManager.commitRoundResults(draft);
+        }, 'nextRoundCommit');
+      }
     }
 
     buffer.transact(draft => {
@@ -1101,16 +1221,27 @@ export class GameManager {
     const buffer = this.roomManager.getRoomBuffer(p.roomId);
     if (!buffer || buffer.get().phase !== 'playing') return;
 
+    const room = buffer.get();
+    const round = room.rounds[room.currentRound];
+    if (round?.banishedPlayerId === p.playerId || round?.endRoundInProgress) return;
+
+    const isTyping = Object.values(answers).some(v => v.trim() !== '');
+    const typingKey = `${p.roomId}:${p.playerId}`;
+    const prev = this.lastTypingBroadcast.get(typingKey);
+    const now = Date.now();
+    if (prev && prev.isTyping === isTyping && now - prev.at < 1500) return;
+
     buffer.transact(draft => {
       const player = draft.players.find(pl => pl.id === p.playerId);
       if (player) {
         player.draftAnswers = answers;
       }
-    }, 'draft_update', (patches) => {
-      // Delta Sync: Send only the patches instead of the full room object
-      if (patches.length > 0) {
-        this.broadcastToRoom(p.roomId, { type: 'patch_update', payload: { patches } });
-      }
+    }, 'draft_update');
+
+    this.lastTypingBroadcast.set(typingKey, { isTyping, at: now });
+    this.broadcastToRoom(p.roomId, {
+      type: 'typing_status',
+      payload: { playerId: p.playerId, isTyping }
     });
   }
 
@@ -1226,19 +1357,41 @@ export class GameManager {
     const buffer = this.roomManager.getRoomBuffer(p.roomId);
     if (!buffer) return;
 
+    let banishTargetId: string | null = null;
+
     buffer.transact(draft => {
       const round = draft.rounds[draft.currentRound];
       if (!round || round.banishedPlayerId === p.playerId) return;
       if (draft.phase !== 'playing') return;
+      if (round.powerUpUsedInRound) return;
 
       if (payload.type === 'wildcard') {
         this.applyWildcard(draft, p.playerId, payload.category);
       } else if (payload.type === 'banish') {
+        if (!payload.targetPlayerId || payload.targetPlayerId === p.playerId) return;
         this.applyBanish(draft, p.playerId, payload.targetPlayerId);
+        banishTargetId = payload.targetPlayerId;
+        round.banishedByPlayerId = p.playerId;
       }
     }, "activatePowerUp");
 
     const room = buffer.get();
+    const actor = room.players.find(pl => pl.id === p.playerId);
+
+    if (banishTargetId) {
+      const targetWs = this.playerManager.getSocket(banishTargetId);
+      if (targetWs) {
+        this.send(targetWs, {
+          type: 'player_banished',
+          payload: { playerId: banishTargetId, banishedBy: actor?.name || 'لاعب' }
+        });
+      }
+      this.broadcastToRoom(room.code, {
+        type: 'powerup_activated',
+        payload: { type: 'banish', playerName: actor?.name || 'لاعب' }
+      });
+    }
+
     this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
   }
 
@@ -1258,7 +1411,11 @@ export class GameManager {
     const possibleWords = WildcardService.getInstance().getWords(letter, category);
     const usedAnswers = round.submissions.flatMap((sub: any) => sub.answers[category] ? [sub.answers[category]] : []);
     const freshWords = possibleWords.filter(w => !usedAnswers.includes(w));
-    const chosen = freshWords.length > 0 ? freshWords[Math.floor(Math.random() * freshWords.length)] : (possibleWords[0] || 'جمل');
+    const pool = freshWords.length > 0 ? freshWords : possibleWords;
+    const chosen = pool.length > 0
+      ? pool[Math.floor(Math.random() * pool.length)]
+      : null;
+    if (!chosen) return;
 
     const submission = round.submissions.find((s: any) => s.playerId === playerId);
     if (submission) {
@@ -1291,6 +1448,12 @@ export class GameManager {
     const buffer = this.roomManager.getRoomBuffer(p.roomId);
     if (!buffer) return;
 
+    const voteKey = `${p.playerId}:${votePayload.requesterId}:${votePayload.category}`;
+    const now = Date.now();
+    const lastVote = this.lastVoteTime.get(voteKey) || 0;
+    if (now - lastVote < this.VOTE_COOLDOWN_MS) return;
+    this.lastVoteTime.set(voteKey, now);
+
     let shouldFinish = false;
     buffer.transact(draft => {
       if (draft.phase !== 'voting') return;
@@ -1309,6 +1472,8 @@ export class GameManager {
 
       item.voterIds.push(p.playerId);
       if (!item.votes) item.votes = { yes: 0, no: 0 };
+      if (!item.voteMap) item.voteMap = {};
+      item.voteMap[p.playerId] = votePayload.vote;
       if (votePayload.vote === 'yes') item.votes.yes++;
       else item.votes.no++;
 
@@ -1353,7 +1518,9 @@ export class GameManager {
     const buffer = this.roomManager.getRoomBuffer(p.roomId);
     if (!buffer) return;
 
+    let startedVoting = false;
     buffer.transact(draft => {
+      if (draft.phase !== 'results' && draft.phase !== 'referee_review') return;
       const round = draft.rounds[draft.currentRound];
       const ans = round?.validatedAnswers.find(a => a.playerId === p.playerId && a.category === payload.category);
       if (!ans || !ans.isValid || ans.isPendingVote) return;
@@ -1363,7 +1530,7 @@ export class GameManager {
 
       if (!draft.voteQueue) draft.voteQueue = [];
       const eligibleVoterIds = draft.players
-        .filter(pl => pl.id !== p.playerId && pl.id !== draft.refereeId && pl.id !== round.banishedPlayerId)
+        .filter(pl => !pl.isOffline && pl.id !== p.playerId && pl.id !== draft.refereeId && pl.id !== round.banishedPlayerId)
         .map(pl => pl.id);
 
       draft.voteQueue.push({
@@ -1376,10 +1543,24 @@ export class GameManager {
         voterIds: [],
         votes: { yes: 0, no: 0 }
       });
+
+      if (eligibleVoterIds.length > 0) {
+        draft.phase = 'voting';
+        round.voteEndTime = Date.now() + 30000;
+        startedVoting = true;
+      }
     }, "requestVote");
 
     const room = buffer.get();
-    this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
+    if (startedVoting) {
+      this.broadcastToRoom(room.code, {
+        type: 'voting_start',
+        payload: { room, validatedAnswers: room.rounds[room.currentRound]?.validatedAnswers }
+      });
+      this.roundManager.setRoundTimer(room.code, () => this.handleVoteTimeout(room.code), 30000);
+    } else {
+      this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
+    }
   }
 
   // ---------- Host Control Methods ----------
@@ -1390,8 +1571,10 @@ export class GameManager {
     if (!p) return;
     const buffer = this.roomManager.getRoomBuffer(p.roomId);
     if (!buffer) return;
-    const isHost = buffer.get().players.find(pl => pl.id === p.playerId)?.isHost;
+    const room = buffer.get();
+    const isHost = room.players.find(pl => pl.id === p.playerId)?.isHost;
     if (!isHost) return;
+    if (room.phase !== 'voting') return;
 
     buffer.transact(draft => {
       // Mark all pending answers as valid (force-accept)
@@ -1412,18 +1595,18 @@ export class GameManager {
       this.roundManager.calculateAnswerScores(draft);
     }, 'host_resolve_votes');
 
-    const room = buffer.get();
-    this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
+    const updatedRoom = buffer.get();
+    this.broadcastToRoom(updatedRoom.code, { type: 'sync_state', payload: { room: updatedRoom } });
 
     // BUG-8 FIX: Send confirmation toast to host
-    const hostWs = this.playerManager.getSocket(room.hostId);
+    const hostWs = this.playerManager.getSocket(updatedRoom.hostId);
     if (hostWs) {
       this.send(hostWs, { type: 'toast', payload: { message: '✅ تم قبول جميع الإجابات المتنازع عليها', type: 'success' } });
     }
 
     // FIX: After force-resolving all votes, finish round phase
-    this.roundManager.clearTimer(room.code);
-    this.finishRoundPhase(room.code);
+    this.roundManager.clearTimer(updatedRoom.code);
+    this.finishRoundPhase(updatedRoom.code);
   }
 
   /** Host can adjust a player's score by delta */
@@ -1463,7 +1646,6 @@ export class GameManager {
         }
       }
     }, 'host_adjust_score');
-    this.roundManager.clearTimer(p.roomId);
     const room = buffer.get();
     this.broadcastToRoom(room.code, { type: 'sync_state', payload: { room } });
   }
@@ -1488,6 +1670,7 @@ export class GameManager {
         ans.isValid = false;
         ans.reason = payload.reason || 'تم الرفض بواسطة الحكم/المضيف';
         this.roundManager.calculateAnswerScores(draft);
+        this.recalculatePlayerTotals(draft);
         draft.nextRoundAt = undefined;
 
         this.addAuditLogEntry(
@@ -1635,13 +1818,15 @@ export class GameManager {
     if (!isHost) return;
     if (targetPlayerId === p.playerId) return;
 
-    // إزالة اللاعب من الغرفة (يجب إعلام اللاعب المطروف قبل الحذف)
+    // إزالة اللاعب نهائياً — الطرد ليس انقطاع اتصال
     const targetWsBeforeRemove = this.playerManager.getSocket(targetPlayerId);
-    if (targetWsBeforeRemove) {
-      this.sendError(targetWsBeforeRemove, 'تم طردك من الغرفة بواسطة المضيف');
+
+    if (!this.kickedPlayers.has(p.roomId)) {
+      this.kickedPlayers.set(p.roomId, new Set());
     }
-    
-    this.roomManager.removePlayerFromRoom(p.roomId, targetPlayerId);
+    this.kickedPlayers.get(p.roomId)!.add(targetPlayerId);
+
+    this.roomManager.removePlayerFromRoom(p.roomId, targetPlayerId, true);
 
     // نفس المنطق المستخدم في handleDisconnect - تنظيف الأصوات والتصويتات
     let shouldFinishVoting = false;
@@ -1678,15 +1863,15 @@ export class GameManager {
         }
 
         if (draft.phase === 'voting' && draft.voteQueue.length === 0) {
-          this.roundManager.calculateAnswerScores(draft);
-          shouldFinishVoting = true;
+          const stillPending = draft.rounds[draft.currentRound]?.validatedAnswers
+            .some((a: any) => a.isPendingVote);
+          if (!stillPending) {
+            this.roundManager.calculateAnswerScores(draft);
+            shouldFinishVoting = true;
+          }
         }
       }
     }, "kickPlayerCleanup");
-
-    if (shouldFinishVoting) {
-      this.finishRoundPhase(p.roomId);
-    }
 
     if (targetWsBeforeRemove) {
       // BUG FIX #2: Send 'kicked' (not just toast) so client redirects the kicked player to home
@@ -1699,6 +1884,7 @@ export class GameManager {
 
     const updated = buffer.get();
     this.broadcastToRoom(updated.code, { type: 'sync_state', payload: { room: updated } });
+    this.broadcastToRoom(updated.code, { type: 'player_left', payload: { players: updated.players } });
     this.broadcastToRoom(updated.code, { type: 'player_kicked', payload: { playerId: targetPlayerId } });
 
     if (shouldFinishVoting) {
@@ -1828,6 +2014,7 @@ export class GameManager {
       // VOTE-ELIGIBILITY-FIX: Exclude both referee and banished player
       const eligibleVoterIds = draft.players
         .filter(pl =>
+          !pl.isOffline &&
           pl.id !== p.playerId &&
           pl.id !== draft.refereeId &&
           pl.id !== round.banishedPlayerId
@@ -1845,9 +2032,8 @@ export class GameManager {
         votes: { yes: 0, no: 0 }
       });
 
-      // V3-3 FIX: Only set phase to voting if we're NOT already in results/referee_review
-      // This prevents phase regression when someone appeals from the results screen
-      if (draft.phase !== 'voting' && draft.phase !== 'results' && draft.phase !== 'referee_review') {
+      // Re-vote from results or referee review moves back to voting
+      if (draft.phase === 'results' || draft.phase === 'referee_review') {
         draft.phase = 'voting';
       }
 
@@ -1877,6 +2063,7 @@ export class GameManager {
     if (!buffer) return;
 
     this.roundManager.clearTimer(roomCode);
+    this.kickedPlayers.delete(roomCode);
 
     // V3-6 FIX: Clean roomSocketIndex for offline players before removing them
     const roomBefore = buffer.get();
@@ -1943,7 +2130,9 @@ export class GameManager {
 
   // Helpers
   private send(ws: WebSocket, message: WSMessage) {
-    if (message.type !== 'ping') console.log(`[GameManager] Sending: ${message.type}`);
+    if (process.env.NODE_ENV !== 'production' && message.type !== 'ping') {
+      console.log(`[GameManager] Sending: ${message.type}`);
+    }
     if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(message));
   }
 
@@ -1977,38 +2166,19 @@ export class GameManager {
   }
 
   // FIX (#3): Phase 3 Score Utilities
-  // BUG-1 FIX: After recalculating from rounds, add back any manual host adjustments
   private recalculatePlayerTotals(draft: GameRoom) {
-    // Reset all player scores
-    draft.players.forEach(p => {
-      p.score = 0;
-      p.totalEarnedPoints = 0;
-    });
-
-    // Sum all rounds structurally
-    draft.rounds.forEach(round => {
-      round.validatedAnswers.forEach(ans => {
-        if (ans.isValid) {
-          const player = draft.players.find(p => p.id === ans.playerId);
-          if (player) {
-            player.score += ans.score || 0;
-            player.totalEarnedPoints += ans.score || 0;
-          }
-        }
-      });
-    });
-
-    // Re-apply any manual host score adjustments on top of round-calculated scores
-    draft.players.forEach(p => {
-      if (p.manualScoreAdjustment) {
-        p.score = Math.max(0, p.score + p.manualScoreAdjustment);
-      }
-    });
+    this.roundManager.recalculatePlayerTotals(draft);
   }
 
   private handlePlayerAppeal(ws: WebSocket, payload: { targetPlayerId: string; category: string }) {
     const p = this.playerManager.getPlayer(ws);
     if (!p) return;
+
+    if (payload.targetPlayerId === p.playerId) {
+      this.appealAnswer(ws, { category: payload.category as Category });
+      return;
+    }
+
     const buffer = this.roomManager.getRoomBuffer(p.roomId);
     if (!buffer) return;
 

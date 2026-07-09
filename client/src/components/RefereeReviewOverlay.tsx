@@ -45,7 +45,7 @@ export function RefereeReviewOverlay() {
                 <div className="retro-overlay p-6">
                     {/* Header */}
                     <div className="text-center mb-6">
-                        <div className="inline-flex items-center gap-2 bg-[#7c3aed] text-white px-4 py-2 rounded-full border-2 border-[#4c1d95] mb-2 shadow-[2px_2px_0_0_#2e1065]">
+                        <div className="inline-flex items-center gap-2 bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] text-white px-5 py-2 rounded-full mb-2 shadow-md">
                             <Gavel className="w-5 h-5" />
                             <span className="font-bold font-pixel-text">مراجعة الحكم</span>
                         </div>
@@ -64,7 +64,7 @@ export function RefereeReviewOverlay() {
                             if (!player) return null;
 
                             return (
-                                <div key={playerId} className="bg-[#FFFDD1] p-4 rounded-xl border-2 border-[#4c1d95]">
+                                <div key={playerId} className="surface-card p-4">
                                     {/* Player Header */}
                                     <div className="flex items-center gap-2 mb-3 pb-2 border-b-2 border-[#4c1d95]/20">
                                         <Users className="w-4 h-4 text-[#7c3aed]" />
@@ -125,7 +125,8 @@ export function RefereeReviewOverlay() {
                     <div className="text-center">
                         <Button
                             onClick={handleApprove}
-                            className="h-14 px-8 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold font-pixel-title text-xl border-b-4 border-green-700 active:border-b-0 active:translate-y-1 shadow-lg"
+                            className="h-14 px-8 text-xl"
+                            variant="primary"
                         >
                             <CheckCircle className="w-6 h-6 mr-2" />
                             الموافقة على النتائج

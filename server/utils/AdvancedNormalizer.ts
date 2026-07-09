@@ -124,7 +124,6 @@ export class AdvancedNormalizer {
         'طماطم': ['طماطا'],
 
         // More common variations
-        'محمد': ['محمود'],  // Kept original
         'مريم': ['مريام'],
         'ياسمين': ['ياسمين', 'يسمين'],
         'نور': ['نور'],

@@ -48,9 +48,8 @@ function SquarePowerUp({ type, title, cost, icon: Icon, status, onActivate }: Sq
 
     if (isUsed) {
         return (
-            <div className="w-32 h-32 md:w-40 md:h-40 bg-black/40 border-4 border-dashed border-white/20 rounded-xl flex flex-col items-center justify-center grayscale relative overflow-hidden">
-                <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.5)_50%)] bg-[length:100%_4px] opacity-50" />
-                <span className="font-pixel-title text-white/50 text-xl">مستخدم</span>
+            <div className="w-32 h-32 md:w-40 md:h-40 bg-gray-100/80 border border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center grayscale relative overflow-hidden opacity-70">
+                <span className="font-bold text-gray-500 text-xl">مستخدم</span>
             </div>
         );
     }
@@ -61,12 +60,12 @@ function SquarePowerUp({ type, title, cost, icon: Icon, status, onActivate }: Sq
             className={cn(
                 "relative w-32 h-32 md:w-40 md:h-40 rounded-xl flex flex-col items-center justify-center gap-2 group transition-all active:scale-95",
                 theme.bg,
-                isDisabled ? "opacity-70 grayscale cursor-not-allowed pointer-events-none" : "hover:scale-105 hover:-translate-y-1 hover:brightness-110 shadow-[4px_4px_0_0_rgba(0,0,0,0.5)] border-[3px]"
+                isDisabled ? "opacity-70 grayscale cursor-not-allowed pointer-events-none" : "hover:scale-105 hover:-translate-y-1 hover:brightness-110 shadow-[0_8px_24px_rgba(0,0,0,0.2)] border border-white/30"
             )}
         >
             {/* Price Badge */}
             <div className={cn(
-                "absolute -top-3 -right-3 px-2 py-1 bg-black border-2 border-white/50 text-white font-pixel-text text-xs md:text-sm font-bold flex items-center gap-1 shadow-sm z-20",
+                "absolute -top-3 -right-3 px-2.5 py-1 bg-gray-900/90 border border-white/20 text-white text-xs md:text-sm font-bold flex items-center gap-1 shadow-lg rounded-full z-20 backdrop-blur-sm",
                 isLocked && "text-red-400 border-red-400"
             )}>
                 <Zap className={cn("w-3 h-3", isLocked ? "text-red-400" : "text-yellow-400 fill-yellow-400")} />
@@ -102,7 +101,7 @@ export function PowerUpMenu() {
 
     const getStatus = (cost: number, used: boolean) => {
         if (used) return 'used';
-        // If someone else has active wildcard, disable mine
+        if (currentRound?.powerUpUsedInRound) return 'disabled';
         if (currentRound?.activePowerUp && currentRound.activePowerUp.playerId !== currentPlayer?.id) return 'disabled';
 
         const points = currentPlayer?.totalEarnedPoints || 0;
@@ -113,7 +112,7 @@ export function PowerUpMenu() {
         <>
             <Button
                 onClick={toggleOpen}
-                className="retro-action-btn h-10 md:h-14 px-4 md:px-6 flex items-center justify-center gap-2 font-pixel-title relative overflow-hidden bg-gradient-to-b from-[#fbbf24] to-[#f59e0b] text-[#78350f] group rounded-xl !shadow-[3px_3px_0_0_#78350f] !border-[#78350f] hover:brightness-110"
+                className="h-10 md:h-14 px-4 md:px-6 flex items-center justify-center gap-2 font-bold relative overflow-hidden bg-gradient-to-b from-amber-400 to-amber-500 text-amber-950 group rounded-xl shadow-[0_4px_16px_rgba(251,191,36,0.4)] border border-amber-500/40 hover:brightness-110"
             >
                 {/* Shimmer Effect */}
                 <motion.div
@@ -147,11 +146,10 @@ export function PowerUpMenu() {
                                     transition={{ type: "spring", duration: 0.3 }}
                                     className="relative w-full max-w-lg z-[10000]"
                                 >
-                                    <RetroCard className="border-[4px] shadow-2xl relative overflow-visible">
-                                        {/* Close Button */}
+                                    <RetroCard className="shadow-2xl relative overflow-visible">
                                         <button
                                             onClick={() => setIsOpen(false)}
-                                            className="absolute -top-5 -left-5 bg-red-500 text-white p-2 rounded-lg border-[3px] border-[#7f1d1d] shadow-[3px_3px_0_0_#4a0404] hover:scale-105 active:scale-95 transition-transform z-50"
+                                            className="absolute -top-4 -left-4 bg-red-500 text-white p-2 rounded-full shadow-lg hover:scale-105 active:scale-95 transition-transform z-50"
                                         >
                                             <X className="w-6 h-6 stroke-[3]" />
                                         </button>
@@ -191,7 +189,7 @@ export function PowerUpMenu() {
                                         </div>
 
                                         <div className="mt-4 text-center">
-                                            <div className="inline-flex items-center gap-2 bg-[#4c1d95] text-white px-4 py-2 rounded-lg font-pixel-text border-2 border-[#2e1065]">
+                                            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] text-white px-5 py-2.5 rounded-full font-semibold shadow-md">
                                                 <span>رصيدك الحالي:</span>
                                                 <span className="text-yellow-400 font-bold text-xl">{currentPlayer?.totalEarnedPoints || 0}</span>
                                                 <Zap className="w-4 h-4 text-yellow-400 fill-yellow-400" />

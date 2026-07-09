@@ -29,8 +29,7 @@ if (redisClient) {
                     if (ws) {
                         gameManager.handleDisconnect(ws);
                     } else {
-                        // If no socket, ensure player is removed from room if still present
-                        gameManager.removePlayerFromRoom(code, player.id); // Use public method
+                        gameManager.removePlayerFromRoom(code, player.id, false);
                     }
                 }
             }

@@ -1,4 +1,4 @@
-import { Copy, Check, Play, Users, Shield, Crown, Sparkles, X, Home, LogOut, Settings, UserX, Wifi, WifiOff, Minus, Plus, Gavel } from 'lucide-react';
+import { Copy, Check, Play, Users, Shield, Crown, Sparkles, X, Home, LogOut, Settings, UserX, Wifi, Minus, Plus, Gavel } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -69,25 +69,13 @@ export default function Lobby() {
 
         {showTutorial && <Tutorial onClose={() => setShowTutorial(false)} />}
 
-        {/* FIX: Reconnecting indicator */}
-        {state.reconnecting && (
-          <motion.div
-            className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-2 bg-yellow-400 border-[3px] border-yellow-700 rounded-full shadow-lg font-pixel-text text-yellow-900 text-sm font-bold"
-            initial={{ y: -50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-          >
-            <WifiOff className="w-4 h-4 animate-pulse" />
-            جاري إعادة الاتصال...
-          </motion.div>
-        )}
-
         <motion.div
           className="text-center mb-6"
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
         >
           <motion.div
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-white to-[#faf5ff] border-[3px] border-[#4c1d95] rounded-full mb-4 shadow-[4px_4px_0_0_#2e1065,_0_0_20px_rgba(139,92,246,0.2)]"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-white/90 backdrop-blur-md border border-purple-200/50 rounded-full mb-4 shadow-lg"
             animate={isMobile ? {} : { scale: [1, 1.05, 1] }}
             transition={{ repeat: Infinity, duration: 2 }}
           >
@@ -117,7 +105,7 @@ export default function Lobby() {
                   {room.code.split('').map((char, i) => (
                     <motion.span
                       key={i}
-                      className="w-14 h-16 flex items-center justify-center text-3xl font-bold bg-[#4c1d95] text-white rounded-lg shadow-[4px_4px_0_0_#2e1065,_0_0_10px_rgba(139,92,246,0.3)] border-2 border-[#7c3aed] font-pixel-title"
+                      className="w-14 h-16 flex items-center justify-center text-3xl font-bold bg-gradient-to-b from-[#8b5cf6] to-[#7c3aed] text-white rounded-xl shadow-[0_4px_16px_rgba(124,58,237,0.35)] border border-purple-400/30 font-pixel-title"
                       initial={isMobile ? { opacity: 0 } : { rotateY: 90 }}
                       animate={isMobile ? { opacity: 1 } : { rotateY: 0 }}
                       transition={{ delay: 0.3 + i * 0.1 }}
@@ -130,7 +118,7 @@ export default function Lobby() {
                   variant="outline"
                   size="icon"
                   onClick={copyCode}
-                  className="h-16 w-16 border-[3px] border-[#4c1d95] text-[#4c1d95] hover:bg-[#4c1d95] hover:text-white bg-white shadow-[4px_4px_0_0_#2e1065] active:translate-y-[2px] active:shadow-[2px_2px_0_0_#4c1d95] rounded-none transition-all"
+                  className="h-16 w-16 rounded-xl"
                   data-testid="button-copy-code"
                 >
                   {copied ? (
@@ -175,7 +163,7 @@ export default function Lobby() {
               {isHost && (
                 <div className="flex items-center justify-between p-3 bg-white/50 rounded-lg border-2 border-[#4c1d95]/20">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-[#4c1d95] rounded-lg flex items-center justify-center text-white font-pixel-title text-sm shadow-[2px_2px_0_0_#2e1065]">
+                    <div className="w-8 h-8 bg-gradient-to-br from-[#8b5cf6] to-[#7c3aed] rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm">
                       {room.totalRounds}
                     </div>
                     <div>
@@ -199,7 +187,7 @@ export default function Lobby() {
                       size="icon"
                       onClick={() => updateSettings({ totalRounds: Math.min(20, room.totalRounds + 1) })}
                       disabled={room.totalRounds >= 20}
-                      className="w-9 h-9 bg-[#4c1d95] border-[2px] border-[#2e1065] text-white hover:bg-[#7c3aed] shadow-[2px_2px_0_0_#2e1065] active:translate-y-[1px] active:shadow-none transition-all rounded-lg"
+                      className="w-9 h-9 rounded-lg"
                     >
                       <Plus className="w-4 h-4" />
                     </Button>
@@ -211,9 +199,9 @@ export default function Lobby() {
               {isHost ? (
                 <button
                   onClick={() => updateSettings({ votingEnabled: !room.settings?.votingEnabled })}
-                  className={`w-full flex items-center justify-between p-3 rounded-lg border-[3px] transition-all active:translate-y-[1px] active:shadow-none ${room.settings?.votingEnabled
-                    ? 'bg-[#7c3aed]/10 border-[#7c3aed] shadow-[0_3px_0_0_#4c1d95]'
-                    : 'bg-white/50 border-[#4c1d95]/20 shadow-[0_2px_0_0_#4c1d95]/10'
+                  className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all ${room.settings?.votingEnabled
+                    ? 'bg-purple-500/10 border-purple-300/50 shadow-sm'
+                    : 'bg-white/60 border-purple-200/30'
                     }`}
                 >
                   <div className="flex items-center gap-2">
@@ -242,6 +230,18 @@ export default function Lobby() {
                     <span className="text-xs font-bold text-[#4c1d95] font-pixel-text">نظام التحكيم الديمقراطي مفعل</span>
                   </div>
                 )
+              )}
+
+              {room.settings?.customCategories && room.settings.customCategories.length > 0 && (
+                <div className="flex items-center gap-2 p-2 bg-amber-500/10 rounded-lg border border-amber-500/30 justify-center mb-2">
+                  <span className="text-xs font-bold text-amber-800 font-pixel-text">الإجابات المخصصة تحتاج تصويت اللاعبين</span>
+                </div>
+              )}
+
+              {room.settings?.votingEnabled && room.players.length === 1 && (
+                <div className="flex items-center gap-2 p-2 bg-[#7c3aed]/10 rounded-lg border border-[#7c3aed]/30 justify-center mb-2">
+                  <span className="text-xs font-bold text-[#4c1d95] font-pixel-text">في اللعب الفردي تُرفض الإجابات غير الموجودة في القاموس — فعّل التصويت مع أصدقاء لاقتراح كلمات جديدة</span>
+                </div>
               )}
 
               <AnimatePresence>
@@ -286,7 +286,7 @@ export default function Lobby() {
             transition={{ delay: 0.25 }}
             className="mb-4"
           >
-            <RetroCard className="border-[3px] border-dashed">
+            <RetroCard className="border-dashed border-purple-300/40">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-full bg-[#7c3aed]/20 flex items-center justify-center border-2 border-[#4c1d95]">
@@ -386,7 +386,7 @@ export default function Lobby() {
 
           {currentPlayer?.isReady && !isHost && (
             <motion.div
-              className="text-center p-4 bg-gradient-to-b from-white to-[#faf5ff] rounded-xl border-[3px] border-[#4c1d95] shadow-[4px_4px_0_0_#2e1065,_0_0_15px_rgba(139,92,246,0.2)]"
+              className="text-center p-4 surface-card"
               animate={{ scale: [1, 1.02, 1] }}
               transition={{ repeat: Infinity, duration: 2 }}
             >
@@ -407,11 +407,8 @@ export default function Lobby() {
             >
   <div className="relative group">
     <Button
-      variant="default"
-      className={`w-full h-16 text-lg border-[3px] text-white shadow-[0_4px_0_0_rgba(0,0,0,0.2)] active:translate-y-1 active:shadow-none transition-all relative font-pixel-button ${canStart
-        ? 'bg-[#10b981] hover:bg-[#059669] border-[#047857]'
-        : 'bg-[#6d28d9]/50 hover:bg-[#5b21b6]/50 border-[#4c1d95]/50 grayscale cursor-not-allowed'
-        }`}
+      variant={canStart ? 'primary' : 'secondary'}
+      className={`w-full h-16 text-lg relative font-pixel-title ${!canStart ? 'opacity-50 grayscale cursor-not-allowed' : ''}`}
       onClick={() => {
         if (!canStart) {
           toast({

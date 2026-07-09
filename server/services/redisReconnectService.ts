@@ -43,6 +43,7 @@ export class InMemoryReconnectService implements ReconnectService {
     }
 
     async restore(token: string): Promise<{ roomId: string; playerId: string; newToken: string } | null> {
+        this.purgeExpired();
         const data = this.tokens.get(token);
         if (!data) return null;
         if (Date.now() > data.expires) {
@@ -55,5 +56,12 @@ export class InMemoryReconnectService implements ReconnectService {
         // Issue fresh rolling token
         const newToken = await this.issueToken(data.playerId, data.roomId);
         return { playerId: data.playerId, roomId: data.roomId, newToken };
+    }
+
+    private purgeExpired() {
+        const now = Date.now();
+        for (const [token, data] of this.tokens.entries()) {
+            if (now > data.expires) this.tokens.delete(token);
+        }
     }
 }

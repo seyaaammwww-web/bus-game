@@ -1,9 +1,10 @@
 import * as fs from 'fs';
 import { promises as fsAsync } from 'fs';
 import * as path from 'path';
-import { arabicWords } from '../../shared/arabicWords';
+import { arabicWords, availableLetters } from '../../shared/arabicWords';
 import { AdvancedNormalizer } from '../utils/AdvancedNormalizer';
 import { SmartToleranceEngine } from '../utils/SmartToleranceEngine';
+import { hasGarbagePattern, isMostlyArabic } from '../utils/answerHeuristics';
 
 // FIX (#3): Serialized async write queue — prevents concurrent write corruption
 let writeQueuePromise: Promise<void> = Promise.resolve();
@@ -90,8 +91,15 @@ export class WildcardService {
 
             if (dbPath && fs.existsSync(dbPath)) {
                 const data = fs.readFileSync(dbPath, 'utf-8');
-                this.database = JSON.parse(data);
-                console.log(`✅ Wildcard Database loaded from: ${dbPath}`);
+                const parsed = JSON.parse(data) as WildcardDatabase;
+                this.database = this.sanitizeDatabase(this.filterValidLetterKeys(parsed));
+                const keys = Object.keys(this.database);
+                const nonArabic = keys.filter(k => !/^[\u0600-\u06FF]/.test(k) || /^\d+$/.test(k));
+                if (keys.length > 0 && nonArabic.length / keys.length > 0.1) {
+                    console.warn(`⚠️ Wildcard DB has ${nonArabic.length}/${keys.length} non-Arabic letter keys — run cleanDatabase.ts`);
+                }
+                console.log(`✅ Wildcard Database loaded from: ${dbPath} (${keys.length} Arabic letters)`);
+                this.supplementFromFallback();
             } else {
                 console.error(`❌ Wildcard Database NOT found in any candidate path.`);
                 if (!arabicWords || Object.keys(arabicWords).length === 0) {
@@ -107,6 +115,33 @@ export class WildcardService {
         }
     }
 
+    /** Merge core words from arabicWords.ts when missing from the main JSON DB. */
+    private supplementFromFallback(): void {
+        let added = 0;
+        for (const [letter, cats] of Object.entries(arabicWords)) {
+            const dbKey = this.getDatabaseKey(letter);
+            if (!dbKey) continue;
+            if (!this.database[dbKey]) this.database[dbKey] = {};
+            for (const [category, words] of Object.entries(cats)) {
+                if (!this.database[dbKey][category]) this.database[dbKey][category] = [];
+                const existing = new Set(
+                    this.database[dbKey][category].map(w => this.normalizer.normalize(w))
+                );
+                for (const word of words) {
+                    const norm = this.normalizer.normalize(word);
+                    if (!existing.has(norm)) {
+                        this.database[dbKey][category].push(word);
+                        existing.add(norm);
+                        added++;
+                    }
+                }
+            }
+        }
+        if (added > 0) {
+            console.log(`✅ Supplemented ${added} core words from arabicWords fallback`);
+        }
+    }
+
     private loadSynonyms(): void {
         try {
             const synPath = path.join(process.cwd(), 'server/data/synonyms.json');
@@ -119,15 +154,53 @@ export class WildcardService {
         }
     }
 
+    private isValidLetterKey(key: string): boolean {
+        if (/^\d+$/.test(key)) return false;
+        if (/^[a-zA-Z]/.test(key)) return false;
+        if (availableLetters.includes(key)) return true;
+        const norm = this.normalizer.normalize(key);
+        return availableLetters.some(l => this.normalizer.normalize(l) === norm);
+    }
+
+    private filterValidLetterKeys(db: WildcardDatabase): WildcardDatabase {
+        const filtered: WildcardDatabase = {};
+        for (const [letter, categories] of Object.entries(db)) {
+            if (this.isValidLetterKey(letter)) {
+                filtered[letter] = categories;
+            }
+        }
+        return filtered;
+    }
+
+    /** Drop polluted short/garbage entries that cause false fuzzy matches. */
+    private sanitizeDatabase(db: WildcardDatabase): WildcardDatabase {
+        const clean: WildcardDatabase = {};
+        for (const [letter, categories] of Object.entries(db)) {
+            clean[letter] = {};
+            for (const [category, words] of Object.entries(categories)) {
+                clean[letter][category] = words.filter(w => {
+                    const trimmed = w.trim();
+                    if (trimmed.length < 3) return false;
+                    if (!/^[\u0600-\u06FF]+$/.test(trimmed)) return false;
+                    if (/(.)\1{2,}/.test(trimmed)) return false;
+                    const norm = this.normalizer.normalize(trimmed);
+                    return norm.length >= 3;
+                });
+            }
+        }
+        return clean;
+    }
+
     /**
      * Helper to find the correct database key for a given letter
      */
     private getDatabaseKey(letter: string): string | null {
-        if (this.database[letter]) return letter;
+        if (this.database[letter] && this.isValidLetterKey(letter)) return letter;
 
-        // WS5: Use this.normalizer.normalize (same as validateWord) for consistency
         const normalized = this.normalizer.normalize(letter);
-        const key = Object.keys(this.database).find(k => this.normalizer.normalize(k) === normalized);
+        const key = Object.keys(this.database)
+            .filter(k => this.isValidLetterKey(k))
+            .find(k => this.normalizer.normalize(k) === normalized);
         return key || null;
     }
 
@@ -169,24 +242,26 @@ export class WildcardService {
                 !a.includes('(')
             );
 
-            if (availableAnswers.length === 0) {
-                // If filtered list is empty, fall back to anything
-                availableAnswers = categoryAnswers;
-            }
+            if (availableAnswers.length === 0) continue;
 
             const randomAnswer = availableAnswers[Math.floor(Math.random() * availableAnswers.length)];
             answers[category] = randomAnswer;
         }
-        return answers;
+        return Object.keys(answers).length > 0 ? answers : null;
     }
 
     /**
      * Validate a word against the database with ADVANCED smart logic
      */
     validateWord(letter: string, category: string, word: string): boolean {
+        const trimmed = word.trim();
+        if (!trimmed || trimmed.length < 3) return false;
+        if (!isMostlyArabic(trimmed)) return false;
+        if (hasGarbagePattern(trimmed)) return false;
+
         // 1. Basic cleaning using advanced normalizer
-        const normalizedInput = this.normalizer.normalize(word);
-        if (!normalizedInput || normalizedInput.length < 2) return false;
+        const normalizedInput = this.normalizer.normalize(trimmed);
+        if (!normalizedInput || normalizedInput.length < 3) return false;
 
         // 2. Cache Check (O(1))
         const cacheKey = `${letter}:${category}:${normalizedInput}`;

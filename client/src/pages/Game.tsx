@@ -14,15 +14,15 @@ import { BanishOverlay } from '@/components/BanishOverlay';
 import { BanishNotification } from '@/components/BanishNotification';
 import { PowerUpMenu } from '@/components/PowerUpMenu';
 import { VotingOverlay } from '@/components/VotingOverlay';
-import { Confetti } from '@/components/Confetti';
 import { useGame } from '@/lib/gameContext';
 import { categories, type Category, type RoundAnswers } from '@shared/schema';
 import { AlertTriangle, Send, User, Users, Globe, PawPrint, Box, LogOut, Zap, Eye, Trophy, Flame, Sparkles, Crown, Skull, Pyramid, Gavel } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { playCountdownSound, playCountdownFinalSound, playRoundStart, playBusSound, playFreezeSound, playWildcardSound, playBanishSound, playSubmitSound, playClickSound, playRushActivateSound, playBonusSound, playTypeSound } from '@/lib/sounds';
+import { playCountdownSound, playCountdownFinalSound, playRoundStart, playBusSound, playFreezeSound, playWildcardSound, playBanishSound, playSubmitSound, playClickSound, playRushActivateSound } from '@/lib/sounds';
 import { RetroCard } from '@/components/ui/RetroCard';
 import { cn } from '@/lib/utils';
+import { categoryGradients } from '@/lib/designTokens';
 
 const categoryIcons: Record<Category, any> = {
   'ولد': User,
@@ -30,14 +30,6 @@ const categoryIcons: Record<Category, any> = {
   'بلد': Globe,
   'حيوان': PawPrint,
   'جماد': Box,
-};
-
-const categoryColors: Record<Category, string> = {
-  'ولد': 'category-boy',
-  'بنت': 'category-girl',
-  'بلد': 'category-country',
-  'حيوان': 'category-animal',
-  'جماد': 'category-thing',
 };
 
 // Slot Machine Letter Scramble Component
@@ -81,6 +73,7 @@ export default function Game() {
     banishOverlay,
     setBanishOverlay,
     sendDraftUpdate,
+    setTimerPaused,
   } = useGame();
 
   const isMobile = useIsMobile();
@@ -154,13 +147,16 @@ export default function Game() {
   }, [room.currentRound]);
 
   useEffect(() => {
+    setTimerPaused(showCountdown);
+  }, [showCountdown, setTimerPaused]);
+
+  useEffect(() => {
     if (showCountdown && countdown > 0) {
       playCountdownSound();
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
       return () => clearTimeout(timer);
-    } else if (countdown === 0) {
+    } else if (countdown === 0 && showCountdown) {
       playCountdownFinalSound();
-      // G2: Store timeout ref so it can be cleaned up if component unmounts
       const hideTimer = setTimeout(() => {
         setShowCountdown(false);
         playRoundStart();
@@ -168,7 +164,7 @@ export default function Game() {
       }, 500);
       return () => clearTimeout(hideTimer);
     }
-  }, [countdown, showCountdown]);
+  }, [countdown, showCountdown, currentCategories]);
 
   useEffect(() => {
     if (state.isRush) {
@@ -191,9 +187,7 @@ export default function Game() {
   }, [currentRound, currentPlayer, hasSubmitted]);
 
   const updateAnswer = (category: string, value: string) => {
-    setAnswers(prev => {
-      return { ...prev, [category]: value };
-    });
+    setAnswers(prev => ({ ...prev, [category]: value }));
   };
 
   const handleKeyDown = (category: string, e: React.KeyboardEvent) => {
@@ -208,9 +202,12 @@ export default function Game() {
   };
 
   const allFilled = currentCategories.length > 0 && currentCategories.every(cat => answers[cat] && answers[cat].trim().length > 0);
-  const filledCount = currentCategories.filter(cat => answers[cat] && answers[cat].trim().length > 0).length;
-
   const canBusComplete = allFilled;
+
+  const roundDurationSec = currentRound
+    ? Math.max(1, Math.ceil((currentRound.endTime - currentRound.startTime) / 1000))
+    : 45;
+  const displayTimeLeft = showCountdown ? roundDurationSec : state.timeLeft;
 
   const handleBusComplete = () => {
     if (!hasSubmitted) {
@@ -219,7 +216,7 @@ export default function Game() {
       playClickSound();
       setBusCompleteTriggered(true);
       handleSubmit();
-      triggerBusComplete();
+      setTimeout(() => triggerBusComplete(), 50);
     }
   };
 
@@ -244,12 +241,13 @@ export default function Game() {
     }
   };
 
-  // Auto-submit when time runs out
+  // Auto-submit when time runs out (not during countdown or AI processing)
   useEffect(() => {
+    if (showCountdown || room.phase === 'ai_processing') return;
     if (state.timeLeft <= 1 && !hasSubmitted) {
       handleSubmit();
     }
-  }, [state.timeLeft, hasSubmitted]);
+  }, [state.timeLeft, hasSubmitted, showCountdown, room.phase]);
 
 
 
@@ -263,9 +261,38 @@ export default function Game() {
 
 
       <AnimatePresence>
+        {room.phase === 'ai_processing' && (
+          <motion.div
+            className="fixed inset-0 z-50 bg-[#0f0a1f] flex flex-col items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="flex gap-2 mb-6"
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+            >
+              {[0, 1, 2].map(i => (
+                <div
+                  key={i}
+                  className="w-3 h-3 rounded-full bg-[#7c3aed] ai-review-dot"
+                  style={{ animationDelay: `${i * 0.2}s` }}
+                />
+              ))}
+            </motion.div>
+            <motion.p
+              className="font-pixel-title text-xl text-[#FFFDD1]"
+              animate={{ opacity: [0.7, 1, 0.7] }}
+              transition={{ repeat: Infinity, duration: 1.5 }}
+            >
+              جاري مراجعة الإجابات...
+            </motion.p>
+          </motion.div>
+        )}
         {showCountdown && (
           <motion.div
-            className="fixed inset-0 z-50 bg-[#0f0a1f]/95 flex flex-col items-center justify-center"
+            className="fixed inset-0 z-50 bg-[#0f0a1f] flex flex-col items-center justify-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -291,7 +318,7 @@ export default function Game() {
                 initial={{ scale: 2, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0, opacity: 0 }}
-                className="text-9xl font-pixel-title text-white drop-shadow-[0_0_30px_rgba(139,92,246,0.8)]"
+                className="countdown-digit text-white drop-shadow-[0_0_30px_rgba(139,92,246,0.8)]"
               >
                 {countdown === 0 ? 'ابدأ!' : countdown}
               </motion.div>
@@ -300,7 +327,7 @@ export default function Game() {
         )}
       </AnimatePresence>
 
-      <div className="max-w-5xl mx-auto relative z-10 px-4 w-full">
+      <div className={`max-w-5xl mx-auto relative z-10 px-4 w-full ${showCountdown || room.phase === 'ai_processing' ? 'invisible' : ''}`}>
         {/* Mobile Header: Clean Standard Layout (Exit - Letter - Timer) */}
         <motion.div
           className="flex flex-col gap-2 mb-4 relative z-[100] md:hidden"
@@ -323,7 +350,7 @@ export default function Game() {
             </div>
 
             <div className="flex items-center gap-2">
-              <Timer timeLeft={state.timeLeft} isRush={state.isRush} />
+              <Timer timeLeft={displayTimeLeft} isRush={state.isRush} maxTime={roundDurationSec} />
             </div>
           </div>
 
@@ -359,7 +386,7 @@ export default function Game() {
               <LogOut className="w-5 h-5" />
             </Button>
 
-            <div className="px-4 py-1 flex items-center gap-2 bg-[#2e1065]/50 border-2 border-[#4c1d95] rounded-xl shadow-[2px_2px_0_0_#2e1065]">
+            <div className="px-4 py-1.5 flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full">
               <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
               <span className="font-pixel-text font-bold text-[#FFFDD1]">الجولة {room.currentRound + 1} / {room.totalRounds}</span>
             </div>
@@ -377,7 +404,7 @@ export default function Game() {
             </div>
 
             <div className="flex flex-col items-end gap-1">
-              <Timer timeLeft={state.timeLeft} isRush={state.isRush} />
+              <Timer timeLeft={displayTimeLeft} isRush={state.isRush} maxTime={roundDurationSec} />
               {currentPlayer?.busStreak && currentPlayer.busStreak > 0 ? (
                 <div className="flex items-center gap-1 bg-gradient-to-r from-orange-500 to-amber-500 px-2 py-0.5 rounded-full text-white font-bold text-[9px] md:text-xs shadow-sm">
                   <Flame className="w-3 h-3" />
@@ -435,12 +462,18 @@ export default function Game() {
         <VotingOverlay />
 
 
+        {state.isRush && !hasSubmitted && (
+          <div className="mb-3 mx-auto max-w-md bg-gradient-to-r from-red-500 to-red-600 text-white text-center py-2 px-4 rounded-full font-semibold text-xs md:text-sm shadow-[0_4px_16px_rgba(239,68,68,0.35)]">
+            <Flame className="w-3.5 h-3.5 inline ml-1" />
+            وضع السرعة
+          </div>
+        )}
+
         <div className="w-full relative z-10">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
             {currentCategories.map((category, i) => {
               const Icon = categoryIcons[category as Category] || Box;
               const isLastOdd = isMobile && currentCategories.length % 2 !== 0 && i === currentCategories.length - 1;
-
               return (
                 <motion.div
                   key={category}
@@ -450,10 +483,10 @@ export default function Game() {
                   className={cn("relative group", isLastOdd && "col-span-2 flex justify-center")}
                 >
                   <div className={cn(
-                    "bg-white border-2 border-[#4c1d95] shadow-[3px_3px_0px_0px_#2e1065] rounded-xl overflow-hidden hover:-translate-y-1 hover:shadow-[5px_5px_0px_0px_#2e1065] transition-all duration-200",
+                    "surface-card overflow-hidden transition-all duration-200",
                     isLastOdd && "w-[calc(50%-6px)] md:w-full"
                   )}>
-                    <div className={`${categoryColors[category as Category]} py-1.5 px-2 border-b-2 border-[#4c1d95] flex items-center justify-center gap-1.5`}>
+                    <div className={`${categoryGradients[category as Category]} py-2 px-2 flex items-center justify-center gap-1.5`}>
                       <Icon className="w-3.5 h-3.5 text-white" />
                       <span className="font-bold text-white font-pixel-text text-xs md:text-sm whitespace-nowrap">{category}</span>
                     </div>
@@ -473,7 +506,7 @@ export default function Game() {
                             }, 300);
                           }
                         }}
-                        className={`text-center text-sm md:text-lg h-9 md:h-12 border-2 border-[#e5e7eb] focus:border-[#7c3aed] focus:ring-0 focus:shadow-[0_0_0_2px_rgba(124,58,237,0.1)] transition-all font-pixel-text font-bold bg-white text-[#4c1d95] placeholder:text-gray-300 rounded-lg ${hasSubmitted || isBanished ? 'opacity-60 grayscale' : ''} ${answers[category as Category]?.trim().length > 0 ? 'input-locked scale-100' : ''}`}
+                        className={`text-center text-sm md:text-lg h-9 md:h-12 border-purple-200/50 focus:border-purple-400 bg-white text-[#4c1d95] placeholder:text-purple-300 rounded-lg ${hasSubmitted || isBanished ? 'opacity-60 grayscale' : ''} ${answers[category as Category]?.trim().length > 0 ? 'input-locked scale-100' : ''}`}
                         data-testid={`input-${category}`}
                       />
                     </div>
@@ -492,7 +525,7 @@ export default function Game() {
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className={`mt-6 rounded-lg ${canBusComplete ? 'pulse-ready' : ''}`}
+              className="mt-6"
             >
               <BusCompleteButton
                 onPress={handleBusComplete}
@@ -501,18 +534,14 @@ export default function Game() {
             </motion.div>
           ) : (
             <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
+              initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="text-center p-8 mt-6 bg-gradient-to-b from-white to-[#faf5ff] rounded-2xl border-[3px] border-[#4c1d95] shadow-[4px_4px_0_0_#2e1065,_0_0_20px_rgba(139,92,246,0.2)]"
+              className="text-center p-6 mt-6 surface-card"
             >
-              <motion.div
-                className="w-16 h-16 bg-gradient-to-br from-[#7c3aed] to-[#4c1d95] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg"
-                animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
-                transition={{ repeat: Infinity, duration: 1.5 }}
-              >
-                <Send className="w-8 h-8 text-white" />
-              </motion.div>
-              <p className="font-pixel-title text-2xl text-[#4c1d95] mb-2">تم!</p>
+              <div className="w-14 h-14 bg-[#7c3aed] rounded-full flex items-center justify-center mx-auto mb-3">
+                <Send className="w-7 h-7 text-white" />
+              </div>
+              <p className="font-pixel-text text-xl text-[#4c1d95] mb-1 font-bold">تم!</p>
               <motion.p className="text-lg text-[#7c3aed] font-bold font-pixel-text"
                 animate={{ opacity: [0.8, 1, 0.8] }}
                 transition={{ repeat: Infinity, duration: 2 }}

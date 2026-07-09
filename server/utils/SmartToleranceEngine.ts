@@ -223,6 +223,9 @@ export class SmartToleranceEngine {
      * Check if two words match considering all tolerance rules
      */
     isMatch(word: string, dbWord: string, category?: string): boolean {
+        const normDb = this.normalizer.normalize(dbWord);
+        if (!normDb || normDb.length < 3) return false;
+
         // 1. Exact match after normalization
         if (this.normalizer.areEquivalent(word, dbWord)) {
             return true;
@@ -287,66 +290,82 @@ export class SmartToleranceEngine {
     isStemMatch(word1: string, word2: string): boolean {
         const norm1 = this.normalizer.normalize(word1);
         const norm2 = this.normalizer.normalize(word2);
+        if (norm1 === norm2) return false;
 
-        // Don't stem words that are too short to avoid false positives
-        if (norm1.length <= 3 && norm2.length <= 3) return false;
+        const [shorter, longer] = norm1.length <= norm2.length ? [norm1, norm2] : [norm2, norm1];
+        if (longer.length - shorter.length > 2 || shorter.length < 3) return false;
 
-        const stem1 = this.stemWord(norm1);
-        const stem2 = this.stemWord(norm2);
+        // Plural / dual suffixes only — ة/ه variants are handled by the normalizer
+        const pluralSuffixes = ['ات', 'ون', 'ين'];
+        for (const suffix of pluralSuffixes) {
+            if (!longer.endsWith(suffix) || longer.length < suffix.length + 3) continue;
+            if (longer.slice(0, -suffix.length) === shorter) return true;
+        }
 
-        // Require at least 2 remaining characters to prevent extreme false positives (e.g. "ب" matching "بات")
-        return stem1 === stem2 && stem1.length >= 2;
-    }
-
-    /**
-     * Strips common plural/feminine endings
-     */
-    private stemWord(word: string): string {
-        let w = word;
-        if (w.endsWith('ات') && w.length >= 5) return w.slice(0, -2);
-        if (w.endsWith('ون') && w.length >= 5) return w.slice(0, -2);
-        if (w.endsWith('ين') && w.length >= 5) return w.slice(0, -2);
-        if (w.endsWith('ه') && w.length >= 4) return w.slice(0, -1); // Taa Marbuta is normalized to 'ه'
-        return w;
+        return false;
     }
 
     /**
      * Advanced fuzzy matching with smart rules
      */
+    /** Pairs of letters that are spelling variants, not different words. */
+    private static readonly EQUIVALENT_CHARS: string[][] = [
+        ['ا', 'أ', 'إ', 'آ', 'ئ', 'ؤ', 'ء'],
+        ['ه', 'ة'],
+        ['ي', 'ى'],
+        ['و', 'ؤ'],
+    ];
+
+    /** Sound-alike consonants common in Egyptian typos (not different words). */
+    private static readonly PHONETIC_CHARS: string[][] = [
+        ['ذ', 'ز', 'ظ'],
+        ['ث', 'س', 'ص'],
+        ['ق', 'ك'],
+        ['ط', 'ت'],
+        ['ض', 'د'],
+    ];
+
+    private areEquivalentChars(a: string, b: string): boolean {
+        if (a === b) return true;
+        if (SmartToleranceEngine.EQUIVALENT_CHARS.some(g => g.includes(a) && g.includes(b))) return true;
+        return SmartToleranceEngine.PHONETIC_CHARS.some(g => g.includes(a) && g.includes(b));
+    }
+
+    /** Single-character spelling or phonetic typo between same-length words. */
+    private isSingleCharTypo(norm1: string, norm2: string): boolean {
+        if (norm1 === norm2) return true;
+        if (norm1.length !== norm2.length) return false;
+        if (this.levenshteinDistance(norm1, norm2, 1) !== 1) return false;
+
+        for (let i = 0; i < norm1.length; i++) {
+            if (norm1[i] !== norm2[i]) {
+                return this.areEquivalentChars(norm1[i], norm2[i]);
+            }
+        }
+        return false;
+    }
+
     /**
-     * Advanced fuzzy matching with smart rules (Levenshtein + Phonetic)
+     * Advanced fuzzy matching with smart rules (Phonetic + spelling-variant typos only)
      */
     isFuzzyMatch(word1: string, word2: string): boolean {
         const norm1 = this.normalizer.normalize(word1);
         const norm2 = this.normalizer.normalize(word2);
 
-        // 0. Length sanity check (must be somewhat similar)
-        if (Math.abs(norm1.length - norm2.length) > 3) return false;
+        if (Math.abs(norm1.length - norm2.length) > 2) return false;
 
-        // 1. Phonetic Skeleton Match (Sound-Alike) -- High Confidence
-        // "ثعبان" (Th3ban) vs "سعبان" (S3ban) -> S3BAN vs S3BAN
         const skel1 = this.normalizer.getPhoneticSkeleton(word1);
         const skel2 = this.normalizer.getPhoneticSkeleton(word2);
 
-        if (skel1 === skel2) {
-            // Ensure length difference isn't wildly off (e.g. "كتب" vs "كاتب" might have same skeleton KTB-ish if vowels ignored, relying on specific mapping)
-            // Our mapping keeps long vowels as 'A', so KTB vs KATB -> KTB vs KATB (different).
-            // But "ذرة" (ZRA) vs "زرة" (ZRA) -> Match.
-            return true;
+        if (skel1 === skel2 && Math.abs(norm1.length - norm2.length) <= 1) {
+            return this.isSingleCharTypo(norm1, norm2);
         }
 
-        // 2. Levenshtein Distance (Typo Correction) -- Medium Confidence
-        const distance = this.levenshteinDistance(norm1, norm2);
         const maxLength = Math.max(norm1.length, norm2.length);
-
-        // Strictness based on length (Tuned via Project MIRROR Verification)
         if (maxLength <= 4) {
-            return distance === 0; // Exact match only for short words (<= 4 chars)
-        } else if (maxLength <= 7) {
-            return distance <= 1; // 1 error for medium words (5-7 chars)
-        } else {
-            return distance <= 2; // 2 errors for long words (> 7 chars)
+            return norm1 === norm2;
         }
+        return this.isSingleCharTypo(norm1, norm2);
     }
 
     /**
