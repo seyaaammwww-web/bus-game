@@ -49,13 +49,13 @@ export default function Home() {
 
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden relative text-white">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 pb-24 overflow-hidden relative text-white">
 
       {showHelp && <Tutorial onClose={() => setShowHelp(false)} />}
 
-      {/* Large Floating Help Button */}
+      {/* Large Floating Help Button — raised above the road scene */}
       <button
-        className="fixed bottom-4 right-4 z-50 w-12 h-12 bg-[#FFFEE5] rounded-sm flex items-center justify-center border-[3px] border-[#350D7A] shadow-pixel hover:bg-[#FFFDD6] active:translate-x-[2px] active:translate-y-[2px] active:shadow-pixel-sm"
+        className="fixed bottom-[70px] right-4 z-50 w-12 h-12 bg-[#FFFEE5] rounded-sm flex items-center justify-center border-[3px] border-[#350D7A] shadow-pixel hover:bg-[#FFFDD6] active:translate-x-[2px] active:translate-y-[2px] active:shadow-pixel-sm"
         onClick={() => setShowHelp(true)}
         aria-label="المساعدة"
       >
@@ -66,22 +66,24 @@ export default function Home() {
         initial={{ y: -30, opacity: 0, scale: 0.95 }}
         animate={{ y: 0, opacity: 1, scale: 1 }}
         transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-        className="text-center mb-12 relative z-10"
+        className={`text-center relative z-10 ${mode === 'home' ? 'mb-8' : 'mb-4'}`}
       >
-        <div className={`logo-container mb-2 animate-slow-float`}>
+        <div className={`logo-container mb-1 animate-slow-float`}>
           {/* Logo with shine effect - uses CSS mask to constrain glow to logo shape */}
           <img
             src="/assets/logo.png"
             alt="أوتوبيس كومبليت"
-            className="w-full max-w-[500px] object-contain pixelated"
+            className={`w-full object-contain pixelated mx-auto transition-all duration-300 ${mode === 'home' ? 'max-w-[300px] md:max-w-[380px]' : 'max-w-[180px] md:max-w-[220px]'}`}
           />
         </div>
 
-        <div dir="ltr" className="flex justify-center mt-4">
-          <span className="typewriter-text text-sm md:text-base font-pixel-text text-[#FEFADE]/90 tracking-widest uppercase">
-            By Mohamed Seyam
-          </span>
-        </div>
+        {mode === 'home' && (
+          <div dir="ltr" className="flex justify-center mt-2">
+            <span className="typewriter-text text-xs md:text-sm font-pixel-text text-[#FEFADE]/90 tracking-widest uppercase">
+              By Mohamed Seyam
+            </span>
+          </div>
+        )}
       </motion.div>
 
       <AnimatePresence mode="wait">
@@ -115,7 +117,7 @@ export default function Home() {
         {mode === 'home' && (
           <motion.div
             key="home"
-            className="flex flex-col gap-6 w-full max-w-sm relative z-10"
+            className="flex flex-col gap-4 w-full max-w-sm relative z-10"
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -30, opacity: 0 }}
@@ -129,11 +131,11 @@ export default function Home() {
               <Button
                 size="lg"
                 variant="primary"
-                className="w-full h-20 text-3xl font-pixel-title shine-effect relative overflow-hidden"
+                className="w-full h-16 text-2xl font-pixel-title shine-effect relative overflow-hidden"
                 onClick={() => setMode('create')}
                 data-testid="button-create-room"
               >
-                <Plus className="w-8 h-8 ml-2 absolute right-4" />
+                <Plus className="w-6 h-6 ml-2 absolute right-4" />
                 غرفة جديدة
               </Button>
             </motion.div>
@@ -144,11 +146,11 @@ export default function Home() {
               <Button
                 size="lg"
                 variant="retro"
-                className="w-full h-20 text-3xl font-pixel-title shine-effect relative overflow-hidden"
+                className="w-full h-16 text-2xl font-pixel-title shine-effect relative overflow-hidden"
                 onClick={() => setMode('join')}
                 data-testid="button-join-room"
               >
-                <Users className="w-8 h-8 ml-2 absolute right-4" />
+                <Users className="w-6 h-6 ml-2 absolute right-4" />
                 انضم لغرفة
               </Button>
             </motion.div>
@@ -165,11 +167,11 @@ export default function Home() {
             className="w-full max-w-sm relative z-10"
           >
             <RetroCard className="shadow-xl">
-              <CardHeader>
+              <CardHeader className="pb-3">
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute top-4 left-4"
+                  className="absolute top-3 left-3"
                   onClick={() => setMode('home')}
                   data-testid="button-back"
                 >
@@ -180,27 +182,27 @@ export default function Home() {
                   animate={{ scale: 1 }}
                   transition={{ type: 'spring', delay: 0.1 }}
                 >
-                  <CardTitle className="flex items-center gap-2 font-pixel-title text-4xl">
-                    <Plus className="w-7 h-7 text-[#6714A8]" />
+                  <CardTitle className="flex items-center gap-2 font-pixel-title text-3xl">
+                    <Plus className="w-6 h-6 text-[#6714A8]" />
                     غرفة جديدة
                   </CardTitle>
                 </motion.div>
-                <CardDescription className="font-pixel-text text-xl mt-2">أنشئ غرفة وادعي أصحابك</CardDescription>
+                <CardDescription className="font-pixel-text text-lg mt-1">أنشئ غرفة وادعي أصحابك</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3">
                 <motion.div
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <label className="text-3xl font-bold mb-3 block font-pixel-title">اسمك</label>
+                  <label className="text-2xl font-bold mb-2 block font-pixel-title">اسمك</label>
                   <Input
                     type="text"
                     placeholder="اكتب اسمك هنا"
                     value={playerName}
                     onChange={(e) => setPlayerName(e.target.value)}
                     maxLength={20}
-                    className="h-20 text-2xl font-pixel-text font-bold"
+                    className="h-14 text-xl font-pixel-text font-bold"
                     data-testid="input-player-name"
                   />
                 </motion.div>
@@ -211,7 +213,7 @@ export default function Home() {
                 >
                   <Button
                     variant="primary"
-                    className="w-full h-20 text-3xl font-bold font-pixel-title shine-effect relative overflow-hidden"
+                    className="w-full h-14 text-2xl font-bold font-pixel-title shine-effect relative overflow-hidden"
                     onClick={handleCreate}
                     disabled={playerName.trim().length < 2 || isLoading}
                     data-testid="button-create-confirm"
@@ -243,11 +245,11 @@ export default function Home() {
             className="w-full max-w-sm relative z-10"
           >
             <RetroCard className="shadow-xl">
-              <CardHeader>
+              <CardHeader className="pb-3">
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute top-4 left-4"
+                  className="absolute top-3 left-3"
                   onClick={() => setMode('home')}
                   data-testid="button-back"
                 >
@@ -258,27 +260,27 @@ export default function Home() {
                   animate={{ scale: 1 }}
                   transition={{ type: 'spring', delay: 0.1 }}
                 >
-                  <CardTitle className="flex items-center gap-2 font-pixel-title text-4xl">
-                    <Users className="w-7 h-7 text-secondary" />
+                  <CardTitle className="flex items-center gap-2 font-pixel-title text-3xl">
+                    <Users className="w-6 h-6 text-secondary" />
                     انضم لغرفة
                   </CardTitle>
                 </motion.div>
-                <CardDescription className="font-pixel-text text-xl mt-2">اكتب كود الغرفة من صاحبك</CardDescription>
+                <CardDescription className="font-pixel-text text-lg mt-1">اكتب كود الغرفة من صاحبك</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3">
                 <motion.div
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <label className="text-3xl font-bold mb-3 block font-pixel-title">اسمك</label>
+                  <label className="text-2xl font-bold mb-2 block font-pixel-title">اسمك</label>
                   <Input
                     type="text"
                     placeholder="اكتب اسمك هنا"
                     value={playerName}
                     onChange={(e) => setPlayerName(e.target.value)}
                     maxLength={20}
-                    className="h-20 text-2xl font-pixel-text font-bold"
+                    className="h-14 text-xl font-pixel-text font-bold"
                     data-testid="input-player-name-join"
                   />
                 </motion.div>
@@ -287,14 +289,14 @@ export default function Home() {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.3 }}
                 >
-                  <label className="text-3xl font-bold mb-3 block font-pixel-title">كود الغرفة</label>
+                  <label className="text-2xl font-bold mb-2 block font-pixel-title">كود الغرفة</label>
                   <Input
                     type="text"
                     placeholder="XXXX"
                     value={roomCode}
                     onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
                     maxLength={4}
-                    className="text-center text-5xl tracking-widest font-bold h-20 font-pixel-title"
+                    className="text-center text-4xl tracking-widest font-bold h-14 font-pixel-title"
                     data-testid="input-room-code"
                   />
                 </motion.div>
