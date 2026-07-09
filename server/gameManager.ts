@@ -705,7 +705,7 @@ export class GameManager {
       if (room.phase !== 'lobby') {
         return this.send(ws, { type: 'error', payload: { message: 'اللاعب غير موجود في هذه الغرفة' } });
       }
-      if (room.players.length >= 50) {
+      if (room.players.length >= 8) {
         return this.send(ws, { type: 'error', payload: { message: 'الغرفة ممتلئة' } });
       }
       buffer.transact(draft => {

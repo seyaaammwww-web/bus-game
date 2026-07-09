@@ -72,8 +72,10 @@ export class RoomManager {
         let room = buffer.get();
 
         // Check constraints
+        // STABILITY: cap matches the UI ("X / 8") and BusSeats — was 50, which
+        // let a 9th+ player in and broke every layout and game-balance assumption
         if (room.phase !== 'lobby') throw new Error('اللعبة بدأت');
-        if (room.players.length >= 50) throw new Error('الغرفة ممتلئة');
+        if (room.players.length >= 8) throw new Error('الغرفة ممتلئة');
         if (room.players.find(p => p.id === playerId)) return room; // Already joined
 
         buffer.transact((draft) => {
@@ -111,6 +113,10 @@ export class RoomManager {
             // RMgr1: Guard — cannot join a public room that's already in progress
             if (draft.phase !== 'lobby') {
                 throw new Error('اللعبة بدأت بالفعل، انتظر الجولة القادمة');
+            }
+            // STABILITY: public room honors the same 8-player cap as private rooms
+            if (draft.players.length >= 8 && !draft.players.find(p => p.id === playerId)) {
+                throw new Error('الغرفة ممتلئة');
             }
 
             const isFirst = draft.players.length === 0;
