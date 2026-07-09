@@ -34,6 +34,61 @@ const purpleGradient = [
     '#FFFEE2', '#FFFDCC', '#A333D5', '#F640A8', '#FFC48B',
 ];
 
+// Sky band boundaries — each upper band dithers down into the next one.
+// pos = % where the band below starts; color = the UPPER band's color.
+const bandBoundaries = [
+    { pos: 10, color: '#350D7A' },
+    { pos: 19, color: '#4E0994' },
+    { pos: 27, color: '#6714A8' },
+    { pos: 34, color: '#871BB7' },
+    { pos: 40, color: '#A333D5' },
+    { pos: 46, color: '#F640A8' },
+    { pos: 52, color: '#FF6957' },
+    { pos: 59, color: '#FF8A50' },
+    { pos: 66, color: '#FFA168' },
+    { pos: 74, color: '#FFC48B' },
+    { pos: 85, color: '#FFFDCC' },
+];
+
+interface Sparkle {
+    id: number;
+    top: number;
+    left: number;
+    delay: number;
+    size: number;
+    duration: number;
+}
+
+interface Balloon {
+    id: number;
+    left: number;
+    bodyColor: string;
+    delay: number;
+    duration: number;
+    scale: number;
+}
+
+const balloonColors = ['#F640A8', '#FF8A50', '#FFC48B', '#A333D5'];
+
+/* Pixel balloon — tiny hand-drawn SVG with a wavy string */
+const PixelBalloon: React.FC<{ color: string }> = ({ color }) => (
+    <svg width="24" height="52" viewBox="0 0 24 52" shapeRendering="crispEdges" aria-hidden="true">
+        {/* Balloon body (pixel oval) */}
+        <rect x="6" y="2" width="12" height="4" fill={color} />
+        <rect x="4" y="6" width="16" height="10" fill={color} />
+        <rect x="6" y="16" width="12" height="4" fill={color} />
+        {/* Shine pixel */}
+        <rect x="7" y="5" width="4" height="4" fill="#FFFEE5" opacity="0.8" />
+        {/* Knot */}
+        <rect x="10" y="20" width="4" height="3" fill={color} />
+        {/* Wavy string */}
+        <rect x="11" y="23" width="2" height="6" fill="#FFFEE5" opacity="0.9" />
+        <rect x="9" y="29" width="2" height="6" fill="#FFFEE5" opacity="0.9" />
+        <rect x="11" y="35" width="2" height="6" fill="#FFFEE5" opacity="0.9" />
+        <rect x="13" y="41" width="2" height="6" fill="#FFFEE5" opacity="0.9" />
+    </svg>
+);
+
 interface WorkOSBackgroundProps {
     /** If true, reduces particle count for mobile performance (keeps all visual effects) */
     isMobile?: boolean;
@@ -178,6 +233,40 @@ const WorkOSBackground: React.FC<WorkOSBackgroundProps> = ({ isMobile = false })
         return generated;
     }, [isMobile]);
 
+    // Big 4-point plus-shaped sparkles — the reference's signature detail
+    const sparkles = useMemo(() => {
+        const count = isMobile ? 8 : 16;
+        const generated: Sparkle[] = [];
+        for (let i = 0; i < count; i++) {
+            generated.push({
+                id: i,
+                top: Math.random() * 80,
+                left: Math.random() * 100,
+                delay: Math.random() * 4,
+                size: Math.random() > 0.6 ? 4 : 3,
+                duration: 1.6 + Math.random() * 2,
+            });
+        }
+        return generated;
+    }, [isMobile]);
+
+    // Floating balloons drifting up through the sunset
+    const balloons = useMemo(() => {
+        const count = isMobile ? 2 : 4;
+        const generated: Balloon[] = [];
+        for (let i = 0; i < count; i++) {
+            generated.push({
+                id: i,
+                left: 10 + Math.random() * 80,
+                bodyColor: balloonColors[i % balloonColors.length],
+                delay: -Math.random() * 30,
+                duration: 26 + Math.random() * 18,
+                scale: 0.8 + Math.random() * 0.6,
+            });
+        }
+        return generated;
+    }, [isMobile]);
+
     // Generate clouds with RANDOM positions, speeds, and delays — fewer on mobile
     const clouds = useMemo(() => {
         const cloudImages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
@@ -206,6 +295,30 @@ const WorkOSBackground: React.FC<WorkOSBackgroundProps> = ({ isMobile = false })
         <div className={`workos-background${isMobile ? ' mobile-optimized' : ''}`}>
             {/* Gradient Overlay for depth */}
             <div className="workos-gradient-overlay" />
+
+            {/* Dithered band transitions — checkerboard pixels between sky colors */}
+            <div className="workos-dither-container" aria-hidden="true">
+                {bandBoundaries.map((band) => (
+                    <React.Fragment key={`dither-${band.pos}`}>
+                        {/* Dense checker row right at the edge */}
+                        <div
+                            className="workos-dither-checker"
+                            style={{
+                                top: `${band.pos}%`,
+                                backgroundImage: `repeating-conic-gradient(${band.color} 0% 25%, transparent 0% 50%)`,
+                            }}
+                        />
+                        {/* Sparse pixel row bleeding further down */}
+                        <div
+                            className="workos-dither-sparse"
+                            style={{
+                                top: `calc(${band.pos}% + 8px)`,
+                                backgroundImage: `repeating-linear-gradient(90deg, ${band.color} 0px, ${band.color} 8px, transparent 8px, transparent 32px)`,
+                            }}
+                        />
+                    </React.Fragment>
+                ))}
+            </div>
 
             {/* Micro Dots Layer - The Art */}
             <div className="workos-micro-dots-container">
@@ -240,6 +353,45 @@ const WorkOSBackground: React.FC<WorkOSBackgroundProps> = ({ isMobile = false })
                             height: star.size,
                         }}
                     />
+                ))}
+            </div>
+
+            {/* Plus-shaped sparkles — big twinkling pixel stars */}
+            <div className="workos-sparkles-container" aria-hidden="true">
+                {sparkles.map((s) => (
+                    <div
+                        key={`sparkle-${s.id}`}
+                        className="workos-sparkle"
+                        style={{
+                            top: `${s.top}%`,
+                            left: `${s.left}%`,
+                            width: s.size,
+                            height: s.size,
+                            boxShadow: `0 ${-s.size}px 0 #FFFEE2, 0 ${s.size}px 0 #FFFEE2, ${-s.size}px 0 0 #FFFEE2, ${s.size}px 0 0 #FFFEE2`,
+                            animationDelay: `${s.delay}s`,
+                            animationDuration: `${s.duration}s`,
+                        }}
+                    />
+                ))}
+            </div>
+
+            {/* Floating balloons rising through the sunset */}
+            <div className="workos-balloons-container" aria-hidden="true">
+                {balloons.map((b) => (
+                    <div
+                        key={`balloon-${b.id}`}
+                        className="workos-balloon"
+                        style={{
+                            left: `${b.left}%`,
+                            scale: `${b.scale}`,
+                            animationDelay: `${b.delay}s`,
+                            animationDuration: `${b.duration}s`,
+                        }}
+                    >
+                        <div className="workos-balloon-sway">
+                            <PixelBalloon color={b.bodyColor} />
+                        </div>
+                    </div>
                 ))}
             </div>
 

@@ -44,13 +44,45 @@
     display: none;
 }
 
-/* Micro Dots Container */
+/* ============================================================
+   DITHER LAYER — checkerboard pixel transitions between bands.
+   This is the signature texture from the reference art.
+   ============================================================ */
+.workos-dither-container {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Dense 4px checkerboard row hugging each band edge */
+.workos-dither-checker {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 8px;
+    background-size: 8px 8px;
+    image-rendering: pixelated;
+}
+
+/* Sparse single-pixel row bleeding into the band below */
+.workos-dither-sparse {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background-size: 32px 4px;
+    image-rendering: pixelated;
+    opacity: 0.85;
+}
+
+/* Micro Dots Container — full sky coverage */
 .workos-micro-dots-container {
     position: absolute;
     top: 0;
     left: 0;
-    width: 40%;
-    height: 40%;
+    width: 100%;
+    height: 74%;
     z-index: 1;
     pointer-events: none;
 }
@@ -104,6 +136,99 @@
 
     to {
         opacity: 1;
+    }
+}
+
+/* ============================================================
+   PLUS-SHAPED SPARKLES — big 4-point pixel stars that twinkle
+   by growing/shrinking in hard steps (like the reference)
+   ============================================================ */
+.workos-sparkles-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 3;
+    pointer-events: none;
+}
+
+.workos-sparkle {
+    position: absolute;
+    background: #FFFEE2;
+    border-radius: 0;
+    animation: workos-sparkle-twinkle 2s steps(3, end) infinite alternate;
+}
+
+@keyframes workos-sparkle-twinkle {
+    0% {
+        opacity: 0.1;
+        transform: scale(0.5);
+    }
+
+    60% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    100% {
+        opacity: 0.9;
+        transform: scale(1.6);
+    }
+}
+
+/* ============================================================
+   BALLOONS — pixel balloons rising slowly through the sunset
+   with a stepped side-to-side sway
+   ============================================================ */
+.workos-balloons-container {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.workos-balloon {
+    position: absolute;
+    bottom: -60px;
+    image-rendering: pixelated;
+    animation: workos-balloon-rise linear infinite;
+    will-change: transform;
+}
+
+@keyframes workos-balloon-rise {
+    0% {
+        transform: translateY(0);
+        opacity: 0;
+    }
+
+    6% {
+        opacity: 1;
+    }
+
+    92% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(calc(-100vh - 80px));
+        opacity: 0;
+    }
+}
+
+/* Stepped sway — pixel jitter left/right as it climbs */
+.workos-balloon-sway {
+    animation: workos-balloon-sway 2.8s steps(2, end) infinite alternate;
+}
+
+@keyframes workos-balloon-sway {
+    from {
+        transform: translateX(-6px);
+    }
+
+    to {
+        transform: translateX(6px);
     }
 }
 
@@ -446,8 +571,15 @@
     .workos-wheel-hub,
     .workos-road-dashes,
     .workos-road-dashes-far,
-    .workos-bus-puff {
+    .workos-bus-puff,
+    .workos-sparkle,
+    .workos-balloon,
+    .workos-balloon-sway {
         animation: none !important;
+    }
+
+    .workos-balloon {
+        display: none;
     }
 
     .workos-bus {
