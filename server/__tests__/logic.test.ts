@@ -196,6 +196,19 @@ describe('Word database scoring', () => {
     assert.equal(hv.validate('p1', letter, 'جماد', 'طائر').isValid, false);
   });
 
+  it('accepts curated 2-letter dictionary words (دب، قط، مي…)', () => {
+    const hv = HybridValidator.getInstance();
+    // Regression: length gate must not run before the dictionary lookup
+    assert.equal(hv.validate('p1', 'د', 'حيوان', 'دب').isValid, true);
+    assert.equal(hv.validate('p1', 'ق', 'حيوان', 'قط').isValid, true);
+    assert.equal(hv.validate('p1', 'م', 'بنت', 'مي').isValid, true);
+    assert.equal(hv.validate('p1', 'ط', 'ولد', 'طه').isValid, true);
+    assert.equal(hv.validate('p1', 'ر', 'جماد', 'رف').isValid, true);
+    // But 2-char non-dictionary noise is still rejected
+    assert.equal(hv.validate('p1', 'د', 'حيوان', 'دو').isValid, false);
+    assert.equal(hv.validate('p1', 'م', 'ولد', 'مب').isValid, false);
+  });
+
   it('uses exactly the 28 game letters', () => {
     assert.equal(availableLetters.length, 28);
     const svc = WildcardService.getInstance();

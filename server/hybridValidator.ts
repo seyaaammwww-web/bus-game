@@ -55,15 +55,18 @@ export class HybridValidator {
     if (hasGarbagePattern(trimmed)) {
       return { isValid: false, reason: 'إجابة غير صالحة', source: 'heuristic' };
     }
-    if (trimmed.length < 3) {
-      return { isValid: false, reason: 'قصير جداً', source: 'heuristic' };
-    }
 
+    // Dictionary lookup FIRST — legit 2-char words (دب، قط، مي، طه...) are curated in the DB
     const isValid = WildcardService.getInstance().validateWord(letter, category, trimmed);
 
     if (isValid) {
       this.metrics.dbHits++;
       return { isValid: true, reason: 'موجودة في القاموس', source: 'database' };
+    }
+
+    // Non-dictionary words under 3 chars are noise — reject without logging a suggestion
+    if (trimmed.length < 3) {
+      return { isValid: false, reason: 'قصير جداً', source: 'heuristic' };
     }
 
     this.metrics.dbMisses++;

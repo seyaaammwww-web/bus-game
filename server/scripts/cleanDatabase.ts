@@ -20,6 +20,9 @@ const NAME_HOMONYMS = new Set([
     'نجم', 'نهاد', 'وليد', 'سعاد', 'هناء', 'منى', 'هدى', 'رنا', 'دعاء',
 ]);
 
+// Curated 2-char words that are legitimate answers (matched exact-only at runtime)
+const SHORT_WORD_WHITELIST = new Set(['دب', 'قط', 'بط', 'ضب', 'طه', 'مي', 'رف', 'زر']);
+
 const CONFIG = {
     minLength: 3,
     maxLength: 15,
@@ -63,6 +66,7 @@ function startsWithLetter(word: string, letter: string): boolean {
 }
 
 function isComplexWord(word: string): boolean {
+    if (SHORT_WORD_WHITELIST.has(word.trim())) return false;
     if (/[\s،\-_/]/.test(word)) return true;
     if (word.length > CONFIG.maxLength || word.length < CONFIG.minLength) return true;
     if (/\d/.test(word)) return true;

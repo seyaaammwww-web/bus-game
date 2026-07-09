@@ -1381,35 +1381,35 @@
     "normalized": "طاووس",
     "letter": "ط",
     "category": "ولد",
-    "count": 6,
+    "count": 10,
     "firstSeen": "2026-06-11T16:54:47.109Z",
-    "lastSeen": "2026-06-11T16:58:16.180Z"
+    "lastSeen": "2026-07-09T00:38:00.225Z"
   },
   {
     "word": "طاولة",
     "normalized": "طاوله",
     "letter": "ط",
     "category": "بنت",
-    "count": 6,
+    "count": 10,
     "firstSeen": "2026-06-11T16:54:47.113Z",
-    "lastSeen": "2026-06-11T16:58:16.183Z"
+    "lastSeen": "2026-07-09T00:38:00.228Z"
   },
   {
     "word": "طائر",
     "normalized": "طائر",
     "letter": "ط",
     "category": "ولد",
-    "count": 3,
+    "count": 7,
     "firstSeen": "2026-06-11T16:56:09.723Z",
-    "lastSeen": "2026-06-11T16:58:16.186Z"
+    "lastSeen": "2026-07-09T00:38:00.229Z"
   },
   {
     "word": "طائر",
     "normalized": "طائر",
     "letter": "ط",
     "category": "جماد",
-    "count": 2,
+    "count": 6,
     "firstSeen": "2026-06-11T16:58:16.187Z",
-    "lastSeen": "2026-06-11T16:58:16.907Z"
+    "lastSeen": "2026-07-09T00:38:00.230Z"
   }
 ]

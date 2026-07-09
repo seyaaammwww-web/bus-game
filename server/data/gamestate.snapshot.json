@@ -1,4 +1,280 @@
 {
-  "timestamp": 1780890947865,
-  "rooms": []
+  "timestamp": 1783557545645,
+  "rooms": [
+    {
+      "id": "021eb10f-7b6e-463d-9bf5-19803ffe8eae",
+      "code": "GJBV",
+      "hostId": "df5cbdc2-62b8-4a14-b5f5-94605267abb5",
+      "players": [
+        {
+          "id": "df5cbdc2-62b8-4a14-b5f5-94605267abb5",
+          "name": "أحمد",
+          "score": 80,
+          "isHost": true,
+          "isReady": false,
+          "busStreak": 0,
+          "powerUps": {
+            "wildcard": 0,
+            "banish": 0,
+            "hint": 0,
+            "steal": 0
+          },
+          "usedPowerUps": {
+            "hint": false,
+            "steal": false,
+            "wildcard": false,
+            "banish": false
+          },
+          "totalEarnedPoints": 80
+        },
+        {
+          "id": "46bf63d8-b16d-4b6d-beb8-8840cb4e95f5",
+          "name": "منى",
+          "score": 100,
+          "isHost": false,
+          "isReady": true,
+          "busStreak": 0,
+          "powerUps": {
+            "wildcard": 0,
+            "banish": 0,
+            "hint": 0,
+            "steal": 0
+          },
+          "usedPowerUps": {
+            "hint": false,
+            "steal": false,
+            "wildcard": false,
+            "banish": false
+          },
+          "totalEarnedPoints": 100
+        }
+      ],
+      "rounds": [
+        {
+          "number": 1,
+          "letter": "د",
+          "startTime": 1783557165128,
+          "endTime": 1783557203390,
+          "isRush": true,
+          "isComplete": false,
+          "submissions": [
+            {
+              "playerId": "df5cbdc2-62b8-4a14-b5f5-94605267abb5",
+              "playerName": "أحمد",
+              "answers": {
+                "ولد": "داود",
+                "بنت": "دينا",
+                "بلد": "دبي",
+                "حيوان": "دب",
+                "جماد": "دولاب"
+              },
+              "submittedAt": 1783557193329,
+              "busComplete": true
+            },
+            {
+              "playerId": "46bf63d8-b16d-4b6d-beb8-8840cb4e95f5",
+              "playerName": "منى",
+              "answers": {
+                "ولد": "دياب",
+                "بنت": "درية",
+                "بلد": "دمشق",
+                "حيوان": "دجاجة",
+                "جماد": "دفتر"
+              },
+              "submittedAt": 1783557195768,
+              "busComplete": false
+            }
+          ],
+          "validatedAnswers": [
+            {
+              "playerId": "df5cbdc2-62b8-4a14-b5f5-94605267abb5",
+              "playerName": "أحمد",
+              "category": "ولد",
+              "answer": "داود",
+              "isValid": true,
+              "isPendingVote": false,
+              "isUnique": true,
+              "score": 20,
+              "votes": {
+                "accepted": 0,
+                "rejected": 0
+              },
+              "reason": "موجودة في القاموس",
+              "isFabricated": false
+            },
+            {
+              "playerId": "46bf63d8-b16d-4b6d-beb8-8840cb4e95f5",
+              "playerName": "منى",
+              "category": "ولد",
+              "answer": "دياب",
+              "isValid": true,
+              "isPendingVote": false,
+              "isUnique": true,
+              "score": 20,
+              "votes": {
+                "accepted": 0,
+                "rejected": 0
+              },
+              "reason": "موجودة في القاموس",
+              "isFabricated": false
+            },
+            {
+              "playerId": "df5cbdc2-62b8-4a14-b5f5-94605267abb5",
+              "playerName": "أحمد",
+              "category": "بنت",
+              "answer": "دينا",
+              "isValid": true,
+              "isPendingVote": false,
+              "isUnique": true,
+              "score": 20,
+              "votes": {
+                "accepted": 0,
+                "rejected": 0
+              },
+              "reason": "موجودة في القاموس",
+              "isFabricated": false
+            },
+            {
+              "playerId": "46bf63d8-b16d-4b6d-beb8-8840cb4e95f5",
+              "playerName": "منى",
+              "category": "بنت",
+              "answer": "درية",
+              "isValid": true,
+              "isPendingVote": false,
+              "isUnique": true,
+              "score": 20,
+              "votes": {
+                "accepted": 0,
+                "rejected": 0
+              },
+              "reason": "موجودة في القاموس",
+              "isFabricated": false
+            },
+            {
+              "playerId": "df5cbdc2-62b8-4a14-b5f5-94605267abb5",
+              "playerName": "أحمد",
+              "category": "بلد",
+              "answer": "دبي",
+              "isValid": true,
+              "isPendingVote": false,
+              "isUnique": true,
+              "score": 20,
+              "votes": {
+                "accepted": 0,
+                "rejected": 0
+              },
+              "reason": "موجودة في القاموس",
+              "isFabricated": false
+            },
+            {
+              "playerId": "46bf63d8-b16d-4b6d-beb8-8840cb4e95f5",
+              "playerName": "منى",
+              "category": "بلد",
+              "answer": "دمشق",
+              "isValid": true,
+              "isPendingVote": false,
+              "isUnique": true,
+              "score": 20,
+              "votes": {
+                "accepted": 0,
+                "rejected": 0
+              },
+              "reason": "موجودة في القاموس",
+              "isFabricated": false
+            },
+            {
+              "playerId": "df5cbdc2-62b8-4a14-b5f5-94605267abb5",
+              "playerName": "أحمد",
+              "category": "حيوان",
+              "answer": "دب",
+              "isValid": false,
+              "isPendingVote": false,
+              "isUnique": false,
+              "score": 0,
+              "votes": {
+                "accepted": 0,
+                "rejected": 0
+              },
+              "reason": "حرف خطأ أو قصيرة جداً",
+              "isFabricated": false
+            },
+            {
+              "playerId": "46bf63d8-b16d-4b6d-beb8-8840cb4e95f5",
+              "playerName": "منى",
+              "category": "حيوان",
+              "answer": "دجاجة",
+              "isValid": true,
+              "isPendingVote": false,
+              "isUnique": true,
+              "score": 20,
+              "votes": {
+                "accepted": 0,
+                "rejected": 0
+              },
+              "reason": "موجودة في القاموس",
+              "isFabricated": false
+            },
+            {
+              "playerId": "df5cbdc2-62b8-4a14-b5f5-94605267abb5",
+              "playerName": "أحمد",
+              "category": "جماد",
+              "answer": "دولاب",
+              "isValid": true,
+              "isPendingVote": false,
+              "isUnique": true,
+              "score": 20,
+              "votes": {
+                "accepted": 0,
+                "rejected": 0
+              },
+              "reason": "موجودة في القاموس",
+              "isFabricated": false
+            },
+            {
+              "playerId": "46bf63d8-b16d-4b6d-beb8-8840cb4e95f5",
+              "playerName": "منى",
+              "category": "جماد",
+              "answer": "دفتر",
+              "isValid": true,
+              "isPendingVote": false,
+              "isUnique": true,
+              "score": 20,
+              "votes": {
+                "accepted": 0,
+                "rejected": 0
+              },
+              "reason": "موجودة في القاموس",
+              "isFabricated": false
+            }
+          ],
+          "votingComplete": false,
+          "powerUpUsedInRound": false,
+          "endRoundInProgress": true,
+          "resultsCommitted": true
+        }
+      ],
+      "currentRound": 0,
+      "totalRounds": 10,
+      "phase": "results",
+      "letters": [
+        "د",
+        "ض",
+        "ج",
+        "ك",
+        "ف",
+        "ز",
+        "ح",
+        "ر",
+        "م",
+        "ث"
+      ],
+      "createdAt": 1783557089388,
+      "voteQueue": [],
+      "currentVote": null,
+      "settings": {
+        "votingEnabled": true,
+        "customCategories": []
+      }
+    }
+  ]
 }
