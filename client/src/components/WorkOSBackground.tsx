@@ -39,32 +39,107 @@ interface WorkOSBackgroundProps {
     isMobile?: boolean;
 }
 
-/* Pixel bus built from plain divs — crisp, palette-locked, zero assets */
+/* ============================================================
+   PIXEL BUS — hand-drawn pixel-art SVG, palette-locked.
+   Body bobs on its suspension while wheels stay planted and spin.
+   Ink: #350D7A / #1B0645 · Body: #FF8A50 / #FFC48B / #FF6957
+   Glass: #FFFEE5 / #FFFDCC · Accent: #6714A8 · Light: #FFF3B6
+   ============================================================ */
 const PixelBus: React.FC = () => (
-    <div className="workos-bus-body relative" style={{ width: 152, height: 76 }}>
+    <div className="relative" style={{ width: 200, height: 120 }}>
         {/* Exhaust puffs (trail behind, bus drives left-to-right) */}
         <div className="workos-bus-puff" />
         <div className="workos-bus-puff" />
-        {/* Body */}
-        <div className="absolute" style={{ left: 0, top: 8, width: 152, height: 48, backgroundColor: '#FF8A50', border: '4px solid #350D7A' }} />
-        {/* Roof stripe */}
-        <div className="absolute" style={{ left: 6, top: 14, width: 140, height: 8, backgroundColor: '#FFC48B' }} />
-        {/* Passenger windows */}
-        {[16, 50, 84].map((x) => (
-            <div key={x} className="absolute" style={{ left: x, top: 26, width: 22, height: 16, backgroundColor: '#FFFEE5', border: '3px solid #350D7A' }} />
-        ))}
-        {/* Door line */}
-        <div className="absolute" style={{ left: 112, top: 26, width: 3, height: 26, backgroundColor: '#350D7A' }} />
-        {/* Windshield (front) */}
-        <div className="absolute" style={{ left: 122, top: 26, width: 20, height: 18, backgroundColor: '#FFFEE5', border: '3px solid #350D7A' }} />
-        {/* Headlight */}
-        <div className="absolute" style={{ left: 146, top: 42, width: 6, height: 8, backgroundColor: '#FFF3B6', border: '2px solid #350D7A' }} />
-        {/* Wheels */}
-        {[22, 104].map((x) => (
-            <div key={x} className="absolute" style={{ left: x, top: 52, width: 24, height: 24, backgroundColor: '#350D7A', border: '4px solid #1B0645' }}>
-                <div className="absolute" style={{ left: 5, top: 5, width: 6, height: 6, backgroundColor: '#FFFEE5' }} />
-            </div>
-        ))}
+        <div className="workos-bus-puff" />
+        <svg
+            width="200"
+            height="120"
+            viewBox="0 0 200 120"
+            shapeRendering="crispEdges"
+            aria-hidden="true"
+        >
+            {/* Ground shadow (stays put — wheels are planted) */}
+            <rect x="10" y="112" width="182" height="6" fill="#1B0645" opacity="0.35" />
+
+            {/* ============ BODY (bobs on suspension) ============ */}
+            <g className="workos-bus-suspension">
+                {/* Ink silhouette with chamfered corners */}
+                <rect x="8" y="20" width="184" height="72" fill="#350D7A" />
+                <rect x="4" y="24" width="192" height="68" fill="#350D7A" />
+                {/* Orange body fill */}
+                <rect x="12" y="24" width="176" height="64" fill="#FF8A50" />
+                <rect x="8" y="28" width="184" height="56" fill="#FF8A50" />
+                {/* Roof highlight band */}
+                <rect x="12" y="24" width="176" height="6" fill="#FFC48B" />
+                <rect x="8" y="28" width="184" height="4" fill="#FFC48B" />
+                {/* Purple accent stripe under windows */}
+                <rect x="8" y="64" width="184" height="8" fill="#6714A8" />
+                {/* Lower skirt (darker orange) */}
+                <rect x="8" y="72" width="184" height="12" fill="#FF6957" />
+                {/* Dark bumper base */}
+                <rect x="4" y="86" width="192" height="6" fill="#1B0645" />
+
+                {/* Destination sign on the roof */}
+                <rect x="140" y="4" width="52" height="20" fill="#350D7A" />
+                <rect x="144" y="8" width="44" height="12" fill="#FFFEE5" />
+                <rect x="148" y="11" width="10" height="6" fill="#350D7A" />
+                <rect x="162" y="11" width="14" height="6" fill="#350D7A" />
+                <rect x="180" y="11" width="4" height="6" fill="#350D7A" />
+
+                {/* Passenger windows x3 — ink frame, glass, bottom shade */}
+                {[20, 56, 92].map((x) => (
+                    <g key={x}>
+                        <rect x={x} y="32" width="28" height="28" fill="#350D7A" />
+                        <rect x={x + 4} y="36" width="20" height="20" fill="#FFFEE5" />
+                        <rect x={x + 4} y="48" width="20" height="8" fill="#FFFDCC" />
+                        {/* diagonal shine pixel */}
+                        <rect x={x + 6} y="38" width="4" height="4" fill="#FFFFFF" opacity="0.7" />
+                    </g>
+                ))}
+
+                {/* Double door — two panes with ink divider */}
+                <rect x="128" y="32" width="24" height="52" fill="#350D7A" />
+                <rect x="132" y="36" width="16" height="20" fill="#FFFEE5" />
+                <rect x="132" y="60" width="16" height="20" fill="#FFFDCC" />
+                <rect x="139" y="36" width="2" height="44" fill="#350D7A" />
+
+                {/* Windshield */}
+                <rect x="160" y="32" width="28" height="32" fill="#350D7A" />
+                <rect x="164" y="36" width="20" height="24" fill="#FFFEE5" />
+                <rect x="164" y="50" width="20" height="10" fill="#FFFDCC" />
+                <rect x="166" y="38" width="4" height="4" fill="#FFFFFF" opacity="0.7" />
+
+                {/* Side mirror (front) */}
+                <rect x="192" y="34" width="6" height="4" fill="#350D7A" />
+                <rect x="194" y="26" width="6" height="10" fill="#350D7A" />
+                <rect x="196" y="28" width="2" height="6" fill="#FFFEE5" />
+
+                {/* Headlight + turn signal (front) */}
+                <rect x="182" y="66" width="12" height="14" fill="#350D7A" />
+                <rect x="184" y="68" width="8" height="10" fill="#FFF3B6" />
+                {/* Taillight (back) */}
+                <rect x="6" y="66" width="10" height="14" fill="#350D7A" />
+                <rect x="8" y="68" width="6" height="10" fill="#F640A8" />
+            </g>
+
+            {/* ============ WHEELS (planted, spinning) ============ */}
+            {[52, 148].map((cx) => (
+                <g key={cx}>
+                    {/* Wheel well shadow */}
+                    <rect x={cx - 22} y="80" width="44" height="12" fill="#1B0645" />
+                    {/* Tire */}
+                    <circle cx={cx} cy="96" r="17" fill="#1B0645" />
+                    <circle cx={cx} cy="96" r="13" fill="#350D7A" />
+                    {/* Spinning hub with spokes */}
+                    <g className="workos-wheel-hub">
+                        <circle cx={cx} cy="96" r="8" fill="#FFC48B" />
+                        <rect x={cx - 2} y="88" width="4" height="16" fill="#350D7A" />
+                        <rect x={cx - 8} y="94" width="16" height="4" fill="#350D7A" />
+                        <rect x={cx - 2} y="94" width="4" height="4" fill="#FFFEE5" />
+                    </g>
+                </g>
+            ))}
+        </svg>
     </div>
 );
 
@@ -196,6 +271,24 @@ const WorkOSBackground: React.FC<WorkOSBackgroundProps> = ({ isMobile = false })
 
             {/* Road Scene — pixel road with the always-driving bus */}
             <div className="workos-road-scene">
+                {/* Bus stop sign standing on the curb (behind the bus) */}
+                <div className="workos-bus-stop" aria-hidden="true">
+                    <svg width="48" height="76" viewBox="0 0 48 76" shapeRendering="crispEdges">
+                        {/* Post */}
+                        <rect x="20" y="20" width="8" height="56" fill="#350D7A" />
+                        <rect x="22" y="20" width="2" height="56" fill="#6714A8" />
+                        {/* Sign board */}
+                        <rect x="2" y="0" width="44" height="30" fill="#350D7A" />
+                        <rect x="6" y="4" width="36" height="22" fill="#FFFEE5" />
+                        {/* Tiny bus glyph on the sign */}
+                        <rect x="12" y="9" width="24" height="10" fill="#FF8A50" />
+                        <rect x="14" y="11" width="6" height="4" fill="#FFFEE5" />
+                        <rect x="23" y="11" width="6" height="4" fill="#FFFEE5" />
+                        <rect x="14" y="19" width="5" height="4" fill="#350D7A" />
+                        <rect x="29" y="19" width="5" height="4" fill="#350D7A" />
+                    </svg>
+                </div>
+
                 <div className="workos-bus">
                     <PixelBus />
                 </div>
@@ -203,9 +296,13 @@ const WorkOSBackground: React.FC<WorkOSBackgroundProps> = ({ isMobile = false })
                 <div className="workos-bus workos-bus-second">
                     <PixelBus />
                 </div>
+
+                <div className="workos-road-curb-highlight" />
                 <div className="workos-road-curb" />
                 <div className="workos-road-asphalt">
+                    <div className="workos-road-edgeline" />
                     <div className="workos-road-dashes" />
+                    <div className="workos-road-dashes-far" />
                     <div className="workos-road-edge" />
                 </div>
             </div>
