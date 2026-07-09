@@ -13,7 +13,7 @@ import { Tutorial } from '@/components/Tutorial';
 import { HelpCircle } from 'lucide-react';
 import { HostControls } from '@/components/HostControls';
 import { useToast } from '@/hooks/use-toast';
-import { BusDivider, LoadingBlocks, CornerStuds } from '@/components/ui/PixelDetails';
+import { LoadingBlocks, CornerStuds } from '@/components/ui/PixelDetails';
 
 export default function Lobby() {
   const { state, currentPlayer, isHost, setReady, startGame, setReferee, removeReferee, referee, disconnect, updateSettings, kickPlayer } = useGame();
@@ -141,7 +141,6 @@ export default function Lobby() {
               >
                 شاركه مع أصحابك عشان ينضموا
               </motion.p>
-              <BusDivider className="mt-3" />
             </div>
           </RetroCard>
         </motion.div>

@@ -908,7 +908,7 @@
     image-rendering: pixelated;
     scale: 1.15;
     transform-origin: bottom left;
-    animation: workos-bus-drive 16s linear infinite;
+    animation: workos-bus-drive 28s linear infinite;
     will-change: transform;
 }
 
@@ -924,7 +924,7 @@
 
 /* Second bus: half-cycle offset keeps a bus on screen most of the time */
 .workos-bus-second {
-    animation-delay: -8s;
+    animation-delay: -14s;
 }
 
 /* Taxi — crosses right-to-left on the far lane, slightly smaller/higher */
@@ -942,17 +942,21 @@
     will-change: transform;
 }
 
+/* NOTE: travel distance is oversized because the element's
+   `scale` property also scales the translation. 170vw covers the
+   smallest scale used (mobile 0.62 -> 105vw), so the taxi always
+   fully exits and never sits "parked" on screen. */
 @keyframes workos-taxi-drive {
     0% {
         transform: translateX(0);
     }
 
     32% {
-        transform: translateX(calc(-100vw - 280px));
+        transform: translateX(calc(-170vw - 600px));
     }
 
     100% {
-        transform: translateX(calc(-100vw - 280px));
+        transform: translateX(calc(-170vw - 600px));
     }
 }
 
@@ -1049,11 +1053,11 @@
 
 .mobile-optimized .workos-bus {
     scale: 0.78;
-    animation-duration: 13s;
+    animation-duration: 22s;
 }
 
 .mobile-optimized .workos-bus-second {
-    animation-delay: -6.5s;
+    animation-delay: -11s;
 }
 
 .mobile-optimized .workos-bus-stop {
