@@ -58,15 +58,15 @@ function SquarePowerUp({ type, title, cost, icon: Icon, status, onActivate }: Sq
         <button
             onClick={handleClick}
             className={cn(
-                "relative w-32 h-32 md:w-40 md:h-40 rounded-xl flex flex-col items-center justify-center gap-2 group transition-all active:scale-95",
+                "relative w-32 h-32 md:w-40 md:h-40 rounded-sm border-[3px] border-[#350D7A] flex flex-col items-center justify-center gap-2 group",
                 theme.bg,
-                isDisabled ? "opacity-70 grayscale cursor-not-allowed pointer-events-none" : "hover:scale-105 hover:-translate-y-1 hover:brightness-110 shadow-[0_8px_24px_rgba(0,0,0,0.2)] border border-white/30"
+                isDisabled ? "opacity-70 grayscale cursor-not-allowed pointer-events-none shadow-pixel-sm" : "shadow-pixel hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-pixel-lg active:translate-x-[2px] active:translate-y-[2px] active:shadow-pixel-sm"
             )}
         >
             {/* Price Badge */}
             <div className={cn(
-                "absolute -top-3 -right-3 px-2.5 py-1 bg-gray-900/90 border border-white/20 text-white text-xs md:text-sm font-bold flex items-center gap-1 shadow-lg rounded-full z-20 backdrop-blur-sm",
-                isLocked && "text-red-400 border-red-400"
+                "absolute -top-3 -right-3 px-2.5 py-1 bg-[#350D7A] border-2 border-[#350D7A] text-[#FFFEE2] text-xs md:text-sm font-bold flex items-center gap-1 shadow-pixel-sm rounded-sm z-20",
+                isLocked && "text-[#FF6957]"
             )}>
                 <Zap className={cn("w-3 h-3", isLocked ? "text-red-400" : "text-yellow-400 fill-yellow-400")} />
                 {formatCost(cost)}
@@ -112,15 +112,9 @@ export function PowerUpMenu() {
         <>
             <Button
                 onClick={toggleOpen}
-                className="h-10 md:h-14 px-4 md:px-6 flex items-center justify-center gap-2 font-bold relative overflow-hidden bg-gradient-to-b from-amber-400 to-amber-500 text-amber-950 group rounded-xl shadow-[0_4px_16px_rgba(251,191,36,0.4)] border border-amber-500/40 hover:brightness-110"
+                variant="retro"
+                className="h-10 md:h-14 px-4 md:px-6 flex items-center justify-center gap-2 relative overflow-hidden group"
             >
-                {/* Shimmer Effect */}
-                <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-12 w-[40%]"
-                    animate={{ left: ['-100%', '200%'] }}
-                    transition={{ repeat: Infinity, duration: 3, ease: "linear", repeatDelay: 1 }}
-                />
-
                 <div className="relative z-10 flex items-center justify-center">
                     <Zap className="w-5 h-5 md:w-6 md:h-6 fill-current" />
                 </div>
@@ -128,17 +122,14 @@ export function PowerUpMenu() {
                 <div className="relative z-10 flex items-center justify-center mt-1">
                     <span className="text-base md:text-xl">مساعدات</span>
                 </div>
-
-                <div className="absolute right-1 top-1 w-1 h-1 bg-white/60 rounded-full animate-pulse" />
-                <div className="absolute left-2 bottom-1 w-1.5 h-1.5 bg-white/30 rounded-full animate-pulse delay-700" />
             </Button>
 
             <AnimatePresence>
                 {isOpen && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" style={{ zIndex: 9999 }}>
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#350D7A]/85" style={{ zIndex: 9999 }}>
                         {/* We use Portal to escape stacking context of parent motion divs */}
                         {createPortal(
-                            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-[#350D7A]/85">
                                 <motion.div
                                     initial={{ scale: 0.8, opacity: 0 }}
                                     animate={{ scale: 1, opacity: 1 }}
@@ -149,7 +140,7 @@ export function PowerUpMenu() {
                                     <RetroCard className="shadow-2xl relative overflow-visible">
                                         <button
                                             onClick={() => setIsOpen(false)}
-                                            className="absolute -top-4 -left-4 bg-red-500 text-white p-2 rounded-full shadow-lg hover:scale-105 active:scale-95 transition-transform z-50"
+                                            className="absolute -top-4 -left-4 bg-[#FF6957] text-[#350D7A] p-2 rounded-sm border-[3px] border-[#350D7A] shadow-pixel-sm hover:bg-[#FF8A50] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none z-50"
                                         >
                                             <X className="w-6 h-6 stroke-[3]" />
                                         </button>
@@ -189,10 +180,10 @@ export function PowerUpMenu() {
                                         </div>
 
                                         <div className="mt-4 text-center">
-                                            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-[#6714A8] to-[#6714A8] text-white px-5 py-2.5 rounded-full font-semibold shadow-md">
+                                            <div className="inline-flex items-center gap-2 bg-[#6714A8] text-[#FFFEE2] px-5 py-2.5 rounded-sm border-[3px] border-[#350D7A] font-bold shadow-pixel-sm">
                                                 <span>رصيدك الحالي:</span>
-                                                <span className="text-yellow-400 font-bold text-xl">{currentPlayer?.totalEarnedPoints || 0}</span>
-                                                <Zap className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                                                <span className="text-[#FFC48B] font-bold text-xl">{currentPlayer?.totalEarnedPoints || 0}</span>
+                                                <Zap className="w-4 h-4 text-[#FFC48B] fill-[#FFC48B]" />
                                             </div>
                                         </div>
 

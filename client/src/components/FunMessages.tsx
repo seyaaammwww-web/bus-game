@@ -33,7 +33,7 @@ export function FunMessages({ messages }: FunMessagesProps) {
               stiffness: 200,
               damping: 25,
             }}
-            className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-full font-bold shadow-lg backdrop-blur-md border border-white/20 whitespace-nowrap text-center"
+            className="bg-[#F640A8] text-[#FFFEE2] px-6 py-3 rounded-sm font-bold border-[3px] border-[#350D7A] shadow-pixel whitespace-nowrap text-center"
           >
             <motion.span
               animate={{ scale: [1, 1.1, 1] }}

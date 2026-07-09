@@ -18,9 +18,9 @@ export function PixelAvatar({ src, alt, size = 'md', className, ...props }: Pixe
     return (
         <div
             className={cn(
-                "relative inline-flex items-center justify-center overflow-hidden rounded-2xl",
-                "bg-gradient-to-br from-white to-purple-50 border border-purple-200/60",
-                "shadow-md ring-2 ring-white/80",
+                "relative inline-flex items-center justify-center overflow-hidden rounded-sm",
+                "bg-[#FFFDCC] border-[3px] border-[#350D7A]",
+                "shadow-pixel-sm",
                 sizeClasses[size],
                 className
             )}

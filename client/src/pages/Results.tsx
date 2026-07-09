@@ -171,20 +171,20 @@ export default function Results() {
                 transition={{ type: 'spring', stiffness: 150, damping: 15 }}
                 className="relative inline-block mb-4"
               >
-                <div className="w-28 h-28 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-3xl flex items-center justify-center shadow-[0_12px_40px_rgba(251,191,36,0.45)] border border-amber-400/40">
-                  <Trophy className="w-16 h-16 text-white drop-shadow-lg" />
+                <div className="w-28 h-28 bg-[#FF8A50] rounded-sm flex items-center justify-center shadow-pixel-lg border-4 border-[#350D7A]">
+                  <Trophy className="w-16 h-16 text-[#350D7A]" />
                 </div>
                 <motion.div
-                  className="absolute -top-3 -right-3 w-12 h-12 bg-gradient-to-br from-[#6714A8] to-[#6714A8] rounded-full flex items-center justify-center shadow-lg border border-purple-400/30"
+                  className="absolute -top-3 -right-3 w-12 h-12 bg-[#6714A8] rounded-sm flex items-center justify-center shadow-pixel-sm border-[3px] border-[#350D7A]"
                   animate={{ scale: [1, 1.2, 1], rotate: [0, 15, -15, 0] }}
                   transition={{ repeat: Infinity, duration: 1.2 }}
                 >
-                  <Crown className="w-6 h-6 text-amber-300" />
+                  <Crown className="w-6 h-6 text-[#FFC48B]" />
                 </motion.div>
               </motion.div>
 
               <motion.h1
-                className="text-4xl md:text-5xl font-bold text-white mb-6 drop-shadow-lg"
+                className="text-4xl md:text-5xl text-white mb-6 [text-shadow:3px_3px_0_#350D7A]"
                 initial={{ y: -20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
@@ -232,11 +232,10 @@ export default function Results() {
                       transition={{ repeat: Infinity, duration: 2 }}
                     >
                       <div className="relative">
-                        <div className="absolute inset-0 bg-amber-400 rounded-full blur-xl opacity-40 animate-pulse" />
                         <PixelAvatar
                           src={winner.avatar || defaultAvatar(winner.id)}
                           size="md"
-                          className="relative z-10 ring-4 ring-amber-400/60 shadow-[0_0_32px_rgba(250,204,21,0.5)]"
+                          className="relative z-10 ring-4 ring-[#FF8A50] shadow-pixel"
                         />
                       </div>
                     </motion.div>
@@ -281,8 +280,8 @@ export default function Results() {
               >
                 <RetroCard>
                   <div className="flex items-center gap-2 mb-3">
-                    <div className="w-7 h-7 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-lg flex items-center justify-center shadow-sm">
-                      <Trophy className="w-4 h-4 text-white" />
+                    <div className="w-7 h-7 bg-[#FF8A50] rounded-sm border-2 border-[#350D7A] flex items-center justify-center">
+                      <Trophy className="w-4 h-4 text-[#350D7A]" />
                     </div>
                     <span className="font-pixel-title text-[#350D7A] text-base font-bold">الترتيب النهائي</span>
                   </div>
@@ -297,17 +296,17 @@ export default function Results() {
                           initial={{ x: -30, opacity: 0 }}
                           animate={{ x: 0, opacity: 1 }}
                           transition={{ delay: 0.85 + index * 0.07, type: 'spring', stiffness: 300 }}
-                          className={`flex items-center gap-3 px-3 py-2 rounded-xl border text-sm font-medium ${isMe
-                            ? 'bg-gradient-to-r from-purple-500/10 to-purple-400/10 border-purple-300/50 shadow-sm'
-                            : 'bg-white/80 border-purple-100'
+                          className={`flex items-center gap-3 px-3 py-2 rounded-sm border-2 border-[#350D7A] text-sm font-medium ${isMe
+                            ? 'bg-[#FFF3B6] shadow-pixel-sm'
+                            : 'bg-[#FFFEE5]'
                             }`}
                         >
                           {/* Rank */}
-                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-base font-bold flex-shrink-0 shadow-sm ${index === 0 ? rankStyles.gold :
+                          <div className={`w-8 h-8 rounded-sm border-2 border-[#350D7A] flex items-center justify-center text-base font-bold flex-shrink-0 ${index === 0 ? rankStyles.gold :
                             index === 1 ? rankStyles.silver :
                               index === 2 ? rankStyles.bronze :
-                                'bg-purple-500/10 text-[#350D7A] text-sm'
-                            } text-white`}>
+                                'bg-[#FFFDCC] text-[#350D7A] text-sm'
+                            }`}>
                             {index < 3 ? medals[index] : index + 1}
                           </div>
 
@@ -368,8 +367,8 @@ export default function Results() {
           >
             <RetroCard className="mb-4">
               <div className="flex items-center gap-2 mb-3 font-pixel-title text-[#350D7A] text-base">
-                <div className="w-7 h-7 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-lg flex items-center justify-center">
-                  <Trophy className="w-4 h-4 text-white" />
+                <div className="w-7 h-7 bg-[#FF8A50] rounded-sm border-2 border-[#350D7A] flex items-center justify-center">
+                  <Trophy className="w-4 h-4 text-[#350D7A]" />
                 </div>
                 الترتيب
               </div>
@@ -381,20 +380,20 @@ export default function Results() {
                     return (
                       <motion.div
                         key={`${player.id}-${player.score}`}
-                        className={`flex items-center gap-2 p-2 rounded-lg border-[2px] ${player.id === state.playerId
-                          ? 'bg-gradient-to-r from-[#6714A8]/10 to-[#871BB7]/10 border-[#6714A8]'
-                          : 'bg-white/80 border-[#350D7A]/20'
+                        className={`flex items-center gap-2 p-2 rounded-sm border-2 ${player.id === state.playerId
+                          ? 'bg-[#FFF3B6] border-[#350D7A] shadow-pixel-sm'
+                          : 'bg-[#FFFEE5] border-[#350D7A]/40'
                           } font-pixel-text text-sm`}
                         initial={{ x: -20, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
                         transition={{ delay: 0.05 * index }}
                       >
                         {index < 3 ? (
-                          <div className={`w-8 h-8 rounded-lg ${rankColors[index]} flex items-center justify-center text-white border border-white/50`}>
+                          <div className={`w-8 h-8 rounded-sm ${rankColors[index]} flex items-center justify-center border-2 border-[#350D7A]`}>
                             <RankIcon className="w-4 h-4" />
                           </div>
                         ) : (
-                          <div className="w-8 h-8 rounded-lg bg-[#350D7A]/10 flex items-center justify-center text-[#350D7A] font-bold text-sm">
+                          <div className="w-8 h-8 rounded-sm bg-[#FFFDCC] border-2 border-[#350D7A]/40 flex items-center justify-center text-[#350D7A] font-bold text-sm">
                             {index + 1}
                           </div>
                         )}
@@ -468,14 +467,13 @@ export default function Results() {
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3 }}
             >
-              <div className="bg-[#350D7A] text-[#FFFDD1] px-4 py-3 border-b-4 border-[#350D7A] rounded-t-lg">
+              <div className="bg-[#350D7A] text-[#FFFEE2] px-4 py-3 border-4 border-[#350D7A] rounded-t-sm">
                 <div className="flex items-center gap-2">
-                  <span className="text-xl"></span>
                   <span className="font-pixel-title text-lg tracking-wide">نتائج الجولة</span>
                 </div>
               </div>
 
-              <div className="bg-[#f3e8ff] p-4 rounded-b-lg border-x-4 border-b-4 border-[#350D7A]">
+              <div className="bg-[#FFFEE5] p-4 rounded-b-sm border-x-4 border-b-4 border-[#350D7A] shadow-pixel">
                 <ResultsTable
                   round={currentRound}
                   players={room.players}
@@ -500,20 +498,20 @@ export default function Results() {
             <>
               {/* Case 1: Countdown Running (Approved or Auto) */}
               {room.nextRoundAt ? (
-                <div className="w-full h-20 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center gap-5 border border-white/20 text-xl font-semibold">
-                  <span className="text-white text-xl">الجولة التالية في</span>
+                <div className="w-full h-20 bg-[#350D7A] rounded-sm flex items-center justify-center gap-5 border-[3px] border-[#350D7A] shadow-pixel text-xl font-semibold">
+                  <span className="text-[#FFFEE2] text-xl font-pixel-text">الجولة التالية في</span>
                   <motion.span
                     key={countdown}
                     initial={{ scale: 1.5, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="w-14 h-14 bg-gradient-to-br from-white to-[#faf5ff] text-[#350D7A] rounded-full flex items-center justify-center font-bold shadow-lg border-2 border-[#350D7A] font-pixel-title text-2xl"
+                    className="w-14 h-14 bg-[#FFFEE5] text-[#350D7A] rounded-sm flex items-center justify-center font-bold border-[3px] border-[#350D7A] shadow-pixel-sm font-pixel-title text-2xl"
                   >
                     {countdown}
                   </motion.span>
                 </div>
               ) : (
                 /* Case 2: Waiting for Referee (No Timer) */
-                <div className="w-full p-4 surface-dark text-center rounded-2xl">
+                <div className="w-full p-4 surface-dark text-center">
                   {isReferee && (room.phase === 'referee_review' || room.phase === 'results') ? (
                     <div className="space-y-2">
                       <p className="text-[#FFFDD1] font-bold font-pixel-text text-lg animate-pulse">

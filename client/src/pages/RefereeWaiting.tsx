@@ -22,16 +22,9 @@ export default function RefereeWaiting() {
                 animate={{ rotate: [0, -15, 15, -10, 10, 0] }}
                 transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 1 }}
             >
-                <div className="w-28 h-28 bg-gradient-to-br from-amber-400 to-amber-500 rounded-2xl flex items-center justify-center shadow-[0_8px_32px_rgba(251,191,36,0.4)] border border-amber-500/40">
-                    <Gavel className="w-14 h-14 text-amber-950" strokeWidth={2.5} />
+                <div className="w-28 h-28 bg-[#FF8A50] rounded-sm flex items-center justify-center shadow-pixel-lg border-4 border-[#350D7A]">
+                    <Gavel className="w-14 h-14 text-[#350D7A]" strokeWidth={2.5} />
                 </div>
-                {/* Glow */}
-                <motion.div
-                    className="absolute inset-0 rounded-lg"
-                    style={{ background: 'radial-gradient(circle, rgba(251,191,36,0.4) 0%, transparent 70%)', filter: 'blur(16px)' }}
-                    animate={{ opacity: [0.4, 0.9, 0.4], scale: [1, 1.2, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                />
             </motion.div>
 
             {/* Title */}
@@ -49,23 +42,23 @@ export default function RefereeWaiting() {
 
             {/* Round info */}
             <div className="flex gap-4 mb-8">
-                <div className="bg-[#350D7A]/90 backdrop-blur-md border border-purple-400/30 rounded-xl px-5 py-3 shadow-lg">
+                <div className="bg-[#350D7A] border-[3px] border-[#350D7A] rounded-sm px-5 py-3 shadow-pixel">
                     <p className="text-[10px] font-pixel-text text-[#FFFDCC] mb-1">الحرف</p>
-                    <p className="text-3xl font-pixel-title text-amber-300">{letter}</p>
+                    <p className="text-3xl font-pixel-title text-[#FFC48B]">{letter}</p>
                 </div>
-                <div className="bg-[#350D7A]/90 backdrop-blur-md border border-purple-400/30 rounded-xl px-5 py-3 shadow-lg">
+                <div className="bg-[#350D7A] border-[3px] border-[#350D7A] rounded-sm px-5 py-3 shadow-pixel">
                     <p className="text-[10px] font-pixel-text text-[#FFFDCC] mb-1">أرسلوا</p>
-                    <p className="text-3xl font-pixel-title text-emerald-300">{submittedCount} / {totalPlayers}</p>
+                    <p className="text-3xl font-pixel-title text-[#D3F088]">{submittedCount} / {totalPlayers}</p>
                 </div>
-                <div className="bg-[#350D7A]/90 backdrop-blur-md border border-purple-400/30 rounded-xl px-5 py-3 shadow-lg">
+                <div className="bg-[#350D7A] border-[3px] border-[#350D7A] rounded-sm px-5 py-3 shadow-pixel">
                     <p className="text-[10px] font-pixel-text text-[#FFFDCC] mb-1">الجولة</p>
-                    <p className="text-3xl font-pixel-title text-white">{(room?.currentRound || 0) + 1} / {room?.totalRounds || '?'}</p>
+                    <p className="text-3xl font-pixel-title text-[#FFFEE2]">{(room?.currentRound || 0) + 1} / {room?.totalRounds || '?'}</p>
                 </div>
             </div>
 
             {/* Player status */}
             {room && room.players.filter(p => p.id !== room.refereeId).length > 0 && (
-                <div className="w-full max-w-sm bg-white/95 backdrop-blur-md border border-purple-200/50 rounded-2xl p-4 shadow-card">
+                <div className="w-full max-w-sm bg-[#FFFEE5] border-[3px] border-[#350D7A] rounded-sm p-4 shadow-pixel">
                     <div className="flex items-center gap-2 mb-3">
                         <Eye className="w-4 h-4 text-[#6714A8]" />
                         <span className="font-pixel-text text-sm font-bold text-[#350D7A]">حالة اللاعبين</span>

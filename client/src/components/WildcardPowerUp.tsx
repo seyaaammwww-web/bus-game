@@ -22,23 +22,21 @@ export function WildcardPowerUp({ count, isActive, isDisabled, onActivate }: Wil
     >
       {!isLocked && (
         <div className="absolute -top-2 -right-2 z-10">
-          <motion.span
-            className="flex items-center justify-center w-5 h-5 bg-purple-600 text-white text-[10px] font-bold rounded-full border-2 border-white shadow-sm"
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ repeat: Infinity, duration: 2 }}
+          <span
+            className="flex items-center justify-center w-5 h-5 bg-[#6714A8] text-[#FFFEE2] text-[10px] font-bold rounded-sm border-2 border-[#350D7A]"
           >
             {count}
-          </motion.span>
+          </span>
         </div>
       )}
 
       <Button
         size="sm"
-        className={`h-12 px-4 gap-2 font-bold rounded-xl transition-all duration-300 relative overflow-hidden group ${isLocked
-          ? 'bg-slate-100 border-2 border-slate-200 text-slate-400 cursor-not-allowed'
+        className={`h-12 px-4 gap-2 font-bold rounded-sm border-[3px] border-[#350D7A] relative overflow-hidden group ${isLocked
+          ? 'bg-[#FFFDCC] text-[#350D7A]/40 cursor-not-allowed !shadow-none'
           : isActive
-            ? 'bg-gradient-to-br from-purple-500 via-indigo-500 to-purple-600 text-white shadow-[0_0_20px_rgba(168,85,247,0.4)]'
-            : 'bg-white border-2 border-purple-200 text-purple-600 hover:border-purple-400 hover:bg-purple-50'
+            ? 'bg-[#6714A8] text-[#FFFEE2] shadow-pixel'
+            : 'bg-[#FFFEE5] text-[#6714A8] hover:bg-[#FFFDD6] shadow-pixel-sm'
           } ${(isDisabled && !isLocked) ? 'opacity-40 grayscale cursor-not-allowed' : ''
           }`}
         onClick={isLocked ? undefined : onActivate}
@@ -63,13 +61,7 @@ export function WildcardPowerUp({ count, isActive, isDisabled, onActivate }: Wil
           <span className="text-sm">{isLocked ? 'مغلق' : '50pt'}</span>
         </div>
 
-        {isActive && !isLocked && (
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-            animate={{ x: ['-100%', '200%'] }}
-            transition={{ repeat: Infinity, duration: 1.5, ease: 'linear' }}
-          />
-        )}
+
       </Button>
     </motion.div>
   );

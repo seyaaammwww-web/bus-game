@@ -41,9 +41,9 @@ export function FillProgress({ filled, total, labels = [], filledSlots = [] }: F
         </motion.span>
       </div>
 
-      <div className="h-2.5 md:h-3 bg-[#350D7A]/60 rounded-full border border-[#6714A8]/40 overflow-hidden shadow-inner">
+      <div className="h-2.5 md:h-3 bg-[#FFFEE5] rounded-sm border-2 border-[#350D7A] overflow-hidden">
         <motion.div
-          className={`h-full rounded-full ${complete ? 'bg-gradient-to-r from-[#FFA168] via-[#FFC48B] to-[#6714A8]' : 'bg-gradient-to-r from-[#6714A8] to-[#871BB7]'}`}
+          className={`h-full ${complete ? 'bg-[#FF8A50]' : 'bg-[#6714A8]'}`}
           initial={false}
           animate={{ width: `${pct * 100}%` }}
           transition={{ type: 'spring', stiffness: 120, damping: 18 }}

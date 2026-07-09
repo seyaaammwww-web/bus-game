@@ -16,18 +16,18 @@ const TEXTS = {
 
 const THEMES = {
     wildcard: {
-        bg: 'bg-gradient-to-br from-amber-400 to-amber-500',
-        border: 'border-amber-500/50',
-        shadow: 'md:shadow-[0_4px_16px_rgba(251,191,36,0.35)]',
-        text: 'text-amber-950',
-        iconColor: 'text-amber-950'
+        bg: 'bg-[#FF8A50]',
+        border: 'border-[#350D7A]',
+        shadow: 'shadow-pixel',
+        text: 'text-[#350D7A]',
+        iconColor: 'text-[#350D7A]'
     },
     banish: {
-        bg: 'bg-gradient-to-br from-red-400 to-red-500',
-        border: 'border-red-500/50',
-        shadow: 'md:shadow-[0_4px_16px_rgba(248,113,113,0.35)]',
-        text: 'text-red-950',
-        iconColor: 'text-red-950'
+        bg: 'bg-[#FF6957]',
+        border: 'border-[#350D7A]',
+        shadow: 'shadow-pixel',
+        text: 'text-[#350D7A]',
+        iconColor: 'text-[#350D7A]'
     }
 } as const;
 

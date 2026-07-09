@@ -53,23 +53,8 @@ export function WildcardNotification({ show, playerName }: WildcardNotificationP
           ))}
 
           <motion.div
-            className="bg-gradient-to-br from-amber-400 via-yellow-300 to-orange-400 text-white px-8 py-5 rounded-3xl shadow-2xl flex flex-col items-center gap-2 backdrop-blur-md border-2 border-yellow-200/60 relative overflow-hidden"
-            animate={{
-              boxShadow: [
-                '0 0 20px rgba(251, 191, 36, 0.6)',
-                '0 0 50px rgba(251, 191, 36, 1)',
-                '0 0 20px rgba(251, 191, 36, 0.6)',
-              ],
-            }}
-            transition={{ duration: 1.5, repeat: Infinity }}
+            className="bg-[#FF8A50] text-[#350D7A] px-8 py-5 rounded-sm shadow-pixel-lg flex flex-col items-center gap-2 border-4 border-[#350D7A] relative overflow-hidden"
           >
-            {/* Inner glow effect */}
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30"
-              animate={{ x: [-200, 400] }}
-              transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
-            />
-
             <motion.div
               className="relative z-10"
               animate={{ rotate: [0, 360] }}

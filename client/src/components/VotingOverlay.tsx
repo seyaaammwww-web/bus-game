@@ -49,12 +49,12 @@ function VotingItemCard({ item, currentPlayer, castParallelVote, refereeOverride
 
             <div className="flex items-center justify-center gap-3 px-3 py-3">
                 <div className="text-center">
-                    <div className="bg-gradient-to-b from-[#6714A8] to-[#6714A8] text-white px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
+                    <div className="bg-[#6714A8] text-[#FFFEE2] px-3 py-1 rounded-sm border-2 border-[#350D7A] text-xs font-bold shadow-pixel-sm">
                         {item.category}
                     </div>
                 </div>
                 <div className="flex-1 text-center">
-                    <div className="bg-white border border-purple-200/60 text-[#350D7A] px-3 py-1.5 rounded-xl text-lg font-bold shadow-sm">
+                    <div className="bg-[#FFFEF5] border-2 border-[#350D7A] text-[#350D7A] px-3 py-1.5 rounded-sm text-lg font-bold shadow-pixel-sm">
                         {item.word}
                     </div>
                 </div>
@@ -84,18 +84,18 @@ function VotingItemCard({ item, currentPlayer, castParallelVote, refereeOverride
                         </div>
                     </div>
                 ) : isRequester ? (
-                    <div className="text-center py-2 bg-purple-500/10 rounded-xl border border-dashed border-purple-300/50">
+                    <div className="text-center py-2 bg-[#FFFDCC] rounded-sm border-2 border-dashed border-[#350D7A]/50">
                         <Loader2 className="w-4 h-4 text-[#6714A8] animate-spin mx-auto mb-1" />
                         <p className="text-[9px] text-[#350D7A]/80 font-medium">
                             إجابتك تحت التصويت ({yesVotes} نعم / {noVotes} لا)
                         </p>
                     </div>
                 ) : !isEligible ? (
-                    <div className="text-center py-2 bg-purple-500/5 rounded-xl border border-purple-200/30">
+                    <div className="text-center py-2 bg-[#FFFDCC]/60 rounded-sm border-2 border-[#350D7A]/30">
                         <p className="text-[9px] text-[#350D7A]/50">لا يحق لك التصويت على هذه الإجابة</p>
                     </div>
                 ) : hasVoted ? (
-                    <div className="text-center py-2 bg-purple-500/10 rounded-xl border border-purple-300/40">
+                    <div className="text-center py-2 bg-[#FFF3B6] rounded-sm border-2 border-[#350D7A]">
                         <p className="text-[10px] text-[#350D7A] font-semibold">تم تسجيل صوتك</p>
                     </div>
                 ) : (
@@ -120,9 +120,9 @@ function VotingItemCard({ item, currentPlayer, castParallelVote, refereeOverride
                 )}
 
                 <div className="mt-2">
-                    <div className="h-2 bg-purple-500/10 rounded-full overflow-hidden flex">
-                        <motion.div className="h-full bg-red-500" animate={{ width: `${noPercent}%` }} />
-                        <motion.div className="h-full bg-[#6714A8]" animate={{ width: `${yesPercent}%` }} />
+                    <div className="h-2.5 bg-[#FFFDCC] rounded-sm border-2 border-[#350D7A] overflow-hidden flex">
+                        <motion.div className="h-full bg-[#FF6957]" animate={{ width: `${noPercent}%` }} />
+                        <motion.div className="h-full bg-[#44AF00]" animate={{ width: `${yesPercent}%` }} />
                     </div>
                     <div className="flex justify-between text-[8px] text-[#350D7A]/60 mt-1 font-medium">
                         <span>رفض ({item.votes?.no || 0})</span>
@@ -170,14 +170,14 @@ export function VotingOverlay() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/75 backdrop-blur-md p-4"
+                    className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#350D7A]/85 p-4"
                 >
                     <motion.div
                         initial={{ scale: 0.9, y: 20 }}
                         animate={{ scale: 1, y: 0 }}
-                        className="w-full max-w-sm retro-overlay p-8 text-center rounded-2xl"
+                        className="w-full max-w-sm retro-overlay p-8 text-center"
                     >
-                        <Loader2 className="w-10 h-10 text-amber-400 animate-spin mx-auto mb-3" />
+                        <Loader2 className="w-10 h-10 text-[#6714A8] animate-spin mx-auto mb-3" />
                         <p className="font-bold text-[#350D7A] text-base">جاري معالجة النتائج...</p>
                     </motion.div>
                 </motion.div>
@@ -192,35 +192,35 @@ export function VotingOverlay() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/75 backdrop-blur-md p-4"
+                className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#350D7A]/85 p-4"
             >
                 <motion.div
                     initial={{ scale: 0.9, y: 20 }}
                     animate={{ scale: 1, y: 0 }}
                     exit={{ scale: 0.9, y: 20 }}
-                    className="w-full max-w-md max-h-[90vh] flex flex-col retro-overlay overflow-hidden rounded-2xl shadow-[0_24px_64px_rgba(76,29,149,0.3)]"
+                    className="w-full max-w-md max-h-[90vh] flex flex-col retro-overlay overflow-hidden"
                 >
-                    <div className="bg-gradient-to-r from-[#6714A8] to-[#6714A8] px-4 py-3 flex items-center justify-between shrink-0">
+                    <div className="bg-[#6714A8] border-b-[3px] border-[#350D7A] px-4 py-3 flex items-center justify-between shrink-0">
                         <div className="flex items-center gap-2">
                             <motion.div
                                 animate={{ rotate: [-10, 10, -10] }}
                                 transition={{ repeat: Infinity, duration: 0.8 }}
                             >
-                                <Gavel className="w-5 h-5 text-amber-300" />
+                                <Gavel className="w-5 h-5 text-[#FFC48B]" />
                             </motion.div>
-                            <span className="font-bold text-white text-base">
+                            <span className="font-bold text-[#FFFEE2] text-base font-pixel-text">
                                 محكمة الجولة {room.currentRound + 1}
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
                             <Timer timeLeft={voteTimeLeft} isRush={voteTimeLeft <= 5} maxTime={30} />
-                            <span className="text-[10px] bg-amber-400 text-[#350D7A] font-bold px-2.5 py-0.5 rounded-full">
+                            <span className="text-[10px] bg-[#FF8A50] text-[#350D7A] font-bold px-2.5 py-0.5 rounded-sm border-2 border-[#350D7A]">
                                 {voteQueue.length} إجابات
                             </span>
                         </div>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto p-3 custom-scrollbar bg-white/50">
+                    <div className="flex-1 overflow-y-auto p-3 custom-scrollbar bg-[#FFFDCC]">
                         <AnimatePresence>
                             {voteQueue.map((item: any) => (
                                 <VotingItemCard

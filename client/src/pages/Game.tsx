@@ -358,8 +358,8 @@ export default function Game() {
           <div className="flex items-center justify-between px-2 mt-4">
             <PowerUpMenu />
 
-            <div className="px-3 py-1 bg-white/10 rounded-full border border-white/20">
-              <span className="font-pixel-text font-bold text-sm text-amber-300">
+            <div className="px-3 py-1 bg-[#FFFEE5] rounded-sm border-2 border-[#350D7A] shadow-pixel-sm">
+              <span className="font-pixel-text font-bold text-sm text-[#350D7A]">
                 الجولة {room.currentRound + 1} / {room.totalRounds}
               </span>
             </div>
@@ -386,9 +386,9 @@ export default function Game() {
               <LogOut className="w-5 h-5" />
             </Button>
 
-            <div className="px-4 py-1.5 flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full">
-              <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-              <span className="font-pixel-text font-bold text-[#FFFDD1]">الجولة {room.currentRound + 1} / {room.totalRounds}</span>
+            <div className="px-4 py-1.5 flex items-center gap-2 bg-[#FFFEE5] border-2 border-[#350D7A] rounded-sm shadow-pixel-sm">
+              <div className="w-2 h-2 bg-[#F640A8]" />
+              <span className="font-pixel-text font-bold text-[#350D7A]">الجولة {room.currentRound + 1} / {room.totalRounds}</span>
             </div>
 
             <div className="scale-75 origin-right">
@@ -538,8 +538,8 @@ export default function Game() {
               animate={{ scale: 1, opacity: 1 }}
               className="text-center p-6 mt-6 surface-card"
             >
-              <div className="w-14 h-14 bg-[#6714A8] rounded-full flex items-center justify-center mx-auto mb-3">
-                <Send className="w-7 h-7 text-white" />
+              <div className="w-14 h-14 bg-[#6714A8] rounded-sm border-[3px] border-[#350D7A] shadow-pixel-sm flex items-center justify-center mx-auto mb-3">
+                <Send className="w-7 h-7 text-[#FFFEE2]" />
               </div>
               <p className="font-pixel-text text-xl text-[#350D7A] mb-1 font-bold">تم!</p>
               <motion.p className="text-lg text-[#6714A8] font-bold font-pixel-text"

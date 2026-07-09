@@ -51,7 +51,7 @@ export const BanishOverlay = memo(function BanishOverlay({
             className="retro-overlay overflow-hidden max-w-md w-full"
           >
             {/* Header */}
-            <div className="bg-gradient-to-r from-red-500 to-red-600 p-6 relative overflow-hidden">
+            <div className="bg-[#FF6957] border-b-4 border-[#350D7A] p-6 relative overflow-hidden">
               <div className="absolute inset-0 opacity-10">
                 {[...Array(5)].map((_, i) => (
                   <motion.div
@@ -103,14 +103,14 @@ export const BanishOverlay = memo(function BanishOverlay({
                     onClick={() => {
                       handleSelectPlayer(player.id);
                     }}
-                    className="w-full p-4 bg-gradient-to-r from-red-50 to-orange-50 hover:from-red-100 hover:to-orange-100 border-2 border-red-200 hover:border-red-400 rounded-xl transition-all text-left group"
+                    className="w-full p-4 bg-[#FFFDCC] hover:bg-[#FFF3B6] border-[3px] border-[#350D7A] rounded-sm shadow-pixel-sm hover:shadow-pixel transition-none text-left group"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
-                        <p className="font-bold text-red-600 group-hover:text-red-700">
+                        <p className="font-bold text-[#350D7A]">
                           {player.name}
                         </p>
-                        <p className="text-xs text-red-500">
+                        <p className="text-xs text-[#6714A8]">
                           نقاط: {player.score}
                         </p>
                       </div>

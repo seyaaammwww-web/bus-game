@@ -45,7 +45,7 @@ export function RefereeReviewOverlay() {
                 <div className="retro-overlay p-6">
                     {/* Header */}
                     <div className="text-center mb-6">
-                        <div className="inline-flex items-center gap-2 bg-gradient-to-r from-[#6714A8] to-[#6714A8] text-white px-5 py-2 rounded-full mb-2 shadow-md">
+                        <div className="inline-flex items-center gap-2 bg-[#6714A8] text-[#FFFEE2] px-5 py-2 rounded-sm border-2 border-[#350D7A] shadow-pixel-sm mb-2">
                             <Gavel className="w-5 h-5" />
                             <span className="font-bold font-pixel-text">مراجعة الحكم</span>
                         </div>

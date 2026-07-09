@@ -21,14 +21,14 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
   return (
     <motion.div
       className={cn(
-        "flex items-center gap-3 rounded-2xl border relative transition-all overflow-visible backdrop-blur-sm",
+        "flex items-center gap-3 rounded-sm border-[3px] border-[#350D7A] relative overflow-visible",
         isCurrentPlayer
-          ? "bg-purple-50/90 border-purple-300/60 shadow-md ring-1 ring-purple-200/50"
-          : "bg-white/95 border-gray-200/80 shadow-sm"
+          ? "bg-[#FFF3B6] shadow-pixel"
+          : "bg-[#FFFEE5] shadow-pixel-sm"
       )}
       initial={{ scale: 0.8, opacity: 0, y: 20 }}
       animate={{ scale: 1, opacity: 1, y: 0 }}
-      whileHover={{ y: -6, scale: 1.02 }}
+      whileHover={{ y: -2 }}
       transition={{ type: "spring", stiffness: 400, damping: 15 }}
     >
       {/* Rank Badge */}
@@ -51,16 +51,13 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
       {/* Avatar Container */}
       <div className="relative p-2">
         <div className={cn(
-          "relative flex items-center justify-center rounded-xl border overflow-hidden",
-          isCurrentPlayer ? "w-14 h-14 border-purple-300/50 bg-gradient-to-br from-[#871BB7] to-[#6714A8]" : "w-12 h-12 border-gray-200 bg-gray-50"
+          "relative flex items-center justify-center rounded-sm border-2 border-[#350D7A] overflow-hidden",
+          isCurrentPlayer ? "w-14 h-14 bg-[#6714A8]" : "w-12 h-12 bg-[#FFFDCC]"
         )}>
-          {/* Background Pattern */}
-          <div className={`absolute inset-0 opacity-20 ${isCurrentPlayer ? 'bg-[#6714A8]/10' : ''}`} />
-
           {/* Letter */}
           <span className={cn(
-            "relative z-10 font-bold font-pixel-title drop-shadow-md",
-            isCurrentPlayer ? "text-3xl text-white" : "text-2xl text-gray-800"
+            "relative z-10 font-pixel-title",
+            isCurrentPlayer ? "text-3xl text-[#FFFEE2]" : "text-2xl text-[#350D7A]"
           )}>
             {player.name.charAt(0)}
           </span>
@@ -73,14 +70,14 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
         <div className="flex items-center gap-2 mb-1">
           <span className={cn(
             "font-bold truncate font-pixel-text text-base",
-            isCurrentPlayer ? "text-[#350D7A]" : "text-gray-900"
+            isCurrentPlayer ? "text-[#350D7A]" : "text-[#350D7A]/90"
           )}>
             {player.name}
           </span>
 
           {/* Status Badges */}
-          {player.isHost && <Crown className="w-4 h-4 text-yellow-500 fill-yellow-500 shrink-0" />}
-          {isReferee && <Shield className="w-4 h-4 text-blue-500 fill-blue-500 shrink-0" />}
+          {player.isHost && <Crown className="w-4 h-4 text-[#FF8A50] fill-[#FF8A50] shrink-0" />}
+          {isReferee && <Shield className="w-4 h-4 text-[#6714A8] fill-[#6714A8] shrink-0" />}
 
           {isCurrentPlayer && (
             <span className="text-[10px] bg-[#6714A8]/10 text-[#6714A8] border border-[#6714A8]/20 px-1.5 py-0.5 rounded-sm font-bold font-pixel-text">
@@ -100,7 +97,7 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
         ) : (
           <div className="flex items-center gap-1">
             {player.isOffline ? (
-              <div className="flex items-center gap-1 text-gray-500 text-xs font-bold bg-gray-100 px-2 py-0.5 rounded-sm border border-gray-300">
+              <div className="flex items-center gap-1 text-[#350D7A]/60 text-xs font-bold bg-[#FFFDCC] px-2 py-0.5 rounded-sm border-2 border-[#350D7A]/40">
                 <WifiOff className="w-3 h-3" />
                 غير متصل
               </div>
@@ -109,13 +106,13 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
                 initial={{ scale: 0, rotate: -20 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ type: "spring", stiffness: 600, damping: 12 }}
-                className="flex items-center gap-1 text-[#350D7A] text-xs font-bold bg-[#f5f3ff] px-2 py-0.5 rounded-sm border border-[#6714A8]/30 shadow-sm"
+                className="flex items-center gap-1 text-[#350D7A] text-xs font-bold bg-[#D3F088] px-2 py-0.5 rounded-sm border-2 border-[#350D7A]"
               >
-                <Check className="w-3 h-3 text-[#6714A8] stroke-[3]" />
+                <Check className="w-3 h-3 text-[#44AF00] stroke-[3]" />
                 جاهز
               </motion.div>
             ) : (
-              <div className="flex items-center gap-1 text-gray-400 text-xs font-bold bg-gray-50 px-2 py-0.5 rounded-sm border border-gray-200">
+              <div className="flex items-center gap-1 text-[#350D7A]/50 text-xs font-bold bg-[#FFFEE5] px-2 py-0.5 rounded-sm border-2 border-[#350D7A]/30">
                 <Clock className="w-3 h-3" />
                 ينتظر
               </div>
