@@ -9,8 +9,8 @@ export default function NotFound() {
         <div className="flex mb-4 gap-2 justify-center">
           <AlertCircle className="h-8 w-8 text-red-500" />
         </div>
-        <h1 className="text-2xl font-pixel-title text-[#4c1d95] mb-2">404 Page Not Found</h1>
-        <p className="text-[#4c1d95]/60">الصفحة دي غير موجودة في الأتوبيس بتاعنا.</p>
+        <h1 className="text-2xl font-pixel-title text-[#350D7A] mb-2">404 Page Not Found</h1>
+        <p className="text-[#350D7A]/60">الصفحة دي غير موجودة في الأتوبيس بتاعنا.</p>
         <div className="mt-6">
           <a href="/" className="text-primary hover:underline font-bold">ارجع للرئيسية</a>
         </div>

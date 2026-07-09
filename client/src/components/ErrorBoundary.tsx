@@ -59,12 +59,12 @@ export class ErrorBoundary extends Component<Props, State> {
 
                         <h1 className="text-4xl font-pixel-title text-red-400 mb-4">أوبس! خطأ فني</h1>
 
-                        <p className="text-xl text-[#e9d5ff]/80 font-pixel-text mb-8">
+                        <p className="text-xl text-[#FFFDCC]/80 font-pixel-text mb-8">
                             يبدو أن الأوتوبيس عطلان شوية. ما تقلقش، هنرجعك المحطة وتصلح كل حاجة.
                         </p>
 
                         {this.state.errorId && (
-                            <p className="text-xs text-[#e9d5ff]/50 mb-4 font-mono break-all">
+                            <p className="text-xs text-[#FFFDCC]/50 mb-4 font-mono break-all">
                                 رقم الخطأ: {this.state.errorId}
                             </p>
                         )}

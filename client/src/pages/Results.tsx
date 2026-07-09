@@ -175,7 +175,7 @@ export default function Results() {
                   <Trophy className="w-16 h-16 text-white drop-shadow-lg" />
                 </div>
                 <motion.div
-                  className="absolute -top-3 -right-3 w-12 h-12 bg-gradient-to-br from-[#7c3aed] to-[#6d28d9] rounded-full flex items-center justify-center shadow-lg border border-purple-400/30"
+                  className="absolute -top-3 -right-3 w-12 h-12 bg-gradient-to-br from-[#6714A8] to-[#6714A8] rounded-full flex items-center justify-center shadow-lg border border-purple-400/30"
                   animate={{ scale: [1, 1.2, 1], rotate: [0, 15, -15, 0] }}
                   transition={{ repeat: Infinity, duration: 1.2 }}
                 >
@@ -284,7 +284,7 @@ export default function Results() {
                     <div className="w-7 h-7 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-lg flex items-center justify-center shadow-sm">
                       <Trophy className="w-4 h-4 text-white" />
                     </div>
-                    <span className="font-pixel-title text-[#4c1d95] text-base font-bold">الترتيب النهائي</span>
+                    <span className="font-pixel-title text-[#350D7A] text-base font-bold">الترتيب النهائي</span>
                   </div>
                   <div className="space-y-2">
                     {sortedPlayers.map((player, index) => {
@@ -306,7 +306,7 @@ export default function Results() {
                           <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-base font-bold flex-shrink-0 shadow-sm ${index === 0 ? rankStyles.gold :
                             index === 1 ? rankStyles.silver :
                               index === 2 ? rankStyles.bronze :
-                                'bg-purple-500/10 text-[#4c1d95] text-sm'
+                                'bg-purple-500/10 text-[#350D7A] text-sm'
                             } text-white`}>
                             {index < 3 ? medals[index] : index + 1}
                           </div>
@@ -315,28 +315,28 @@ export default function Results() {
                           <PixelAvatar
                             src={player.avatar || defaultAvatar(player.id)}
                             size="sm"
-                            className="border border-[#4c1d95]/30 flex-shrink-0"
+                            className="border border-[#350D7A]/30 flex-shrink-0"
                           />
 
                           {/* Name */}
                           <div className="flex-1 min-w-0">
-                            <p className="font-bold text-sm text-[#4c1d95] font-pixel-text truncate flex items-center gap-1">
+                            <p className="font-bold text-sm text-[#350D7A] font-pixel-text truncate flex items-center gap-1">
                               {player.name}
                               {player.isHost && <Crown className="w-3 h-3 text-amber-500 flex-shrink-0" />}
-                              {isRef && <Shield className="w-3 h-3 text-[#7c3aed] flex-shrink-0" />}
-                              {isMe && <span className="text-[9px] bg-[#7c3aed] text-white px-1 rounded font-pixel-text flex-shrink-0">أنت</span>}
+                              {isRef && <Shield className="w-3 h-3 text-[#6714A8] flex-shrink-0" />}
+                              {isMe && <span className="text-[9px] bg-[#6714A8] text-white px-1 rounded font-pixel-text flex-shrink-0">أنت</span>}
                             </p>
                           </div>
 
                           {/* Score */}
                           <div className="flex items-center gap-1 flex-shrink-0">
                             <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                            <ScoreCounter value={player.score} className="text-lg font-bold text-[#4c1d95] font-pixel-title tabular-nums" />
+                            <ScoreCounter value={player.score} className="text-lg font-bold text-[#350D7A] font-pixel-title tabular-nums" />
                           </div>
 
                           {/* Host Controls for Score Adjustment — hide for referee players */}
                           {isHost && player.id !== room.refereeId && (
-                            <div className="flex items-center gap-1 ml-1 border-l-2 border-[#4c1d95]/10 pl-2 scale-75 transform origin-right">
+                            <div className="flex items-center gap-1 ml-1 border-l-2 border-[#350D7A]/10 pl-2 scale-75 transform origin-right">
                               <HostControls type="player_row" targetPlayer={player} />
                             </div>
                           )}
@@ -367,7 +367,7 @@ export default function Results() {
             transition={{ delay: 0.2 }}
           >
             <RetroCard className="mb-4">
-              <div className="flex items-center gap-2 mb-3 font-pixel-title text-[#4c1d95] text-base">
+              <div className="flex items-center gap-2 mb-3 font-pixel-title text-[#350D7A] text-base">
                 <div className="w-7 h-7 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-lg flex items-center justify-center">
                   <Trophy className="w-4 h-4 text-white" />
                 </div>
@@ -382,8 +382,8 @@ export default function Results() {
                       <motion.div
                         key={`${player.id}-${player.score}`}
                         className={`flex items-center gap-2 p-2 rounded-lg border-[2px] ${player.id === state.playerId
-                          ? 'bg-gradient-to-r from-[#7c3aed]/10 to-[#8b5cf6]/10 border-[#7c3aed]'
-                          : 'bg-white/80 border-[#4c1d95]/20'
+                          ? 'bg-gradient-to-r from-[#6714A8]/10 to-[#871BB7]/10 border-[#6714A8]'
+                          : 'bg-white/80 border-[#350D7A]/20'
                           } font-pixel-text text-sm`}
                         initial={{ x: -20, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
@@ -394,25 +394,25 @@ export default function Results() {
                             <RankIcon className="w-4 h-4" />
                           </div>
                         ) : (
-                          <div className="w-8 h-8 rounded-lg bg-[#4c1d95]/10 flex items-center justify-center text-[#4c1d95] font-bold text-sm">
+                          <div className="w-8 h-8 rounded-lg bg-[#350D7A]/10 flex items-center justify-center text-[#350D7A] font-bold text-sm">
                             {index + 1}
                           </div>
                         )}
 
                         <PixelAvatar
                           src={player.avatar || defaultAvatar(player.id)}
-                          className="w-8 h-8 border border-[#4c1d95]/30"
+                          className="w-8 h-8 border border-[#350D7A]/30"
                           size="sm"
                         />
 
                         <div className="flex-1 min-w-0">
-                          <p className="font-bold text-sm text-[#4c1d95] font-pixel-text truncate">
+                          <p className="font-bold text-sm text-[#350D7A] font-pixel-text truncate">
                             {player.name}
                             {player.isHost && <Crown className="w-3 h-3 text-amber-500 inline mr-1" />}
-                            {isReferee && <Shield className="w-3 h-3 text-[#7c3aed] inline mr-1" />}
+                            {isReferee && <Shield className="w-3 h-3 text-[#6714A8] inline mr-1" />}
                           </p>
                         </div>
-                        <span className="text-lg font-bold text-[#4c1d95] font-pixel-title">{player.score}</span>
+                        <span className="text-lg font-bold text-[#350D7A] font-pixel-title">{player.score}</span>
                       </motion.div>
                     );
                   })}
@@ -468,14 +468,14 @@ export default function Results() {
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3 }}
             >
-              <div className="bg-[#4c1d95] text-[#FFFDD1] px-4 py-3 border-b-4 border-[#2e1065] rounded-t-lg">
+              <div className="bg-[#350D7A] text-[#FFFDD1] px-4 py-3 border-b-4 border-[#350D7A] rounded-t-lg">
                 <div className="flex items-center gap-2">
                   <span className="text-xl"></span>
                   <span className="font-pixel-title text-lg tracking-wide">نتائج الجولة</span>
                 </div>
               </div>
 
-              <div className="bg-[#f3e8ff] p-4 rounded-b-lg border-x-4 border-b-4 border-[#4c1d95]">
+              <div className="bg-[#f3e8ff] p-4 rounded-b-lg border-x-4 border-b-4 border-[#350D7A]">
                 <ResultsTable
                   round={currentRound}
                   players={room.players}
@@ -506,7 +506,7 @@ export default function Results() {
                     key={countdown}
                     initial={{ scale: 1.5, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="w-14 h-14 bg-gradient-to-br from-white to-[#faf5ff] text-[#4c1d95] rounded-full flex items-center justify-center font-bold shadow-lg border-2 border-[#4c1d95] font-pixel-title text-2xl"
+                    className="w-14 h-14 bg-gradient-to-br from-white to-[#faf5ff] text-[#350D7A] rounded-full flex items-center justify-center font-bold shadow-lg border-2 border-[#350D7A] font-pixel-title text-2xl"
                   >
                     {countdown}
                   </motion.span>

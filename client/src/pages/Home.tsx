@@ -54,14 +54,13 @@ export default function Home() {
       {showHelp && <Tutorial onClose={() => setShowHelp(false)} />}
 
       {/* Large Floating Help Button */}
-      <motion.button
-        className="fixed bottom-4 right-4 z-50 w-12 h-12 bg-white/95 rounded-full flex items-center justify-center shadow-lg border border-purple-200/60 backdrop-blur-md hover:bg-white hover:scale-110 active:scale-95 transition-all"
+      <button
+        className="fixed bottom-4 right-4 z-50 w-12 h-12 bg-[#FFFEE5] rounded-sm flex items-center justify-center border-[3px] border-[#350D7A] shadow-pixel hover:bg-[#FFFDD6] active:translate-x-[2px] active:translate-y-[2px] active:shadow-pixel-sm"
         onClick={() => setShowHelp(true)}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+        aria-label="المساعدة"
       >
-        <span className="text-2xl font-bold text-[#2e1065] font-pixel-title">؟</span>
-      </motion.button>
+        <span className="text-2xl text-[#350D7A] font-pixel-title">؟</span>
+      </button>
 
       <motion.div
         initial={{ y: -30, opacity: 0, scale: 0.95 }}
@@ -74,7 +73,7 @@ export default function Home() {
           <img
             src="/assets/logo.png"
             alt="أوتوبيس كومبليت"
-            className="w-full max-w-[500px] object-contain drop-shadow-2xl"
+            className="w-full max-w-[500px] object-contain pixelated"
           />
         </div>
 
@@ -91,7 +90,7 @@ export default function Home() {
             initial={{ scale: 0.9, opacity: 0, y: -10 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: -10 }}
-            className="bg-destructive/10 border-2 border-destructive/30 text-destructive px-6 py-4 rounded-2xl mb-6 text-center max-w-md shadow-lg"
+            className="bg-[#FFFEE5] border-[3px] border-[#350D7A] text-[#FF6957] px-6 py-4 rounded-sm mb-6 text-center max-w-md shadow-pixel font-bold"
           >
             <motion.div
               animate={{ rotate: [0, 5, -5, 0] }}
@@ -102,7 +101,7 @@ export default function Home() {
             {(state.error?.includes('محاولات') || state.error?.includes('الاتصال')) && (
               <Button
                 variant="outline"
-                className="mt-4 bg-white/20 hover:bg-white/30 text-white font-pixel-text border-white/40 border-2 shadow-sm"
+                className="mt-4 font-pixel-text"
                 onClick={() => window.location.reload()}
               >
                 إعادة المحاولة
@@ -182,7 +181,7 @@ export default function Home() {
                   transition={{ type: 'spring', delay: 0.1 }}
                 >
                   <CardTitle className="flex items-center gap-2 font-pixel-title text-4xl">
-                    <Plus className="w-7 h-7 text-[#7c3aed]" />
+                    <Plus className="w-7 h-7 text-[#6714A8]" />
                     غرفة جديدة
                   </CardTitle>
                 </motion.div>

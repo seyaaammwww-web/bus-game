@@ -43,22 +43,22 @@ export default function RefereeWaiting() {
                 أنت الحكم!
             </motion.h1>
 
-            <p className="text-[#e9d5ff] font-pixel-text text-base mb-6 max-w-xs">
+            <p className="text-[#FFFDCC] font-pixel-text text-base mb-6 max-w-xs">
                 انتظر اللاعبين حتى ينتهوا من الإجابة، ثم ستراجع إجاباتهم
             </p>
 
             {/* Round info */}
             <div className="flex gap-4 mb-8">
-                <div className="bg-[#4c1d95]/90 backdrop-blur-md border border-purple-400/30 rounded-xl px-5 py-3 shadow-lg">
-                    <p className="text-[10px] font-pixel-text text-[#e9d5ff] mb-1">الحرف</p>
+                <div className="bg-[#350D7A]/90 backdrop-blur-md border border-purple-400/30 rounded-xl px-5 py-3 shadow-lg">
+                    <p className="text-[10px] font-pixel-text text-[#FFFDCC] mb-1">الحرف</p>
                     <p className="text-3xl font-pixel-title text-amber-300">{letter}</p>
                 </div>
-                <div className="bg-[#4c1d95]/90 backdrop-blur-md border border-purple-400/30 rounded-xl px-5 py-3 shadow-lg">
-                    <p className="text-[10px] font-pixel-text text-[#e9d5ff] mb-1">أرسلوا</p>
+                <div className="bg-[#350D7A]/90 backdrop-blur-md border border-purple-400/30 rounded-xl px-5 py-3 shadow-lg">
+                    <p className="text-[10px] font-pixel-text text-[#FFFDCC] mb-1">أرسلوا</p>
                     <p className="text-3xl font-pixel-title text-emerald-300">{submittedCount} / {totalPlayers}</p>
                 </div>
-                <div className="bg-[#4c1d95]/90 backdrop-blur-md border border-purple-400/30 rounded-xl px-5 py-3 shadow-lg">
-                    <p className="text-[10px] font-pixel-text text-[#e9d5ff] mb-1">الجولة</p>
+                <div className="bg-[#350D7A]/90 backdrop-blur-md border border-purple-400/30 rounded-xl px-5 py-3 shadow-lg">
+                    <p className="text-[10px] font-pixel-text text-[#FFFDCC] mb-1">الجولة</p>
                     <p className="text-3xl font-pixel-title text-white">{(room?.currentRound || 0) + 1} / {room?.totalRounds || '?'}</p>
                 </div>
             </div>
@@ -67,21 +67,21 @@ export default function RefereeWaiting() {
             {room && room.players.filter(p => p.id !== room.refereeId).length > 0 && (
                 <div className="w-full max-w-sm bg-white/95 backdrop-blur-md border border-purple-200/50 rounded-2xl p-4 shadow-card">
                     <div className="flex items-center gap-2 mb-3">
-                        <Eye className="w-4 h-4 text-[#7c3aed]" />
-                        <span className="font-pixel-text text-sm font-bold text-[#4c1d95]">حالة اللاعبين</span>
+                        <Eye className="w-4 h-4 text-[#6714A8]" />
+                        <span className="font-pixel-text text-sm font-bold text-[#350D7A]">حالة اللاعبين</span>
                     </div>
                     <div className="space-y-2">
                         {room.players.filter(p => p.id !== room.refereeId).map(player => {
                             const hasSubmitted = currentRound?.submissions?.some(s => s.playerId === player.id);
                             return (
                                 <div key={player.id} className="flex items-center justify-between">
-                                    <span className="font-pixel-text text-sm text-[#4c1d95] font-bold">{player.name}</span>
+                                    <span className="font-pixel-text text-sm text-[#350D7A] font-bold">{player.name}</span>
                                     {hasSubmitted ? (
-                                        <span className="flex items-center gap-1 text-xs font-pixel-text font-bold px-2 py-0.5 rounded-lg bg-[#7c3aed]/10 text-[#4c1d95] border border-[#7c3aed]/30">
+                                        <span className="flex items-center gap-1 text-xs font-pixel-text font-bold px-2 py-0.5 rounded-lg bg-[#6714A8]/10 text-[#350D7A] border border-[#6714A8]/30">
                                             <CheckCircle className="w-3 h-3" /> أرسل
                                         </span>
                                     ) : (
-                                        <span className="text-xs font-pixel-text font-bold px-2 py-0.5 rounded-lg bg-[#4c1d95]/5 text-[#4c1d95]/50 border border-[#4c1d95]/20">يكتب...</span>
+                                        <span className="text-xs font-pixel-text font-bold px-2 py-0.5 rounded-lg bg-[#350D7A]/5 text-[#350D7A]/50 border border-[#350D7A]/20">يكتب...</span>
                                     )}
                                 </div>
                             );

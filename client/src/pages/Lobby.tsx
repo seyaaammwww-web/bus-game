@@ -75,15 +75,13 @@ export default function Lobby() {
           animate={{ y: 0, opacity: 1 }}
         >
           <motion.div
-            className="inline-flex items-center gap-2 px-6 py-3 bg-white/90 backdrop-blur-md border border-purple-200/50 rounded-full mb-4 shadow-lg"
-            animate={isMobile ? {} : { scale: [1, 1.05, 1] }}
-            transition={{ repeat: Infinity, duration: 2 }}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-[#FFFEE5] border-[3px] border-[#350D7A] rounded-sm mb-4 shadow-pixel"
           >
-            <Sparkles className="w-6 h-6 text-[#7c3aed]" />
-            <span className="font-bold text-lg text-[#4c1d95] font-pixel-text">غرفة الانتظار</span>
+            <Sparkles className="w-6 h-6 text-[#6714A8]" />
+            <span className="font-bold text-lg text-[#350D7A] font-pixel-text">غرفة الانتظار</span>
           </motion.div>
-          <h1 className="text-5xl font-pixel-title mb-3 text-white font-bold">في الانتظار...</h1>
-          <p className="text-3xl text-[#e9d5ff] font-bold font-pixel-text">ادعي أصحابك!</p>
+          <h1 className="text-5xl font-pixel-title mb-3 text-white font-bold [text-shadow:3px_3px_0_#350D7A]">في الانتظار...</h1>
+          <p className="text-3xl text-[#FFFDCC] font-bold font-pixel-text">ادعي أصحابك!</p>
         </motion.div>
 
         <motion.div
@@ -93,7 +91,7 @@ export default function Lobby() {
         >
           <RetroCard className="mb-6">
             <div className="text-center">
-              <p className="text-lg text-[#4c1d95] font-bold mb-3 font-pixel-text">كود الغرفة</p>
+              <p className="text-lg text-[#350D7A] font-bold mb-3 font-pixel-text">كود الغرفة</p>
               <div className="flex items-center justify-center gap-4">
                 <motion.div
                   className="flex gap-2"
@@ -105,7 +103,7 @@ export default function Lobby() {
                   {room.code.split('').map((char, i) => (
                     <motion.span
                       key={i}
-                      className="w-14 h-16 flex items-center justify-center text-3xl font-bold bg-gradient-to-b from-[#8b5cf6] to-[#7c3aed] text-white rounded-xl shadow-[0_4px_16px_rgba(124,58,237,0.35)] border border-purple-400/30 font-pixel-title"
+                      className="w-14 h-16 flex items-center justify-center text-3xl bg-[#6714A8] text-[#FFFEE2] rounded-sm shadow-pixel border-[3px] border-[#350D7A] font-pixel-title"
                       initial={isMobile ? { opacity: 0 } : { rotateY: 90 }}
                       animate={isMobile ? { opacity: 1 } : { rotateY: 0 }}
                       transition={{ delay: 0.3 + i * 0.1 }}
@@ -118,7 +116,7 @@ export default function Lobby() {
                   variant="outline"
                   size="icon"
                   onClick={copyCode}
-                  className="h-16 w-16 rounded-xl"
+                  className="h-16 w-16"
                   data-testid="button-copy-code"
                 >
                   {copied ? (
@@ -129,7 +127,7 @@ export default function Lobby() {
                 </Button>
               </div>
               <motion.p
-                className="text-sm text-[#4c1d95] mt-4 font-pixel-text font-bold"
+                className="text-sm text-[#350D7A] mt-4 font-pixel-text font-bold"
                 animate={{ opacity: [0.5, 1, 0.5] }}
                 transition={{ repeat: Infinity, duration: 2 }}
               >
@@ -145,13 +143,13 @@ export default function Lobby() {
           transition={{ delay: 0.2 }}
         >
           <RetroCard className="mb-6">
-            <div className="flex flex-row items-center justify-between gap-2 pb-4 border-b-2 border-[#4c1d95]/10 mb-3">
-              <h2 className="text-xl flex items-center gap-2 font-pixel-title text-[#4c1d95] font-bold">
-                <Users className="w-6 h-6 text-[#7c3aed]" />
+            <div className="flex flex-row items-center justify-between gap-2 pb-4 border-b-2 border-[#350D7A]/10 mb-3">
+              <h2 className="text-xl flex items-center gap-2 font-pixel-title text-[#350D7A] font-bold">
+                <Users className="w-6 h-6 text-[#6714A8]" />
                 اللاعبين
               </h2>
               <motion.span
-                className="text-sm px-4 py-2 bg-gradient-to-r from-[#7c3aed] to-[#8b5cf6] text-white rounded-full font-bold border-2 border-[#4c1d95] font-pixel-text text-lg shadow-[2px_2px_0_0_#2e1065]"
+                className="text-sm px-4 py-2 bg-[#6714A8] text-[#FFFEE2] rounded-sm font-bold border-2 border-[#350D7A] font-pixel-text text-lg shadow-[2px_2px_0_0_#350D7A]"
                 animate={{ scale: room.players.length >= 1 ? [1, 1.1, 1] : 1 }}
                 transition={{ repeat: room.players.length >= 1 ? Infinity : 0, duration: 1.5 }}
               >
@@ -161,14 +159,14 @@ export default function Lobby() {
             <div className="space-y-3">
               {/* Round Count Picker (Host only) — STYLE-1 FIX: use retro Button components */}
               {isHost && (
-                <div className="flex items-center justify-between p-3 bg-white/50 rounded-lg border-2 border-[#4c1d95]/20">
+                <div className="flex items-center justify-between p-3 bg-[#FFFDCC] rounded-sm border-2 border-[#350D7A]">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-gradient-to-br from-[#8b5cf6] to-[#7c3aed] rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm">
+                    <div className="w-8 h-8 bg-[#6714A8] rounded-sm flex items-center justify-center text-[#FFFEE2] text-sm font-bold border-2 border-[#350D7A]">
                       {room.totalRounds}
                     </div>
                     <div>
-                      <p className="font-bold text-[#4c1d95] font-pixel-text text-sm">عدد الجولات</p>
-                      <p className="text-[10px] text-[#4c1d95]/70 font-pixel-text">بين 3 و 20 جولة</p>
+                      <p className="font-bold text-[#350D7A] font-pixel-text text-sm">عدد الجولات</p>
+                      <p className="text-[10px] text-[#350D7A]/70 font-pixel-text">بين 3 و 20 جولة</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -177,17 +175,17 @@ export default function Lobby() {
                       size="icon"
                       onClick={() => updateSettings({ totalRounds: Math.max(3, room.totalRounds - 1) })}
                       disabled={room.totalRounds <= 3}
-                      className="w-9 h-9 border-[2px] border-[#4c1d95] text-[#4c1d95] hover:bg-[#4c1d95] hover:text-white shadow-[2px_2px_0_0_#2e1065] active:translate-y-[1px] active:shadow-none transition-all rounded-lg"
+                      className="w-9 h-9"
                     >
                       <Minus className="w-4 h-4" />
                     </Button>
-                    <span className="w-8 text-center font-pixel-title text-[#4c1d95] text-base font-bold">{room.totalRounds}</span>
+                    <span className="w-8 text-center font-pixel-title text-[#350D7A] text-base font-bold">{room.totalRounds}</span>
                     <Button
                       variant="outline"
                       size="icon"
                       onClick={() => updateSettings({ totalRounds: Math.min(20, room.totalRounds + 1) })}
                       disabled={room.totalRounds >= 20}
-                      className="w-9 h-9 rounded-lg"
+                      className="w-9 h-9"
                     >
                       <Plus className="w-4 h-4" />
                     </Button>
@@ -199,48 +197,48 @@ export default function Lobby() {
               {isHost ? (
                 <button
                   onClick={() => updateSettings({ votingEnabled: !room.settings?.votingEnabled })}
-                  className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all ${room.settings?.votingEnabled
-                    ? 'bg-purple-500/10 border-purple-300/50 shadow-sm'
-                    : 'bg-white/60 border-purple-200/30'
+                  className={`w-full flex items-center justify-between p-3 rounded-sm border-2 border-[#350D7A] transition-colors ${room.settings?.votingEnabled
+                    ? 'bg-[#FFF3B6] shadow-pixel-sm'
+                    : 'bg-[#FFFDCC]'
                     }`}
                 >
                   <div className="flex items-center gap-2">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white transition-colors ${room.settings?.votingEnabled ? 'bg-[#7c3aed]' : 'bg-[#4c1d95]/40'
+                    <div className={`w-8 h-8 rounded-sm border-2 border-[#350D7A] flex items-center justify-center text-[#FFFEE2] transition-colors ${room.settings?.votingEnabled ? 'bg-[#6714A8]' : 'bg-[#350D7A]/40'
                       }`}>
                       <Gavel className="w-4 h-4" />
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-[#4c1d95] font-pixel-text text-sm">التحكيم الديمقراطي</p>
-                      <p className="text-[10px] text-[#4c1d95]/70 font-pixel-text">
+                      <p className="font-bold text-[#350D7A] font-pixel-text text-sm">التحكيم الديمقراطي</p>
+                      <p className="text-[10px] text-[#350D7A]/70 font-pixel-text">
                         {referee ? <span className="text-red-500 font-bold">سيلغي الحكم الحالي</span> : 'اللاعبين يصوتوا على الإجابات'}
                       </p>
                     </div>
                   </div>
-                  <div className={`px-3 py-1 rounded-full border-[2px] font-bold font-pixel-text text-xs transition-colors ${room.settings?.votingEnabled
-                    ? 'border-[#7c3aed] bg-[#7c3aed]/10 text-[#7c3aed]'
-                    : 'border-[#4c1d95]/20 bg-[#4c1d95]/10 text-[#4c1d95]/40'
+                  <div className={`px-3 py-1 rounded-sm border-[2px] font-bold font-pixel-text text-xs transition-colors ${room.settings?.votingEnabled
+                    ? 'border-[#6714A8] bg-[#6714A8]/10 text-[#6714A8]'
+                    : 'border-[#350D7A]/20 bg-[#350D7A]/10 text-[#350D7A]/40'
                     }`}>
                     {room.settings?.votingEnabled ? 'مفعل' : 'معطل'}
                   </div>
                 </button>
               ) : (
                 room.settings?.votingEnabled && (
-                  <div className="flex items-center gap-2 p-2 bg-[#7c3aed]/10 rounded-lg border border-[#7c3aed]/30 justify-center mb-2">
-                    <Gavel className="w-4 h-4 text-[#7c3aed]" />
-                    <span className="text-xs font-bold text-[#4c1d95] font-pixel-text">نظام التحكيم الديمقراطي مفعل</span>
+                  <div className="flex items-center gap-2 p-2 bg-[#FFFDCC] rounded-sm border-2 border-[#350D7A] justify-center mb-2">
+                    <Gavel className="w-4 h-4 text-[#6714A8]" />
+                    <span className="text-xs font-bold text-[#350D7A] font-pixel-text">نظام التحكيم الديمقراطي مفعل</span>
                   </div>
                 )
               )}
 
               {room.settings?.customCategories && room.settings.customCategories.length > 0 && (
-                <div className="flex items-center gap-2 p-2 bg-amber-500/10 rounded-lg border border-amber-500/30 justify-center mb-2">
-                  <span className="text-xs font-bold text-amber-800 font-pixel-text">الإجابات المخصصة تحتاج تصويت اللاعبين</span>
+                <div className="flex items-center gap-2 p-2 bg-[#FFC48B] rounded-sm border-2 border-[#350D7A] justify-center mb-2">
+                  <span className="text-xs font-bold text-[#350D7A] font-pixel-text">الإجابات المخصصة تحتاج تصويت اللاعبين</span>
                 </div>
               )}
 
               {room.settings?.votingEnabled && room.players.length === 1 && (
-                <div className="flex items-center gap-2 p-2 bg-[#7c3aed]/10 rounded-lg border border-[#7c3aed]/30 justify-center mb-2">
-                  <span className="text-xs font-bold text-[#4c1d95] font-pixel-text">في اللعب الفردي تُرفض الإجابات غير الموجودة في القاموس — فعّل التصويت مع أصدقاء لاقتراح كلمات جديدة</span>
+                <div className="flex items-center gap-2 p-2 bg-[#6714A8]/10 rounded-lg border border-[#6714A8]/30 justify-center mb-2">
+                  <span className="text-xs font-bold text-[#350D7A] font-pixel-text">في اللعب الفردي تُرفض الإجابات غير الموجودة في القاموس — فعّل التصويت مع أصدقاء لاقتراح كلمات جديدة</span>
                 </div>
               )}
 
@@ -289,12 +287,12 @@ export default function Lobby() {
             <RetroCard className="border-dashed border-purple-300/40">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-[#7c3aed]/20 flex items-center justify-center border-2 border-[#4c1d95]">
-                    <Shield className="w-6 h-6 text-[#7c3aed]" />
+                  <div className="w-12 h-12 rounded-sm bg-[#6714A8]/20 flex items-center justify-center border-2 border-[#350D7A]">
+                    <Shield className="w-6 h-6 text-[#6714A8]" />
                   </div>
                   <div>
-                    <p className="font-bold text-lg text-[#4c1d95] font-pixel-text">الحكم (اختياري)</p>
-                    <p className="text-base text-[#7c3aed] font-bold font-pixel-text">
+                    <p className="font-bold text-lg text-[#350D7A] font-pixel-text">الحكم (اختياري)</p>
+                    <p className="text-base text-[#6714A8] font-bold font-pixel-text">
                       {referee ? referee.name : 'اختر حكم للمباراة'}
                     </p>
                   </div>
@@ -304,7 +302,7 @@ export default function Lobby() {
                     variant="ghost"
                     size="icon"
                     onClick={() => removeReferee()}
-                    className="text-[#7c3aed] hover:bg-red-100 hover:text-red-900"
+                    className="text-[#6714A8] hover:bg-red-100 hover:text-red-900"
                     data-testid="button-remove-referee"
                   >
                     <X className="w-5 h-5" />
@@ -314,7 +312,7 @@ export default function Lobby() {
                     variant="outline"
                     size="sm"
                     onClick={() => setShowRefereeSelect(true)}
-                    className="h-10 border-2 border-[#4c1d95] text-[#4c1d95] font-pixel-text font-bold text-base"
+                    className="h-10 border-2 border-[#350D7A] text-[#350D7A] font-pixel-text font-bold text-base"
                     data-testid="button-choose-referee"
                   >
                     {room.settings?.votingEnabled ? <span className="text-xs text-red-500 ml-2">(سيلغي التصويت)</span> : 'اختر حكم'}
@@ -328,9 +326,9 @@ export default function Lobby() {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    className="mt-4 pt-4 border-t-2 border-[#4c1d95]/20 overflow-hidden"
+                    className="mt-4 pt-4 border-t-2 border-[#350D7A]/20 overflow-hidden"
                   >
-                    <p className="text-base text-[#4c1d95] mb-3 font-pixel-text font-bold">اختر واحد من اللاعبين:</p>
+                    <p className="text-base text-[#350D7A] mb-3 font-pixel-text font-bold">اختر واحد من اللاعبين:</p>
                     <div className="grid grid-cols-2 gap-2">
                       {room.players
                         .filter((player) => !player.isHost) // BUG-11 FIX: Host cannot be their own referee
@@ -338,7 +336,7 @@ export default function Lobby() {
                           <Button
                             key={player.id}
                             variant="outline"
-                            className="justify-start gap-2 h-12 border-2 border-[#4c1d95] text-[#4c1d95] font-pixel-text font-bold"
+                            className="justify-start gap-2 h-12 border-2 border-[#350D7A] text-[#350D7A] font-pixel-text font-bold"
                             onClick={() => handleSetReferee(player.id)}
                             data-testid={`button-select-referee-${player.id}`}
                           >
@@ -349,7 +347,7 @@ export default function Lobby() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="w-full mt-3 text-[#7c3aed] hover:bg-[#7c3aed]/10 font-pixel-text font-bold text-base"
+                      className="w-full mt-3 text-[#6714A8] hover:bg-[#6714A8]/10 font-pixel-text font-bold text-base"
                       onClick={() => setShowRefereeSelect(false)}
                     >
                       إلغاء
@@ -394,10 +392,10 @@ export default function Lobby() {
                 animate={{ rotate: [0, 10, -10, 0] }}
                 transition={{ repeat: Infinity, duration: 1 }}
               >
-                <Check className="w-8 h-8 text-[#7c3aed] mx-auto mb-2" />
+                <Check className="w-8 h-8 text-[#6714A8] mx-auto mb-2" />
               </motion.div>
-              <p className="font-bold text-[#4c1d95] font-pixel-text">أنت جاهز!</p>
-              <p className="text-sm text-[#7c3aed] font-bold font-pixel-text">في الانتظار...</p>
+              <p className="font-bold text-[#350D7A] font-pixel-text">أنت جاهز!</p>
+              <p className="text-sm text-[#6714A8] font-bold font-pixel-text">في الانتظار...</p>
             </motion.div>
           )}
 

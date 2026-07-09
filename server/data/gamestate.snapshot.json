@@ -1,4 +1,56 @@
 {
-  "timestamp": 1783559739422,
-  "rooms": []
+  "timestamp": 1783560339433,
+  "rooms": [
+    {
+      "id": "7a924926-e87c-48eb-807c-6834fbd0b19c",
+      "code": "8F63",
+      "hostId": "a76e743b-17a3-4c66-abd4-22e5e8224392",
+      "players": [
+        {
+          "id": "a76e743b-17a3-4c66-abd4-22e5e8224392",
+          "name": "أحمد",
+          "score": 0,
+          "isHost": true,
+          "isReady": false,
+          "busStreak": 0,
+          "powerUps": {
+            "hint": 0,
+            "steal": 0,
+            "wildcard": 0,
+            "banish": 0
+          },
+          "usedPowerUps": {
+            "hint": false,
+            "steal": false,
+            "wildcard": false,
+            "banish": false
+          },
+          "totalEarnedPoints": 0
+        }
+      ],
+      "rounds": [],
+      "currentRound": 0,
+      "totalRounds": 10,
+      "phase": "lobby",
+      "letters": [
+        "ف",
+        "ي",
+        "غ",
+        "د",
+        "س",
+        "ز",
+        "م",
+        "خ",
+        "ح",
+        "أ"
+      ],
+      "createdAt": 1783560176480,
+      "voteQueue": [],
+      "currentVote": null,
+      "settings": {
+        "votingEnabled": true,
+        "customCategories": []
+      }
+    }
+  ]
 }

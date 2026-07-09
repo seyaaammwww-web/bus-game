@@ -16,42 +16,42 @@ const slides: Slide[] = [
     {
         title: "أهلا بيك في أوتوبيس كومبليت! 🚌",
         description: "بص يا بطل، دي لعبة أوتوبيس كومبليت المصرية الأصيلة، بس بشكل جديد وحركات أكتر. جهز نفسك عشان هنبدأ الرحلة!",
-        icon: <Bus className="w-20 h-20 text-[#4c1d95]" />,
+        icon: <Bus className="w-20 h-20 text-[#350D7A]" />,
         color: "text-primary",
         bgColor: "bg-primary"
     },
     {
         title: "إزاي تلعب؟ 🤔",
         description: "كل جولة بناخد حرف، ومطلوب منك تملا 5 خانات (ولد، بنت، بلد، حيوان، جماد) بسرعة. اللي بيخلص الأول بيوقف الأوتوبيس وكل الناس بعدها قدامها 10 ثواني بس!",
-        icon: <Sparkles className="w-20 h-20 text-[#4c1d95]" />,
+        icon: <Sparkles className="w-20 h-20 text-[#350D7A]" />,
         color: "text-secondary",
         bgColor: "bg-secondary"
     },
     {
         title: "كلمتك صح بس مش موجودة؟ ➕",
         description: "النظام بتاعنا صارم وبيرفض الكلمات اللي مش في القائمة. لو لقيت كلمتك صح ومرفوضة، اضغط على علامة (+) في صفحة النتائج، والذكاء الاصطناعي هيراجعها ويرجعلك حقك!",
-        icon: <Plus className="w-20 h-20 text-[#4c1d95]" />,
+        icon: <Plus className="w-20 h-20 text-[#350D7A]" />,
         color: "text-amber-500",
         bgColor: "bg-amber-500"
     },
     {
         title: "الجوكر (Wildcard) 🃏",
         description: "معاك 50 نقطة؟ تقدر تستخدم الجوكر! بضغطة واحدة هيملالك كل الخانات إجابات صحيحة وفي ثانية واحدة. بس خلي بالك، دي حركة للأزمات بس!",
-        icon: <Lightbulb className="w-20 h-20 text-[#4c1d95]" />,
+        icon: <Lightbulb className="w-20 h-20 text-[#350D7A]" />,
         color: "text-purple-600",
         bgColor: "bg-purple-600"
     },
     {
         title: "حركة الطرد (Banish) 🚫",
         description: "عايز تخلص من منافس قوي؟ بـ 40 نقطة تقدر تطرد أي لاعب من الجولة الحالية، مش هيقدر يجاوب ولا يجمع نقاط. بس استعملها في الوقت الصح!",
-        icon: <UserX className="w-20 h-20 text-[#4c1d95]" />,
+        icon: <UserX className="w-20 h-20 text-[#350D7A]" />,
         color: "text-destructive",
         bgColor: "bg-destructive"
     },
     {
         title: "اكسب وخليك الـ MVP! 🏆",
         description: "جمع النقاط، استخدم المساعدات بذكاء، وخليك أسرع واحد في مصر. يالا بينا نبدأ اللعب؟",
-        icon: <Trophy className="w-20 h-20 text-[#4c1d95]" />,
+        icon: <Trophy className="w-20 h-20 text-[#350D7A]" />,
         color: "text-green-600",
         bgColor: "bg-green-600"
     }
@@ -87,7 +87,7 @@ export default function InstructionSlides({ isOpen, onClose }: InstructionSlides
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-[#2e1065]/80 backdrop-blur-sm"
+                className="absolute inset-0 bg-[#350D7A]/80 backdrop-blur-sm"
                 onClick={onClose}
             />
 
@@ -100,13 +100,13 @@ export default function InstructionSlides({ isOpen, onClose }: InstructionSlides
                 <RetroCard className="p-0 overflow-hidden shadow-2xl">
                     <button
                         onClick={onClose}
-                        className="absolute top-4 right-4 p-2 rounded-full bg-[#2e1065]/10 hover:bg-[#2e1065]/20 transition-colors z-20"
+                        className="absolute top-4 right-4 p-2 rounded-full bg-[#350D7A]/10 hover:bg-[#350D7A]/20 transition-colors z-20"
                     >
-                        <X className="w-6 h-6 text-[#2e1065]" />
+                        <X className="w-6 h-6 text-[#350D7A]" />
                     </button>
 
-                    <div className="relative h-56 sm:h-64 flex items-center justify-center overflow-hidden border-b-[3px] border-[#2e1065] bg-[#FFFEF0]">
-                        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(#2e1065 1px, transparent 1px)', backgroundSize: '16px 16px' }}></div>
+                    <div className="relative h-56 sm:h-64 flex items-center justify-center overflow-hidden border-b-[3px] border-[#350D7A] bg-[#FFFEF0]">
+                        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(#350D7A 1px, transparent 1px)', backgroundSize: '16px 16px' }}></div>
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key={currentSlide}
@@ -114,7 +114,7 @@ export default function InstructionSlides({ isOpen, onClose }: InstructionSlides
                                 animate={{ scale: 1, opacity: 1, rotate: 0 }}
                                 exit={{ scale: 0.5, opacity: 0, rotate: 10 }}
                                 transition={{ type: 'spring', damping: 15, stiffness: 200 }}
-                                className={`w-32 h-32 ${slides[currentSlide].bgColor} flex items-center justify-center rounded-2xl shadow-[4px_4px_0_0_#2e1065] border-[3px] border-[#2e1065]`}
+                                className={`w-32 h-32 ${slides[currentSlide].bgColor} flex items-center justify-center rounded-2xl shadow-[4px_4px_0_0_#350D7A] border-[3px] border-[#350D7A]`}
                             >
                                 {slides[currentSlide].icon}
                             </motion.div>
@@ -130,10 +130,10 @@ export default function InstructionSlides({ isOpen, onClose }: InstructionSlides
                                 exit={{ x: -20, opacity: 0 }}
                                 transition={{ duration: 0.2 }}
                             >
-                                <h2 className="text-2xl font-bold font-pixel-title mb-4 text-[#4c1d95]">
+                                <h2 className="text-2xl font-bold font-pixel-title mb-4 text-[#350D7A]">
                                     {slides[currentSlide].title}
                                 </h2>
-                                <p className="text-sm sm:text-base text-[#4c1d95]/80 leading-relaxed font-pixel-text">
+                                <p className="text-sm sm:text-base text-[#350D7A]/80 leading-relaxed font-pixel-text">
                                     {slides[currentSlide].description}
                                 </p>
                             </motion.div>
@@ -144,7 +144,7 @@ export default function InstructionSlides({ isOpen, onClose }: InstructionSlides
                                 {slides.map((_, i) => (
                                     <div
                                         key={i}
-                                        className={`h-3 transition-all duration-300 border border-[#2e1065] ${i === currentSlide ? 'w-8 bg-[#4c1d95]' : 'w-3 bg-[#FFFDD1]'
+                                        className={`h-3 transition-all duration-300 border border-[#350D7A] ${i === currentSlide ? 'w-8 bg-[#350D7A]' : 'w-3 bg-[#FFFDD1]'
                                             }`}
                                     />
                                 ))}

@@ -29,10 +29,9 @@ interface Cloud {
     delay: number;
 }
 
-// Purple gradient colors for artistic effect
+// Sparkle colors — strictly the sunset palette (cream + light purple + pink)
 const purpleGradient = [
-    '#7c3aed', '#8b5cf6', '#a78bfa', '#c4b5fd', '#6d28d9',
-    '#5b21b6', '#4c1d95', '#e9d5ff', '#06b6d4', '#22d3ee',
+    '#FFFEE2', '#FFFDCC', '#A333D5', '#F640A8', '#FFC48B',
 ];
 
 interface WorkOSBackgroundProps {
@@ -113,10 +112,9 @@ const WorkOSBackground: React.FC<WorkOSBackgroundProps> = ({ isMobile = false })
                         style={{
                             top: `${dot.top}%`,
                             left: `${dot.left}%`,
-                            width: dot.size,
-                            height: dot.size,
+                            width: Math.round(dot.size),
+                            height: Math.round(dot.size),
                             backgroundColor: dot.color,
-                            boxShadow: `0 0 ${dot.size * 2}px ${dot.color}`,
                             animationDelay: `${dot.delay}s`,
                             animationDuration: `${dot.duration}s`,
                         }}

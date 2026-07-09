@@ -41,8 +41,8 @@ export function Timer({ timeLeft, isRush, maxTime = 60 }: TimerProps) {
     : isWarning
       ? 'shadow-[0_4px_16px_rgba(251,191,36,0.35)]'
       : 'shadow-md';
-  const numColor = isDanger ? 'text-white' : isWarning ? 'text-amber-950' : 'text-[#4c1d95]';
-  const iconColor = isDanger ? 'text-white' : isWarning ? 'text-amber-950' : 'text-[#7c3aed]';
+  const numColor = isDanger ? 'text-white' : isWarning ? 'text-amber-950' : 'text-[#350D7A]';
+  const iconColor = isDanger ? 'text-white' : isWarning ? 'text-amber-950' : 'text-[#6714A8]';
   const fuseColor = isDanger ? 'from-red-300 to-white' : isWarning ? 'from-orange-400 to-yellow-300' : 'from-violet-400 to-purple-300';
 
   const fuseWidth = Math.max(0, Math.min(1, timeLeft / maxTime));
@@ -66,7 +66,7 @@ export function Timer({ timeLeft, isRush, maxTime = 60 }: TimerProps) {
         style={{ width: `${fuseWidth * 100}%` }}
       >
         {fuseWidth > 0.02 && (
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-yellow-200 shadow-[0_0_6px_#fbbf24] animate-ping" />
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-yellow-200 shadow-[0_0_6px_#FFA168] animate-ping" />
         )}
       </div>
 

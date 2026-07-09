@@ -53,7 +53,7 @@ function ReconnectBanner() {
   const { state } = useGame();
   if (!state.reconnecting) return null;
   return (
-    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] bg-amber-400/95 text-[#4c1d95] px-5 py-2.5 rounded-full font-semibold text-sm shadow-lg border border-amber-500/40 backdrop-blur-md pointer-events-none">
+    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] bg-[#FF8A50] text-[#350D7A] px-5 py-2.5 rounded-sm font-bold text-sm border-[3px] border-[#350D7A] shadow-pixel pointer-events-none">
       جاري إعادة الاتصال...
     </div>
   );

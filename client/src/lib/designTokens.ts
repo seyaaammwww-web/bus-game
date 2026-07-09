@@ -1,14 +1,14 @@
 import type { Category } from '@shared/schema';
 
 export const brand = {
-  primary: '#7c3aed',
-  primaryLight: '#8b5cf6',
-  primaryDark: '#4c1d95',
-  primaryDarker: '#2e1065',
+  primary: '#6714A8',
+  primaryLight: '#871BB7',
+  primaryDark: '#350D7A',
+  primaryDarker: '#350D7A',
   cream: '#FFFDD1',
   creamAlt: '#FEFADE',
-  gold: '#fbbf24',
-  goldDark: '#f59e0b',
+  gold: '#FFA168',
+  goldDark: '#FF8A50',
 } as const;
 
 export const elevationShadow = 'shadow-card';

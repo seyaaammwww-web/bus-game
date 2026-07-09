@@ -45,14 +45,14 @@ export function RefereeReviewOverlay() {
                 <div className="retro-overlay p-6">
                     {/* Header */}
                     <div className="text-center mb-6">
-                        <div className="inline-flex items-center gap-2 bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] text-white px-5 py-2 rounded-full mb-2 shadow-md">
+                        <div className="inline-flex items-center gap-2 bg-gradient-to-r from-[#6714A8] to-[#6714A8] text-white px-5 py-2 rounded-full mb-2 shadow-md">
                             <Gavel className="w-5 h-5" />
                             <span className="font-bold font-pixel-text">مراجعة الحكم</span>
                         </div>
-                        <h2 className="text-2xl font-bold text-[#4c1d95] font-pixel-title">
+                        <h2 className="text-2xl font-bold text-[#350D7A] font-pixel-title">
                             راجع إجابات اللاعبين
                         </h2>
-                        <p className="text-sm text-[#7c3aed] mt-1">
+                        <p className="text-sm text-[#6714A8] mt-1">
                             الجولة {room.currentRound + 1} من {room.totalRounds}
                         </p>
                     </div>
@@ -66,9 +66,9 @@ export function RefereeReviewOverlay() {
                             return (
                                 <div key={playerId} className="surface-card p-4">
                                     {/* Player Header */}
-                                    <div className="flex items-center gap-2 mb-3 pb-2 border-b-2 border-[#4c1d95]/20">
-                                        <Users className="w-4 h-4 text-[#7c3aed]" />
-                                        <span className="font-bold text-[#4c1d95] font-pixel-text">
+                                    <div className="flex items-center gap-2 mb-3 pb-2 border-b-2 border-[#350D7A]/20">
+                                        <Users className="w-4 h-4 text-[#6714A8]" />
+                                        <span className="font-bold text-[#350D7A] font-pixel-text">
                                             {player.name}
                                         </span>
                                         {player.isHost && <Crown className="w-4 h-4 text-yellow-500" />}
@@ -91,7 +91,7 @@ export function RefereeReviewOverlay() {
                                                         <p className="text-xs text-gray-600 font-bold">
                                                             {answer.category}
                                                         </p>
-                                                        <p className="text-lg font-bold text-[#4c1d95] font-pixel-text">
+                                                        <p className="text-lg font-bold text-[#350D7A] font-pixel-text">
                                                             {answer.answer || '(فارغ)'}
                                                         </p>
                                                     </div>
@@ -109,7 +109,7 @@ export function RefereeReviewOverlay() {
                                                     </p>
                                                 )}
                                                 {answer.score !== undefined && (
-                                                    <p className="text-xs font-bold text-[#7c3aed] mt-1 pointer-events-none">
+                                                    <p className="text-xs font-bold text-[#6714A8] mt-1 pointer-events-none">
                                                         {answer.score} نقطة
                                                     </p>
                                                 )}
@@ -131,7 +131,7 @@ export function RefereeReviewOverlay() {
                             <CheckCircle className="w-6 h-6 mr-2" />
                             الموافقة على النتائج
                         </Button>
-                        <p className="text-xs text-[#4c1d95]/60 mt-2">
+                        <p className="text-xs text-[#350D7A]/60 mt-2">
                             الموافقة → الجولة التالية
                         </p>
                     </div>

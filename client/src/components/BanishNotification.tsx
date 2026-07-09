@@ -26,7 +26,7 @@ export function BanishNotification({ show, banishedBy, isBanished }: BanishNotif
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 100, damping: 15, delay: 0.2 }}
-            className="bg-gradient-to-b from-[#2e1065] to-[#1a0b3a] px-12 py-10 rounded-2xl shadow-2xl flex flex-col items-center gap-6 border-4 border-[#FFFDD1] relative z-10"
+            className="bg-gradient-to-b from-[#350D7A] to-[#1a0b3a] px-12 py-10 rounded-2xl shadow-2xl flex flex-col items-center gap-6 border-4 border-[#FFFDD1] relative z-10"
           >
             {/* Glowing effect */}
             <motion.div

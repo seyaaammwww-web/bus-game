@@ -16,12 +16,12 @@ export function Tutorial({ onClose }: TutorialProps) {
             title: "أهلاً بيك في أتوبيس كومبليت! 🚌",
             content: (
                 <div className="space-y-4 text-center">
-                    <p className="text-xl font-bold text-[#4c1d95]">لعبة الحروف اللي كلنا بنحبها..</p>
-                    <p className="text-base text-[#6d28d9]">الهدف: املأ الخانات (ولد، بنت، حيوان..) بحرف معين أسرع من غيرك!</p>
+                    <p className="text-xl font-bold text-[#350D7A]">لعبة الحروف اللي كلنا بنحبها..</p>
+                    <p className="text-base text-[#6714A8]">الهدف: املأ الخانات (ولد، بنت، حيوان..) بحرف معين أسرع من غيرك!</p>
                     <div className="flex justify-center gap-2 mt-4">
                         <span className="bg-amber-400 px-3 py-1.5 rounded-full text-sm font-semibold text-amber-950 shadow-sm">سرعة</span>
                         <span className="bg-purple-600 px-3 py-1.5 rounded-full text-sm font-semibold text-white shadow-sm">ذكاء</span>
-                        <span className="bg-white px-3 py-1.5 rounded-full text-sm font-semibold text-[#4c1d95] shadow-sm border border-purple-200/50">تركيز</span>
+                        <span className="bg-white px-3 py-1.5 rounded-full text-sm font-semibold text-[#350D7A] shadow-sm border border-purple-200/50">تركيز</span>
                     </div>
                 </div>
             ),
@@ -41,17 +41,17 @@ export function Tutorial({ onClose }: TutorialProps) {
                 <ul className="text-right space-y-3 px-4">
                     <li className="flex items-center gap-2">
                         <span className="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center font-bold text-xs">20</span>
-                        <span className="font-bold text-[#4c1d95]">إجابة صحيحة ومميزة (محدش كتب زيها)</span>
+                        <span className="font-bold text-[#350D7A]">إجابة صحيحة ومميزة (محدش كتب زيها)</span>
                     </li>
                     <li className="flex items-center gap-2">
                         <span className="w-6 h-6 rounded-full bg-yellow-500 text-white flex items-center justify-center font-bold text-xs">10</span>
-                        <span className="font-bold text-[#4c1d95]">إجابة صحيحة بس مكررة</span>
+                        <span className="font-bold text-[#350D7A]">إجابة صحيحة بس مكررة</span>
                     </li>
                     <li className="flex items-center gap-2">
                         <span className="w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center font-bold text-xs">0</span>
-                        <span className="font-bold text-[#4c1d95]">إجابة غلط أو فاضية</span>
+                        <span className="font-bold text-[#350D7A]">إجابة غلط أو فاضية</span>
                     </li>
-                    <li className="flex items-center gap-2 border-t-2 border-dashed border-[#4c1d95]/20 pt-2 mt-2">
+                    <li className="flex items-center gap-2 border-t-2 border-dashed border-[#350D7A]/20 pt-2 mt-2">
                         <Trophy className="w-5 h-5 text-orange-500" />
                         <span className="font-bold text-orange-600">بونص: 10 نقط لو قفلت الأتوبيس (Bus Complete) 3 مرات ورا بعض!</span>
                     </li>
@@ -83,24 +83,24 @@ export function Tutorial({ onClose }: TutorialProps) {
             title: "أنظمة التحكيم الجديدة ⚖️",
             content: (
                 <div className="space-y-4">
-                    <div className="flex items-start gap-3 bg-white/50 p-3 rounded-lg border-2 border-[#4c1d95]/10">
+                    <div className="flex items-start gap-3 bg-white/50 p-3 rounded-lg border-2 border-[#350D7A]/10">
                         <Users className="w-6 h-6 text-blue-600 mt-1" />
                         <div>
-                            <h4 className="font-bold text-[#4c1d95] text-sm">التحكيم الديمقراطي</h4>
-                            <p className="text-xs text-[#6d28d9]">اللاعبين بيصوتوا لبعض (مع/ضد). الأغلبية بتحكم!</p>
+                            <h4 className="font-bold text-[#350D7A] text-sm">التحكيم الديمقراطي</h4>
+                            <p className="text-xs text-[#6714A8]">اللاعبين بيصوتوا لبعض (مع/ضد). الأغلبية بتحكم!</p>
                         </div>
                     </div>
-                    <div className="text-center font-bold text-[#4c1d95]/50 text-xs">- أو -</div>
-                    <div className="flex items-start gap-3 bg-white/50 p-3 rounded-lg border-2 border-[#4c1d95]/10">
+                    <div className="text-center font-bold text-[#350D7A]/50 text-xs">- أو -</div>
+                    <div className="flex items-start gap-3 bg-white/50 p-3 rounded-lg border-2 border-[#350D7A]/10">
                         <Gavel className="w-6 h-6 text-green-600 mt-1" />
                         <div>
-                            <h4 className="font-bold text-[#4c1d95] text-sm">حكم للمباراة</h4>
-                            <p className="text-xs text-[#6d28d9]">اختاروا واحد يكون حكم، هو اللي بيقبل ويرفض ويعدل النتايج.</p>
+                            <h4 className="font-bold text-[#350D7A] text-sm">حكم للمباراة</h4>
+                            <p className="text-xs text-[#6714A8]">اختاروا واحد يكون حكم، هو اللي بيقبل ويرفض ويعدل النتايج.</p>
                         </div>
                     </div>
                 </div>
             ),
-            icon: <Gavel className="w-16 h-16 text-[#4c1d95] mx-auto mb-4" />
+            icon: <Gavel className="w-16 h-16 text-[#350D7A] mx-auto mb-4" />
         }
     ];
 
@@ -136,16 +136,16 @@ export function Tutorial({ onClose }: TutorialProps) {
                             >
                                 <div className="text-center mb-6">
                                     {slides[step].icon}
-                                    <h2 className="text-2xl font-bold font-pixel-title text-[#4c1d95] mb-2">{slides[step].title}</h2>
+                                    <h2 className="text-2xl font-bold font-pixel-title text-[#350D7A] mb-2">{slides[step].title}</h2>
                                 </div>
-                                <div className="font-pixel-text text-[#2e1065]">
+                                <div className="font-pixel-text text-[#350D7A]">
                                     {slides[step].content}
                                 </div>
                             </motion.div>
                         </AnimatePresence>
                     </div>
 
-                    <div className="flex items-center justify-between mt-4 px-4 pb-2 border-t-2 border-[#4c1d95]/10 pt-4">
+                    <div className="flex items-center justify-between mt-4 px-4 pb-2 border-t-2 border-[#350D7A]/10 pt-4">
                         <Button
                             variant="outline"
                             onClick={prevStep}
@@ -162,7 +162,7 @@ export function Tutorial({ onClose }: TutorialProps) {
                             <Button
                                 variant="default"
                                 onClick={onClose}
-                                className="bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold font-pixel-text"
+                                className="bg-[#6714A8] hover:bg-[#6714A8] text-white font-bold font-pixel-text"
                             >
                                 يلا نبدأ!
                                 <Sparkles className="w-4 h-4 mr-1" />
@@ -171,7 +171,7 @@ export function Tutorial({ onClose }: TutorialProps) {
                             <Button
                                 variant="default"
                                 onClick={nextStep}
-                                className="bg-[#4c1d95] hover:bg-[#3b0764] text-white font-bold font-pixel-text"
+                                className="bg-[#350D7A] hover:bg-[#3b0764] text-white font-bold font-pixel-text"
                             >
                                 التالي
                                 <ChevronLeft className="w-4 h-4 mr-1" />

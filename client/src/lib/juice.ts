@@ -50,7 +50,7 @@ export function burstGold(origin?: { x: number; y: number }) {
     particleCount: 40,
     spread: 70,
     origin: origin ?? { x: 0.5, y: 0.4 },
-    colors: [brand.gold, '#fcd34d', brand.cream, '#f59e0b'],
+    colors: [brand.gold, '#FFC48B', brand.cream, '#FF8A50'],
     startVelocity: 35,
     scalar: 1.2,
   });

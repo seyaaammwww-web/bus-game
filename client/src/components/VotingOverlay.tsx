@@ -42,19 +42,19 @@ function VotingItemCard({ item, currentPlayer, castParallelVote, refereeOverride
         >
             <div className="bg-purple-500/10 px-3 py-2 flex items-center justify-between border-b border-purple-200/40">
                 <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-[#4c1d95]/70 font-semibold">اللاعب:</span>
-                    <span className="text-xs text-[#7c3aed] font-bold">{item.requesterName}</span>
+                    <span className="text-[10px] text-[#350D7A]/70 font-semibold">اللاعب:</span>
+                    <span className="text-xs text-[#6714A8] font-bold">{item.requesterName}</span>
                 </div>
             </div>
 
             <div className="flex items-center justify-center gap-3 px-3 py-3">
                 <div className="text-center">
-                    <div className="bg-gradient-to-b from-[#7c3aed] to-[#6d28d9] text-white px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
+                    <div className="bg-gradient-to-b from-[#6714A8] to-[#6714A8] text-white px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
                         {item.category}
                     </div>
                 </div>
                 <div className="flex-1 text-center">
-                    <div className="bg-white border border-purple-200/60 text-[#4c1d95] px-3 py-1.5 rounded-xl text-lg font-bold shadow-sm">
+                    <div className="bg-white border border-purple-200/60 text-[#350D7A] px-3 py-1.5 rounded-xl text-lg font-bold shadow-sm">
                         {item.word}
                     </div>
                 </div>
@@ -85,18 +85,18 @@ function VotingItemCard({ item, currentPlayer, castParallelVote, refereeOverride
                     </div>
                 ) : isRequester ? (
                     <div className="text-center py-2 bg-purple-500/10 rounded-xl border border-dashed border-purple-300/50">
-                        <Loader2 className="w-4 h-4 text-[#7c3aed] animate-spin mx-auto mb-1" />
-                        <p className="text-[9px] text-[#4c1d95]/80 font-medium">
+                        <Loader2 className="w-4 h-4 text-[#6714A8] animate-spin mx-auto mb-1" />
+                        <p className="text-[9px] text-[#350D7A]/80 font-medium">
                             إجابتك تحت التصويت ({yesVotes} نعم / {noVotes} لا)
                         </p>
                     </div>
                 ) : !isEligible ? (
                     <div className="text-center py-2 bg-purple-500/5 rounded-xl border border-purple-200/30">
-                        <p className="text-[9px] text-[#4c1d95]/50">لا يحق لك التصويت على هذه الإجابة</p>
+                        <p className="text-[9px] text-[#350D7A]/50">لا يحق لك التصويت على هذه الإجابة</p>
                     </div>
                 ) : hasVoted ? (
                     <div className="text-center py-2 bg-purple-500/10 rounded-xl border border-purple-300/40">
-                        <p className="text-[10px] text-[#4c1d95] font-semibold">تم تسجيل صوتك</p>
+                        <p className="text-[10px] text-[#350D7A] font-semibold">تم تسجيل صوتك</p>
                     </div>
                 ) : (
                     <div className="flex gap-2">
@@ -122,9 +122,9 @@ function VotingItemCard({ item, currentPlayer, castParallelVote, refereeOverride
                 <div className="mt-2">
                     <div className="h-2 bg-purple-500/10 rounded-full overflow-hidden flex">
                         <motion.div className="h-full bg-red-500" animate={{ width: `${noPercent}%` }} />
-                        <motion.div className="h-full bg-[#7c3aed]" animate={{ width: `${yesPercent}%` }} />
+                        <motion.div className="h-full bg-[#6714A8]" animate={{ width: `${yesPercent}%` }} />
                     </div>
-                    <div className="flex justify-between text-[8px] text-[#4c1d95]/60 mt-1 font-medium">
+                    <div className="flex justify-between text-[8px] text-[#350D7A]/60 mt-1 font-medium">
                         <span>رفض ({item.votes?.no || 0})</span>
                         <span>{totalVotes} من {eligibleCount} صوّتوا</span>
                         <span>موافقة ({item.votes?.yes || 0})</span>
@@ -178,7 +178,7 @@ export function VotingOverlay() {
                         className="w-full max-w-sm retro-overlay p-8 text-center rounded-2xl"
                     >
                         <Loader2 className="w-10 h-10 text-amber-400 animate-spin mx-auto mb-3" />
-                        <p className="font-bold text-[#4c1d95] text-base">جاري معالجة النتائج...</p>
+                        <p className="font-bold text-[#350D7A] text-base">جاري معالجة النتائج...</p>
                     </motion.div>
                 </motion.div>
             </AnimatePresence>
@@ -200,7 +200,7 @@ export function VotingOverlay() {
                     exit={{ scale: 0.9, y: 20 }}
                     className="w-full max-w-md max-h-[90vh] flex flex-col retro-overlay overflow-hidden rounded-2xl shadow-[0_24px_64px_rgba(76,29,149,0.3)]"
                 >
-                    <div className="bg-gradient-to-r from-[#6d28d9] to-[#7c3aed] px-4 py-3 flex items-center justify-between shrink-0">
+                    <div className="bg-gradient-to-r from-[#6714A8] to-[#6714A8] px-4 py-3 flex items-center justify-between shrink-0">
                         <div className="flex items-center gap-2">
                             <motion.div
                                 animate={{ rotate: [-10, 10, -10] }}
@@ -214,7 +214,7 @@ export function VotingOverlay() {
                         </div>
                         <div className="flex items-center gap-2">
                             <Timer timeLeft={voteTimeLeft} isRush={voteTimeLeft <= 5} maxTime={30} />
-                            <span className="text-[10px] bg-amber-400 text-[#4c1d95] font-bold px-2.5 py-0.5 rounded-full">
+                            <span className="text-[10px] bg-amber-400 text-[#350D7A] font-bold px-2.5 py-0.5 rounded-full">
                                 {voteQueue.length} إجابات
                             </span>
                         </div>

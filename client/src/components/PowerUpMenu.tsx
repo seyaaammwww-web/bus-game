@@ -24,7 +24,7 @@ function SquarePowerUp({ type, title, cost, icon: Icon, status, onActivate }: Sq
     const isDisabled = status === 'disabled';
 
     const theme = type === 'wildcard'
-        ? { bg: 'bg-[#fbbf24]', text: 'text-[#78350f]' }
+        ? { bg: 'bg-[#FFA168]', text: 'text-[#78350f]' }
         : { bg: 'bg-[#f87171]', text: 'text-[#7f1d1d]' };
 
     const formatCost = (c: number) => c.toLocaleString('en-US');
@@ -155,7 +155,7 @@ export function PowerUpMenu() {
                                         </button>
 
                                         <div className="text-center mb-6">
-                                            <h2 className="text-3xl font-pixel-title text-[#4c1d95] mb-2 flex items-center justify-center gap-2">
+                                            <h2 className="text-3xl font-pixel-title text-[#350D7A] mb-2 flex items-center justify-center gap-2">
                                                 <Zap className="w-8 h-8 text-yellow-500 fill-yellow-500" />
                                                 المساعدات
                                             </h2>
@@ -189,7 +189,7 @@ export function PowerUpMenu() {
                                         </div>
 
                                         <div className="mt-4 text-center">
-                                            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] text-white px-5 py-2.5 rounded-full font-semibold shadow-md">
+                                            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-[#6714A8] to-[#6714A8] text-white px-5 py-2.5 rounded-full font-semibold shadow-md">
                                                 <span>رصيدك الحالي:</span>
                                                 <span className="text-yellow-400 font-bold text-xl">{currentPlayer?.totalEarnedPoints || 0}</span>
                                                 <Zap className="w-4 h-4 text-yellow-400 fill-yellow-400" />

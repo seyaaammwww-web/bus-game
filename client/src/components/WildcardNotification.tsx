@@ -36,7 +36,7 @@ export function WildcardNotification({ show, playerName }: WildcardNotificationP
                 top: `${sparkle.top}%`,
                 width: sparkle.size,
                 height: sparkle.size,
-                background: `linear-gradient(135deg, #fbbf24, #f59e0b)`,
+                background: `linear-gradient(135deg, #FFA168, #FF8A50)`,
               }}
               initial={{ scale: 1, opacity: 1 }}
               animate={{

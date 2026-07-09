@@ -52,7 +52,7 @@ function SlotMachineLetter({ targetLetter, isRolling }: { targetLetter: string, 
   }, [isRolling, targetLetter]);
 
   return (
-    <span className={`text-7xl font-pixel-title text-white drop-shadow-lg ${isRolling ? 'slot-machine-text text-[#fbbf24]' : 'slot-machine-land'}`}>
+    <span className={`text-7xl font-pixel-title text-white drop-shadow-lg ${isRolling ? 'slot-machine-text text-[#FFA168]' : 'slot-machine-land'}`}>
       {displayLetter}
     </span>
   );
@@ -276,7 +276,7 @@ export default function Game() {
               {[0, 1, 2].map(i => (
                 <div
                   key={i}
-                  className="w-3 h-3 rounded-full bg-[#7c3aed] ai-review-dot"
+                  className="w-3 h-3 rounded-full bg-[#6714A8] ai-review-dot"
                   style={{ animationDelay: `${i * 0.2}s` }}
                 />
               ))}
@@ -304,7 +304,7 @@ export default function Game() {
               exit={{ scale: 0, opacity: 0 }}
             >
               <motion.div
-                className="w-40 h-40 bg-gradient-to-br from-[#7c3aed] to-[#4c1d95] rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-[0_0_60px_rgba(139,92,246,0.5)] border-4 border-white/20 overflow-hidden"
+                className="w-40 h-40 bg-[#6714A8] rounded-sm flex items-center justify-center mx-auto mb-8 shadow-[6px_6px_0_0_#350D7A] border-4 border-[#350D7A] overflow-hidden"
                 animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.05, 1] }}
                 transition={{ duration: 0.5, repeat: Infinity }}
               >
@@ -318,7 +318,7 @@ export default function Game() {
                 initial={{ scale: 2, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0, opacity: 0 }}
-                className="countdown-digit text-white drop-shadow-[0_0_30px_rgba(139,92,246,0.8)]"
+                className="countdown-digit text-white [text-shadow:4px_4px_0_#350D7A]"
               >
                 {countdown === 0 ? 'ابدأ!' : countdown}
               </motion.div>
@@ -406,7 +406,7 @@ export default function Game() {
             <div className="flex flex-col items-end gap-1">
               <Timer timeLeft={displayTimeLeft} isRush={state.isRush} maxTime={roundDurationSec} />
               {currentPlayer?.busStreak && currentPlayer.busStreak > 0 ? (
-                <div className="flex items-center gap-1 bg-gradient-to-r from-orange-500 to-amber-500 px-2 py-0.5 rounded-full text-white font-bold text-[9px] md:text-xs shadow-sm">
+                <div className="flex items-center gap-1 bg-[#FF8A50] px-2 py-0.5 rounded-sm border-2 border-[#350D7A] text-[#350D7A] font-bold text-[9px] md:text-xs shadow-pixel-sm">
                   <Flame className="w-3 h-3" />
                   <span className="font-pixel-text">×{currentPlayer.busStreak}</span>
                 </div>
@@ -421,9 +421,9 @@ export default function Game() {
               initial={{ y: -50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: -50, opacity: 0 }}
-              className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-[#2e1065] text-white px-6 py-3 rounded-full shadow-xl flex items-center gap-3 border-2 border-[#FFFDD1]"
+              className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-[#350D7A] text-[#FFFEE2] px-6 py-3 rounded-sm shadow-pixel flex items-center gap-3 border-[3px] border-[#F640A8]"
             >
-              <div className="bg-white/20 p-2 rounded-full">
+              <div className="bg-[#FFFEE2]/20 p-2 rounded-sm">
                 {activePowerUpNotification.type === 'wildcard' && <Sparkles className="w-6 h-6 animate-spin" />}
               </div>
               <div className="flex flex-col">
@@ -463,7 +463,7 @@ export default function Game() {
 
 
         {state.isRush && !hasSubmitted && (
-          <div className="mb-3 mx-auto max-w-md bg-gradient-to-r from-red-500 to-red-600 text-white text-center py-2 px-4 rounded-full font-semibold text-xs md:text-sm shadow-[0_4px_16px_rgba(239,68,68,0.35)]">
+          <div className="mb-3 mx-auto max-w-md bg-[#FF6957] text-[#350D7A] text-center py-2 px-4 rounded-sm border-[3px] border-[#350D7A] font-bold text-xs md:text-sm shadow-pixel-sm">
             <Flame className="w-3.5 h-3.5 inline ml-1" />
             وضع السرعة
           </div>
@@ -490,7 +490,7 @@ export default function Game() {
                       <Icon className="w-3.5 h-3.5 text-white" />
                       <span className="font-bold text-white font-pixel-text text-xs md:text-sm whitespace-nowrap">{category}</span>
                     </div>
-                    <div className="p-2 bg-gradient-to-b from-white to-gray-50">
+                    <div className="p-2 bg-[#FFFEE5]">
                       <Input
                         ref={(el) => { inputRefs.current[category as Category] = el; }}
                         type="text"
@@ -506,7 +506,7 @@ export default function Game() {
                             }, 300);
                           }
                         }}
-                        className={`text-center text-sm md:text-lg h-9 md:h-12 border-purple-200/50 focus:border-purple-400 bg-white text-[#4c1d95] placeholder:text-purple-300 rounded-lg ${hasSubmitted || isBanished ? 'opacity-60 grayscale' : ''} ${answers[category as Category]?.trim().length > 0 ? 'input-locked scale-100' : ''}`}
+                        className={`text-center text-sm md:text-lg h-9 md:h-12 border-purple-200/50 focus:border-purple-400 bg-white text-[#350D7A] placeholder:text-purple-300 rounded-lg ${hasSubmitted || isBanished ? 'opacity-60 grayscale' : ''} ${answers[category as Category]?.trim().length > 0 ? 'input-locked scale-100' : ''}`}
                         data-testid={`input-${category}`}
                       />
                     </div>
@@ -538,11 +538,11 @@ export default function Game() {
               animate={{ scale: 1, opacity: 1 }}
               className="text-center p-6 mt-6 surface-card"
             >
-              <div className="w-14 h-14 bg-[#7c3aed] rounded-full flex items-center justify-center mx-auto mb-3">
+              <div className="w-14 h-14 bg-[#6714A8] rounded-full flex items-center justify-center mx-auto mb-3">
                 <Send className="w-7 h-7 text-white" />
               </div>
-              <p className="font-pixel-text text-xl text-[#4c1d95] mb-1 font-bold">تم!</p>
-              <motion.p className="text-lg text-[#7c3aed] font-bold font-pixel-text"
+              <p className="font-pixel-text text-xl text-[#350D7A] mb-1 font-bold">تم!</p>
+              <motion.p className="text-lg text-[#6714A8] font-bold font-pixel-text"
                 animate={{ opacity: [0.8, 1, 0.8] }}
                 transition={{ repeat: Infinity, duration: 2 }}
               >

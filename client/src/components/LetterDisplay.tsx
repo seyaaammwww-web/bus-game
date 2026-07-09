@@ -17,10 +17,10 @@ export function LetterDisplay({ letter, round, totalRounds }: LetterDisplayProps
         transition={{ type: 'spring', stiffness: 80, damping: 20 }}
       >
         {/* Glow Effect */}
-        <div className="absolute inset-0 bg-[#7c3aed]/30 blur-xl rounded-xl" />
+        <div className="absolute inset-0 bg-[#6714A8]/30 blur-xl rounded-xl" />
 
         {/* Card */}
-        <div className="relative w-28 h-28 bg-gradient-to-br from-[#7c3aed] to-[#4c1d95] rounded-2xl flex items-center justify-center shadow-[0_8px_32px_rgba(124,58,237,0.45)] border border-purple-300/40 ring-1 ring-white/20">
+        <div className="relative w-28 h-28 bg-gradient-to-br from-[#6714A8] to-[#350D7A] rounded-2xl flex items-center justify-center shadow-[0_8px_32px_rgba(124,58,237,0.45)] border border-purple-300/40 ring-1 ring-white/20">
           {/* Inner Glow */}
           <div className="absolute inset-2 bg-gradient-to-br from-white/10 to-transparent rounded-lg" />
 
@@ -51,7 +51,7 @@ export function LetterDisplay({ letter, round, totalRounds }: LetterDisplayProps
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8 }}
-          className="absolute -bottom-8 bg-[#4c1d95]/80 px-3 py-1 rounded-full text-xs font-pixel-text text-[#FFFDD1] border border-[#FFFDD1]/30 backdrop-blur-sm"
+          className="absolute -bottom-8 bg-[#350D7A]/80 px-3 py-1 rounded-full text-xs font-pixel-text text-[#FFFDD1] border border-[#FFFDD1]/30 backdrop-blur-sm"
         >
           جولة {round} من {totalRounds}
         </motion.div>

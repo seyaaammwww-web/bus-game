@@ -45,7 +45,7 @@ export function ResultsTable({
     return (
         <div className="flex flex-col gap-4">
             {/* Table Headers - Hidden on small mobile, visible on tablet+ */}
-            <div className="hidden md:grid grid-cols-[1.5fr,repeat(5,1fr)] gap-2 px-4 py-2 bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] text-white rounded-t-xl text-sm font-semibold shadow-sm">
+            <div className="hidden md:grid grid-cols-[1.5fr,repeat(5,1fr)] gap-2 px-4 py-2 bg-gradient-to-r from-[#6714A8] to-[#6714A8] text-white rounded-t-xl text-sm font-semibold shadow-sm">
                 <div className="flex items-center gap-2">
                     <Trophy className="w-4 h-4 text-yellow-400" />
                     <span>اللاعب</span>
@@ -99,18 +99,18 @@ export function ResultsTable({
                                 {/* Player Info Column (Desktop: Col 1, Mobile: Header) */}
                                 <div className={cn(
                                     "flex items-center gap-3 p-3 border-b-2 md:border-b-0 md:border-l-2 border-dashed",
-                                    isMe ? "border-[#7c3aed]/30 bg-[#7c3aed]/5" : "border-gray-200 bg-gray-50"
+                                    isMe ? "border-[#6714A8]/30 bg-[#6714A8]/5" : "border-gray-200 bg-gray-50"
                                 )}>
 
                                     <div className="flex-1 min-w-0">
-                                        <div className={cn("font-bold font-pixel-text truncate", isMe ? "text-[#5b21b6]" : "text-gray-700")}>
+                                        <div className={cn("font-bold font-pixel-text truncate", isMe ? "text-[#4E0994]" : "text-gray-700")}>
                                             {player?.name}
                                         </div>
                                         <div className="text-xs text-gray-400 font-pixel-text md:hidden">
                                             {isMe ? 'أنت' : 'لاعب'}
                                         </div>
                                     </div>
-                                    <div className="text-xl font-bold font-pixel-title text-[#4c1d95]">
+                                    <div className="text-xl font-bold font-pixel-title text-[#350D7A]">
                                         +{totalScore}
                                     </div>
                                 </div>
@@ -160,7 +160,7 @@ export function ResultsTable({
                                                 {answer ? (
                                                     <span className={cn(
                                                         "font-bold text-sm md:text-base break-words block relative z-10",
-                                                        !hasValidation || isPending ? "text-[#4c1d95]" :
+                                                        !hasValidation || isPending ? "text-[#350D7A]" :
                                                         isValid ? "text-[#15803d]" : "text-[#b91c1c] line-through decoration-2 decoration-red-300"
                                                     )}>
                                                         {answer}
@@ -204,7 +204,7 @@ export function ResultsTable({
                                                         className="p-1 rounded bg-black/10 hover:bg-black/20 transition-colors mt-1"
                                                         title="تعديل احتساب الكلمة"
                                                     >
-                                                        <Shield className="w-3 h-3 text-[#4c1d95]" />
+                                                        <Shield className="w-3 h-3 text-[#350D7A]" />
                                                     </button>
                                                 )}
 

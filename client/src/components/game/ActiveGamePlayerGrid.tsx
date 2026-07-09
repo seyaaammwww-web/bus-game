@@ -30,7 +30,7 @@ export function ActiveGamePlayerGrid({ players, currentPlayerId, submissions, ti
                         className={cn(
                             "relative flex flex-col items-center p-4 rounded-2xl border shadow-md backdrop-blur-sm transition-all",
                             isMe
-                                ? "bg-[#e9d5ff] border-[#7c3aed]"
+                                ? "bg-[#FFFDCC] border-[#6714A8]"
                                 : hasSubmitted
                                     ? "bg-[#dcfce7] border-[#22c55e]"
                                     : "bg-white border-[#e5e7eb]"
@@ -53,9 +53,9 @@ export function ActiveGamePlayerGrid({ players, currentPlayerId, submissions, ti
                         <PixelAvatar
                             src={player.avatar || defaultAvatar(player.id)}
                             size="sm"
-                            className="border-2 border-[#4c1d95] mb-1 z-10 bg-white"
+                            className="border-2 border-[#350D7A] mb-1 z-10 bg-white"
                         />
-                        <p className="font-pixel-text text-sm mt-1 truncate max-w-[80px] text-center text-[#2e1065] font-bold leading-tight">
+                        <p className="font-pixel-text text-sm mt-1 truncate max-w-[80px] text-center text-[#350D7A] font-bold leading-tight">
                             {player.name}
                         </p>
 
@@ -65,7 +65,7 @@ export function ActiveGamePlayerGrid({ players, currentPlayerId, submissions, ti
 
                         {/* "You" Badge */}
                         {isMe && (
-                            <div className="absolute -bottom-3 bg-[#7c3aed] text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm border-2 border-white">
+                            <div className="absolute -bottom-3 bg-[#6714A8] text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm border-2 border-white">
                                 أنت
                             </div>
                         )}

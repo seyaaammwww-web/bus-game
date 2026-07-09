@@ -52,10 +52,10 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
       <div className="relative p-2">
         <div className={cn(
           "relative flex items-center justify-center rounded-xl border overflow-hidden",
-          isCurrentPlayer ? "w-14 h-14 border-purple-300/50 bg-gradient-to-br from-[#8b5cf6] to-[#7c3aed]" : "w-12 h-12 border-gray-200 bg-gray-50"
+          isCurrentPlayer ? "w-14 h-14 border-purple-300/50 bg-gradient-to-br from-[#871BB7] to-[#6714A8]" : "w-12 h-12 border-gray-200 bg-gray-50"
         )}>
           {/* Background Pattern */}
-          <div className={`absolute inset-0 opacity-20 ${isCurrentPlayer ? 'bg-[#7c3aed]/10' : ''}`} />
+          <div className={`absolute inset-0 opacity-20 ${isCurrentPlayer ? 'bg-[#6714A8]/10' : ''}`} />
 
           {/* Letter */}
           <span className={cn(
@@ -73,7 +73,7 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
         <div className="flex items-center gap-2 mb-1">
           <span className={cn(
             "font-bold truncate font-pixel-text text-base",
-            isCurrentPlayer ? "text-[#4c1d95]" : "text-gray-900"
+            isCurrentPlayer ? "text-[#350D7A]" : "text-gray-900"
           )}>
             {player.name}
           </span>
@@ -83,7 +83,7 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
           {isReferee && <Shield className="w-4 h-4 text-blue-500 fill-blue-500 shrink-0" />}
 
           {isCurrentPlayer && (
-            <span className="text-[10px] bg-[#7c3aed]/10 text-[#7c3aed] border border-[#7c3aed]/20 px-1.5 py-0.5 rounded-sm font-bold font-pixel-text">
+            <span className="text-[10px] bg-[#6714A8]/10 text-[#6714A8] border border-[#6714A8]/20 px-1.5 py-0.5 rounded-sm font-bold font-pixel-text">
               أنت
             </span>
           )}
@@ -109,9 +109,9 @@ export function PlayerCard({ player, isCurrentPlayer, isReferee, showScore, rank
                 initial={{ scale: 0, rotate: -20 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ type: "spring", stiffness: 600, damping: 12 }}
-                className="flex items-center gap-1 text-[#4c1d95] text-xs font-bold bg-[#f5f3ff] px-2 py-0.5 rounded-sm border border-[#7c3aed]/30 shadow-sm"
+                className="flex items-center gap-1 text-[#350D7A] text-xs font-bold bg-[#f5f3ff] px-2 py-0.5 rounded-sm border border-[#6714A8]/30 shadow-sm"
               >
-                <Check className="w-3 h-3 text-[#7c3aed] stroke-[3]" />
+                <Check className="w-3 h-3 text-[#6714A8] stroke-[3]" />
                 جاهز
               </motion.div>
             ) : (

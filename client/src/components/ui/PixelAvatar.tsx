@@ -29,7 +29,7 @@ export function PixelAvatar({ src, alt, size = 'md', className, ...props }: Pixe
             {src ? (
                 <img src={src} alt={alt ?? ''} className="w-full h-full object-cover" />
             ) : (
-                <div className="w-full h-full bg-purple-50 flex items-center justify-center text-[#7c3aed]">
+                <div className="w-full h-full bg-purple-50 flex items-center justify-center text-[#6714A8]">
                     <User className="w-1/2 h-1/2 opacity-60" />
                 </div>
             )}
