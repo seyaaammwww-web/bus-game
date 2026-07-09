@@ -1,50 +1,57 @@
 {
-  "timestamp": 1783604432556,
+  "timestamp": 1783605050319,
   "rooms": [
     {
-      "id": "dfe489ed-2d93-4944-865c-724b4d8b9d67",
-      "code": "STFY",
-      "hostId": "1c36ec89-2925-4784-bb0c-cf0d022cbdb6",
-      "players": [
-        {
-          "id": "1c36ec89-2925-4784-bb0c-cf0d022cbdb6",
-          "name": "لاعب تجريبي",
-          "score": 0,
-          "isHost": true,
-          "isReady": false,
-          "busStreak": 0,
-          "powerUps": {
-            "hint": 0,
-            "steal": 0,
-            "wildcard": 0,
-            "banish": 0
-          },
-          "usedPowerUps": {
-            "hint": false,
-            "steal": false,
-            "wildcard": false,
-            "banish": false
-          },
-          "totalEarnedPoints": 0
-        }
+      "id": "28d45e30-9341-46c6-92cc-5ce25d237936",
+      "code": "Y75Q",
+      "hostId": "ef257320-cb57-4309-a67f-5c158d0bccf9",
+      "players": [],
+      "rounds": [],
+      "currentRound": 0,
+      "totalRounds": 10,
+      "phase": "lobby",
+      "letters": [
+        "ط",
+        "أ",
+        "ك",
+        "ظ",
+        "و",
+        "ف",
+        "ق",
+        "خ",
+        "ض",
+        "ل"
       ],
+      "createdAt": 1783604616580,
+      "voteQueue": [],
+      "currentVote": null,
+      "settings": {
+        "votingEnabled": true,
+        "customCategories": []
+      }
+    },
+    {
+      "id": "255b5345-e40f-4acd-8508-0a5f733266be",
+      "code": "V4WJ",
+      "hostId": "9f20bd4b-4112-428a-9e1b-cd47a5bf2929",
+      "players": [],
       "rounds": [],
       "currentRound": 0,
       "totalRounds": 10,
       "phase": "lobby",
       "letters": [
         "خ",
-        "ط",
-        "ظ",
-        "أ",
-        "ح",
-        "ن",
-        "م",
+        "ي",
+        "ق",
+        "ض",
+        "ص",
         "ب",
-        "هـ",
-        "ص"
+        "س",
+        "ع",
+        "ظ",
+        "ح"
       ],
-      "createdAt": 1783603808087,
+      "createdAt": 1783604767133,
       "voteQueue": [],
       "currentVote": null,
       "settings": {
