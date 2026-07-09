@@ -1,35 +1,6 @@
 {
-  "timestamp": 1783561749449,
+  "timestamp": 1783562079455,
   "rooms": [
-    {
-      "id": "41d4127e-ef02-431d-9de8-9f673320900d",
-      "code": "22Y2",
-      "hostId": "7be44362-3a21-49ce-b83b-cf9e97f125c7",
-      "players": [],
-      "rounds": [],
-      "currentRound": 0,
-      "totalRounds": 10,
-      "phase": "lobby",
-      "letters": [
-        "ق",
-        "ذ",
-        "د",
-        "ش",
-        "ز",
-        "ف",
-        "ح",
-        "ظ",
-        "و",
-        "ع"
-      ],
-      "createdAt": 1783561319776,
-      "voteQueue": [],
-      "currentVote": null,
-      "settings": {
-        "votingEnabled": true,
-        "customCategories": []
-      }
-    },
     {
       "id": "8a7bbdb7-4c15-44db-86d0-6bb3f7486963",
       "code": "77LC",

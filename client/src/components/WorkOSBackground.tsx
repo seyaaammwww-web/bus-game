@@ -39,6 +39,35 @@ interface WorkOSBackgroundProps {
     isMobile?: boolean;
 }
 
+/* Pixel bus built from plain divs — crisp, palette-locked, zero assets */
+const PixelBus: React.FC = () => (
+    <div className="workos-bus-body relative" style={{ width: 152, height: 76 }}>
+        {/* Exhaust puffs (trail behind, bus drives left-to-right) */}
+        <div className="workos-bus-puff" />
+        <div className="workos-bus-puff" />
+        {/* Body */}
+        <div className="absolute" style={{ left: 0, top: 8, width: 152, height: 48, backgroundColor: '#FF8A50', border: '4px solid #350D7A' }} />
+        {/* Roof stripe */}
+        <div className="absolute" style={{ left: 6, top: 14, width: 140, height: 8, backgroundColor: '#FFC48B' }} />
+        {/* Passenger windows */}
+        {[16, 50, 84].map((x) => (
+            <div key={x} className="absolute" style={{ left: x, top: 26, width: 22, height: 16, backgroundColor: '#FFFEE5', border: '3px solid #350D7A' }} />
+        ))}
+        {/* Door line */}
+        <div className="absolute" style={{ left: 112, top: 26, width: 3, height: 26, backgroundColor: '#350D7A' }} />
+        {/* Windshield (front) */}
+        <div className="absolute" style={{ left: 122, top: 26, width: 20, height: 18, backgroundColor: '#FFFEE5', border: '3px solid #350D7A' }} />
+        {/* Headlight */}
+        <div className="absolute" style={{ left: 146, top: 42, width: 6, height: 8, backgroundColor: '#FFF3B6', border: '2px solid #350D7A' }} />
+        {/* Wheels */}
+        {[22, 104].map((x) => (
+            <div key={x} className="absolute" style={{ left: x, top: 52, width: 24, height: 24, backgroundColor: '#350D7A', border: '4px solid #1B0645' }}>
+                <div className="absolute" style={{ left: 5, top: 5, width: 6, height: 6, backgroundColor: '#FFFEE5' }} />
+            </div>
+        ))}
+    </div>
+);
+
 const WorkOSBackground: React.FC<WorkOSBackgroundProps> = ({ isMobile = false }) => {
     // Generate white stars — fewer on mobile for performance
     const stars = useMemo(() => {
@@ -163,6 +192,22 @@ const WorkOSBackground: React.FC<WorkOSBackgroundProps> = ({ isMobile = false })
                         }}
                     />
                 ))}
+            </div>
+
+            {/* Road Scene — pixel road with the always-driving bus */}
+            <div className="workos-road-scene">
+                <div className="workos-bus">
+                    <PixelBus />
+                </div>
+                {/* Second bus offset by half a cycle so the road is never empty */}
+                <div className="workos-bus workos-bus-second">
+                    <PixelBus />
+                </div>
+                <div className="workos-road-curb" />
+                <div className="workos-road-asphalt">
+                    <div className="workos-road-dashes" />
+                    <div className="workos-road-edge" />
+                </div>
             </div>
 
             {/* Vignette */}

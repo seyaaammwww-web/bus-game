@@ -186,6 +186,165 @@
     backface-visibility: hidden;
 }
 
+/* ============================================================
+   ROAD SCENE — pixel road replacing the bottom cream band,
+   with an always-driving pixel bus (the game's namesake!)
+   ============================================================ */
+
+.workos-road-scene {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 7;
+    pointer-events: none;
+}
+
+/* Hazard-striped curb: orange / ink checkers */
+.workos-road-curb {
+    height: 12px;
+    border-top: 4px solid #350D7A;
+    background-image: repeating-linear-gradient(90deg,
+            #FF8A50 0px, #FF8A50 24px,
+            #350D7A 24px, #350D7A 48px);
+    image-rendering: pixelated;
+}
+
+/* Asphalt — dark ink purple so it reads as road at sunset */
+.workos-road-asphalt {
+    position: relative;
+    height: 72px;
+    background-color: #26095A;
+}
+
+/* Scrolling center lane dashes — stepped for pixel feel */
+.workos-road-dashes {
+    position: absolute;
+    top: 32px;
+    left: 0;
+    right: 0;
+    height: 8px;
+    background-image: repeating-linear-gradient(90deg,
+            #FFFEE5 0px, #FFFEE5 40px,
+            transparent 40px, transparent 88px);
+    background-size: 88px 8px;
+    image-rendering: pixelated;
+    animation: workos-road-scroll 0.7s steps(4, end) infinite;
+}
+
+@keyframes workos-road-scroll {
+    from {
+        background-position-x: 0;
+    }
+
+    to {
+        background-position-x: -88px;
+    }
+}
+
+/* Bottom shadow edge of the road */
+.workos-road-edge {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 6px;
+    background-color: #1B0645;
+}
+
+/* The bus drives across the screen forever */
+.workos-bus {
+    position: absolute;
+    bottom: 26px;
+    left: -200px;
+    z-index: 8;
+    image-rendering: pixelated;
+    animation: workos-bus-drive 18s linear infinite;
+    will-change: transform;
+}
+
+@keyframes workos-bus-drive {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(calc(100vw + 400px));
+    }
+}
+
+/* Second bus: half-cycle offset keeps a bus on screen most of the time */
+.workos-bus-second {
+    animation-delay: -9s;
+}
+
+.mobile-optimized .workos-bus-second {
+    animation-delay: -7s;
+}
+
+/* Stepped bob — same rhythm as the moon for cohesion */
+.workos-bus-body {
+    animation: workos-bus-bob 0.5s steps(1, end) infinite;
+}
+
+@keyframes workos-bus-bob {
+
+    0%,
+    49.9% {
+        transform: translateY(0);
+    }
+
+    50%,
+    100% {
+        transform: translateY(-3px);
+    }
+}
+
+/* Exhaust puffs trailing behind the bus */
+.workos-bus-puff {
+    position: absolute;
+    left: -14px;
+    bottom: 12px;
+    width: 10px;
+    height: 10px;
+    background: #FFFDCC;
+    opacity: 0;
+    animation: workos-puff 1.2s steps(3, end) infinite;
+}
+
+.workos-bus-puff:nth-child(2) {
+    animation-delay: 0.4s;
+    left: -24px;
+}
+
+@keyframes workos-puff {
+    0% {
+        opacity: 0.8;
+        transform: translate(0, 0) scale(0.6);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(-18px, -14px) scale(1.4);
+    }
+}
+
+/* Mobile: shorter road, smaller bus, slower repaint */
+.mobile-optimized .workos-road-asphalt {
+    height: 56px;
+}
+
+.mobile-optimized .workos-road-dashes {
+    top: 24px;
+}
+
+.mobile-optimized .workos-bus {
+    bottom: 20px;
+    transform-origin: bottom left;
+    scale: 0.72;
+    animation-duration: 14s;
+}
+
 /* Custom Cursor */
 .workos-cursor * {
     cursor: url('/images/cursor-normal.png'), auto;
