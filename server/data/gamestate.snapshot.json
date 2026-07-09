@@ -1,5 +1,5 @@
 {
-  "timestamp": 1783561719448,
+  "timestamp": 1783561749449,
   "rooms": [
     {
       "id": "41d4127e-ef02-431d-9de8-9f673320900d",
@@ -33,13 +33,13 @@
     {
       "id": "8a7bbdb7-4c15-44db-86d0-6bb3f7486963",
       "code": "77LC",
-      "hostId": "73db37b1-1acc-4a6c-89d4-ab83508b1ff6",
+      "hostId": "7078e3e8-836b-4609-a2ce-e47cbd2e4a21",
       "players": [
         {
           "id": "73db37b1-1acc-4a6c-89d4-ab83508b1ff6",
           "name": "سيام",
           "score": 80,
-          "isHost": true,
+          "isHost": false,
           "isReady": false,
           "busStreak": 0,
           "powerUps": {
@@ -54,13 +54,14 @@
             "wildcard": false,
             "banish": false
           },
-          "totalEarnedPoints": 80
+          "totalEarnedPoints": 80,
+          "isOffline": true
         },
         {
           "id": "7078e3e8-836b-4609-a2ce-e47cbd2e4a21",
           "name": "نورا",
           "score": 0,
-          "isHost": false,
+          "isHost": true,
           "isReady": true,
           "busStreak": 0,
           "powerUps": {
