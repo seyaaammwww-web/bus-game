@@ -1,5 +1,5 @@
 {
-  "timestamp": 1783563759471,
+  "timestamp": 1783564179472,
   "rooms": [
     {
       "id": "8a7bbdb7-4c15-44db-86d0-6bb3f7486963",
@@ -191,6 +191,57 @@
         "أ"
       ],
       "createdAt": 1783561495739,
+      "voteQueue": [],
+      "currentVote": null,
+      "settings": {
+        "votingEnabled": true,
+        "customCategories": []
+      }
+    },
+    {
+      "id": "5ad48c14-4c05-46e6-9bc4-ddcdce342fba",
+      "code": "J79Q",
+      "hostId": "19dcd8d4-4f23-4d13-a826-764eb223d22e",
+      "players": [
+        {
+          "id": "19dcd8d4-4f23-4d13-a826-764eb223d22e",
+          "name": "لاعب تجريبي",
+          "score": 0,
+          "isHost": true,
+          "isReady": false,
+          "busStreak": 0,
+          "powerUps": {
+            "hint": 0,
+            "steal": 0,
+            "wildcard": 0,
+            "banish": 0
+          },
+          "usedPowerUps": {
+            "hint": false,
+            "steal": false,
+            "wildcard": false,
+            "banish": false
+          },
+          "totalEarnedPoints": 0
+        }
+      ],
+      "rounds": [],
+      "currentRound": 0,
+      "totalRounds": 10,
+      "phase": "lobby",
+      "letters": [
+        "ك",
+        "ج",
+        "ث",
+        "ق",
+        "ل",
+        "ب",
+        "ص",
+        "ذ",
+        "ع",
+        "ط"
+      ],
+      "createdAt": 1783564158166,
       "voteQueue": [],
       "currentVote": null,
       "settings": {

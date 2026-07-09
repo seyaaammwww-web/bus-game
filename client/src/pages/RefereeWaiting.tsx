@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Gavel, Eye, CheckCircle } from 'lucide-react';
 import { useGame } from '@/lib/gameContext';
+import { LoadingBlocks, CornerStuds } from '@/components/ui/PixelDetails';
 
 export default function RefereeWaiting() {
     const { state } = useGame();
@@ -22,7 +23,7 @@ export default function RefereeWaiting() {
                 animate={{ rotate: [0, -15, 15, -10, 10, 0] }}
                 transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 1 }}
             >
-                <div className="w-28 h-28 bg-[#FF8A50] rounded-sm flex items-center justify-center shadow-pixel-lg border-4 border-[#350D7A]">
+                <div className="pw-shine w-28 h-28 bg-[#FF8A50] rounded-sm flex items-center justify-center shadow-pixel-lg border-4 border-[#350D7A]">
                     <Gavel className="w-14 h-14 text-[#350D7A]" strokeWidth={2.5} />
                 </div>
             </motion.div>
@@ -36,9 +37,12 @@ export default function RefereeWaiting() {
                 أنت الحكم!
             </motion.h1>
 
-            <p className="text-[#FFFDCC] font-pixel-text text-base mb-6 max-w-xs">
+            <p className="text-[#FFFDCC] font-pixel-text text-base mb-3 max-w-xs">
                 انتظر اللاعبين حتى ينتهوا من الإجابة، ثم ستراجع إجاباتهم
             </p>
+            <div className="mb-6">
+                <LoadingBlocks />
+            </div>
 
             {/* Round info */}
             <div className="flex gap-4 mb-8">
@@ -58,7 +62,8 @@ export default function RefereeWaiting() {
 
             {/* Player status */}
             {room && room.players.filter(p => p.id !== room.refereeId).length > 0 && (
-                <div className="w-full max-w-sm bg-[#FFFEE5] border-[3px] border-[#350D7A] rounded-sm p-4 shadow-pixel">
+                <div className="relative w-full max-w-sm bg-[#FFFEE5] border-[3px] border-[#350D7A] rounded-sm p-4 shadow-pixel">
+                    <CornerStuds />
                     <div className="flex items-center gap-2 mb-3">
                         <Eye className="w-4 h-4 text-[#6714A8]" />
                         <span className="font-pixel-text text-sm font-bold text-[#350D7A]">حالة اللاعبين</span>
@@ -74,7 +79,7 @@ export default function RefereeWaiting() {
                                             <CheckCircle className="w-3 h-3" /> أرسل
                                         </span>
                                     ) : (
-                                        <span className="text-xs font-pixel-text font-bold px-2 py-0.5 rounded-lg bg-[#350D7A]/5 text-[#350D7A]/50 border border-[#350D7A]/20">يكتب...</span>
+                                        <span className="text-xs font-pixel-text font-bold px-2 py-0.5 rounded-lg bg-[#350D7A]/5 text-[#350D7A]/50 border border-[#350D7A]/20">يكتب<span className="pw-dots" /></span>
                                     )}
                                 </div>
                             );

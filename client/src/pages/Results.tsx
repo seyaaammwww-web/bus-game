@@ -18,6 +18,7 @@ import { ResultsTable } from '@/components/results/ResultsTable';
 import { rankStyles, defaultAvatar } from '@/lib/designTokens';
 import { ScoreCounter } from '@/components/ScoreCounter';
 import { HostControls } from '@/components/HostControls';
+import { PixelConfettiRain, BusDivider } from '@/components/ui/PixelDetails';
 
 const categoryIcons: Record<Category, any> = {
   'ولد': User,
@@ -164,6 +165,9 @@ export default function Results() {
         >
           {isFinal ? (
             <>
+              {/* Pixel confetti raining over the celebration header */}
+              <PixelConfettiRain count={16} />
+
               {/* Trophy Header */}
               <motion.div
                 initial={{ scale: 0, rotate: -180 }}
@@ -171,7 +175,7 @@ export default function Results() {
                 transition={{ type: 'spring', stiffness: 150, damping: 15 }}
                 className="relative inline-block mb-4"
               >
-                <div className="w-28 h-28 bg-[#FF8A50] rounded-sm flex items-center justify-center shadow-pixel-lg border-4 border-[#350D7A]">
+                <div className="pw-shine w-28 h-28 bg-[#FF8A50] rounded-sm flex items-center justify-center shadow-pixel-lg border-4 border-[#350D7A]">
                   <Trophy className="w-16 h-16 text-[#350D7A]" />
                 </div>
                 <motion.div
@@ -216,7 +220,7 @@ export default function Results() {
                       <span className="text-xl my-0.5">2</span>
                       <p className="text-xs font-pixel-text text-white font-bold truncate max-w-[72px] leading-tight">{sortedPlayers[1].name}</p>
                       <p className="text-xs font-pixel-title text-gray-100 leading-tight">{sortedPlayers[1].score}</p>
-                      <div className={`w-20 h-10 border-t-[3px] mt-2 ${rankStyles.silver}`} />
+                      <div className={`pw-podium-grow w-20 h-10 border-t-[3px] mt-2 ${rankStyles.silver}`} style={{ animationDelay: '0.7s' }} />
                     </motion.div>
                   )}
 
@@ -245,7 +249,7 @@ export default function Results() {
                       <ScoreCounter value={winner.score} /> نقطة
                     </p>
                     {/* Podium bar — tallest */}
-                    <div className={`w-24 h-16 border-t-[3px] mt-2 ${rankStyles.gold}`} />
+                    <div className={`pw-podium-grow w-24 h-16 border-t-[3px] mt-2 ${rankStyles.gold}`} style={{ animationDelay: '0.55s' }} />
                   </motion.div>
 
                   {/* 3rd place */}
@@ -265,7 +269,7 @@ export default function Results() {
                       <p className="text-xs font-pixel-text text-white font-bold truncate max-w-[72px] leading-tight">{sortedPlayers[2].name}</p>
                       <p className="text-xs font-pixel-title text-orange-200 leading-tight">{sortedPlayers[2].score}</p>
                       {/* Podium bar — shortest */}
-                      <div className={`w-20 h-6 border-t-[3px] mt-2 ${rankStyles.bronze}`} />
+                      <div className={`pw-podium-grow w-20 h-6 border-t-[3px] mt-2 ${rankStyles.bronze}`} style={{ animationDelay: '0.85s' }} />
                     </motion.div>
                   )}
                 </motion.div>
@@ -279,12 +283,13 @@ export default function Results() {
                 className="mb-6"
               >
                 <RetroCard>
-                  <div className="flex items-center gap-2 mb-3">
+                  <div className="flex items-center gap-2 mb-1">
                     <div className="w-7 h-7 bg-[#FF8A50] rounded-sm border-2 border-[#350D7A] flex items-center justify-center">
                       <Trophy className="w-4 h-4 text-[#350D7A]" />
                     </div>
                     <span className="font-pixel-title text-[#350D7A] text-base font-bold">الترتيب النهائي</span>
                   </div>
+                  <BusDivider className="mb-3" />
                   <div className="space-y-2">
                     {sortedPlayers.map((player, index) => {
                       const isMe = player.id === state.playerId;

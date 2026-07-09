@@ -13,6 +13,7 @@ import { Tutorial } from '@/components/Tutorial';
 import { HelpCircle } from 'lucide-react';
 import { HostControls } from '@/components/HostControls';
 import { useToast } from '@/hooks/use-toast';
+import { BusDivider, LoadingBlocks, CornerStuds } from '@/components/ui/PixelDetails';
 
 export default function Lobby() {
   const { state, currentPlayer, isHost, setReady, startGame, setReferee, removeReferee, referee, disconnect, updateSettings, kickPlayer } = useGame();
@@ -80,8 +81,13 @@ export default function Lobby() {
             <Sparkles className="w-6 h-6 text-[#6714A8]" />
             <span className="font-bold text-lg text-[#350D7A] font-pixel-text">غرفة الانتظار</span>
           </motion.div>
-          <h1 className="text-5xl font-pixel-title mb-3 text-white font-bold [text-shadow:3px_3px_0_#350D7A]">في الانتظار...</h1>
-          <p className="text-3xl text-[#FFFDCC] font-bold font-pixel-text">ادعي أصحابك!</p>
+          <h1 className="text-5xl font-pixel-title mb-3 text-white font-bold [text-shadow:3px_3px_0_#350D7A]">
+            في الانتظار<span className="pw-dots" />
+          </h1>
+          <p className="text-3xl text-[#FFFDCC] font-bold font-pixel-text mb-3">ادعي أصحابك!</p>
+          <div className="flex justify-center">
+            <LoadingBlocks />
+          </div>
         </motion.div>
 
         <motion.div
@@ -89,7 +95,8 @@ export default function Lobby() {
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.1 }}
         >
-          <RetroCard className="mb-6">
+          <RetroCard className="mb-6 relative">
+            <CornerStuds />
             <div className="text-center">
               <p className="text-lg text-[#350D7A] font-bold mb-3 font-pixel-text">كود الغرفة</p>
               <div className="flex items-center justify-center gap-4">
@@ -103,7 +110,8 @@ export default function Lobby() {
                   {room.code.split('').map((char, i) => (
                     <motion.span
                       key={i}
-                      className="w-14 h-16 flex items-center justify-center text-3xl bg-[#6714A8] text-[#FFFEE2] rounded-sm shadow-pixel border-[3px] border-[#350D7A] font-pixel-title"
+                      className="pw-code-tile w-14 h-16 flex items-center justify-center text-3xl bg-[#6714A8] text-[#FFFEE2] rounded-sm shadow-pixel border-[3px] border-[#350D7A] font-pixel-title"
+                      style={{ animationDelay: `${i * 0.15}s` }}
                       initial={isMobile ? { opacity: 0 } : { rotateY: 90 }}
                       animate={isMobile ? { opacity: 1 } : { rotateY: 0 }}
                       transition={{ delay: 0.3 + i * 0.1 }}
@@ -133,6 +141,7 @@ export default function Lobby() {
               >
                 شاركه مع أصحابك عشان ينضموا
               </motion.p>
+              <BusDivider className="mt-3" />
             </div>
           </RetroCard>
         </motion.div>
@@ -384,10 +393,14 @@ export default function Lobby() {
 
           {currentPlayer?.isReady && !isHost && (
             <motion.div
-              className="text-center p-4 surface-card"
+              className="relative text-center p-4 surface-card"
               animate={{ scale: [1, 1.02, 1] }}
               transition={{ repeat: Infinity, duration: 2 }}
             >
+              {/* Pixel "READY" stamp slams in over the corner */}
+              <div className="pw-stamp absolute -top-3 -left-2 bg-[#6714A8] text-[#FFFEE2] border-[3px] border-[#350D7A] rounded-sm px-2 py-0.5 font-pixel-title text-xs shadow-pixel-sm">
+                جاهز
+              </div>
               <motion.div
                 animate={{ rotate: [0, 10, -10, 0] }}
                 transition={{ repeat: Infinity, duration: 1 }}
@@ -395,7 +408,9 @@ export default function Lobby() {
                 <Check className="w-8 h-8 text-[#6714A8] mx-auto mb-2" />
               </motion.div>
               <p className="font-bold text-[#350D7A] font-pixel-text">أنت جاهز!</p>
-              <p className="text-sm text-[#6714A8] font-bold font-pixel-text">في الانتظار...</p>
+              <p className="text-sm text-[#6714A8] font-bold font-pixel-text">
+                في الانتظار<span className="pw-dots" />
+              </p>
             </motion.div>
           )}
 
@@ -421,7 +436,7 @@ export default function Lobby() {
       data-testid="button-start-game"
     >
       <Play className="w-6 h-6 absolute right-4" />
-      {otherPlayersReady ? 'ابدأ!' : 'في الانتظار...'}
+      {otherPlayersReady ? 'ابدأ!' : <span>في الانتظار<span className="pw-dots" /></span>}
     </Button>
     {!canStart && isHost && (
       <div className="absolute inset-0 z-10 cursor-not-allowed" onClick={() => {
