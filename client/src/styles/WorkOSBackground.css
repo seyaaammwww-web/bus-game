@@ -232,6 +232,214 @@
     }
 }
 
+/* ============================================================
+   SHOOTING STARS — cream streaks darting diagonally, rare
+   ============================================================ */
+.workos-shooting-stars-container {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.workos-shooting-star {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #FFFEE2;
+    opacity: 0;
+    /* Pixel trail via hard box-shadow steps */
+    box-shadow:
+        6px -6px 0 rgba(255, 254, 226, 0.8),
+        12px -12px 0 rgba(255, 254, 226, 0.55),
+        18px -18px 0 rgba(255, 254, 226, 0.3),
+        24px -24px 0 rgba(255, 254, 226, 0.15);
+    animation: workos-shooting steps(6, end) infinite;
+    animation-iteration-count: infinite;
+}
+
+@keyframes workos-shooting {
+    0% {
+        opacity: 0;
+        transform: translate(0, 0);
+    }
+
+    3% {
+        opacity: 1;
+    }
+
+    12% {
+        opacity: 1;
+        transform: translate(-130px, 130px);
+    }
+
+    16% {
+        opacity: 0;
+        transform: translate(-160px, 160px);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(-160px, 160px);
+    }
+}
+
+/* ============================================================
+   BIRDS — 2-frame flapping sprites gliding right-to-left
+   ============================================================ */
+.workos-birds-container {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.workos-bird {
+    position: absolute;
+    right: -40px;
+    image-rendering: pixelated;
+    animation: workos-bird-glide linear infinite;
+    will-change: transform;
+}
+
+@keyframes workos-bird-glide {
+    0% {
+        transform: translateX(0) translateY(0);
+    }
+
+    25% {
+        transform: translateX(calc(-28vw - 40px)) translateY(-12px);
+    }
+
+    50% {
+        transform: translateX(calc(-52vw - 40px)) translateY(6px);
+    }
+
+    75% {
+        transform: translateX(calc(-76vw - 40px)) translateY(-8px);
+    }
+
+    100% {
+        transform: translateX(calc(-100vw - 80px)) translateY(0);
+    }
+}
+
+/* Hard 2-frame wing flap: frames swap visibility in steps */
+.workos-bird-sprite {
+    position: relative;
+    width: 20px;
+    height: 14px;
+}
+
+.workos-bird-frame {
+    position: absolute;
+    inset: 0;
+}
+
+.workos-bird-up {
+    animation: workos-flap-a 0.5s steps(1, end) infinite;
+}
+
+.workos-bird-down {
+    animation: workos-flap-b 0.5s steps(1, end) infinite;
+}
+
+@keyframes workos-flap-a {
+
+    0%,
+    49.9% {
+        opacity: 1;
+    }
+
+    50%,
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes workos-flap-b {
+
+    0%,
+    49.9% {
+        opacity: 0;
+    }
+
+    50%,
+    100% {
+        opacity: 1;
+    }
+}
+
+/* ============================================================
+   CITY SKYLINE — ink silhouette on the horizon w/ lit windows
+   ============================================================ */
+.workos-skyline {
+    position: absolute;
+    bottom: 57px;
+    left: 0;
+    right: 0;
+    z-index: 6;
+    display: flex;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.workos-skyline-tile {
+    flex: 0 0 auto;
+    width: 520px;
+    height: 90px;
+    image-rendering: pixelated;
+}
+
+/* Lit windows blink on and off in hard steps */
+.workos-window-blink {
+    animation: workos-window 5s steps(1, end) infinite;
+}
+
+@keyframes workos-window {
+
+    0%,
+    72% {
+        opacity: 1;
+    }
+
+    73%,
+    86% {
+        opacity: 0.15;
+    }
+
+    87%,
+    100% {
+        opacity: 1;
+    }
+}
+
+/* ============================================================
+   STREETLIGHTS — glowing lamps along the curb
+   ============================================================ */
+.workos-streetlight {
+    position: absolute;
+    bottom: 52px;
+    z-index: 7;
+    image-rendering: pixelated;
+}
+
+.workos-lamp-glow {
+    animation: workos-lamp 1.6s steps(2, end) infinite alternate;
+}
+
+@keyframes workos-lamp {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0.55;
+    }
+}
+
 /* Moon — crisp pixel rendering, stepped bob, no glow filter */
 .workos-moon {
     position: absolute;
@@ -563,6 +771,21 @@
     transform-origin: bottom right;
 }
 
+.mobile-optimized .workos-skyline {
+    bottom: 44px;
+}
+
+.mobile-optimized .workos-skyline-tile {
+    width: 380px;
+    height: 66px;
+}
+
+.mobile-optimized .workos-streetlight {
+    bottom: 40px;
+    scale: 0.72;
+    transform-origin: bottom left;
+}
+
 /* Respect reduced-motion preferences: park the buses, stop the road */
 @media (prefers-reduced-motion: reduce) {
 
@@ -574,11 +797,18 @@
     .workos-bus-puff,
     .workos-sparkle,
     .workos-balloon,
-    .workos-balloon-sway {
+    .workos-balloon-sway,
+    .workos-shooting-star,
+    .workos-bird,
+    .workos-bird-frame,
+    .workos-window-blink,
+    .workos-lamp-glow {
         animation: none !important;
     }
 
-    .workos-balloon {
+    .workos-balloon,
+    .workos-shooting-star,
+    .workos-bird {
         display: none;
     }
 

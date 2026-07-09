@@ -89,6 +89,115 @@ const PixelBalloon: React.FC<{ color: string }> = ({ color }) => (
     </svg>
 );
 
+interface ShootingStar {
+    id: number;
+    top: number;
+    left: number;
+    delay: number;
+    duration: number;
+}
+
+interface Bird {
+    id: number;
+    top: number;
+    delay: number;
+    duration: number;
+    scale: number;
+}
+
+/* Pixel bird — 2-frame wing flap handled in CSS via frame classes */
+const PixelBird: React.FC = () => (
+    <div className="workos-bird-sprite">
+        {/* Frame A: wings up */}
+        <svg className="workos-bird-frame workos-bird-up" width="20" height="14" viewBox="0 0 20 14" shapeRendering="crispEdges" aria-hidden="true">
+            <rect x="0" y="0" width="4" height="4" fill="#350D7A" />
+            <rect x="4" y="4" width="4" height="4" fill="#350D7A" />
+            <rect x="8" y="8" width="4" height="4" fill="#350D7A" />
+            <rect x="12" y="4" width="4" height="4" fill="#350D7A" />
+            <rect x="16" y="0" width="4" height="4" fill="#350D7A" />
+        </svg>
+        {/* Frame B: wings down */}
+        <svg className="workos-bird-frame workos-bird-down" width="20" height="14" viewBox="0 0 20 14" shapeRendering="crispEdges" aria-hidden="true">
+            <rect x="0" y="8" width="4" height="4" fill="#350D7A" />
+            <rect x="4" y="4" width="4" height="4" fill="#350D7A" />
+            <rect x="8" y="2" width="4" height="4" fill="#350D7A" />
+            <rect x="12" y="4" width="4" height="4" fill="#350D7A" />
+            <rect x="16" y="8" width="4" height="4" fill="#350D7A" />
+        </svg>
+    </div>
+);
+
+/* City skyline silhouette — ink buildings with blinking lit windows.
+   Drawn once as a repeating SVG tile, sits right above the road curb. */
+const PixelSkyline: React.FC = () => (
+    <svg
+        width="520"
+        height="90"
+        viewBox="0 0 520 90"
+        shapeRendering="crispEdges"
+        preserveAspectRatio="none"
+        className="workos-skyline-tile"
+        aria-hidden="true"
+    >
+        {/* Buildings — staggered heights, all deep ink */}
+        <rect x="0" y="38" width="52" height="52" fill="#26095A" />
+        <rect x="52" y="18" width="44" height="72" fill="#350D7A" />
+        <rect x="96" y="50" width="36" height="40" fill="#26095A" />
+        <rect x="132" y="30" width="56" height="60" fill="#350D7A" />
+        <rect x="188" y="58" width="30" height="32" fill="#26095A" />
+        <rect x="218" y="10" width="40" height="80" fill="#350D7A" />
+        <rect x="258" y="44" width="50" height="46" fill="#26095A" />
+        <rect x="308" y="26" width="38" height="64" fill="#350D7A" />
+        <rect x="346" y="54" width="44" height="36" fill="#26095A" />
+        <rect x="390" y="16" width="48" height="74" fill="#350D7A" />
+        <rect x="438" y="42" width="36" height="48" fill="#26095A" />
+        <rect x="474" y="30" width="46" height="60" fill="#350D7A" />
+        {/* Rooftop details: antennas + water tank */}
+        <rect x="70" y="8" width="4" height="10" fill="#350D7A" />
+        <rect x="234" y="0" width="4" height="10" fill="#350D7A" />
+        <rect x="236" y="0" width="8" height="4" fill="#350D7A" />
+        <rect x="406" y="6" width="4" height="10" fill="#350D7A" />
+        <rect x="150" y="22" width="14" height="8" fill="#350D7A" />
+        {/* Lit windows — cream + amber, some blink via CSS classes */}
+        {[
+            [60, 26], [78, 26], [60, 42], [78, 58], [142, 38], [160, 38],
+            [142, 54], [226, 20], [240, 20], [226, 36], [240, 52], [226, 68],
+            [316, 34], [330, 34], [316, 50], [398, 24], [414, 24], [398, 40],
+            [414, 56], [398, 72], [482, 38], [498, 38], [482, 54], [10, 46],
+            [28, 46], [10, 62], [268, 52], [284, 52], [268, 68], [356, 62],
+            [446, 50], [462, 66], [104, 58], [118, 72],
+        ].map(([x, y], i) => (
+            <rect
+                key={i}
+                x={x}
+                y={y}
+                width="8"
+                height="10"
+                fill={i % 3 === 0 ? '#FFC48B' : '#FFF3B6'}
+                className={i % 4 === 0 ? 'workos-window-blink' : undefined}
+                style={i % 4 === 0 ? { animationDelay: `${(i * 0.7) % 5}s` } : undefined}
+            />
+        ))}
+    </svg>
+);
+
+/* Streetlight — ink pole with warm glowing pixel lamp */
+const PixelStreetlight: React.FC = () => (
+    <svg width="44" height="110" viewBox="0 0 44 110" shapeRendering="crispEdges" aria-hidden="true">
+        {/* Pole */}
+        <rect x="8" y="14" width="6" height="96" fill="#350D7A" />
+        <rect x="10" y="14" width="2" height="96" fill="#6714A8" />
+        {/* Arm reaching over the road */}
+        <rect x="8" y="8" width="30" height="6" fill="#350D7A" />
+        {/* Lamp head */}
+        <rect x="30" y="14" width="12" height="8" fill="#350D7A" />
+        {/* Glowing bulb (pulses via CSS) */}
+        <rect x="32" y="22" width="8" height="6" fill="#FFF3B6" className="workos-lamp-glow" />
+        {/* Base */}
+        <rect x="4" y="104" width="14" height="6" fill="#1B0645" />
+    </svg>
+);
+
 interface WorkOSBackgroundProps {
     /** If true, reduces particle count for mobile performance (keeps all visual effects) */
     isMobile?: boolean;
@@ -250,6 +359,38 @@ const WorkOSBackground: React.FC<WorkOSBackgroundProps> = ({ isMobile = false })
         return generated;
     }, [isMobile]);
 
+    // Shooting stars — rare diagonal streaks across the upper sky
+    const shootingStars = useMemo(() => {
+        const count = isMobile ? 2 : 3;
+        const generated: ShootingStar[] = [];
+        for (let i = 0; i < count; i++) {
+            generated.push({
+                id: i,
+                top: 4 + Math.random() * 26,
+                left: 10 + Math.random() * 70,
+                delay: i * 7 + Math.random() * 5,
+                duration: 0.9 + Math.random() * 0.5,
+            });
+        }
+        return generated;
+    }, [isMobile]);
+
+    // Flapping pixel birds gliding across the mid sky
+    const birds = useMemo(() => {
+        const count = isMobile ? 2 : 3;
+        const generated: Bird[] = [];
+        for (let i = 0; i < count; i++) {
+            generated.push({
+                id: i,
+                top: 18 + Math.random() * 26,
+                delay: -Math.random() * 40,
+                duration: 32 + Math.random() * 20,
+                scale: 0.8 + Math.random() * 0.7,
+            });
+        }
+        return generated;
+    }, [isMobile]);
+
     // Floating balloons drifting up through the sunset
     const balloons = useMemo(() => {
         const count = isMobile ? 2 : 4;
@@ -375,6 +516,40 @@ const WorkOSBackground: React.FC<WorkOSBackgroundProps> = ({ isMobile = false })
                 ))}
             </div>
 
+            {/* Shooting stars — diagonal cream streaks */}
+            <div className="workos-shooting-stars-container" aria-hidden="true">
+                {shootingStars.map((s) => (
+                    <div
+                        key={`shooting-${s.id}`}
+                        className="workos-shooting-star"
+                        style={{
+                            top: `${s.top}%`,
+                            left: `${s.left}%`,
+                            animationDelay: `${s.delay}s`,
+                            animationDuration: `${s.duration}s`,
+                        }}
+                    />
+                ))}
+            </div>
+
+            {/* Flapping pixel birds gliding across the sky */}
+            <div className="workos-birds-container" aria-hidden="true">
+                {birds.map((b) => (
+                    <div
+                        key={`bird-${b.id}`}
+                        className="workos-bird"
+                        style={{
+                            top: `${b.top}%`,
+                            scale: `${b.scale}`,
+                            animationDelay: `${b.delay}s`,
+                            animationDuration: `${b.duration}s`,
+                        }}
+                    >
+                        <PixelBird />
+                    </div>
+                ))}
+            </div>
+
             {/* Floating balloons rising through the sunset */}
             <div className="workos-balloons-container" aria-hidden="true">
                 {balloons.map((b) => (
@@ -421,8 +596,27 @@ const WorkOSBackground: React.FC<WorkOSBackgroundProps> = ({ isMobile = false })
                 ))}
             </div>
 
+            {/* City skyline silhouette on the horizon (behind the road) */}
+            <div className="workos-skyline" aria-hidden="true">
+                <PixelSkyline />
+                <PixelSkyline />
+                <PixelSkyline />
+                <PixelSkyline />
+            </div>
+
             {/* Road Scene — pixel road with the always-driving bus */}
             <div className="workos-road-scene">
+                {/* Streetlights spaced along the curb (behind the bus) */}
+                <div className="workos-streetlight" style={{ left: '12%' }} aria-hidden="true">
+                    <PixelStreetlight />
+                </div>
+                <div className="workos-streetlight" style={{ left: '46%' }} aria-hidden="true">
+                    <PixelStreetlight />
+                </div>
+                <div className="workos-streetlight" style={{ left: '80%' }} aria-hidden="true">
+                    <PixelStreetlight />
+                </div>
+
                 {/* Bus stop sign standing on the curb (behind the bus) */}
                 <div className="workos-bus-stop" aria-hidden="true">
                     <svg width="48" height="76" viewBox="0 0 48 76" shapeRendering="crispEdges">
