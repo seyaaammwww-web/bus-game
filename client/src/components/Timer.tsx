@@ -27,23 +27,15 @@ export function Timer({ timeLeft, isRush, maxTime = 60 }: TimerProps) {
   const isWarning = timeLeft <= 15;
 
   const pillBg = isDanger
-    ? 'bg-gradient-to-r from-red-500 to-red-600'
+    ? 'bg-[#FF6957]'
     : isWarning
-      ? 'bg-gradient-to-r from-amber-400 to-amber-500'
-      : 'bg-white/95';
-  const pillBorder = isDanger
-    ? 'border-red-400/50'
-    : isWarning
-      ? 'border-amber-400/50'
-      : 'border-purple-200/60';
-  const pillShadow = isDanger
-    ? 'shadow-[0_4px_16px_rgba(239,68,68,0.4)]'
-    : isWarning
-      ? 'shadow-[0_4px_16px_rgba(251,191,36,0.35)]'
-      : 'shadow-md';
-  const numColor = isDanger ? 'text-white' : isWarning ? 'text-amber-950' : 'text-[#350D7A]';
-  const iconColor = isDanger ? 'text-white' : isWarning ? 'text-amber-950' : 'text-[#6714A8]';
-  const fuseColor = isDanger ? 'from-red-300 to-white' : isWarning ? 'from-orange-400 to-yellow-300' : 'from-violet-400 to-purple-300';
+      ? 'bg-[#FFA168]'
+      : 'bg-[#FFFEE5]';
+  const pillBorder = 'border-[#350D7A]';
+  const pillShadow = 'shadow-pixel-sm';
+  const numColor = 'text-[#350D7A]';
+  const iconColor = isDanger || isWarning ? 'text-[#350D7A]' : 'text-[#6714A8]';
+  const fuseColor = isDanger ? 'bg-[#350D7A]' : isWarning ? 'bg-[#6714A8]' : 'bg-[#F640A8]';
 
   const fuseWidth = Math.max(0, Math.min(1, timeLeft / maxTime));
 
@@ -52,8 +44,8 @@ export function Timer({ timeLeft, isRush, maxTime = 60 }: TimerProps) {
       className={`
         relative flex items-center gap-2
         px-3 py-1.5 md:px-4 md:py-2
-        rounded-full border overflow-hidden backdrop-blur-sm
-        font-semibold
+        rounded-sm border-[3px] overflow-hidden
+        font-bold
         ${pillBg} ${pillBorder} ${pillShadow}
         ${isDanger ? 'animate-pulse' : ''}
       `}
@@ -62,13 +54,9 @@ export function Timer({ timeLeft, isRush, maxTime = 60 }: TimerProps) {
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
     >
       <div
-        className={`absolute bottom-0 left-0 h-[2px] bg-gradient-to-r ${fuseColor} transition-all duration-1000 ease-linear`}
+        className={`absolute bottom-0 left-0 h-[3px] ${fuseColor} transition-all duration-1000 ease-linear`}
         style={{ width: `${fuseWidth * 100}%` }}
-      >
-        {fuseWidth > 0.02 && (
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-yellow-200 shadow-[0_0_6px_#FFA168] animate-ping" />
-        )}
-      </div>
+      />
 
       <motion.div
         animate={
