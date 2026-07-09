@@ -483,7 +483,7 @@ const WorkOSBackground: React.FC<WorkOSBackgroundProps> = ({ isMobile = false })
 
     // Big 4-point plus-shaped sparkles — the reference's signature detail
     const sparkles = useMemo(() => {
-        const count = isMobile ? 8 : 16;
+        const count = isMobile ? 10 : 24;
         const generated: Sparkle[] = [];
         for (let i = 0; i < count; i++) {
             generated.push({
@@ -803,6 +803,14 @@ const WorkOSBackground: React.FC<WorkOSBackgroundProps> = ({ isMobile = false })
                 <PixelSkyline />
                 <PixelSkyline />
                 <PixelSkyline />
+            </div>
+
+            {/* Celebration fireworks bursting over the city */}
+            <div className="workos-city-fireworks" aria-hidden="true">
+                <span className="workos-city-firework" style={{ left: '14%', color: '#F640A8', animationDelay: '0s' }} />
+                <span className="workos-city-firework" style={{ left: '42%', color: '#FFC48B', animationDelay: '2.6s' }} />
+                <span className="workos-city-firework" style={{ left: '68%', color: '#FF8A50', animationDelay: '5.4s' }} />
+                <span className="workos-city-firework" style={{ left: '86%', color: '#A333D5', animationDelay: '7.8s' }} />
             </div>
 
             {/* Road Scene — pixel road with the always-driving bus */}

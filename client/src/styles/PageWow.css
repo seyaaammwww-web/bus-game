@@ -297,6 +297,161 @@
     }
 }
 
+/* --- Marquee bulbs: theater-style chasing blink --- */
+.pw-marquee-bulb {
+    width: 8px;
+    height: 8px;
+    background: #FFC48B;
+    border: 2px solid #350D7A;
+    animation: pw-marquee 0.75s steps(1, end) infinite;
+}
+
+@keyframes pw-marquee {
+
+    0%,
+    49% {
+        background: #FFC48B;
+        box-shadow: 0 0 0 1px rgba(255, 196, 139, 0.5);
+    }
+
+    50%,
+    100% {
+        background: #6714A8;
+        box-shadow: none;
+    }
+}
+
+/* --- Pixel firework: ring of pixels bursts outward in steps --- */
+.pw-firework {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: currentColor;
+    opacity: 0;
+    animation: pw-firework-burst 2.7s steps(5, end) infinite;
+}
+
+@keyframes pw-firework-burst {
+    0% {
+        opacity: 0;
+        box-shadow: none;
+        transform: translateY(24px);
+    }
+
+    /* Rocket rises */
+    8% {
+        opacity: 1;
+        transform: translateY(0);
+        box-shadow: none;
+    }
+
+    /* Burst: 8-direction pixel ring, expanding */
+    14% {
+        box-shadow:
+            0 -10px 0 currentColor, 0 10px 0 currentColor,
+            -10px 0 0 currentColor, 10px 0 0 currentColor,
+            -7px -7px 0 currentColor, 7px -7px 0 currentColor,
+            -7px 7px 0 currentColor, 7px 7px 0 currentColor;
+    }
+
+    26% {
+        opacity: 1;
+        box-shadow:
+            0 -20px 0 currentColor, 0 20px 0 currentColor,
+            -20px 0 0 currentColor, 20px 0 0 currentColor,
+            -14px -14px 0 currentColor, 14px -14px 0 currentColor,
+            -14px 14px 0 currentColor, 14px 14px 0 currentColor;
+    }
+
+    36% {
+        opacity: 0;
+        box-shadow:
+            0 -26px 0 transparent, 0 26px 0 transparent,
+            -26px 0 0 transparent, 26px 0 0 transparent,
+            -18px -18px 0 transparent, 18px -18px 0 transparent,
+            -18px 18px 0 transparent, 18px 18px 0 transparent;
+    }
+
+    100% {
+        opacity: 0;
+        box-shadow: none;
+    }
+}
+
+/* --- Bus seats: lobby seat map that fills as players board --- */
+.pw-bus-seats {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 10px;
+    background: #FFFDCC;
+    border: 2px solid #350D7A;
+    border-radius: 2px;
+    width: fit-content;
+}
+
+.pw-seat {
+    width: 22px;
+    height: 22px;
+    background: #FFFEE5;
+    border: 2px solid #350D7A;
+    border-top-width: 5px;
+    /* thick top edge = seat back */
+    border-radius: 2px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.pw-seat-driver {
+    background: #FFC48B;
+    align-items: center;
+}
+
+.pw-seat-aisle {
+    width: 2px;
+    height: 22px;
+    background-image: repeating-linear-gradient(180deg,
+            rgba(53, 13, 122, 0.4) 0 3px, transparent 3px 6px);
+}
+
+.pw-seat-filled {
+    background: #6714A8;
+    animation: pw-seat-pop 0.3s steps(3, end) both;
+}
+
+@keyframes pw-seat-pop {
+    0% {
+        transform: scale(0);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* --- Winner row: gold shimmer sweep for the champion --- */
+.pw-winner-row {
+    position: relative;
+    overflow: hidden;
+    background: #FFE9A8 !important;
+    box-shadow: 3px 3px 0 0 #350D7A !important;
+}
+
+.pw-winner-row::after {
+    content: '';
+    position: absolute;
+    top: -30%;
+    left: -20%;
+    width: 18%;
+    height: 160%;
+    background: rgba(255, 254, 229, 0.65);
+    transform: rotate(18deg);
+    animation: pw-shine-sweep 2.6s steps(6, end) infinite;
+    pointer-events: none;
+}
+
 /* --- Respect reduced motion --- */
 @media (prefers-reduced-motion: reduce) {
 
@@ -309,11 +464,16 @@
     .pw-stamp,
     .pw-float,
     .pw-flicker,
-    .pw-podium-grow {
+    .pw-podium-grow,
+    .pw-marquee-bulb,
+    .pw-firework,
+    .pw-seat-filled,
+    .pw-winner-row::after {
         animation: none !important;
     }
 
-    .pw-confetti-pixel {
+    .pw-confetti-pixel,
+    .pw-firework {
         display: none;
     }
 }

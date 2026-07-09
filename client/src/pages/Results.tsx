@@ -18,7 +18,7 @@ import { ResultsTable } from '@/components/results/ResultsTable';
 import { rankStyles, defaultAvatar } from '@/lib/designTokens';
 import { ScoreCounter } from '@/components/ScoreCounter';
 import { HostControls } from '@/components/HostControls';
-import { PixelConfettiRain, BusDivider } from '@/components/ui/PixelDetails';
+import { PixelConfettiRain, PixelFireworks, MarqueeLights } from '@/components/ui/PixelDetails';
 
 const categoryIcons: Record<Category, any> = {
   'ولد': User,
@@ -165,8 +165,9 @@ export default function Results() {
         >
           {isFinal ? (
             <>
-              {/* Pixel confetti raining over the celebration header */}
+              {/* Pixel confetti + fireworks over the celebration header */}
               <PixelConfettiRain count={16} />
+              <PixelFireworks count={4} />
 
               {/* Trophy Header */}
               <motion.div
@@ -283,13 +284,13 @@ export default function Results() {
                 className="mb-6"
               >
                 <RetroCard>
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-2 mb-2">
                     <div className="w-7 h-7 bg-[#FF8A50] rounded-sm border-2 border-[#350D7A] flex items-center justify-center">
                       <Trophy className="w-4 h-4 text-[#350D7A]" />
                     </div>
                     <span className="font-pixel-title text-[#350D7A] text-base font-bold">الترتيب النهائي</span>
                   </div>
-                  <BusDivider className="mb-3" />
+                  <MarqueeLights count={14} className="mb-3" />
                   <div className="space-y-2">
                     {sortedPlayers.map((player, index) => {
                       const isMe = player.id === state.playerId;
@@ -301,9 +302,11 @@ export default function Results() {
                           initial={{ x: -30, opacity: 0 }}
                           animate={{ x: 0, opacity: 1 }}
                           transition={{ delay: 0.85 + index * 0.07, type: 'spring', stiffness: 300 }}
-                          className={`flex items-center gap-3 px-3 py-2 rounded-sm border-2 border-[#350D7A] text-sm font-medium ${isMe
-                            ? 'bg-[#FFF3B6] shadow-pixel-sm'
-                            : 'bg-[#FFFEE5]'
+                          className={`flex items-center gap-3 px-3 py-2 rounded-sm border-2 border-[#350D7A] text-sm font-medium ${index === 0
+                            ? 'pw-winner-row'
+                            : isMe
+                              ? 'bg-[#FFF3B6] shadow-pixel-sm'
+                              : 'bg-[#FFFEE5]'
                             }`}
                         >
                           {/* Rank */}
@@ -326,6 +329,7 @@ export default function Results() {
                           <div className="flex-1 min-w-0">
                             <p className="font-bold text-sm text-[#350D7A] font-pixel-text truncate flex items-center gap-1">
                               {player.name}
+                              {index === 0 && <span className="pw-float text-[9px] bg-[#FF8A50] text-[#350D7A] px-1 rounded-sm border border-[#350D7A] font-pixel-text flex-shrink-0 font-bold">البطل</span>}
                               {player.isHost && <Crown className="w-3 h-3 text-[#FF8A50] flex-shrink-0" />}
                               {isRef && <Shield className="w-3 h-3 text-[#6714A8] flex-shrink-0" />}
                               {isMe && <span className="text-[9px] bg-[#6714A8] text-white px-1 rounded font-pixel-text flex-shrink-0">أنت</span>}

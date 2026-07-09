@@ -458,6 +458,83 @@
 }
 
 /* ============================================================
+   CITY FIREWORKS — pixel bursts celebrating over the skyline
+   ============================================================ */
+.workos-city-fireworks {
+    position: absolute;
+    bottom: 130px;
+    left: 0;
+    right: 0;
+    height: 120px;
+    z-index: 6;
+    pointer-events: none;
+}
+
+.workos-city-firework {
+    position: absolute;
+    bottom: 0;
+    width: 4px;
+    height: 4px;
+    background: currentColor;
+    opacity: 0;
+    /* 10s cycle: rocket up, burst, fade, long rest */
+    animation: workos-city-burst 10s steps(6, end) infinite;
+}
+
+@keyframes workos-city-burst {
+    0% {
+        opacity: 0;
+        transform: translateY(0);
+        box-shadow: none;
+    }
+
+    /* Rocket climbs */
+    3% {
+        opacity: 1;
+        transform: translateY(-70px);
+        box-shadow: none;
+    }
+
+    /* Burst ring 1 */
+    5% {
+        transform: translateY(-78px);
+        box-shadow:
+            0 -12px 0 currentColor, 0 12px 0 currentColor,
+            -12px 0 0 currentColor, 12px 0 0 currentColor,
+            -8px -8px 0 currentColor, 8px -8px 0 currentColor,
+            -8px 8px 0 currentColor, 8px 8px 0 currentColor;
+    }
+
+    /* Burst ring 2 — wider, still bright */
+    8% {
+        opacity: 1;
+        transform: translateY(-78px);
+        box-shadow:
+            0 -24px 0 currentColor, 0 24px 0 currentColor,
+            -24px 0 0 currentColor, 24px 0 0 currentColor,
+            -17px -17px 0 currentColor, 17px -17px 0 currentColor,
+            -17px 17px 0 currentColor, 17px 17px 0 currentColor;
+    }
+
+    /* Fade out */
+    11% {
+        opacity: 0;
+        transform: translateY(-74px);
+        box-shadow:
+            0 -30px 0 transparent, 0 30px 0 transparent,
+            -30px 0 0 transparent, 30px 0 0 transparent,
+            -21px -21px 0 transparent, 21px -21px 0 transparent,
+            -21px 21px 0 transparent, 21px 21px 0 transparent;
+    }
+
+    /* Rest until next launch */
+    100% {
+        opacity: 0;
+        box-shadow: none;
+    }
+}
+
+/* ============================================================
    STREETLIGHTS — glowing lamps along the curb
    ============================================================ */
 .workos-streetlight {
@@ -1100,6 +1177,10 @@
     display: none;
 }
 
+.mobile-optimized .workos-city-fireworks {
+    bottom: 100px;
+}
+
 /* Respect reduced-motion preferences: park the buses, stop the road */
 @media (prefers-reduced-motion: reduce) {
 
@@ -1138,6 +1219,7 @@
     .workos-plane,
     .workos-ufo,
     .workos-firefly,
+    .workos-city-firework,
     .workos-taxi {
         display: none;
     }

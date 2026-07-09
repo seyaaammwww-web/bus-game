@@ -13,7 +13,7 @@ import { Tutorial } from '@/components/Tutorial';
 import { HelpCircle } from 'lucide-react';
 import { HostControls } from '@/components/HostControls';
 import { useToast } from '@/hooks/use-toast';
-import { LoadingBlocks, CornerStuds } from '@/components/ui/PixelDetails';
+import { LoadingBlocks, CornerStuds, BusSeats, MarqueeLights } from '@/components/ui/PixelDetails';
 
 export default function Lobby() {
   const { state, currentPlayer, isHost, setReady, startGame, setReferee, removeReferee, referee, disconnect, updateSettings, kickPlayer } = useGame();
@@ -141,6 +141,7 @@ export default function Lobby() {
               >
                 شاركه مع أصحابك عشان ينضموا
               </motion.p>
+              <MarqueeLights count={12} className="mt-3" />
             </div>
           </RetroCard>
         </motion.div>
@@ -151,18 +152,24 @@ export default function Lobby() {
           transition={{ delay: 0.2 }}
         >
           <RetroCard className="mb-6">
-            <div className="flex flex-row items-center justify-between gap-2 pb-4 border-b-2 border-[#350D7A]/10 mb-3">
-              <h2 className="text-xl flex items-center gap-2 font-pixel-title text-[#350D7A] font-bold">
-                <Users className="w-6 h-6 text-[#6714A8]" />
-                اللاعبين
-              </h2>
-              <motion.span
-                className="text-sm px-4 py-2 bg-[#6714A8] text-[#FFFEE2] rounded-sm font-bold border-2 border-[#350D7A] font-pixel-text text-lg shadow-[2px_2px_0_0_#350D7A]"
-                animate={{ scale: room.players.length >= 1 ? [1, 1.1, 1] : 1 }}
-                transition={{ repeat: room.players.length >= 1 ? Infinity : 0, duration: 1.5 }}
-              >
-                {room.players.length} / 8
-              </motion.span>
+            <div className="pb-4 border-b-2 border-[#350D7A]/10 mb-3">
+              <div className="flex flex-row items-center justify-between gap-2 mb-3">
+                <h2 className="text-xl flex items-center gap-2 font-pixel-title text-[#350D7A] font-bold">
+                  <Users className="w-6 h-6 text-[#6714A8]" />
+                  اللاعبين
+                </h2>
+                <motion.span
+                  className="text-sm px-4 py-2 bg-[#6714A8] text-[#FFFEE2] rounded-sm font-bold border-2 border-[#350D7A] font-pixel-text text-lg shadow-[2px_2px_0_0_#350D7A]"
+                  animate={{ scale: room.players.length >= 1 ? [1, 1.1, 1] : 1 }}
+                  transition={{ repeat: room.players.length >= 1 ? Infinity : 0, duration: 1.5 }}
+                >
+                  {room.players.length} / 8
+                </motion.span>
+              </div>
+              {/* Bus seat map — seats fill up as players board */}
+              <div className="flex justify-center">
+                <BusSeats filled={room.players.length} total={8} />
+              </div>
             </div>
             <div className="space-y-3">
               {/* Round Count Picker (Host only) — STYLE-1 FIX: use retro Button components */}
