@@ -76,8 +76,8 @@ export function RetroQuote({ children, className, title, variant = 'yellow', ...
             animate={{ opacity: 1, y: 0 }}
             className={cn(
                 "relative text-center py-6 px-12 max-w-lg mx-auto",
-                "border border-purple-200/50 rounded-2xl",
-                "shadow-card",
+                "border-[3px] border-[#350D7A] rounded-sm",
+                "shadow-pixel",
                 bgColor,
                 className
             )}

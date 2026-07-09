@@ -28,22 +28,22 @@ export function ActiveGamePlayerGrid({ players, currentPlayerId, submissions, ti
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ delay: index * 0.1 }}
                         className={cn(
-                            "relative flex flex-col items-center p-4 rounded-2xl border shadow-md transition-all",
+                            "relative flex flex-col items-center p-4 rounded-sm border-[3px] border-[#350D7A] shadow-pixel-sm",
                             isMe
-                                ? "bg-[#FFFDCC] border-[#6714A8]"
+                                ? "bg-[#FFF3B6]"
                                 : hasSubmitted
-                                    ? "bg-[#dcfce7] border-[#22c55e]"
-                                    : "bg-white border-[#e5e7eb]"
+                                    ? "bg-[#D3F088]"
+                                    : "bg-[#FFFEE5]"
                         )}
                     >
                         {/* Status Indicator */}
                         <div className="absolute top-2 right-2">
                             {hasSubmitted ? (
-                                <div className="bg-green-500 text-white p-1 rounded-md shadow-sm animate-bounce-slight">
+                                <div className="bg-[#44AF00] text-[#FFFEE2] p-1 rounded-sm border-2 border-[#350D7A] animate-bounce-slight">
                                     <CheckCircle className="w-4 h-4" />
                                 </div>
                             ) : (
-                                <div className="bg-gray-200 text-gray-500 p-1 rounded-md shadow-sm">
+                                <div className="bg-[#FFFDCC] text-[#350D7A]/50 p-1 rounded-sm border-2 border-[#350D7A]/30">
                                     <PenTool className="w-4 h-4 animate-pulse" />
                                 </div>
                             )}
@@ -53,7 +53,7 @@ export function ActiveGamePlayerGrid({ players, currentPlayerId, submissions, ti
                         <PixelAvatar
                             src={player.avatar || defaultAvatar(player.id)}
                             size="sm"
-                            className="border-2 border-[#350D7A] mb-1 z-10 bg-white"
+                            className="mb-1 z-10"
                         />
                         <p className="font-pixel-text text-sm mt-1 truncate max-w-[80px] text-center text-[#350D7A] font-bold leading-tight">
                             {player.name}
@@ -65,7 +65,7 @@ export function ActiveGamePlayerGrid({ players, currentPlayerId, submissions, ti
 
                         {/* "You" Badge */}
                         {isMe && (
-                            <div className="absolute -bottom-3 bg-[#6714A8] text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm border-2 border-white">
+                            <div className="absolute -bottom-3 bg-[#6714A8] text-[#FFFEE2] text-[10px] px-2 py-0.5 rounded-sm font-bold border-2 border-[#350D7A]">
                                 أنت
                             </div>
                         )}
@@ -73,9 +73,9 @@ export function ActiveGamePlayerGrid({ players, currentPlayerId, submissions, ti
                         {/* Real Typing Indicator (privacy-safe — no answer content leaked) */}
                         {!hasSubmitted && !isMe && typingPlayers[player.id] && (
                             <div className="absolute bottom-2 left-2 flex gap-0.5">
-                                <motion.div animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0 }} className="w-1 h-1 bg-gray-400 rounded-full" />
-                                <motion.div animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }} className="w-1 h-1 bg-gray-400 rounded-full" />
-                                <motion.div animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.4 }} className="w-1 h-1 bg-gray-400 rounded-full" />
+                                <motion.div animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0 }} className="w-1 h-1 bg-[#6714A8]" />
+                                <motion.div animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }} className="w-1 h-1 bg-[#6714A8]" />
+                                <motion.div animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.4 }} className="w-1 h-1 bg-[#6714A8]" />
                             </div>
                         )}
                     </motion.div>

@@ -34,7 +34,7 @@ export function RefereeReviewOverlay() {
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-[#350D7A]/85 p-4 overflow-y-auto"
         >
             <motion.div
                 initial={{ scale: 0.8, y: 30 }}

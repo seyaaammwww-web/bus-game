@@ -18,7 +18,7 @@ export function BanishNotification({ show, banishedBy, isBanished }: BanishNotif
           className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none grayscale"
         >
           {/* Grayscale overlay */}
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-[#350D7A]/85" />
 
           {/* Main notification card */}
           <motion.div

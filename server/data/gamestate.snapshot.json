@@ -1,5 +1,5 @@
 {
-  "timestamp": 1783561629446,
+  "timestamp": 1783561719448,
   "rooms": [
     {
       "id": "41d4127e-ef02-431d-9de8-9f673320900d",
@@ -38,15 +38,15 @@
         {
           "id": "73db37b1-1acc-4a6c-89d4-ab83508b1ff6",
           "name": "سيام",
-          "score": 0,
+          "score": 80,
           "isHost": true,
           "isReady": false,
           "busStreak": 0,
           "powerUps": {
-            "hint": 0,
-            "steal": 0,
             "wildcard": 0,
-            "banish": 0
+            "banish": 0,
+            "hint": 0,
+            "steal": 0
           },
           "usedPowerUps": {
             "hint": false,
@@ -54,7 +54,7 @@
             "wildcard": false,
             "banish": false
           },
-          "totalEarnedPoints": 0
+          "totalEarnedPoints": 80
         },
         {
           "id": "7078e3e8-836b-4609-a2ce-e47cbd2e4a21",
@@ -64,10 +64,10 @@
           "isReady": true,
           "busStreak": 0,
           "powerUps": {
-            "hint": 0,
-            "steal": 0,
             "wildcard": 0,
-            "banish": 0
+            "banish": 0,
+            "hint": 0,
+            "steal": 0
           },
           "usedPowerUps": {
             "hint": false,
@@ -122,8 +122,8 @@
               "answer": "ثامر",
               "isValid": true,
               "isPendingVote": false,
-              "isUnique": false,
-              "score": 0,
+              "isUnique": true,
+              "score": 20,
               "votes": {
                 "accepted": 0,
                 "rejected": 0
@@ -138,8 +138,8 @@
               "answer": "ثريا",
               "isValid": true,
               "isPendingVote": false,
-              "isUnique": false,
-              "score": 0,
+              "isUnique": true,
+              "score": 20,
               "votes": {
                 "accepted": 0,
                 "rejected": 0
@@ -153,14 +153,14 @@
               "category": "بلد",
               "answer": "ثايلاند",
               "isValid": false,
-              "isPendingVote": true,
+              "isPendingVote": false,
               "isUnique": false,
               "score": 0,
               "votes": {
                 "accepted": 0,
                 "rejected": 0
               },
-              "reason": "تتطلب تصويت",
+              "reason": "تم رفضه (انتهاء الوقت - تعادل أو أغلبية رفض)",
               "isFabricated": false
             },
             {
@@ -170,8 +170,8 @@
               "answer": "ثعلب",
               "isValid": true,
               "isPendingVote": false,
-              "isUnique": false,
-              "score": 0,
+              "isUnique": true,
+              "score": 20,
               "votes": {
                 "accepted": 0,
                 "rejected": 0
@@ -186,8 +186,8 @@
               "answer": "ثلاجة",
               "isValid": true,
               "isPendingVote": false,
-              "isUnique": false,
-              "score": 0,
+              "isUnique": true,
+              "score": 20,
               "votes": {
                 "accepted": 0,
                 "rejected": 0
@@ -199,12 +199,13 @@
           "votingComplete": false,
           "powerUpUsedInRound": false,
           "endRoundInProgress": true,
-          "voteEndTime": 1783561641013
+          "voteEndTime": 1783561641013,
+          "resultsCommitted": true
         }
       ],
       "currentRound": 0,
       "totalRounds": 10,
-      "phase": "voting",
+      "phase": "results",
       "letters": [
         "ث",
         "ت",
@@ -218,23 +219,7 @@
         "أ"
       ],
       "createdAt": 1783561495739,
-      "voteQueue": [
-        {
-          "requestId": "d68ce87b-1a87-422c-aeec-7e3dc7759243",
-          "requesterId": "73db37b1-1acc-4a6c-89d4-ab83508b1ff6",
-          "requesterName": "سيام",
-          "category": "بلد",
-          "word": "ثايلاند",
-          "eligibleVoterIds": [
-            "7078e3e8-836b-4609-a2ce-e47cbd2e4a21"
-          ],
-          "voterIds": [],
-          "votes": {
-            "yes": 0,
-            "no": 0
-          }
-        }
-      ],
+      "voteQueue": [],
       "currentVote": null,
       "settings": {
         "votingEnabled": true,
