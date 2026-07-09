@@ -65,7 +65,7 @@ const RetroHeroContent = () => {
             </div>
 
             {/* Canvas Placeholder */}
-            <div className="max-w-640 px-16 relative mx-auto w-full h-[368px] border-2 border-dashed border-white/30 flex items-center justify-center text-white/50 bg-black/20 backdrop-blur-sm">
+            <div className="max-w-640 px-16 relative mx-auto w-full h-[368px] border-2 border-dashed border-white/30 flex items-center justify-center text-white/50 bg-black/20">
                 <div className="text-center">
                     <p className="font-mono text-sm">Interactive Pixel Canvas</p>
                     <p className="text-xs mt-2 opacity-70">(Requires JS physics engine)</p>

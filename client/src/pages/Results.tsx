@@ -241,7 +241,7 @@ export default function Results() {
                     </motion.div>
                     <span className="text-2xl my-0.5">1</span>
                     <p className="text-sm font-pixel-text text-white font-bold truncate max-w-[90px] leading-tight">{winner.name}</p>
-                    <p className="text-sm font-pixel-title text-amber-200 leading-tight">
+                    <p className="text-sm font-pixel-title text-[#FFC48B] leading-tight">
                       <ScoreCounter value={winner.score} /> نقطة
                     </p>
                     {/* Podium bar — tallest */}
@@ -321,7 +321,7 @@ export default function Results() {
                           <div className="flex-1 min-w-0">
                             <p className="font-bold text-sm text-[#350D7A] font-pixel-text truncate flex items-center gap-1">
                               {player.name}
-                              {player.isHost && <Crown className="w-3 h-3 text-amber-500 flex-shrink-0" />}
+                              {player.isHost && <Crown className="w-3 h-3 text-[#FF8A50] flex-shrink-0" />}
                               {isRef && <Shield className="w-3 h-3 text-[#6714A8] flex-shrink-0" />}
                               {isMe && <span className="text-[9px] bg-[#6714A8] text-white px-1 rounded font-pixel-text flex-shrink-0">أنت</span>}
                             </p>
@@ -329,7 +329,7 @@ export default function Results() {
 
                           {/* Score */}
                           <div className="flex items-center gap-1 flex-shrink-0">
-                            <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                            <Zap className="w-3.5 h-3.5 text-[#FF8A50] fill-[#FF8A50]" />
                             <ScoreCounter value={player.score} className="text-lg font-bold text-[#350D7A] font-pixel-title tabular-nums" />
                           </div>
 
@@ -407,7 +407,7 @@ export default function Results() {
                         <div className="flex-1 min-w-0">
                           <p className="font-bold text-sm text-[#350D7A] font-pixel-text truncate">
                             {player.name}
-                            {player.isHost && <Crown className="w-3 h-3 text-amber-500 inline mr-1" />}
+                            {player.isHost && <Crown className="w-3 h-3 text-[#FF8A50] inline mr-1" />}
                             {isReferee && <Shield className="w-3 h-3 text-[#6714A8] inline mr-1" />}
                           </p>
                         </div>

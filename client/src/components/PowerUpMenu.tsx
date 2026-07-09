@@ -24,8 +24,8 @@ function SquarePowerUp({ type, title, cost, icon: Icon, status, onActivate }: Sq
     const isDisabled = status === 'disabled';
 
     const theme = type === 'wildcard'
-        ? { bg: 'bg-[#FFA168]', text: 'text-[#78350f]' }
-        : { bg: 'bg-[#f87171]', text: 'text-[#7f1d1d]' };
+        ? { bg: 'bg-[#FFA168]', text: 'text-[#350D7A]' }
+        : { bg: 'bg-[#FF6957]', text: 'text-[#350D7A]' };
 
     const formatCost = (c: number) => c.toLocaleString('en-US');
 
@@ -48,8 +48,8 @@ function SquarePowerUp({ type, title, cost, icon: Icon, status, onActivate }: Sq
 
     if (isUsed) {
         return (
-            <div className="w-32 h-32 md:w-40 md:h-40 bg-gray-100/80 border border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center grayscale relative overflow-hidden opacity-70">
-                <span className="font-bold text-gray-500 text-xl">مستخدم</span>
+            <div className="w-32 h-32 md:w-40 md:h-40 bg-[#FFFDCC] border-[3px] border-dashed border-[#350D7A]/40 rounded-sm flex flex-col items-center justify-center relative overflow-hidden opacity-70">
+                <span className="font-bold text-[#350D7A]/50 text-xl">مستخدم</span>
             </div>
         );
     }
@@ -68,13 +68,13 @@ function SquarePowerUp({ type, title, cost, icon: Icon, status, onActivate }: Sq
                 "absolute -top-3 -right-3 px-2.5 py-1 bg-[#350D7A] border-2 border-[#350D7A] text-[#FFFEE2] text-xs md:text-sm font-bold flex items-center gap-1 shadow-pixel-sm rounded-sm z-20",
                 isLocked && "text-[#FF6957]"
             )}>
-                <Zap className={cn("w-3 h-3", isLocked ? "text-red-400" : "text-yellow-400 fill-yellow-400")} />
+                <Zap className={cn("w-3 h-3", isLocked ? "text-[#FF6957]" : "text-[#FFC48B] fill-[#FFC48B]")} />
                 {formatCost(cost)}
             </div>
 
             {/* Content */}
             <div className="relative z-10 flex flex-col items-center">
-                <div className="p-3 bg-white/20 rounded-lg mb-1">
+                <div className="p-3 bg-[#FFFEE2]/30 rounded-sm mb-1">
                     <Icon className={cn("w-10 h-10 md:w-12 md:h-12", theme.text)} />
                 </div>
                 <span className={cn("font-pixel-title text-lg md:text-xl font-bold", theme.text)}>{title}</span>
@@ -82,8 +82,8 @@ function SquarePowerUp({ type, title, cost, icon: Icon, status, onActivate }: Sq
 
             {/* Lock Overlay */}
             {isDisabled && (
-                <div className="absolute inset-0 bg-black/40 rounded-lg flex items-center justify-center z-10">
-                    <Lock className="w-8 h-8 text-white/80" />
+                <div className="absolute inset-0 bg-[#350D7A]/50 rounded-sm flex items-center justify-center z-10">
+                    <Lock className="w-8 h-8 text-[#FFFEE2]/90" />
                 </div>
             )}
         </button>
@@ -147,7 +147,7 @@ export function PowerUpMenu() {
 
                                         <div className="text-center mb-6">
                                             <h2 className="text-3xl font-pixel-title text-[#350D7A] mb-2 flex items-center justify-center gap-2">
-                                                <Zap className="w-8 h-8 text-yellow-500 fill-yellow-500" />
+                                                <Zap className="w-8 h-8 text-[#FF8A50] fill-[#FF8A50]" />
                                                 المساعدات
                                             </h2>
                                             <p className="font-pixel-text text-lg text-muted-foreground">اختار مساعدة عشان تكسب الجولة!</p>

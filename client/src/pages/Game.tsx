@@ -506,7 +506,7 @@ export default function Game() {
                             }, 300);
                           }
                         }}
-                        className={`text-center text-sm md:text-lg h-9 md:h-12 border-purple-200/50 focus:border-purple-400 bg-white text-[#350D7A] placeholder:text-purple-300 rounded-lg ${hasSubmitted || isBanished ? 'opacity-60 grayscale' : ''} ${answers[category as Category]?.trim().length > 0 ? 'input-locked scale-100' : ''}`}
+                        className={`text-center text-sm md:text-lg h-9 md:h-12 ${hasSubmitted || isBanished ? 'opacity-60 grayscale' : ''} ${answers[category as Category]?.trim().length > 0 ? 'input-locked scale-100' : ''}`}
                         data-testid={`input-${category}`}
                       />
                     </div>

@@ -45,9 +45,9 @@ export function ResultsTable({
     return (
         <div className="flex flex-col gap-4">
             {/* Table Headers - Hidden on small mobile, visible on tablet+ */}
-            <div className="hidden md:grid grid-cols-[1.5fr,repeat(5,1fr)] gap-2 px-4 py-2 bg-gradient-to-r from-[#6714A8] to-[#6714A8] text-white rounded-t-xl text-sm font-semibold shadow-sm">
+            <div className="hidden md:grid grid-cols-[1.5fr,repeat(5,1fr)] gap-2 px-4 py-2 bg-[#6714A8] text-[#FFFEE2] rounded-sm border-2 border-[#350D7A] text-sm font-bold shadow-pixel-sm">
                 <div className="flex items-center gap-2">
-                    <Trophy className="w-4 h-4 text-yellow-400" />
+                    <Trophy className="w-4 h-4 text-[#FFC48B]" />
                     <span>اللاعب</span>
                 </div>
                 {categories.map(cat => {
@@ -89,24 +89,24 @@ export function ResultsTable({
                                 visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 300, damping: 20 } }
                             }}
                             className={cn(
-                                "relative group rounded-2xl border overflow-hidden transition-all duration-300",
+                                "relative group rounded-sm border-[3px] border-[#350D7A] overflow-hidden",
                                 isMe
-                                    ? "bg-purple-50/90 border-purple-300/50 shadow-[0_4px_20px_rgba(124,58,237,0.15)]"
-                                    : "bg-white/95 border-gray-200/80 shadow-sm hover:border-purple-300/50"
+                                    ? "bg-[#FFF3B6] shadow-pixel"
+                                    : "bg-[#FFFEE5] shadow-pixel-sm"
                             )}
                         >
-                            <div className="grid grid-cols-1 md:grid-cols-[1.5fr,repeat(5,1fr)] bg-white/50">
+                            <div className="grid grid-cols-1 md:grid-cols-[1.5fr,repeat(5,1fr)]">
                                 {/* Player Info Column (Desktop: Col 1, Mobile: Header) */}
                                 <div className={cn(
                                     "flex items-center gap-3 p-3 border-b-2 md:border-b-0 md:border-l-2 border-dashed",
-                                    isMe ? "border-[#6714A8]/30 bg-[#6714A8]/5" : "border-gray-200 bg-gray-50"
+                                    isMe ? "border-[#6714A8]/40 bg-[#FFFDCC]" : "border-[#350D7A]/30 bg-[#FFFDCC]/60"
                                 )}>
 
                                     <div className="flex-1 min-w-0">
-                                        <div className={cn("font-bold font-pixel-text truncate", isMe ? "text-[#4E0994]" : "text-gray-700")}>
+                                        <div className={cn("font-bold font-pixel-text truncate", isMe ? "text-[#4E0994]" : "text-[#350D7A]/80")}>
                                             {player?.name}
                                         </div>
-                                        <div className="text-xs text-gray-400 font-pixel-text md:hidden">
+                                        <div className="text-xs text-[#350D7A]/50 font-pixel-text md:hidden">
                                             {isMe ? 'أنت' : 'لاعب'}
                                         </div>
                                     </div>

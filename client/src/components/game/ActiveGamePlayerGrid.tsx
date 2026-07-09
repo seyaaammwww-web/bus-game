@@ -28,7 +28,7 @@ export function ActiveGamePlayerGrid({ players, currentPlayerId, submissions, ti
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ delay: index * 0.1 }}
                         className={cn(
-                            "relative flex flex-col items-center p-4 rounded-2xl border shadow-md backdrop-blur-sm transition-all",
+                            "relative flex flex-col items-center p-4 rounded-2xl border shadow-md transition-all",
                             isMe
                                 ? "bg-[#FFFDCC] border-[#6714A8]"
                                 : hasSubmitted

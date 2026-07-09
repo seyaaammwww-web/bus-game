@@ -15,10 +15,8 @@ export function WildcardOverlay({ isActive, playerName, message }: WildcardOverl
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-40 bg-amber-500/5 pointer-events-none flex items-center justify-center overflow-hidden backdrop-blur-sm"
+          className="fixed inset-0 z-40 bg-[#FF8A50]/10 pointer-events-none flex items-center justify-center overflow-hidden"
         >
-          {/* Sparkle particles background */}
-          <div className="absolute inset-0 bg-gradient-to-b from-amber-200/10 via-transparent to-amber-200/10 opacity-30"></div>
 
           {/* Animated sparkles */}
           {[...Array(12)].map((_, i) => (

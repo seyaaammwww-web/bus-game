@@ -108,7 +108,7 @@ export function Tutorial({ onClose }: TutorialProps) {
     const prevStep = () => setStep((s) => Math.max(s - 1, 0));
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#350D7A]/80 p-4">
             <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}

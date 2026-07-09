@@ -24,7 +24,7 @@ export function LoadingSpinner({
   variant = 'spinner',
 }: LoadingSpinnerProps) {
   const containerClasses = fullScreen
-    ? 'fixed inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm z-50'
+    ? 'fixed inset-0 flex items-center justify-center bg-black/20 z-50'
     : 'flex items-center justify-center';
 
   return (

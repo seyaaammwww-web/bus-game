@@ -24,7 +24,7 @@ export const AuditLog: React.FC = () => {
                             exit={{ opacity: 0, y: 20, scale: 0.95 }}
                             transition={{ duration: 0.2 }}
                         >
-                            <Card className="w-80 h-96 mb-4 flex flex-col bg-slate-900/95 border-slate-700 shadow-2xl overflow-hidden backdrop-blur-sm">
+                            <Card className="w-80 h-96 mb-4 flex flex-col bg-slate-900/95 border-slate-700 shadow-2xl overflow-hidden">
                                 <div className="p-3 border-b border-slate-700 flex justify-between items-center bg-slate-800/50">
                                     <div className="flex items-center gap-2 text-slate-200">
                                         <History className="w-4 h-4 text-cyan-400" />

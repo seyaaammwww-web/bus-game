@@ -65,17 +65,8 @@ export function BouncyCard({
             whileHover={hoverEffect ? "hover" : ""}
             {...props as any}
         >
-            {/* Glow trail effect on entrance */}
-            <motion.div
-                className="absolute inset-0 bg-[#6714A8]/20 blur-xl rounded-lg pointer-events-none"
-                variants={glowVariants}
-                custom={delay}
-                initial="hidden"
-                animate={isInView ? 'visible' : 'hidden'}
-            />
-
             {/* Card content - Retro Style */}
-            <div className="relative h-full bg-gradient-to-b from-white to-[#faf5ff] p-4 sm:p-6 text-[#350D7A] font-pixel-text border-[3px] border-[#350D7A] shadow-[4px_4px_0_0_#350D7A] rounded-none z-10 overflow-hidden">
+            <div className="relative h-full bg-[#FFFEE5] p-4 sm:p-6 text-[#350D7A] font-pixel-text border-[3px] border-[#350D7A] shadow-[4px_4px_0_0_#350D7A] rounded-none z-10 overflow-hidden">
                 {/* Subtle grid pattern background */}
                 <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ backgroundImage: 'linear-gradient(#350D7A 1px, transparent 1px), linear-gradient(90deg, #350D7A 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
                 <div className="relative z-10 flex flex-col h-full">

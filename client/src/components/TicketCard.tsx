@@ -149,7 +149,7 @@ export function TicketCard({ category, word, playerName, onVote, disabled, timeL
                         animate={{ scale: 1.2, rotate: -15, opacity: 1 }}
                         transition={{ type: 'spring', damping: 15 }}
                     >
-                        <div className="border-4 border-red-500 text-red-500 font-pixel-title text-4xl p-4 rotate-12 backdrop-blur-sm bg-black/50">
+                        <div className="border-4 border-red-500 text-red-500 font-pixel-title text-4xl p-4 rotate-12 bg-[#350D7A]/80">
                             منتهية!
                         </div>
                     </motion.div>

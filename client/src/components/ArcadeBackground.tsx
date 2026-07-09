@@ -35,8 +35,7 @@ export default function ArcadeBackground() {
             {/* Scanline Effect - Optional for extra retro feel */}
             <div className="absolute inset-0 z-10 pointer-events-none opacity-5 bg-[linear-gradient(transparent_50%,rgba(0,0,0,1)_50%)] bg-[length:100%_4px]" />
 
-            {/* Subtle Dark Overlay for Better Text Contrast */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/10 z-20" />
+
         </div>
     );
 }

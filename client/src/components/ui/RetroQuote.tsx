@@ -77,7 +77,7 @@ export function RetroQuote({ children, className, title, variant = 'yellow', ...
             className={cn(
                 "relative text-center py-6 px-12 max-w-lg mx-auto",
                 "border border-purple-200/50 rounded-2xl",
-                "shadow-card backdrop-blur-sm",
+                "shadow-card",
                 bgColor,
                 className
             )}
