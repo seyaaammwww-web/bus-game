@@ -440,6 +440,222 @@
     }
 }
 
+/* ============================================================
+   HOT-AIR BALLOON — slow majestic drift left-to-right up high
+   ============================================================ */
+.workos-hotair {
+    position: absolute;
+    top: 12%;
+    left: -90px;
+    z-index: 4;
+    image-rendering: pixelated;
+    animation: workos-hotair-drift 70s linear infinite;
+    will-change: transform;
+}
+
+@keyframes workos-hotair-drift {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(calc(100vw + 180px));
+    }
+}
+
+/* Gentle stepped rise-and-fall as it drifts */
+.workos-hotair-bob {
+    animation: workos-hotair-bob 4s steps(3, end) infinite alternate;
+}
+
+@keyframes workos-hotair-bob {
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(-14px);
+    }
+}
+
+/* ============================================================
+   PLANE + BANNER — periodic flyby right-to-left mid sky
+   ============================================================ */
+.workos-plane {
+    position: absolute;
+    top: 26%;
+    right: -220px;
+    z-index: 4;
+    image-rendering: pixelated;
+    /* Long cycle: crosses in ~13s, then rests off-screen */
+    animation: workos-plane-fly 45s linear infinite;
+    animation-delay: 8s;
+    will-change: transform;
+}
+
+@keyframes workos-plane-fly {
+    0% {
+        transform: translateX(0) scaleX(-1);
+    }
+
+    30% {
+        transform: translateX(calc(-100vw - 440px)) scaleX(-1);
+    }
+
+    100% {
+        transform: translateX(calc(-100vw - 440px)) scaleX(-1);
+    }
+}
+
+/* Slight stepped altitude wobble */
+.workos-plane-bob {
+    animation: workos-plane-bob 1.4s steps(2, end) infinite alternate;
+}
+
+@keyframes workos-plane-bob {
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(-6px);
+    }
+}
+
+/* Propeller flicker */
+.workos-prop-spin {
+    animation: workos-prop 0.16s steps(1, end) infinite alternate;
+}
+
+@keyframes workos-prop {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0.25;
+    }
+}
+
+/* ============================================================
+   UFO — rare zigzag dash across the very top (easter egg)
+   ============================================================ */
+.workos-ufo {
+    position: absolute;
+    top: 4%;
+    left: -80px;
+    z-index: 4;
+    image-rendering: pixelated;
+    opacity: 0;
+    /* Long 60s cycle: visible only ~12% of it */
+    animation: workos-ufo-dash 60s steps(40, end) infinite;
+    animation-delay: 20s;
+    will-change: transform;
+}
+
+@keyframes workos-ufo-dash {
+    0% {
+        opacity: 0;
+        transform: translate(0, 0);
+    }
+
+    1% {
+        opacity: 1;
+    }
+
+    4% {
+        transform: translate(30vw, 26px);
+    }
+
+    8% {
+        transform: translate(55vw, -14px);
+    }
+
+    11% {
+        opacity: 1;
+        transform: translate(80vw, 18px);
+    }
+
+    13% {
+        opacity: 0;
+        transform: translate(calc(100vw + 160px), 0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(calc(100vw + 160px), 0);
+    }
+}
+
+/* UFO rim lights chase */
+.workos-ufo-light {
+    animation: workos-ufo-blink 0.6s steps(1, end) infinite;
+}
+
+@keyframes workos-ufo-blink {
+
+    0%,
+    49.9% {
+        opacity: 1;
+    }
+
+    50%,
+    100% {
+        opacity: 0.2;
+    }
+}
+
+/* ============================================================
+   FIREFLIES — warm dots wandering near the skyline at dusk
+   ============================================================ */
+.workos-fireflies-container {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+}
+
+.workos-firefly {
+    position: absolute;
+    border-radius: 0;
+    opacity: 0;
+    animation: workos-firefly-wander steps(8, end) infinite;
+}
+
+@keyframes workos-firefly-wander {
+    0% {
+        opacity: 0;
+        transform: translate(0, 0);
+    }
+
+    15% {
+        opacity: 1;
+    }
+
+    30% {
+        transform: translate(14px, -10px);
+    }
+
+    50% {
+        opacity: 0.4;
+        transform: translate(-8px, -18px);
+    }
+
+    70% {
+        opacity: 1;
+        transform: translate(10px, -26px);
+    }
+
+    90% {
+        opacity: 0.2;
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(-4px, -34px);
+    }
+}
+
 /* Moon — crisp pixel rendering, stepped bob, no glow filter */
 .workos-moon {
     position: absolute;
@@ -670,6 +886,40 @@
     animation-delay: -8s;
 }
 
+/* Taxi — crosses right-to-left on the far lane, slightly smaller/higher */
+.workos-taxi {
+    position: absolute;
+    bottom: 22px;
+    right: -140px;
+    z-index: 7;
+    image-rendering: pixelated;
+    scale: 0.85;
+    transform-origin: bottom right;
+    /* Long cycle: crosses in ~9s then rests, so it feels occasional */
+    animation: workos-taxi-drive 28s linear infinite;
+    animation-delay: 5s;
+    will-change: transform;
+}
+
+@keyframes workos-taxi-drive {
+    0% {
+        transform: translateX(0);
+    }
+
+    32% {
+        transform: translateX(calc(-100vw - 280px));
+    }
+
+    100% {
+        transform: translateX(calc(-100vw - 280px));
+    }
+}
+
+/* Taxi body bounce (wheels planted, same trick as the bus) */
+.workos-taxi-suspension {
+    animation: workos-suspension 0.4s steps(1, end) infinite;
+}
+
 /* Suspension bob — ONLY the body bobs; wheels stay planted on the road */
 .workos-bus-suspension {
     animation: workos-suspension 0.44s steps(1, end) infinite;
@@ -786,6 +1036,25 @@
     transform-origin: bottom left;
 }
 
+.mobile-optimized .workos-taxi {
+    bottom: 16px;
+    scale: 0.62;
+}
+
+.mobile-optimized .workos-hotair {
+    scale: 0.75;
+}
+
+.mobile-optimized .workos-plane {
+    scale: 0.7;
+    top: 22%;
+}
+
+/* Skip the UFO on mobile — save the repaints */
+.mobile-optimized .workos-ufo {
+    display: none;
+}
+
 /* Respect reduced-motion preferences: park the buses, stop the road */
 @media (prefers-reduced-motion: reduce) {
 
@@ -802,14 +1071,32 @@
     .workos-bird,
     .workos-bird-frame,
     .workos-window-blink,
-    .workos-lamp-glow {
+    .workos-lamp-glow,
+    .workos-hotair,
+    .workos-hotair-bob,
+    .workos-plane,
+    .workos-plane-bob,
+    .workos-prop-spin,
+    .workos-ufo,
+    .workos-ufo-light,
+    .workos-firefly,
+    .workos-taxi,
+    .workos-taxi-suspension {
         animation: none !important;
     }
 
     .workos-balloon,
     .workos-shooting-star,
-    .workos-bird {
+    .workos-bird,
+    .workos-plane,
+    .workos-ufo,
+    .workos-firefly,
+    .workos-taxi {
         display: none;
+    }
+
+    .workos-hotair {
+        left: 70%;
     }
 
     .workos-bus {

@@ -181,6 +181,145 @@ const PixelSkyline: React.FC = () => (
     </svg>
 );
 
+/* Hot-air balloon — large showpiece with striped envelope and basket */
+const PixelHotAirBalloon: React.FC = () => (
+    <svg width="72" height="104" viewBox="0 0 72 104" shapeRendering="crispEdges" aria-hidden="true">
+        {/* Envelope — ink outline, striped panels */}
+        <rect x="20" y="0" width="32" height="6" fill="#350D7A" />
+        <rect x="10" y="6" width="52" height="8" fill="#350D7A" />
+        <rect x="4" y="14" width="64" height="28" fill="#350D7A" />
+        <rect x="10" y="42" width="52" height="10" fill="#350D7A" />
+        <rect x="20" y="52" width="32" height="8" fill="#350D7A" />
+        <rect x="26" y="60" width="20" height="6" fill="#350D7A" />
+        {/* Panel stripes: pink / cream / orange / cream / pink */}
+        <rect x="24" y="4" width="24" height="2" fill="#F640A8" />
+        <rect x="14" y="8" width="44" height="6" fill="#F640A8" />
+        <rect x="8" y="14" width="56" height="28" fill="#F640A8" />
+        <rect x="14" y="42" width="44" height="8" fill="#FF6957" />
+        <rect x="24" y="50" width="24" height="8" fill="#FF6957" />
+        <rect x="30" y="58" width="12" height="6" fill="#FF6957" />
+        {/* Vertical cream + orange stripes over the envelope */}
+        <rect x="20" y="8" width="10" height="48" fill="#FFFEE5" />
+        <rect x="42" y="8" width="10" height="48" fill="#FF8A50" />
+        {/* Shine pixels */}
+        <rect x="12" y="18" width="6" height="8" fill="#FFC48B" opacity="0.9" />
+        {/* Ropes */}
+        <rect x="24" y="66" width="2" height="12" fill="#350D7A" />
+        <rect x="46" y="66" width="2" height="12" fill="#350D7A" />
+        {/* Basket */}
+        <rect x="24" y="78" width="24" height="16" fill="#350D7A" />
+        <rect x="27" y="81" width="18" height="10" fill="#FFC48B" />
+        <rect x="27" y="81" width="18" height="3" fill="#FFA168" />
+        {/* Sandbags */}
+        <rect x="20" y="84" width="5" height="7" fill="#6714A8" />
+        <rect x="47" y="84" width="5" height="7" fill="#6714A8" />
+    </svg>
+);
+
+/* Taxi — small pixel cab driving the opposite direction (faces left) */
+const PixelTaxi: React.FC = () => (
+    <svg width="104" height="62" viewBox="0 0 104 62" shapeRendering="crispEdges" aria-hidden="true">
+        {/* Ground shadow */}
+        <rect x="6" y="56" width="94" height="4" fill="#1B0645" opacity="0.35" />
+        <g className="workos-taxi-suspension">
+            {/* Roof sign */}
+            <rect x="40" y="0" width="24" height="10" fill="#350D7A" />
+            <rect x="43" y="3" width="18" height="4" fill="#FFF3B6" />
+            {/* Cabin */}
+            <rect x="24" y="8" width="56" height="18" fill="#350D7A" />
+            <rect x="28" y="12" width="48" height="14" fill="#FFC48B" />
+            {/* Windows (faces LEFT, so windshield on the left) */}
+            <rect x="30" y="14" width="18" height="10" fill="#FFFEE5" />
+            <rect x="54" y="14" width="18" height="10" fill="#FFFEE5" />
+            <rect x="50" y="14" width="3" height="10" fill="#350D7A" />
+            {/* Body */}
+            <rect x="4" y="24" width="96" height="22" fill="#350D7A" />
+            <rect x="8" y="28" width="88" height="14" fill="#FFC48B" />
+            {/* Checker taxi stripe */}
+            <rect x="8" y="32" width="88" height="6" fill="#350D7A" opacity="0.15" />
+            {[12, 24, 36, 48, 60, 72, 84].map((x) => (
+                <rect key={x} x={x} y="32" width="6" height="6" fill="#350D7A" />
+            ))}
+            {/* Headlight (left = front) + taillight */}
+            <rect x="4" y="30" width="6" height="8" fill="#FFF3B6" />
+            <rect x="94" y="30" width="6" height="8" fill="#F640A8" />
+        </g>
+        {/* Wheels */}
+        {[26, 78].map((cx) => (
+            <g key={cx}>
+                <circle cx={cx} cy="48" r="10" fill="#1B0645" />
+                <circle cx={cx} cy="48" r="7" fill="#350D7A" />
+                <g className="workos-wheel-hub">
+                    <circle cx={cx} cy="48" r="4" fill="#FFC48B" />
+                    <rect x={cx - 1} y="44" width="2" height="8" fill="#350D7A" />
+                    <rect x={cx - 4} y="47" width="8" height="2" fill="#350D7A" />
+                </g>
+            </g>
+        ))}
+    </svg>
+);
+
+/* Little plane towing a game-title banner */
+const PixelPlane: React.FC = () => (
+    <svg width="200" height="44" viewBox="0 0 200 44" shapeRendering="crispEdges" aria-hidden="true">
+        {/* Tow rope */}
+        <rect x="60" y="20" width="30" height="2" fill="#350D7A" />
+        {/* Banner */}
+        <rect x="0" y="8" width="62" height="26" fill="#350D7A" />
+        <rect x="3" y="11" width="56" height="20" fill="#FFFEE5" />
+        {/* Tiny bus glyph + dashes as "text" */}
+        <rect x="8" y="16" width="16" height="8" fill="#FF8A50" />
+        <rect x="10" y="18" width="4" height="3" fill="#FFFEE5" />
+        <rect x="17" y="18" width="4" height="3" fill="#FFFEE5" />
+        <rect x="28" y="16" width="12" height="3" fill="#350D7A" />
+        <rect x="28" y="22" width="18" height="3" fill="#350D7A" />
+        <rect x="44" y="16" width="10" height="3" fill="#F640A8" />
+        {/* Fuselage (faces right) */}
+        <rect x="90" y="16" width="44" height="12" fill="#350D7A" />
+        <rect x="94" y="19" width="38" height="6" fill="#FF6957" />
+        {/* Nose + spinning prop */}
+        <rect x="134" y="18" width="8" height="8" fill="#350D7A" />
+        <rect x="142" y="12" width="4" height="20" fill="#FFC48B" className="workos-prop-spin" />
+        {/* Cockpit */}
+        <rect x="112" y="10" width="14" height="8" fill="#350D7A" />
+        <rect x="115" y="12" width="8" height="5" fill="#FFFEE5" />
+        {/* Wing */}
+        <rect x="102" y="24" width="22" height="6" fill="#6714A8" />
+        {/* Tail */}
+        <rect x="90" y="8" width="8" height="10" fill="#6714A8" />
+    </svg>
+);
+
+/* UFO easter egg — zips by rarely with a wobble and beam blink */
+const PixelUFO: React.FC = () => (
+    <svg width="64" height="36" viewBox="0 0 64 36" shapeRendering="crispEdges" aria-hidden="true">
+        {/* Dome */}
+        <rect x="24" y="0" width="16" height="4" fill="#A333D5" />
+        <rect x="20" y="4" width="24" height="6" fill="#A333D5" />
+        <rect x="26" y="2" width="6" height="4" fill="#FFFEE5" opacity="0.8" />
+        {/* Saucer */}
+        <rect x="8" y="10" width="48" height="8" fill="#350D7A" />
+        <rect x="0" y="14" width="64" height="8" fill="#350D7A" />
+        <rect x="4" y="16" width="56" height="4" fill="#6714A8" />
+        {/* Blinking lights along the rim */}
+        {[8, 22, 36, 50].map((x, i) => (
+            <rect
+                key={x}
+                x={x}
+                y="16"
+                width="6"
+                height="4"
+                fill={i % 2 === 0 ? '#F640A8' : '#FFF3B6'}
+                className="workos-ufo-light"
+                style={{ animationDelay: `${i * 0.15}s` }}
+            />
+        ))}
+        {/* Beam pixels below */}
+        <rect x="28" y="24" width="8" height="4" fill="#FFF3B6" opacity="0.6" />
+        <rect x="24" y="30" width="16" height="4" fill="#FFF3B6" opacity="0.3" />
+    </svg>
+);
+
 /* Streetlight — ink pole with warm glowing pixel lamp */
 const PixelStreetlight: React.FC = () => (
     <svg width="44" height="110" viewBox="0 0 44 110" shapeRendering="crispEdges" aria-hidden="true">
@@ -408,6 +547,24 @@ const WorkOSBackground: React.FC<WorkOSBackgroundProps> = ({ isMobile = false })
         return generated;
     }, [isMobile]);
 
+    // Fireflies — warm wandering dots near the skyline at dusk
+    const fireflies = useMemo(() => {
+        const count = isMobile ? 5 : 10;
+        const generated: MicroDot[] = [];
+        for (let i = 0; i < count; i++) {
+            generated.push({
+                id: i,
+                top: 68 + Math.random() * 18,
+                left: Math.random() * 100,
+                delay: Math.random() * 6,
+                size: Math.random() > 0.5 ? 4 : 3,
+                color: i % 3 === 0 ? '#FFC48B' : '#FFF3B6',
+                duration: 4 + Math.random() * 4,
+            });
+        }
+        return generated;
+    }, [isMobile]);
+
     // Generate clouds with RANDOM positions, speeds, and delays — fewer on mobile
     const clouds = useMemo(() => {
         const cloudImages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
@@ -570,6 +727,44 @@ const WorkOSBackground: React.FC<WorkOSBackgroundProps> = ({ isMobile = false })
                 ))}
             </div>
 
+            {/* Hot-air balloon — slow showpiece drifting across the sky */}
+            <div className="workos-hotair" aria-hidden="true">
+                <div className="workos-hotair-bob">
+                    <PixelHotAirBalloon />
+                </div>
+            </div>
+
+            {/* Plane towing a banner — periodic flyby */}
+            <div className="workos-plane" aria-hidden="true">
+                <div className="workos-plane-bob">
+                    <PixelPlane />
+                </div>
+            </div>
+
+            {/* UFO easter egg — rare zigzag dash across the top */}
+            <div className="workos-ufo" aria-hidden="true">
+                <PixelUFO />
+            </div>
+
+            {/* Fireflies — warm dots wandering near the skyline */}
+            <div className="workos-fireflies-container" aria-hidden="true">
+                {fireflies.map((f) => (
+                    <div
+                        key={`firefly-${f.id}`}
+                        className="workos-firefly"
+                        style={{
+                            top: `${f.top}%`,
+                            left: `${f.left}%`,
+                            width: f.size,
+                            height: f.size,
+                            backgroundColor: f.color,
+                            animationDelay: `${f.delay}s`,
+                            animationDuration: `${f.duration}s`,
+                        }}
+                    />
+                ))}
+            </div>
+
             {/* Moon - Always visible, smaller on mobile */}
             <img
                 src="/images/hero/moon.png"
@@ -641,6 +836,11 @@ const WorkOSBackground: React.FC<WorkOSBackgroundProps> = ({ isMobile = false })
                 {/* Second bus offset by half a cycle so the road is never empty */}
                 <div className="workos-bus workos-bus-second">
                     <PixelBus />
+                </div>
+
+                {/* Taxi crossing the other way on the far lane */}
+                <div className="workos-taxi" aria-hidden="true">
+                    <PixelTaxi />
                 </div>
 
                 <div className="workos-road-curb-highlight" />
