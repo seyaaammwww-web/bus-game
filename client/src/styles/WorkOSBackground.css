@@ -55,7 +55,9 @@
     pointer-events: none;
 }
 
-/* Dense 4px checkerboard row hugging each band edge */
+/* Dense 4px checkerboard row hugging each band edge.
+   The pattern crawls sideways in hard 8px steps, so the border
+   pixels look like they're constantly re-dithering — alive. */
 .workos-dither-checker {
     position: absolute;
     left: 0;
@@ -63,9 +65,23 @@
     height: 8px;
     background-size: 8px 8px;
     image-rendering: pixelated;
+    animation: workos-dither-crawl 1.6s steps(2, end) infinite;
 }
 
-/* Sparse single-pixel row bleeding into the band below */
+/* Checker crawl: jump one full tile per step (8px), invisible loop */
+@keyframes workos-dither-crawl {
+    0% {
+        background-position-x: 0;
+    }
+
+    100% {
+        background-position-x: 16px;
+    }
+}
+
+/* Sparse single-pixel row bleeding into the band below.
+   Drifts the opposite direction and breathes in opacity so the
+   two rows never look locked together. */
 .workos-dither-sparse {
     position: absolute;
     left: 0;
@@ -74,6 +90,31 @@
     background-size: 32px 4px;
     image-rendering: pixelated;
     opacity: 0.85;
+    animation:
+        workos-dither-drift 3.2s steps(4, end) infinite,
+        workos-dither-breathe 2.4s steps(2, end) infinite alternate;
+}
+
+/* Sparse drift: one full 32px tile per cycle, opposite direction */
+@keyframes workos-dither-drift {
+    0% {
+        background-position-x: 0;
+    }
+
+    100% {
+        background-position-x: -32px;
+    }
+}
+
+/* Soft stepped flicker so border pixels twinkle like the micro dots */
+@keyframes workos-dither-breathe {
+    0% {
+        opacity: 0.45;
+    }
+
+    100% {
+        opacity: 0.9;
+    }
 }
 
 /* Micro Dots Container — full sky coverage */
@@ -1064,6 +1105,8 @@
     .workos-road-dashes,
     .workos-road-dashes-far,
     .workos-bus-puff,
+    .workos-dither-checker,
+    .workos-dither-sparse,
     .workos-sparkle,
     .workos-balloon,
     .workos-balloon-sway,

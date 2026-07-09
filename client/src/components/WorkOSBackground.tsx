@@ -594,9 +594,11 @@ const WorkOSBackground: React.FC<WorkOSBackgroundProps> = ({ isMobile = false })
             {/* Gradient Overlay for depth */}
             <div className="workos-gradient-overlay" />
 
-            {/* Dithered band transitions — checkerboard pixels between sky colors */}
+            {/* Dithered band transitions — checkerboard pixels between sky colors.
+                Each border animates with its own delay + direction so the whole
+                sky shimmers organically instead of pulsing in sync. */}
             <div className="workos-dither-container" aria-hidden="true">
-                {bandBoundaries.map((band) => (
+                {bandBoundaries.map((band, i) => (
                     <React.Fragment key={`dither-${band.pos}`}>
                         {/* Dense checker row right at the edge */}
                         <div
@@ -604,6 +606,8 @@ const WorkOSBackground: React.FC<WorkOSBackgroundProps> = ({ isMobile = false })
                             style={{
                                 top: `${band.pos}%`,
                                 backgroundImage: `repeating-conic-gradient(${band.color} 0% 25%, transparent 0% 50%)`,
+                                animationDelay: `${(i * 0.35) % 1.6}s`,
+                                animationDirection: i % 2 === 0 ? 'normal' : 'reverse',
                             }}
                         />
                         {/* Sparse pixel row bleeding further down */}
@@ -612,6 +616,8 @@ const WorkOSBackground: React.FC<WorkOSBackgroundProps> = ({ isMobile = false })
                             style={{
                                 top: `calc(${band.pos}% + 8px)`,
                                 backgroundImage: `repeating-linear-gradient(90deg, ${band.color} 0px, ${band.color} 8px, transparent 8px, transparent 32px)`,
+                                animationDelay: `${(i * 0.55) % 3.2}s, ${(i * 0.4) % 2.4}s`,
+                                animationDirection: i % 2 === 0 ? 'reverse, normal' : 'normal, alternate',
                             }}
                         />
                     </React.Fragment>
