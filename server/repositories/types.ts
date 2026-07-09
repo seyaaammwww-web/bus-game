@@ -21,6 +21,6 @@ export interface VotingService {
 }
 
 export interface ReconnectService {
-    issueToken(playerId: string, roomId: string): Promise<string>;
-    restore(token: string): Promise<{ roomId: string; playerId: string; newToken: string } | null>;
+    issueToken(playerId: string, roomId: string, playerName?: string): Promise<string>;
+    restore(token: string): Promise<{ roomId: string; playerId: string; newToken: string; playerName?: string } | null>;
 }

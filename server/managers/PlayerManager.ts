@@ -3,7 +3,11 @@ import { WebSocket } from 'ws';
 import { nanoid } from 'nanoid';
 
 // FIX: Inline constants to avoid import path issues on HF deployment
-const PONG_TIMEOUT_MS = 35000;
+// STABILITY: 120s pong timeout — mobile browsers throttle background tabs so
+// pings/pongs stall for 60s+ when a player switches apps or locks the screen.
+// A 35s timeout was kicking healthy players. Real disconnects are still caught
+// instantly via the ws 'close' event; this timeout only guards half-open sockets.
+const PONG_TIMEOUT_MS = 120000;
 const CLEANUP_INTERVAL_MS = 15000;
 
 export interface ConnectedPlayer {

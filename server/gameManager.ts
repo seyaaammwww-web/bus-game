@@ -37,7 +37,8 @@ function canTransition(from: GamePhase, to: GamePhase): boolean {
 // FIX: Inline constants to avoid import path issues on HF deployment
 const RUSH_MODE_DURATION_MS = 10000;
 const HEARTBEAT_INTERVAL_MS = 30000;
-const PONG_TIMEOUT_MS = 35000;
+// STABILITY: Must match PlayerManager — 120s to survive mobile background throttling
+const PONG_TIMEOUT_MS = 120000;
 
 export class GameManager {
   private roomManager: RoomManager;
@@ -154,14 +155,34 @@ export class GameManager {
     setInterval(() => this.runGhostCleanup(), 45000);
   }
 
+  // STABILITY: Grace tracking for ghost cleanup — a player seen without a socket
+  // is only removed after staying socketless for a full grace window. This kills
+  // the race where cleanup fired mid-reconnect (rejoin's async token validation)
+  // and hard-deleted a healthy player from the lobby.
+  private ghostSince: Map<string, number> = new Map();
+  private readonly GHOST_GRACE_MS = 90000;
+
   /** Remove players marked online but with no active socket (edge-case ghosts). */
   private runGhostCleanup() {
+    const now = Date.now();
+    const seenGhosts = new Set<string>();
+
     for (const code of this.getAllRooms()) {
       const room = this.getRoom(code);
       if (!room) continue;
       for (const player of room.players) {
         if (!player.isOffline && !this.getPlayerSocket(player.id)) {
-          console.log(`[GhostCleanup] Marking ghost offline: ${player.id} in ${code}`);
+          seenGhosts.add(player.id);
+          const firstSeen = this.ghostSince.get(player.id);
+          if (!firstSeen) {
+            // First sighting — start the grace clock, don't remove yet
+            this.ghostSince.set(player.id, now);
+            continue;
+          }
+          if (now - firstSeen < this.GHOST_GRACE_MS) continue;
+
+          console.log(`[GhostCleanup] Removing ghost after ${Math.round((now - firstSeen) / 1000)}s grace: ${player.id} in ${code}`);
+          this.ghostSince.delete(player.id);
           this.roomManager.removePlayerFromRoom(code, player.id);
           const buffer = this.roomManager.getRoomBuffer(code);
           if (buffer && buffer.get().players.length > 0) {
@@ -170,11 +191,16 @@ export class GameManager {
         }
       }
     }
+
+    // Clear grace entries for players that reconnected or left properly
+    for (const id of this.ghostSince.keys()) {
+      if (!seenGhosts.has(id)) this.ghostSince.delete(id);
+    }
   }
 
-  private async issueReconnectToken(playerId: string, roomCode: string): Promise<string> {
+  private async issueReconnectToken(playerId: string, roomCode: string, playerName?: string): Promise<string> {
     try {
-      return await reconnectService.issueToken(playerId, roomCode);
+      return await reconnectService.issueToken(playerId, roomCode, playerName);
     } catch (e) {
       console.warn('[GameManager] Failed to issue reconnect token:', e);
       return `local_${playerId}_${Date.now()}`;
@@ -185,7 +211,7 @@ export class GameManager {
     token: string,
     playerId: string,
     roomCode: string
-  ): Promise<{ valid: boolean; newToken?: string }> {
+  ): Promise<{ valid: boolean; newToken?: string; playerName?: string }> {
     if (token.startsWith('local_')) {
       return token.includes(playerId) ? { valid: true, newToken: token } : { valid: false };
     }
@@ -196,7 +222,7 @@ export class GameManager {
       if (session.playerId !== playerId || session.roomId.toUpperCase() !== normCode) {
         return { valid: false };
       }
-      return { valid: true, newToken: session.newToken };
+      return { valid: true, newToken: session.newToken, playerName: session.playerName };
     } catch (e) {
       console.warn('[GameManager] Reconnect token validation failed:', e);
       return { valid: false };
@@ -670,13 +696,46 @@ export class GameManager {
 
     const room = buffer.getUnsafe();
     const player = room.players.find(p => p.id === playerId);
-    if (!player) return this.send(ws, { type: 'error', payload: { message: 'اللاعب غير موجود في هذه الغرفة' } });
+
+    // STABILITY: If the player was hard-deleted from a lobby (pong timeout or
+    // brief network blip both hard-delete in lobby phase), let them re-enter
+    // with their original identity instead of failing with "player not found".
+    // Their reconnect token already proves they belong to this room.
+    if (!player) {
+      if (room.phase !== 'lobby') {
+        return this.send(ws, { type: 'error', payload: { message: 'اللاعب غير موجود في هذه الغرفة' } });
+      }
+      if (room.players.length >= 50) {
+        return this.send(ws, { type: 'error', payload: { message: 'الغرفة ممتلئة' } });
+      }
+      buffer.transact(draft => {
+        if (draft.players.find(pl => pl.id === playerId)) return; // double-rejoin race
+        draft.players.push({
+          id: playerId,
+          name: tokenResult.playerName || 'لاعب عائد',
+          score: 0,
+          isHost: false,
+          isReady: false,
+          busStreak: 0,
+          powerUps: { hint: 0, steal: 0, wildcard: 0, banish: 0 },
+          usedPowerUps: { hint: false, steal: false, wildcard: false, banish: false },
+          totalEarnedPoints: 0,
+        });
+        // Room lost its host entirely? Restore host to the returning player.
+        if (!draft.players.some(pl => pl.isHost)) {
+          draft.hostId = playerId;
+          const me = draft.players.find(pl => pl.id === playerId);
+          if (me) me.isHost = true;
+        }
+      }, "rejoinRoom Re-add Deleted Player");
+      console.log(`[GameManager] Re-added hard-deleted lobby player ${playerId} to ${room.code}`);
+    }
 
     buffer.transact(draft => {
       const p = draft.players.find(pl => pl.id === playerId);
       if (p) {
         p.isOffline = false;
-        p.isReady = false;
+        if (draft.phase === 'lobby') p.isReady = false;
       }
     }, "rejoinRoom Offline Clear");
 
@@ -690,7 +749,8 @@ export class GameManager {
     this.playerManager.addPlayer(ws, room.code, playerId);
     this.addSocketToRoomIndex(room.code, ws);
 
-    const freshToken = tokenResult.newToken ?? await this.issueReconnectToken(playerId, room.code);
+    const rejoinedName = buffer.get().players.find(pl => pl.id === playerId)?.name;
+    const freshToken = tokenResult.newToken ?? await this.issueReconnectToken(playerId, room.code, rejoinedName);
     this.send(ws, { type: 'room_joined', payload: { room: buffer.get(), playerId, reconnectToken: freshToken } });
     this.broadcastToRoom(room.code, { type: 'player_joined', payload: { players: buffer.get().players } });
   }
@@ -721,7 +781,7 @@ export class GameManager {
       this.playerManager.addPlayer(ws, room.code, hostId);
       this.addSocketToRoomIndex(room.code, ws);
 
-      void this.issueReconnectToken(hostId, room.code).then(token => {
+      void this.issueReconnectToken(hostId, room.code, name).then(token => {
         this.send(ws, {
           type: 'room_created',
           payload: { room, playerId: hostId, reconnectToken: token }
@@ -754,7 +814,7 @@ export class GameManager {
       this.playerManager.addPlayer(ws, room.code, playerId);
       this.addSocketToRoomIndex(room.code, ws);
 
-      void this.issueReconnectToken(playerId, room.code).then(token => {
+      void this.issueReconnectToken(playerId, room.code, name).then(token => {
         this.send(ws, { type: 'room_joined', payload: { room, playerId, reconnectToken: token } });
         this.broadcastToRoom(room.code, { type: 'player_joined', payload: { players: room.players } }, ws);
       });
@@ -776,7 +836,7 @@ export class GameManager {
       this.playerManager.addPlayer(ws, room.code, playerId);
       this.addSocketToRoomIndex(room.code, ws);
 
-      void this.issueReconnectToken(playerId, room.code).then(token => {
+      void this.issueReconnectToken(playerId, room.code, name).then(token => {
         this.send(ws, { type: 'room_joined', payload: { room, playerId, reconnectToken: token } });
         this.broadcastToRoom(room.code, { type: 'player_joined', payload: { players: room.players } }, ws);
       });

@@ -215,6 +215,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const reconnectAttemptRef = useRef(0);
   const reconnectTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isIntentionalDisconnectRef = useRef(false);
+  // STABILITY: Detect half-dead connections — track when the last server ping arrived.
+  // If the socket claims OPEN but no ping lands for 45s, the connection is zombie:
+  // force-close it so onclose triggers the normal reconnect + silent rejoin path.
+  const lastPingRef = useRef<number>(Date.now());
   // BUG-5 FIX: Always-current state ref to avoid stale closures in handleMessage
   const stateRef = useRef(state);
   useEffect(() => { stateRef.current = state; }, [state]);
@@ -423,6 +427,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
     ws.onopen = () => {
       reconnectAttemptRef.current = 0; // Reset backoff
+      lastPingRef.current = Date.now(); // Fresh connection = fresh watchdog clock
       dispatch({ type: 'SET_CONNECTED', connected: true });
       dispatch({ type: 'SET_ERROR', error: null });
 
@@ -456,11 +461,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
         const message = JSON.parse(event.data);
         // FIX: Respond to server pings with pong
         if (message.type === 'ping') {
+          lastPingRef.current = Date.now();
           if (ws.readyState === WebSocket.OPEN) {
             ws.send(JSON.stringify({ type: 'pong', payload: { timestamp: message.payload?.timestamp } }));
           }
           return;
         }
+        // Any server message proves the connection is alive
+        lastPingRef.current = Date.now();
         handleMessage(message);
       } catch (e) {
         console.error('Failed to parse message:', e);
@@ -484,6 +492,63 @@ export function GameProvider({ children }: { children: ReactNode }) {
       connect();
     }
   }, [connect]);
+
+  // STABILITY: Three-layer connection resilience
+  useEffect(() => {
+    // Layer 1 — Zombie watchdog: server pings every 10s; if the socket says OPEN
+    // but nothing arrived for 45s, the connection is half-dead (proxy dropped it
+    // silently). Force-close so onclose → scheduleReconnect → silent rejoin.
+    const watchdog = setInterval(() => {
+      const ws = wsRef.current;
+      if (!ws || ws.readyState !== WebSocket.OPEN) return;
+      if (isIntentionalDisconnectRef.current) return;
+      if (Date.now() - lastPingRef.current > 45000) {
+        console.log('[v0-net] Zombie connection detected (no server ping 45s) — forcing reconnect');
+        try { ws.close(); } catch { }
+      }
+    }, 10000);
+
+    // Layer 2 — Instant recovery when tab becomes visible again (mobile app
+    // switch / screen lock). Don't wait out the 30s backoff: reset attempts
+    // and reconnect NOW if the socket died while backgrounded.
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible') return;
+      if (isIntentionalDisconnectRef.current) return;
+      const ws = wsRef.current;
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        // Connection survived — proactively pong so the server refreshes our liveness
+        try { ws.send(JSON.stringify({ type: 'pong', payload: { timestamp: Date.now() } })); } catch { }
+        return;
+      }
+      const session = loadSession();
+      if (session?.playerId && session?.roomCode) {
+        if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
+        reconnectAttemptRef.current = 0;
+        connectWs();
+      }
+    };
+
+    // Layer 3 — Instant recovery when the network comes back
+    const onOnline = () => {
+      if (isIntentionalDisconnectRef.current) return;
+      const ws = wsRef.current;
+      if (ws && ws.readyState === WebSocket.OPEN) return;
+      const session = loadSession();
+      if (session?.playerId && session?.roomCode) {
+        if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
+        reconnectAttemptRef.current = 0;
+        connectWs();
+      }
+    };
+
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('online', onOnline);
+    return () => {
+      clearInterval(watchdog);
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('online', onOnline);
+    };
+  }, [connectWs]);
 
   const setTimerPaused = useCallback((paused: boolean) => {
     timerPausedRef.current = paused;
