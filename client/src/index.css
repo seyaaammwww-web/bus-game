@@ -17,35 +17,36 @@
   --elevate-1: rgba(0, 0, 0, .03);
   --elevate-2: rgba(0, 0, 0, .08);
 
-  --background: 45 100% 96%;
-  --foreground: 20 14% 15%;
-  --border: 30 20% 85%;
-  --card: 0 0% 100%;
-  --card-foreground: 20 14% 15%;
-  --card-border: 30 20% 88%;
-  --sidebar: 30 30% 95%;
-  --sidebar-foreground: 20 14% 15%;
-  --sidebar-border: 30 20% 85%;
-  --sidebar-primary: 263 70% 58%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 43 96% 56%;
-  --sidebar-accent-foreground: 263 50% 20%;
-  --sidebar-ring: 263 70% 58%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 20 14% 15%;
-  --popover-border: 30 20% 88%;
-  --primary: 263 70% 58%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 43 96% 56%;
-  --secondary-foreground: 263 50% 20%;
-  --muted: 30 20% 92%;
-  --muted-foreground: 20 10% 45%;
-  --accent: 263 60% 45%;
-  --accent-foreground: 0 0% 100%;
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 100%;
-  --input: 30 20% 80%;
-  --ring: 263 70% 58%;
+  /* PIXEL SUNSET TOKENS — cream surface, deep-purple ink */
+  --background: 58 100% 94%;
+  --foreground: 262 81% 26%;
+  --border: 262 81% 26%;
+  --card: 58 100% 95%;
+  --card-foreground: 262 81% 26%;
+  --card-border: 262 81% 26%;
+  --sidebar: 58 100% 94%;
+  --sidebar-foreground: 262 81% 26%;
+  --sidebar-border: 262 81% 26%;
+  --sidebar-primary: 274 79% 37%;
+  --sidebar-primary-foreground: 58 100% 94%;
+  --sidebar-accent: 20 100% 66%;
+  --sidebar-accent-foreground: 262 81% 26%;
+  --sidebar-ring: 326 91% 61%;
+  --popover: 58 100% 95%;
+  --popover-foreground: 262 81% 26%;
+  --popover-border: 262 81% 26%;
+  --primary: 274 79% 37%;
+  --primary-foreground: 58 100% 94%;
+  --secondary: 20 100% 66%;
+  --secondary-foreground: 262 81% 26%;
+  --muted: 55 76% 85%;
+  --muted-foreground: 262 50% 42%;
+  --accent: 326 91% 61%;
+  --accent-foreground: 58 100% 94%;
+  --destructive: 6 100% 67%;
+  --destructive-foreground: 262 81% 26%;
+  --input: 262 81% 26%;
+  --ring: 326 91% 61%;
   --chart-1: 263 70% 58%;
   --chart-2: 43 96% 56%;
   --chart-3: 160 70% 45%;
@@ -53,18 +54,18 @@
   --chart-5: 280 70% 55%;
 
   --font-sans: 'Cairo', 'Inter', system-ui, sans-serif;
-  --font-display: 'Cairo', 'Inter', system-ui, sans-serif;
+  --font-display: 'QTS Hoby', 'Cairo', system-ui, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: ui-monospace, Menlo, monospace;
-  --radius: 0.75rem;
-  --shadow-2xs: 0px 2px 4px 0px rgba(0, 0, 0, 0.03);
-  --shadow-xs: 0px 2px 6px 0px rgba(0, 0, 0, 0.05);
-  --shadow-sm: 0px 2px 8px 0px rgba(0, 0, 0, 0.08);
-  --shadow: 0px 4px 12px 0px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0px 6px 16px 0px rgba(0, 0, 0, 0.12);
-  --shadow-lg: 0px 8px 24px 0px rgba(0, 0, 0, 0.15);
-  --shadow-xl: 0px 12px 32px 0px rgba(0, 0, 0, 0.18);
-  --shadow-2xl: 0px 16px 48px 0px rgba(0, 0, 0, 0.22);
+  --radius: 2px;
+  --shadow-2xs: 1px 1px 0 0 #350D7A;
+  --shadow-xs: 2px 2px 0 0 #350D7A;
+  --shadow-sm: 2px 2px 0 0 #350D7A;
+  --shadow: 3px 3px 0 0 #350D7A;
+  --shadow-md: 3px 3px 0 0 #350D7A;
+  --shadow-lg: 4px 4px 0 0 #350D7A;
+  --shadow-xl: 6px 6px 0 0 #350D7A;
+  --shadow-2xl: 8px 8px 0 0 #350D7A;
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 
@@ -611,6 +612,31 @@
   image-rendering: crisp-edges;
 }
 
+/* Subtle checkerboard texture for cream sections */
+.pixel-checkerboard {
+  background-color: #FFFEE2;
+  background-image:
+    linear-gradient(45deg, rgba(53, 13, 122, 0.035) 25%, transparent 25%, transparent 75%, rgba(53, 13, 122, 0.035) 75%),
+    linear-gradient(45deg, rgba(53, 13, 122, 0.035) 25%, transparent 25%, transparent 75%, rgba(53, 13, 122, 0.035) 75%);
+  background-size: 48px 48px;
+  background-position: 0 0, 24px 24px;
+}
+
+/* Pixel bob — stepped floating (replaces smooth float for pixel elements) */
+@keyframes pixel-bob {
+  0%, 49.9% {
+    transform: translateY(0);
+  }
+
+  50%, 100% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-pixel-bob {
+  animation: pixel-bob 1.2s steps(1, end) infinite;
+}
+
 /* --- Logo Shine Effect --- */
 .logo-container {
   position: relative;
@@ -714,51 +740,40 @@
 }
 
 .retro-card {
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.97), rgba(250, 245, 255, 0.95));
-  border: 1px solid rgba(124, 58, 237, 0.2);
-  box-shadow: 0 4px 24px rgba(76, 29, 149, 0.12), 0 1px 3px rgba(0, 0, 0, 0.06);
-  border-radius: 1rem;
-  backdrop-filter: blur(12px);
-}
-
-.retro-card:hover {
-  box-shadow: 0 8px 32px rgba(124, 58, 237, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08);
-  transform: translateY(-1px);
+  background: #FFFEE5;
+  border: 3px solid #350D7A;
+  box-shadow: 4px 4px 0 0 #350D7A;
+  border-radius: 2px;
 }
 
 .retro-card-dark {
-  background: linear-gradient(145deg, rgba(46, 16, 101, 0.95), rgba(26, 5, 51, 0.98));
-  border: 1px solid rgba(139, 92, 246, 0.35);
-  box-shadow: 0 8px 32px rgba(76, 29, 149, 0.35);
-  border-radius: 1rem;
-  color: white;
-  backdrop-filter: blur(16px);
-}
-
-.retro-card-dark:hover {
-  box-shadow: 0 12px 40px rgba(124, 58, 237, 0.4);
+  background: #350D7A;
+  border: 3px solid #1e0942;
+  box-shadow: 4px 4px 0 0 #1e0942;
+  border-radius: 2px;
+  color: #FFFEE2;
 }
 
 
-/* Category Colors - WorkOS Theme */
+/* Category Colors - flat pixel colors */
 .category-boy {
-  background: linear-gradient(135deg, #6714A8, #871BB7);
+  background: #6714A8;
 }
 
 .category-girl {
-  background: linear-gradient(135deg, #F640A8, #FF6957);
+  background: #F640A8;
 }
 
 .category-country {
-  background: linear-gradient(135deg, #4E0994, #6714A8);
+  background: #4E0994;
 }
 
 .category-animal {
-  background: linear-gradient(135deg, #FF8A50, #FFA168);
+  background: #FF8A50;
 }
 
 .category-thing {
-  background: linear-gradient(135deg, #871BB7, #A333D5);
+  background: #A333D5;
 }
 
 /* Text Utilities */
@@ -772,48 +787,46 @@
 
 /* Legacy category icons for backwards compatibility */
 .category-ولد {
-  background: linear-gradient(135deg, #6714A8, #871BB7);
+  background: #6714A8;
 }
 
 .category-بنت {
-  background: linear-gradient(135deg, #F640A8, #FF6957);
+  background: #F640A8;
 }
 
 .category-بلد {
-  background: linear-gradient(135deg, #4E0994, #6714A8);
+  background: #4E0994;
 }
 
 .category-حيوان {
-  background: linear-gradient(135deg, #FF8A50, #FFA168);
+  background: #FF8A50;
 }
 
 .category-جماد {
-  background: linear-gradient(135deg, #871BB7, #A333D5);
+  background: #A333D5;
 }
 
 @layer utilities {
   .surface-card {
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(250, 245, 255, 0.96));
-    border: 1px solid rgba(124, 58, 237, 0.18);
-    border-radius: 1rem;
-    box-shadow: 0 4px 24px rgba(76, 29, 149, 0.12), 0 1px 3px rgba(0, 0, 0, 0.06);
-    backdrop-filter: blur(12px);
+    background: #FFFEE5;
+    border: 3px solid #350D7A;
+    border-radius: 2px;
+    box-shadow: 4px 4px 0 0 #350D7A;
   }
 
   .surface-glass {
-    background: rgba(255, 255, 255, 0.92);
-    border: 1px solid rgba(124, 58, 237, 0.15);
-    border-radius: 1rem;
-    backdrop-filter: blur(16px);
-    box-shadow: 0 8px 32px rgba(76, 29, 149, 0.14);
+    background: #FFFEE5;
+    border: 3px solid #350D7A;
+    border-radius: 2px;
+    box-shadow: 4px 4px 0 0 #350D7A;
   }
 
   .surface-dark {
-    background: rgba(46, 16, 101, 0.88);
-    border: 1px solid rgba(139, 92, 246, 0.3);
-    border-radius: 1rem;
-    backdrop-filter: blur(16px);
-    box-shadow: 0 8px 32px rgba(76, 29, 149, 0.35);
+    background: #350D7A;
+    border: 3px solid #1e0942;
+    border-radius: 2px;
+    box-shadow: 4px 4px 0 0 #1e0942;
+    color: #FFFEE2;
   }
 
   .badge-pill {
@@ -821,11 +834,12 @@
     align-items: center;
     gap: 0.375rem;
     padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
+    border-radius: 2px;
     font-size: 0.75rem;
-    font-weight: 600;
-    border: 1px solid rgba(124, 58, 237, 0.2);
-    background: rgba(255, 255, 255, 0.9);
+    font-weight: 700;
+    border: 2px solid #350D7A;
+    background: #FFFEE5;
+    box-shadow: 2px 2px 0 0 #350D7A;
   }
 
   .custom-scrollbar::-webkit-scrollbar {
@@ -1369,17 +1383,10 @@
 /* --- Unified Retro Design System --- */
 
 .retro-panel {
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(250, 245, 255, 0.96));
-  border: 1px solid rgba(124, 58, 237, 0.18);
-  border-radius: 1.25rem;
-  box-shadow: 0 4px 24px rgba(76, 29, 149, 0.12), 0 1px 3px rgba(0, 0, 0, 0.06);
-  backdrop-filter: blur(12px);
-  transition: box-shadow 0.25s ease, transform 0.25s ease;
-}
-
-.retro-panel:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(124, 58, 237, 0.16);
+  background: #FFFEE5;
+  border: 3px solid #350D7A;
+  border-radius: 2px;
+  box-shadow: 4px 4px 0 0 #350D7A;
 }
 
 .retro-action-btn {
@@ -1387,31 +1394,30 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(124, 58, 237, 0.25);
-  border-radius: 0.875rem;
-  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.2);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
-  font-family: var(--font-sans);
-  font-weight: 600;
+  border: 3px solid #350D7A;
+  border-radius: 2px;
+  box-shadow: 4px 4px 0 0 #350D7A;
+  transition: transform 0.08s steps(2, end), box-shadow 0.08s steps(2, end);
+  font-family: var(--font-display);
+  font-weight: 400;
 }
 
 .retro-action-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.28);
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 0 #350D7A;
 }
 
 .retro-action-btn:active,
 .retro-action-btn.active-squash {
-  transform: translateY(0) scale(0.98) !important;
-  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.2) !important;
+  transform: translate(3px, 3px) !important;
+  box-shadow: 1px 1px 0 0 #350D7A !important;
 }
 
 .retro-overlay {
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.98), rgba(250, 245, 255, 0.97));
-  border: 1px solid rgba(124, 58, 237, 0.2);
-  border-radius: 1.5rem;
-  box-shadow: 0 24px 64px rgba(76, 29, 149, 0.22), 0 8px 24px rgba(0, 0, 0, 0.08);
-  backdrop-filter: blur(20px);
+  background: #FFFEE5;
+  border: 4px solid #350D7A;
+  border-radius: 2px;
+  box-shadow: 8px 8px 0 0 #350D7A;
 }
 
 /* ================================================
@@ -1452,15 +1458,14 @@ select {
 input:focus,
 textarea:focus,
 select:focus {
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2),
-    0 0 12px rgba(124, 58, 237, 0.3);
-  transform: scale(1.02);
+  box-shadow: 0 0 0 3px #F640A8;
+  transform: none;
 }
 
-/* Smooth hover lift effect */
+/* Pixel hover: hard nudge, no soft lift */
 .hover-lift:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(124, 58, 237, 0.2);
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 0 #350D7A;
 }
 
 /* Button scale on active */

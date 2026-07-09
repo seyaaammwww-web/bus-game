@@ -5,18 +5,25 @@ export default {
   content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      /* Pixel theme: square corners everywhere */
       borderRadius: {
-        lg: "0.75rem",
-        md: "0.5rem",
-        sm: "0.375rem",
-        xl: "1rem",
-        "2xl": "1.25rem",
+        lg: "2px",
+        md: "2px",
+        sm: "0px",
+        xl: "2px",
+        "2xl": "2px",
+        "3xl": "2px",
       },
+      /* Pixel theme: hard offset shadows, no blur */
       boxShadow: {
-        card: "0 4px 24px rgba(76, 29, 149, 0.12), 0 1px 3px rgba(0, 0, 0, 0.06)",
-        "card-hover": "0 8px 32px rgba(124, 58, 237, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08)",
-        glow: "0 0 24px rgba(124, 58, 237, 0.25)",
-        button: "0 4px 14px rgba(124, 58, 237, 0.35)",
+        card: "4px 4px 0 0 #350D7A",
+        "card-hover": "6px 6px 0 0 #350D7A",
+        glow: "0 0 0 3px rgba(246, 64, 168, 0.4)",
+        button: "4px 4px 0 0 #350D7A",
+        "pixel-sm": "2px 2px 0 0 #350D7A",
+        pixel: "4px 4px 0 0 #350D7A",
+        "pixel-lg": "6px 6px 0 0 #350D7A",
+        "pixel-xl": "8px 8px 0 0 #350D7A",
       },
       colors: {
         // Flat / base colors (regular buttons)

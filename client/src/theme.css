@@ -8,61 +8,80 @@
    📝 FONT FACES - الخطوط المحلية
    ================================================ */
 
-/* Fonts: Cairo + Inter loaded via Google Fonts in index.html */
+/* QTS Hoby — Arabic pixel display font (headings, buttons, HUD) */
+@font-face {
+    font-family: 'QTS Hoby';
+    src: url('/fonts/QTS-Hoby/QTS-Hoby.otf') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Cairo (body text) loaded via Google Fonts in index.css */
 
 /* ================================================
    🎨 COLOR PALETTE - لوحة الألوان الموحدة
    ================================================ */
 
 :root {
+    /* ============ PIXEL SUNSET PALETTE ============
+       Ink (deep purple) + Cream + Purple + Pink + Orange
+       ============================================== */
+
+    /* Ink — the universal border/shadow/text color */
+    --pixel-ink: #350D7A;
+    --pixel-ink-soft: rgba(53, 13, 122, 0.15);
+
     /* Primary Colors - البنفسجي الأساسي */
-    --color-primary: #7c3aed;
-    --color-primary-dark: #4c1d95;
-    --color-primary-light: #8b5cf6;
-    --color-primary-darker: #2e1065;
+    --color-primary: #6714A8;
+    --color-primary-dark: #4E0994;
+    --color-primary-light: #871BB7;
+    --color-primary-darker: #350D7A;
 
-    /* Secondary Colors - الذهبي/الأصفر */
-    --color-secondary: #fbbf24;
-    --color-secondary-dark: #f59e0b;
-    --color-secondary-light: #fcd34d;
+    /* Secondary Colors - برتقالي الغروب */
+    --color-secondary: #FF8A50;
+    --color-secondary-dark: #FF6957;
+    --color-secondary-light: #FFA168;
 
-    /* Background Colors */
-    /* Enhanced gradients with more vibrant transitions */
-    --color-bg-main: linear-gradient(135deg, #4c1d95 0%, #7c3aed 50%, #8b5cf6 100%);
-    --color-bg-main-alt: linear-gradient(to bottom, #7c3aed, #9f7aea);
-    --color-bg-card: #ffffff;
-    --color-bg-card-hover: #fafbff;
-    --color-bg-card-active: #f5f3ff;
-    --color-bg-overlay: rgba(46, 16, 101, 0.92);
-    --color-bg-subtle: rgba(124, 58, 237, 0.05);
+    /* Accent - الوردي */
+    --color-accent: #F640A8;
+
+    /* Background Colors — flat cream, no gradients on surfaces */
+    --color-bg-main: #FFFEE2;
+    --color-bg-main-alt: #FFFDCC;
+    --color-bg-card: #FFFEE5;
+    --color-bg-card-hover: #FFFDD6;
+    --color-bg-card-active: #FFF3B6;
+    --color-bg-overlay: rgba(53, 13, 122, 0.85);
+    --color-bg-subtle: rgba(53, 13, 122, 0.05);
 
     /* Text Colors */
-    --color-text-primary: #4c1d95;
-    --color-text-secondary: #6b7280;
-    --color-text-white: #ffffff;
-    --color-text-muted: rgba(76, 29, 149, 0.6);
+    --color-text-primary: #350D7A;
+    --color-text-secondary: #6714A8;
+    --color-text-white: #FFFEE2;
+    --color-text-muted: rgba(53, 13, 122, 0.6);
 
     /* Status Colors */
-    --color-success: #10b981;
-    --color-success-bg: #ecfdf5;
-    --color-error: #ef4444;
-    --color-error-bg: #fef2f2;
-    --color-warning: #f59e0b;
-    --color-warning-bg: #fffbeb;
+    --color-success: #44AF00;
+    --color-success-bg: #F5FBE4;
+    --color-error: #FF6957;
+    --color-error-bg: #FFF3B6;
+    --color-warning: #FF8A50;
+    --color-warning-bg: #FFFDCC;
 
-    /* Category Colors - Enhanced */
-    --color-cat-boy: #2563eb;
-    --color-cat-girl: #db2777;
-    --color-cat-country: #059669;
-    --color-cat-animal: #d97706;
-    --color-cat-object: #7c3aed;
-    
-    /* Enhanced shadows for depth */
-    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 8px 24px rgba(124, 58, 237, 0.15);
-    --shadow-xl: 0 12px 32px rgba(76, 29, 149, 0.2);
-    --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    /* Category Colors - flat pixel colors */
+    --color-cat-boy: #6714A8;
+    --color-cat-girl: #F640A8;
+    --color-cat-country: #4E0994;
+    --color-cat-animal: #FF8A50;
+    --color-cat-object: #A333D5;
+
+    /* Hard pixel shadows — no blur, ever */
+    --shadow-sm: 2px 2px 0 0 var(--pixel-ink);
+    --shadow-md: 3px 3px 0 0 var(--pixel-ink);
+    --shadow-lg: 4px 4px 0 0 var(--pixel-ink);
+    --shadow-xl: 6px 6px 0 0 var(--pixel-ink);
+    --shadow-inner: inset 2px 2px 0 0 var(--pixel-ink-soft);
 
     /* ================================================
      📐 SPACING & SIZING - المسافات والأحجام
@@ -85,22 +104,23 @@
      🔲 BORDER & RADIUS - الحدود والزوايا
      ================================================ */
 
+    /* Pixel corners — square everything */
     --radius-none: 0;
-    --radius-sm: 4px;
-    --radius-md: 8px;
-    --radius-lg: 12px;
-    --radius-xl: 16px;
-    --radius-full: 9999px;
+    --radius-sm: 0;
+    --radius-md: 2px;
+    --radius-lg: 2px;
+    --radius-xl: 2px;
+    --radius-full: 2px;
 
     --border-thin: 2px;
     --border-medium: 3px;
     --border-thick: 4px;
 
-    --shadow-pixel-sm: 0 2px 8px rgba(76, 29, 149, 0.1);
-    --shadow-pixel-md: 0 4px 16px rgba(76, 29, 149, 0.14);
-    --shadow-pixel-lg: 0 8px 32px rgba(76, 29, 149, 0.18);
-    --shadow-glow: 0 0 24px rgba(139, 92, 246, 0.3);
-    --shadow-card: 0 4px 24px rgba(76, 29, 149, 0.12), 0 1px 3px rgba(0, 0, 0, 0.06);
+    --shadow-pixel-sm: 2px 2px 0 0 var(--pixel-ink);
+    --shadow-pixel-md: 3px 3px 0 0 var(--pixel-ink);
+    --shadow-pixel-lg: 4px 4px 0 0 var(--pixel-ink);
+    --shadow-glow: 4px 4px 0 0 var(--pixel-ink);
+    --shadow-card: 4px 4px 0 0 var(--pixel-ink);
 
     /* ================================================
      📝 TYPOGRAPHY - أحجام الخطوط
@@ -127,8 +147,8 @@
 
     --font-arabic: 'Cairo', system-ui, sans-serif;
     --font-english: 'Inter', system-ui, sans-serif;
-    --font-pixel: 'Cairo', system-ui, sans-serif;
-    --font-display: 'Cairo', system-ui, sans-serif;
+    --font-pixel: 'QTS Hoby', 'Cairo', system-ui, sans-serif;
+    --font-display: 'QTS Hoby', 'Cairo', system-ui, sans-serif;
 }
 
 /* ================================================
@@ -145,10 +165,16 @@ body {
     font-weight: 500;
     direction: rtl;
     background: var(--color-bg-main);
-    color: var(--color-text-white);
+    color: var(--color-text-primary);
     min-height: 100vh;
     letter-spacing: 0;
     -webkit-font-smoothing: antialiased;
+}
+
+/* Headings use the pixel display font */
+h1, h2, h3, .pixel-heading {
+    font-family: var(--font-display) !important;
+    font-weight: 400;
 }
 
 *,
@@ -175,18 +201,11 @@ body {
    ================================================ */
 
 .theme-card {
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(250, 245, 255, 0.95));
-    border: 1px solid rgba(124, 58, 237, 0.18);
-    border-radius: var(--radius-xl);
+    background: var(--color-bg-card);
+    border: var(--border-medium) solid var(--pixel-ink);
+    border-radius: var(--radius-md);
     box-shadow: var(--shadow-card);
     padding: var(--spacing-lg);
-    backdrop-filter: blur(12px);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-
-.theme-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-pixel-lg), var(--shadow-glow);
 }
 
 /* ================================================
@@ -199,51 +218,50 @@ body {
     justify-content: center;
     gap: var(--spacing-sm);
     padding: var(--spacing-md) var(--spacing-xl);
-    font-family: var(--font-arabic) !important;
-    font-weight: 600;
+    font-family: var(--font-display) !important;
+    font-weight: 400;
     font-size: var(--font-size-base);
-    border: 1px solid transparent;
-    border-radius: var(--radius-lg);
+    border: var(--border-medium) solid var(--pixel-ink);
+    border-radius: var(--radius-md);
     cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    transition: transform 0.08s steps(2, end), box-shadow 0.08s steps(2, end);
     text-decoration: none;
+    box-shadow: var(--shadow-lg);
+}
+
+.theme-btn:hover:not(:disabled) {
+    transform: translate(-1px, -1px);
+    box-shadow: 5px 5px 0 0 var(--pixel-ink);
+}
+
+.theme-btn:active:not(:disabled) {
+    transform: translate(3px, 3px);
+    box-shadow: 1px 1px 0 0 var(--pixel-ink);
 }
 
 .theme-btn-primary {
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
-    border-color: rgba(76, 29, 149, 0.3);
+    background: var(--color-primary);
     color: var(--color-text-white);
-    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
 }
 
 .theme-btn-primary:hover {
-    background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%);
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
-}
-
-.theme-btn-primary:active {
-    transform: scale(0.98);
-    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.25);
+    background: var(--color-primary-light);
 }
 
 .theme-btn-secondary {
-    background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-secondary-light) 100%);
-    border-color: rgba(245, 158, 11, 0.4);
-    color: var(--color-primary-dark);
-    box-shadow: 0 4px 14px rgba(251, 191, 36, 0.35);
+    background: var(--color-secondary);
+    color: var(--pixel-ink);
 }
 
 /* Ghost Button */
 .theme-btn-ghost {
-    background: transparent;
-    border-color: var(--color-primary);
+    background: var(--color-bg-card);
     color: var(--color-primary);
-    box-shadow: none;
+    box-shadow: var(--shadow-sm);
 }
 
 .theme-btn-ghost:hover {
-    background: rgba(124, 58, 237, 0.1);
+    background: var(--color-bg-card-hover);
 }
 
 /* ================================================
@@ -255,19 +273,19 @@ body {
     padding: var(--spacing-md);
     font-family: var(--font-arabic) !important;
     font-size: var(--font-size-lg);
-    font-weight: 500;
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(124, 58, 237, 0.25);
-    border-radius: var(--radius-lg);
+    font-weight: 600;
+    background: #FFFEF5;
+    border: var(--border-medium) solid var(--pixel-ink);
+    border-radius: var(--radius-md);
     color: var(--color-text-primary);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: var(--shadow-inner);
+    transition: none;
 }
 
 .theme-input:focus {
     outline: none;
-    border-color: var(--color-primary-light);
-    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15), var(--shadow-glow);
+    border-color: var(--color-accent);
+    box-shadow: inset 2px 2px 0 0 rgba(246, 64, 168, 0.15);
 }
 
 .theme-input::placeholder {
@@ -321,18 +339,21 @@ body {
    ================================================ */
 
 .rank-gold {
-    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-    color: white;
+    background: #FFC48B;
+    color: var(--pixel-ink);
+    border: var(--border-thin) solid var(--pixel-ink);
 }
 
 .rank-silver {
-    background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
-    color: white;
+    background: #FFFDCC;
+    color: var(--pixel-ink);
+    border: var(--border-thin) solid var(--pixel-ink);
 }
 
 .rank-bronze {
-    background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
-    color: white;
+    background: #FF8A50;
+    color: var(--pixel-ink);
+    border: var(--border-thin) solid var(--pixel-ink);
 }
 
 /* ================================================
@@ -416,12 +437,13 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(145deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-    border: 2px solid rgba(167, 139, 250, 0.5);
-    border-radius: 1.5rem;
-    box-shadow: 0 8px 32px rgba(124, 58, 237, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    background: var(--color-primary);
+    border: var(--border-thick) solid var(--pixel-ink);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-xl);
+    font-family: var(--font-display);
     font-size: var(--font-size-5xl);
-    font-weight: 800;
+    font-weight: 400;
     color: var(--color-text-white);
 }
 
@@ -466,35 +488,17 @@ body {
    ✨ ENHANCED ANIMATIONS & EFFECTS
    ================================================ */
 
-/* Smooth transitions for all interactive elements */
-button, a, .interactive {
-    transition: all var(--transition-base);
-}
-
-/* Enhanced button hover effects */
-button:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
-}
-
+/* Pixel interactions: no smooth lifts, no scale, no glow.
+   Buttons press DOWN into their hard shadow. */
 button:active:not(:disabled) {
-    transform: translateY(0px);
+    transform: translate(2px, 2px);
 }
 
-/* Card elevation on hover */
-.card, [role="card"] {
-    transition: all var(--transition-base);
-}
-
-.card:hover, [role="card"]:hover {
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-2px);
-}
-
-/* Input focus effects */
+/* Input focus: hard ring only */
 input:focus, textarea:focus, select:focus {
-    box-shadow: 0 0 0 3px var(--color-primary), 0 0 0 6px rgba(124, 58, 237, 0.1);
-    transform: scale(1.01);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--color-accent);
+    transform: none;
 }
 
 /* Smooth color transitions */
